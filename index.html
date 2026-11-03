@@ -123,23 +123,84 @@
   .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
   .primary { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
   @media (max-width:700px){ #chart { height:420px; } header { padding:10px; } main { padding:10px; } }
+
+  /* ---------- telemóvel: separadores Resumo · Gráfico · Setups ---------- */
+  #mtabs, #mcards, #msetups { display:none; }
+  @media (max-width:760px) {
+    body { padding-bottom:64px; }
+    header { flex-wrap:wrap; gap:6px; padding:8px 10px; }
+    header h1, #helpBtn, #status { display:none; }
+    #symbol { width:110px; }
+    #cloudSt { font-size:11px; max-width:150px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    main { padding:8px; }
+    #mtabs { display:flex; position:fixed; left:0; right:0; bottom:0; height:58px; z-index:60; background:#141a21; border-top:1px solid var(--line); }
+    #mtabs button { flex:1; background:none; border:none; color:var(--muted); font-size:14px; font-weight:600; border-top:3px solid transparent; }
+    #mtabs button.on { color:#f5c518; border-top-color:#f5c518; }
+    .tablewrap, #confluence, .sechead, #help { display:none !important; }
+    body:not([data-mtab="grafico"]) .chartbox { display:none; }
+    body[data-mtab="resumo"] #mcards { display:block; }
+    body[data-mtab="setups"] #msetups { display:block; }
+    body:not([data-mtab="resumo"]) #prevbar { display:none !important; }
+    body[data-mtab="grafico"] .chartbox { margin-top:0; }
+    body[data-mtab="grafico"] #chart { height:calc(100vh - 230px); min-height:360px; }
+    body[data-mtab="grafico"] .legend { display:none; }
+    .chartbar { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .chartbar > * { flex:0 0 auto; }
+    #editHint { font-size:11px; }
+    #editMenu button { padding:11px 12px; font-size:14px; }
+    #topBtn { bottom:72px; }
+    .mcard { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:9px 10px; margin-bottom:8px; }
+    .mcard.hot { border-color:#f5c518; }
+    .mcard .r1 { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .mcard .tfn { font-weight:700; min-width:42px; }
+    .mcard .r2 { display:flex; gap:10px; flex-wrap:wrap; margin-top:6px; font-size:12px; color:var(--muted); align-items:center; }
+    .mcard .lbl { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; margin-right:2px; }
+    .mcard .more { display:none; margin-top:6px; font-size:12px; }
+    .mcard.open .more { display:block; }
+    .mcard .go { margin-left:auto; font-size:12px; padding:4px 8px; }
+  }
+
+  #favs { display:none; margin-bottom:14px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px; }
+  body[data-favs="1"] #favs { display:block; }
+  .favhead { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:4px 4px 8px; border-bottom:1px solid var(--line); }
+  .favadd { display:flex; gap:4px; margin-left:auto; } .favadd input { width:120px; background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+  .favimp { padding:8px 4px; } .favimp textarea { width:100%; margin:6px 0; background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; }
+  .favrow { display:flex; align-items:center; gap:10px; padding:7px 6px; border-bottom:1px solid var(--line); cursor:pointer; }
+  .favrow:hover { background:#1a2029; } .favrow.ready { background:rgba(46,125,50,.12); }
+  .favsym { font-weight:700; min-width:96px; } .favpx { min-width:80px; color:var(--muted); font-size:12px; }
+  .favchips { flex:1; display:flex; flex-wrap:wrap; gap:4px; font-size:12px; }
+  .favx { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; }
+  #starBtn { background:none; border:none; color:#f5c518; font-size:20px; cursor:pointer; padding:0 4px; }
+  @media (max-width:760px) {
+    #favBtn { display:none; }
+    body[data-mtab="favs"] #favs { display:block; }
+    body[data-mtab="favs"] #msetups, body[data-mtab="favs"] #mcards { display:none !important; }
+    body:not([data-mtab="favs"]) #favs { display:none; }
+    .favrow { flex-wrap:wrap; } .favsym { min-width:0; } .favchips { flex-basis:100%; }
+    .favadd { margin-left:0; }
+  }
 </style>
 </head>
 <body>
 <header>
   <h1>Scanner de Estrutura</h1>
   <form id="symForm"><input id="symbol" type="text" spellcheck="false" aria-label="Símbolo"><button type="submit">Abrir</button></form>
+  <button id="starBtn" title="Pôr nos favoritos">☆</button>
   <span id="price">—</span>
   <span class="spacer"></span>
   <span id="status" class="status"></span>
   <button id="reload" title="Atualizar agora">↻</button>
   <button id="helpBtn">Como ler</button>
   <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none">Entrar com Google</button>
+  <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
   <button id="gear">Definições</button>
 </header>
 <main>
+  <div id="favs"></div>
   <div class="sechead">Setups <span class="muted">· contexto · zona no timeframe de cima → quebra de estrutura e recuo no de baixo</span> <button id="btBtn" class="lyr" style="margin-left:10px;display:none">📊 Testar no histórico</button></div>
   <div id="confluence"></div>
+  <div id="msetups"></div>
+  <div id="mcards"></div>
   <div id="prevbar" class="prevbar"></div>
   <div class="tablewrap">
     <table>
@@ -171,6 +232,7 @@
 <br>• <b>▶ Começar estrutura aqui</b> — apaga tudo o que o scanner tinha antes deste ponto. Daqui até à tua última marca só contam as tuas marcas; depois da última marca o scanner continua sozinho e nunca altera o que marcaste. Marca pelo menos o swing que define o limite (ex.: o HL que o LL quebra), senão a app não sabe que nível foi quebrado.
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
 <br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
+<br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
 <br>• <b>↶ Desfazer</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.
 <br>As marcas ficam guardadas neste navegador (por par e timeframe) até carregares em “↺ Repor análise do scanner”. Noutro computador ou telemóvel ainda não aparecem.</li>
       <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
@@ -251,6 +313,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>window.FIREBASE_CONFIG = {"apiKey":"AIzaSyAKXOPF_s_ffOQLIqFS7K-FqEq9G1djRJA","authDomain":"scanner-estrutura.firebaseapp.com","projectId":"scanner-estrutura","storageBucket":"scanner-estrutura.firebasestorage.app","messagingSenderId":"322141028599","appId":"1:322141028599:web:e4094ae6ed7c4d12c693f2"};</script>
+<nav id="mtabs"><button data-t="favs">★ Favoritos</button><button data-t="resumo">Resumo</button><button data-t="grafico">Gráfico</button><button data-t="setups">Setups</button></nav>
 <button id="topBtn" title="Voltar ao topo">↑</button>
 <script>/*!
  * @license
@@ -1067,7 +1130,7 @@
   ];
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
-    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
+    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
     tfs: TFS.map((t) => t.id), showExt: true, showInt: true,
   };
 
@@ -1152,8 +1215,8 @@
     save(UNDOKEY, undo); saveEdits(); closeMenu(); refreshTf(selectedTf);
   }
   const undoCount = (id) => (undo[symbol + '|' + id] || []).length;
-  function getEdits(id, create) {
-    const k = symbol + '|' + id;
+  function getEdits(id, create, sym) {
+    const k = (sym || symbol) + '|' + id;
     if (!edits[k] && create) edits[k] = { fvg: new Set(), int: newLayer(), ext: newLayer() };
     return edits[k] || null;
   }
@@ -1168,13 +1231,13 @@
     const m = {}; String(settings.failByTf || '').split(/[,;\s]+/).forEach((p) => { const [k, v] = p.split(':'); if (k && v != null && v !== '' && isFinite(+v)) m[k.trim()] = +v; });
     return m[id] != null ? m[id] : +settings.failBars;
   }
-  function computeTf(cs, id) {
+  function computeTf(cs, id, sym) {
     const now = Date.now();
     cs.forEach((c) => (c.tt = Math.floor(c.t / 1000)));
     const closed = cs.filter((c) => c.ct < now);
     const price = cs[cs.length - 1].c;
     const base = { confirm: +settings.confirm, lockBars: +settings.lockBars, volMult: +settings.volMult, dispAtr: +settings.dispAtr, contBars: +settings.contBars, fvgMinAtr: +settings.fvgMinAtr, contAtr: +settings.contAtr, closeMarginAtr: +settings.closeMarginAtr, acceptBars: +settings.acceptBars, failBars: failFor(id), legRatio: +settings.legRatio, floorAtr: +settings.floorAtr };
-    const ed = getEdits(id, false);
+    const ed = getEdits(id, false, sym);
     const layer = (fn, atrMult, reqDisp, ov) => {
       const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null }));
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
@@ -1498,6 +1561,31 @@
       rows.push(`<tr data-tf="${tf.id}" class="${tf.id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${tf.label}</td>${extCells}${intCells}</tr>`);
     }
     $('#tbody').innerHTML = rows.join('');
+    // telemóvel: um cartão por timeframe (toca para ver mais; "Gráfico ›" abre o gráfico nesse timeframe)
+    const cards = [];
+    for (const tf of TFS) {
+      if (!settings.tfs.includes(tf.id) || !data[tf.id]) continue;
+      const d = data[tf.id], x = d.ext.snap, n = d.int.snap, b = n.lastBreak, rs = recentState(n);
+      const hot = rs && rs.key !== 'trend';
+      cards.push(`<div class="mcard ${hot ? 'hot' : ''} ${tf.id === selectedTf ? 'sel' : ''}" data-tf="${tf.id}">
+        <div class="r1"><span class="tfn">${tf.label}</span>
+          <span><span class="lbl">Princ.</span>${x.trend ? extBadge(x).replace('<br>', ' ') + ' ' + pullCell(x) : '<span class="muted">—</span>'}</span></div>
+        <div class="r1" style="margin-top:6px"><span class="tfn"></span>
+          <span><span class="lbl">Recente</span>${n.trend ? recentBadge(n, tf.id) + ' ' + pullCell(n) : '<span class="muted">—</span>'}</span></div>
+        <div class="r2"><span>${n.trend ? brkCell(d, b).replace(/<br>/g, ' ') : ''}</span><span>${divCell(d)}</span><span>${rangeCell(d, tf.id).replace(/<br>/g, ' ')}</span>
+          <button class="go" data-go="${tf.id}">Gráfico ›</button></div>
+        <div class="more">${x.trend ? `Fase: ${phaseCell(x)} · até ao limite ${pct(Math.abs(x.toInvalid))} (${fmt(x.protected)})<br>` : ''}${b ? `Volume na quebra: ${b.volume}${b.volRatio ? ' ' + b.volRatio.toFixed(1).replace('.', ',') + '×' : ''} · vela ${b.candle}<br>` : ''}${(settings.liqTfs || []).includes(tf.id) ? 'Liquidez: ' + liqCell(d).replace('<br>', ' · ') : ''}</div>
+      </div>`);
+    }
+    const mc = $('#mcards');
+    if (mc) {
+      mc.innerHTML = cards.join('');
+      mc.querySelectorAll('.mcard').forEach((c) => c.addEventListener('click', (ev) => {
+        if (ev.target.closest('[data-disp]')) { ev.stopPropagation(); decideDispute(ev.target.closest('[data-disp]').dataset.disp); setMTab('grafico'); return; }
+        const go = ev.target.closest('[data-go]'); if (go) { selectTf(go.dataset.go); setMTab('grafico'); return; }
+        c.classList.toggle('open');
+      }));
+    }
     document.querySelectorAll('#tbody tr').forEach((tr) => tr.addEventListener('click', () => selectTf(tr.dataset.tf)));
     document.querySelectorAll('#tbody [data-disp]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); decideDispute(b.dataset.disp); }));
   }
@@ -1600,6 +1688,17 @@
         <td>${estado}${r.warn ? '<br>' + r.warn : ''}</td></tr>`;
     }).join('');
     $('#confluence').innerHTML = `<div class="setups"><table><thead><tr><th>Setup</th><th>Sentido</th><th>1 · Zona (correção ≥ 50%)</th><th>2 · Quebra de estrutura</th><th>Checklist</th><th>Estado</th></tr></thead><tbody>${html}</tbody></table></div>`;
+    const ms = $('#msetups');
+    if (ms) ms.innerHTML = '<div class="sechead" style="display:block !important">Setups</div>' + rows.map((r, k) => {
+      const st = on[k]; if (!r) return `<div class="mcard">${st.name} <span class="muted">a carregar…</span></div>`;
+      const tmp = document.createElement('tbody'); tmp.innerHTML = html.split('</tr>')[k] + '</tr>';
+      const tds = tmp.querySelectorAll('td');
+      return `<div class="mcard ${tds[0] && tmp.querySelector('tr').className.includes('ok') ? 'hot' : ''}">
+        <div class="r1">${tds[0] ? tds[0].innerHTML : ''} ${tds[1] ? tds[1].innerHTML : ''}</div>
+        <div class="r2">${tds[2] ? tds[2].innerHTML : ''} ${tds[3] ? tds[3].innerHTML : ''}</div>
+        <div class="r2">${tds[4] ? tds[4].innerHTML : ''}</div>
+        <div class="r2">${tds[5] ? tds[5].innerHTML : ''}</div></div>`;
+    }).join('');
   }
 
   // ---------- teste histórico ----------
@@ -1770,7 +1869,7 @@
 
     drawState = { tf: selectedTf, d };
     if (range) chart.timeScale().setVisibleLogicalRange(range);
-    else { const len = cs.length; chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, len - 160), to: len + 8 }); }
+    else { const len = cs.length, nb = window.innerWidth <= 760 ? 80 : 160; chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, len - nb), to: len + 8 }); }
   }
 
   function draw() {
@@ -2054,6 +2153,107 @@
       { label: `É sweep — ${tr} continua`, run: () => { const e = getEdits(id, true); e.int.yesBreak.delete(t); e.int.noBreak.add(t); done(); } },
     ]), 350);
   }
+
+  // ---------- favoritos: visão geral de muitos ativos (crypto da Binance; ações em breve) ----------
+  // Para cada ativo lê só os timeframes dos setups ativos (500 velas), aplica as tuas marcas desse ativo e mostra o checklist de cada setup.
+  const favData = {}; let favBusy = false, favAgain = false, favTimer = null, favProg = '';
+  const normSym = (s) => String(s || '').trim().toUpperCase().replace(/^BINANCE:/, '').replace(/\.P$/, '');
+  const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
+  function favTfs() {
+    const s = new Set();
+    (settings.setups || []).filter((x) => x.on).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); });
+    return TFS.filter((t) => s.has(t.id));
+  }
+  async function loadFav(sym) {
+    const tfs = favTfs(), out = {};
+    let hourly = null;
+    for (const tf of tfs) {
+      let cs;
+      if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', 1500); cs = aggregate(hourly, tf.agg, 3600e3); }
+      else cs = await klines(sym, tf.api, 500);
+      if (cs.length > 30) out[tf.id] = computeTf(cs, tf.id, sym);
+    }
+    const any = Object.values(out)[0];
+    favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now() };
+  }
+  // avaliação de um setup num ativo dos favoritos (mesmas regras do painel de setups)
+  function favSetup(sym, st) {
+    const dm = (favData[sym] || {}).tfs || {}, dz = dm[st.zone], dt = dm[st.trig];
+    if (!dz || !dt || !dz.ext.snap.trend) return null;
+    const z = dz.ext.snap, t = dt.int.snap, dir = z.trend, rs = recentState(t);
+    const trigOk = !!(rs && t.trend === dir && (rs.key === 'broke' || rs.key === 'entry'));
+    const cid = ctxOf(st), cx = cid && dm[cid] && dm[cid].ext.snap;
+    const items = [['contexto', cx && cx.trend ? cx.trend === dir : null], ['zona', z.pullback >= 50], ['quebra', trigOk], ['FVG', trigOk ? t.lastBreak && t.lastBreak.fvg === 'sim' : false]];
+    const missing = items.filter(([, ok]) => !ok).map(([n]) => n);
+    const disp = [st.zone, st.trig].some((id) => dm[id] && dm[id].int.snap.dispute);
+    const rank = !missing.length ? 4 : z.pullback >= 50 && trigOk ? 3 : z.pullback >= 50 ? 2 : 1;
+    return { st, dir, z, missing, rank, disp, sweep: trigOk && sweepBeforeBreak(dt) };
+  }
+  function renderFavs() {
+    const el = $('#favs'); if (!el) return;
+    const favs = settings.favs || [];
+    const rows = favs.map((s) => {
+      if (!isCrypto(s)) return { s, rank: -1, html: `<span class="muted small">ações — em breve</span>` };
+      const f = favData[s]; if (!f) return { s, rank: -1, html: '<span class="muted small">a carregar…</span>' };
+      const ev = (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)).filter(Boolean);
+      const rank = Math.max(0, ...ev.map((x) => x.rank));
+      const chips = ev.map((x) => {
+        const up = x.dir === 1, cls = x.rank === 4 ? (up ? 'entu' : 'entd') : x.rank >= 2 ? band(x.z.pullback) : 'off';
+        const txt = x.rank === 4 ? '✔ Pronto' : x.rank === 1 ? 'fora da zona' : 'falta: ' + x.missing.join(', ');
+        return `<span class="chip ${cls}" title="${x.st.name}: zona ${pct(x.z.pullback)}">${x.st.name} ${up ? '▲' : '▼'} · ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
+      }).join(' ');
+      return { s, rank, html: chips || '<span class="muted small">sem dados</span>', price: f.price };
+    }).sort((a, b) => b.rank - a.rank);
+    el.innerHTML = `<div class="favhead"><b>★ Favoritos</b> <span class="muted small">${favs.length} ativos · ${favProg || ''}</span>
+        <form id="favAdd" class="favadd"><input id="favIn" placeholder="ex.: ETHUSDT" spellcheck="false"><button type="submit">Adicionar</button></form>
+        <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
+      <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
+        <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
+      ${rows.length ? rows.map((r) => `<div class="favrow ${r.rank === 4 ? 'ready' : ''}" data-s="${r.s}"><span class="favsym">${r.s}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span><span class="favchips">${r.html}</span><button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>`).join('')
+        : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um par (ex.: ETHUSDT) ou importa a tua watchlist do TradingView.</div>'}`;
+    $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); addFavs([$('#favIn').value]); });
+    $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
+    $('#favImpGo').addEventListener('click', () => addFavs($('#favImpTxt').value.split(/[\s,;]+/)));
+    $('#favRef').addEventListener('click', () => scanFavs(true));
+    el.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavs(); updateStar(); }));
+    el.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => openSymbol(r.dataset.s)));
+  }
+  function addFavs(list) {
+    const cur = new Set(settings.favs || []); let n = 0;
+    for (const x of list) { const s = normSym(x); if (s && !cur.has(s) && cur.size < 150) { cur.add(s); n++; } }
+    settings.favs = [...cur]; save('mss_settings4', settings); renderFavs(); updateStar(); if (n) scanFavs(false);
+  }
+  async function scanFavs(force) {
+    if (favBusy) { favAgain = true; return; } favBusy = true; favAgain = false;
+    const list = (settings.favs || []).filter(isCrypto).filter((s) => force || !favData[s] || Date.now() - favData[s].at > 4.5 * 60e3);
+    let done = 0;
+    const work = list.slice();
+    const worker = async () => { while (work.length) { const s = work.shift(); try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavs(); } };
+    await Promise.all([worker(), worker(), worker()]);
+    favProg = 'atualizado ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
+    favBusy = false; renderFavs();
+    if (favAgain) scanFavs(false);
+  }
+  function openSymbol(s) {
+    if (!isCrypto(s)) return;
+    symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar();
+    if (window.innerWidth <= 760) setMTab('resumo'); else { document.body.dataset.favs = ''; window.scrollTo(0, 0); }
+  }
+  function updateStar() { const b = $('#starBtn'); if (b) { const on = (settings.favs || []).includes(symbol); b.textContent = on ? '★' : '☆'; b.title = on ? 'Tirar dos favoritos' : 'Pôr nos favoritos'; } }
+  function favsInit() {
+    $('#starBtn').addEventListener('click', () => { const on = (settings.favs || []).includes(symbol); if (on) { settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); renderFavs(); updateStar(); } else addFavs([symbol]); });
+    $('#favBtn').addEventListener('click', () => { const open = document.body.dataset.favs === '1'; document.body.dataset.favs = open ? '' : '1'; if (!open) { renderFavs(); scanFavs(false); window.scrollTo(0, 0); } });
+    updateStar(); renderFavs();
+    favTimer = setInterval(() => { if (document.body.dataset.favs === '1' || document.body.dataset.mtab === 'favs') scanFavs(false); }, 60e3);
+  }
+
+  function setMTab(t) {
+    document.body.dataset.mtab = t; save('mss_mtab', t);
+    document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
+    window.scrollTo(0, 0);
+    if (t === 'favs') { renderFavs(); scanFavs(false); }
+    if (t === 'grafico') setTimeout(() => { try { chart.panes()[1].setHeight(window.innerWidth <= 760 ? 90 : 130); } catch (e) {} renderChart(false); }, 60);
+  }
   function selectTf(id) { selectedTf = id; save('mss_tf', id); closeMenu(); if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
   function recomputeAll() { for (const id of Object.keys(data)) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderPrev(); renderChart(true); }
 
@@ -2179,10 +2379,13 @@
     $('#symbol').value = symbol;
     $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>`).join('');
     document.querySelectorAll('.tfbtn').forEach((b) => b.addEventListener('click', () => selectTf(b.dataset.tf)));
-    $('#symForm').addEventListener('submit', (e) => { e.preventDefault(); symbol = $('#symbol').value.trim().toUpperCase(); save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); });
+    $('#symForm').addEventListener('submit', (e) => { e.preventDefault(); symbol = $('#symbol').value.trim().toUpperCase(); save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); });
     $('#reload').addEventListener('click', loadAll);
     $('#gear').addEventListener('click', openSettings);
     cloudInit();
+    document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => setMTab(b.dataset.t)));
+    favsInit();
+    setMTab(load('mss_mtab', 'resumo'));
     // botão "voltar ao topo": aparece quando se desce na página (no telemóvel o gráfico ocupa o ecrã e prende o deslizar)
     const tb = $('#topBtn');
     const onScroll = () => { tb.style.display = window.scrollY > 250 ? 'block' : 'none'; };
