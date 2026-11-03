@@ -181,6 +181,28 @@
     .favrow { flex-wrap:wrap; } .favsym { min-width:0; } .favchips { flex-basis:100%; }
     .favadd { margin-left:0; }
   }
+
+  /* favoritos como página inicial: sem ativo aberto, só a lista */
+  body[data-favs="1"] main > .sechead, body[data-favs="1"] main > #confluence, body[data-favs="1"] main > #prevbar, body[data-favs="1"] main > .tablewrap, body[data-favs="1"] main > .chartbox, body[data-favs="1"] main > #help { display:none; }
+  .favgrid { display:grid; gap:8px; align-items:center; }
+  .favh { padding:6px 6px; font-size:11px; color:var(--muted); border-bottom:1px solid var(--line); text-transform:none; }
+  .favcell { display:inline-block; white-space:normal; line-height:1.3; }
+  .favcell .mname { display:none; }
+  .favrow.open { background:#1d2530; }
+  .favdetail { border:1px solid #f5c518; border-radius:10px; margin:6px 0 12px; padding:8px; background:#0f1216; }
+  .favdethead { display:flex; align-items:center; gap:8px; padding:2px 4px 8px; }
+  .favdetail .chartbox { margin-top:10px; }
+  @media (max-width:760px) {
+    .favgrid { grid-template-columns:1fr auto !important; }
+    .favh { display:none; }
+    .favrow > span:nth-child(n+3) { grid-column:1 / -1; }
+    .favrow .favx { grid-row:1; grid-column:2; }
+    .favcell .mname { display:inline; }
+    body[data-mtab="favs"] .favdetail #mcards, body[data-mtab="favs"] .favdetail #msetups { display:block !important; }
+    .favdetail .chartbox { display:block !important; }
+    .favdetail #chart { height:420px; }
+    body[data-mtab="favs"] .favdetail .legend { display:none; }
+  }
 </style>
 </head>
 <body>
@@ -2298,36 +2320,75 @@
     const rank = !missing.length ? 4 : z.pullback >= 50 && trigOk ? 3 : z.pullback >= 50 ? 2 : 1;
     return { st, dir, z, missing, rank, disp, sweep: trigOk && sweepBeforeBreak(dt) };
   }
-  function renderFavs() {
-    const el = $('#favs'); if (!el) return;
-    const favs = settings.favs || [];
+  // ---- página dos favoritos: lista sempre visível; o ativo aberto mostra-se por baixo da sua linha ----
+  let favOpen = null;            // ativo aberto na lista
+  const DETAIL_SEL = ['.sechead', '#confluence', '#msetups', '#mcards', '#prevbar', '.tablewrap', '.chartbox'];
+  let detailWrap = null, anchors = null;
+  function detailNodes() { return DETAIL_SEL.map((s) => document.querySelector('main ' + s) || document.querySelector(s)).filter(Boolean); }
+  function mountDetail(slot) {
+    if (!detailWrap) {
+      detailWrap = document.createElement('div'); detailWrap.className = 'favdetail';
+      anchors = detailNodes().map((n) => { const c = document.createComment('slot'); n.parentNode.insertBefore(c, n); return [n, c]; });
+    }
+    detailWrap.innerHTML = `<div class="favdethead"><b>${favOpen}</b><button class="lyr favclose" style="margin-left:auto">✕ Fechar</button></div>`;
+    anchors.forEach(([n]) => detailWrap.appendChild(n));
+    detailWrap.querySelector('.favclose').addEventListener('click', (ev) => { ev.stopPropagation(); closeFav(); });
+    slot.appendChild(detailWrap);
+    setTimeout(() => renderChart(true), 30);
+  }
+  function unmountDetail() { if (anchors) anchors.forEach(([n, c]) => c.parentNode.insertBefore(n, c.nextSibling)); if (detailWrap) detailWrap.remove(); }
+  function closeFav() { favOpen = null; unmountDetail(); renderFavList(); }
+  function favEvals(s) { return (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)); }
+  function renderFavList() {
+    const box = $('#favList'); if (!box) return;
+    const favs = settings.favs || [], setups = (settings.setups || []).filter((x) => x.on);
+    $('#favCount').textContent = `${favs.length} ativos · ${favProg || ''}`;
+    const cols = `grid-template-columns:minmax(90px,130px) 74px repeat(${setups.length},minmax(0,1fr)) 26px`;
     const rows = favs.map((s) => {
-      const f = favData[s]; if (!f) return { s, rank: -1, html: '<span class="muted small">a carregar…</span>' };
-      const ev = (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)).filter(Boolean);
-      const rank = Math.max(0, ...ev.map((x) => x.rank));
-      const chips = ev.map((x) => {
+      const f = favData[s];
+      if (!f) return { s, rank: -1, cells: setups.map(() => '<span class="muted small">a carregar…</span>') };
+      const ev = favEvals(s), rank = Math.max(0, ...ev.filter(Boolean).map((x) => x.rank));
+      const cells = ev.map((x, k) => {
+        if (!x) return '<span class="muted small">—</span>';
         const up = x.dir === 1, cls = x.rank === 4 ? (up ? 'entu' : 'entd') : x.rank >= 2 ? band(x.z.pullback) : 'off';
         const txt = x.rank === 4 ? '✔ Pronto' : x.rank === 1 ? 'fora da zona' : 'falta: ' + x.missing.join(', ');
-        return `<span class="chip ${cls}" title="${x.st.name}: zona ${pct(x.z.pullback)}">${x.st.name} ${up ? '▲' : '▼'} · ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
-      }).join(' ');
-      return { s, rank, html: chips || '<span class="muted small">sem dados</span>', price: f.price };
+        return `<span class="chip ${cls} favcell" title="${x.st.name}: zona ${pct(x.z.pullback)}"><span class="mname">${x.st.name} </span>${up ? '▲' : '▼'} ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
+      });
+      return { s, rank, cells, price: f.price };
     }).sort((a, b) => b.rank - a.rank);
-    el.innerHTML = `<div class="favhead"><b>★ Favoritos</b> <span class="muted small">${favs.length} ativos · ${favProg || ''}</span>
-        <form id="favAdd" class="favadd"><input id="favIn" placeholder="nome ou ticker (ex.: apple, ETHUSDT)" spellcheck="false"><button type="submit">Adicionar</button></form>
-        <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
- <div id="favSug" class="favsug"></div>
-      <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
-        <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
-      ${rows.length ? rows.map((r) => `<div class="favrow ${r.rank === 4 ? 'ready' : ''}" data-s="${r.s}"><span class="favsym">${r.s}${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span><span class="favchips">${r.html}</span><button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>`).join('')
-        : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um par (ex.: ETHUSDT) ou importa a tua watchlist do TradingView.</div>'}`;
-    $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#favIn').value.trim(); if (!v) return; if (isCrypto(normSym(v)) || /:/.test(v)) addFavs([v]); else favSearch(v, true); });
-    let st0 = null;
-    $('#favIn').addEventListener('input', () => { clearTimeout(st0); const v = $('#favIn').value.trim(); if (v.length >= 2) st0 = setTimeout(() => favSearch(v, false), 400); else $('#favSug').innerHTML = ''; });
-    $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
-    $('#favImpGo').addEventListener('click', () => addFavs($('#favImpTxt').value.split(/[\s,;]+/)));
-    $('#favRef').addEventListener('click', () => scanFavs(true));
-    el.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavs(); updateStar(); }));
-    el.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => openSymbol(r.dataset.s)));
+    box.innerHTML = (rows.length ? `<div class="favgrid favh" style="${cols}"><span>Ativo</span><span>Preço</span>${setups.map((st) => `<span>${st.name}<br><span class="muted small">${ctxOf(st) ? tfLabel(ctxOf(st)) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></span>`).join('')}<span></span></div>` : '')
+      + (rows.length ? rows.map((r) => `<div class="favgrid favrow ${r.rank === 4 ? 'ready' : ''} ${favOpen === r.s ? 'open' : ''}" style="${cols}" data-s="${r.s}"><span class="favsym">${favOpen === r.s ? '▾ ' : ''}${r.s}${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span>${r.cells.map((c) => `<span>${c}</span>`).join('')}<button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>${favOpen === r.s ? '<div class="favslot"></div>' : ''}`).join('')
+        : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um nome ou ticker (ex.: apple, ETHUSDT) ou importa a tua watchlist do TradingView.</div>');
+    box.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); if (favOpen === b.dataset.x) { favOpen = null; unmountDetail(); } settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavList(); updateStar(); }));
+    box.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => toggleFav(r.dataset.s)));
+    const slot = box.querySelector('.favslot'); if (slot && favOpen) mountDetail(slot);
+  }
+  function renderFavs() {
+    const el = $('#favs'); if (!el) return;
+    if (!$('#favList')) {
+      el.innerHTML = `<div class="favhead"><b>★ Favoritos</b> <span id="favCount" class="muted small"></span>
+          <form id="favAdd" class="favadd"><input id="favIn" placeholder="nome ou ticker (ex.: apple, ETHUSDT)" spellcheck="false"><button type="submit">Adicionar</button></form>
+          <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
+        <div id="favSug" class="favsug"></div>
+        <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
+          <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
+        <div id="favList"></div>`;
+      $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#favIn').value.trim(); if (!v) return; if (isCrypto(normSym(v)) || /:/.test(v)) { addFavs([v]); $('#favIn').value = ''; } else favSearch(v, true); });
+      let st0 = null;
+      $('#favIn').addEventListener('input', () => { clearTimeout(st0); const v = $('#favIn').value.trim(); if (v.length >= 2) st0 = setTimeout(() => favSearch(v, false), 400); else $('#favSug').innerHTML = ''; });
+      $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
+      $('#favImpGo').addEventListener('click', () => { addFavs($('#favImpTxt').value.split(/[\s,;]+/)); $('#favImpTxt').value = ''; $('#favImpBox').style.display = 'none'; });
+      $('#favRef').addEventListener('click', () => scanFavs(true));
+    }
+    renderFavList();
+  }
+  function toggleFav(s) {
+    if (favOpen === s) { closeFav(); return; }
+    if (favOpen) unmountDetail();
+    favOpen = s;
+    if (symbol !== s) { symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); }
+    renderFavList();
+    const row = document.querySelector(`.favrow[data-s="${CSS.escape(s)}"]`); if (row) row.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
   // pesquisa de ativos (Yahoo + Binance): devolve opções { symbol, name, exch }
   async function searchAssets(q) {
@@ -2374,21 +2435,24 @@
     const list = (settings.favs || []).filter((s) => force || !favData[s] || Date.now() - favData[s].at > 4.5 * 60e3);
     let done = 0;
     const work = list.slice();
-    const worker = async () => { while (work.length) { const s = work.shift(); try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavs(); } };
+    const worker = async () => { while (work.length) { const s = work.shift(); try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavList(); } };
     await Promise.all([worker(), worker(), worker()]);
     favProg = 'atualizado ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-    favBusy = false; renderFavs();
+    favBusy = false; renderFavList();
     if (favAgain) scanFavs(false);
   }
   function openSymbol(s) {
+    if ((settings.favs || []).includes(s) && (document.body.dataset.favs === '1' || document.body.dataset.mtab === 'favs')) { toggleFav(s); return; }
+    if (favOpen) { favOpen = null; unmountDetail(); }
     symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar();
     if (window.innerWidth <= 760) setMTab('resumo'); else { document.body.dataset.favs = ''; window.scrollTo(0, 0); }
   }
   function updateStar() { const b = $('#starBtn'); if (b) { const on = (settings.favs || []).includes(symbol); b.textContent = on ? '★' : '☆'; b.title = on ? 'Tirar dos favoritos' : 'Pôr nos favoritos'; } }
   function favsInit() {
     $('#starBtn').addEventListener('click', () => { const on = (settings.favs || []).includes(symbol); if (on) { settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); renderFavs(); updateStar(); } else addFavs([symbol]); });
-    $('#favBtn').addEventListener('click', () => { const open = document.body.dataset.favs === '1'; document.body.dataset.favs = open ? '' : '1'; if (!open) { renderFavs(); scanFavs(false); window.scrollTo(0, 0); } });
+    $('#favBtn').addEventListener('click', () => { const open = document.body.dataset.favs === '1'; if (open) { if (favOpen) { favOpen = null; unmountDetail(); } document.body.dataset.favs = ''; renderFavList(); } else { document.body.dataset.favs = '1'; renderFavs(); scanFavs(false); } window.scrollTo(0, 0); });
     updateStar(); renderFavs();
+    if (window.innerWidth > 760) { document.body.dataset.favs = '1'; setTimeout(() => scanFavs(false), 1500); }
     favTimer = setInterval(() => { if (document.body.dataset.favs === '1' || document.body.dataset.mtab === 'favs') scanFavs(false); }, 60e3);
   }
 
@@ -2396,6 +2460,7 @@
     document.body.dataset.mtab = t; save('mss_mtab', t);
     document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
     window.scrollTo(0, 0);
+    if (t !== 'favs' && favOpen) { favOpen = null; unmountDetail(); }
     if (t === 'favs') { renderFavs(); scanFavs(false); }
     if (t === 'grafico') setTimeout(() => { try { chart.panes()[1].setHeight(window.innerWidth <= 760 ? 90 : 130); } catch (e) {} renderChart(false); }, 60);
   }
@@ -2526,7 +2591,7 @@
     document.querySelectorAll('.tfbtn').forEach((b) => b.addEventListener('click', () => selectTf(b.dataset.tf)));
     // caixa do par: abre o ticker exato; escrevendo um nome mostra sugestões (ações e crypto)
     const symSug = $('#symSug'); let sq = null;
-    const openTyped = (v) => { symbol = normSym(v) || v.trim().toUpperCase(); $('#symbol').value = symbol; save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); symSug.style.display = 'none'; };
+    const openTyped = (v) => { const ns = normSym(v) || v.trim().toUpperCase(); symSug.style.display = 'none'; if ((settings.favs || []).includes(ns) || favOpen) return openSymbol(ns); symbol = ns; $('#symbol').value = symbol; save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); symSug.style.display = 'none'; };
     $('#symForm').addEventListener('submit', async (e) => {
       e.preventDefault(); const v = $('#symbol').value.trim(); if (!v) return;
       if (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v)) return openTyped(v);   // ticker exato (BTCUSDT, AAPL, ASML.AS, NASDAQ:MSFT)
@@ -2540,7 +2605,7 @@
     cloudInit();
     document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => setMTab(b.dataset.t)));
     favsInit();
-    setMTab(load('mss_mtab', 'resumo'));
+    setMTab('favs');
     // botão "voltar ao topo": aparece quando se desce na página (no telemóvel o gráfico ocupa o ecrã e prende o deslizar)
     const tb = $('#topBtn');
     const onScroll = () => { tb.style.display = window.scrollY > 250 ? 'block' : 'none'; };
