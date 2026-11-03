@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0f1216">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>Scanner de Estrutura</title>
 <style>
   :root { --bg:#0b0e12; --panel:#12161c; --line:#222a33; --text:#e3e7ec; --muted:#7d8794; --up:#26a69a; --dn:#ef5350; --lat:#ffb74d; --acc:#4fc3f7; }
@@ -44,7 +48,7 @@
   .crow { margin:3px 0; } .clabel { color:var(--muted); }
   .tablewrap { overflow-x:auto; background:var(--panel); border:1px solid var(--line); border-radius:10px; }
   table { border-collapse:collapse; width:100%; min-width:1000px; }
-  th, td { padding:7px 8px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; }
+  th, td { padding:7px 6px; text-align:left; border-bottom:1px solid var(--line); white-space:nowrap; }
   th { color:var(--muted); font-weight:500; font-size:12px; background:var(--panel); }
   tr.grp th { color:var(--text); font-size:11px; letter-spacing:.5px; padding-bottom:2px; border-bottom:none; }
   .gl { border-left:1px solid var(--line); }
@@ -61,7 +65,7 @@
   .badge.dn { background:rgba(239,83,80,.15); color:var(--dn); }
   .badge.lat { background:rgba(255,183,77,.15); color:var(--lat); }
   .badge.rng { background:rgba(158,170,186,.15); color:#c5ced9; }
-  td.nw { white-space:nowrap; }
+  td.nw { white-space:nowrap; } td.wr { white-space:normal; line-height:1.25; }
   .badge.disp, .chip.disp { background:#f5c518; color:#111; }
   .badge.entu { background:#2e7d32; color:#fff; } .badge.entd { background:#b71c1c; color:#fff; }
   .chips { display:flex; flex-wrap:wrap; gap:5px; margin:4px 0 8px; }
@@ -139,9 +143,9 @@
   <div class="tablewrap">
     <table>
       <thead>
-        <tr class="grp"><th></th><th colspan="4" class="gl">TENDÊNCIA PRINCIPAL <span class="muted">· onde estamos</span></th><th colspan="7" class="gl">MOVIMENTO RECENTE <span class="muted">· quebra e entrada</span></th></tr>
+        <tr class="grp"><th></th><th colspan="4" class="gl">TENDÊNCIA PRINCIPAL <span class="muted">· onde estamos</span></th><th colspan="8" class="gl">MOVIMENTO RECENTE <span class="muted">· quebra e entrada</span></th></tr>
         <tr><th>TF</th><th class="gl">Estrutura</th><th>Fase</th><th>Correção</th><th>Até ao<br>limite</th>
-        <th class="gl">Estado</th><th>Correção<br>da perna</th><th>Última<br>quebra</th><th title="Divergência RSI nos swings do movimento recente: ▲ de alta, ▼ de baixa">Div.</th><th>Volume</th><th>Vela</th><th>Liquidez <span class="muted">(por varrer)</span></th></tr>
+        <th class="gl">Estado</th><th>Correção<br>da perna</th><th>Última<br>quebra</th><th title="Divergência RSI nos swings do movimento recente: ▲ de alta, ▼ de baixa">Div.</th><th title="Ranges: o teu range manual, dia e semana anteriores e sessão asiática. ⚠ a tocar o limite · 💧 sweep · ⚖ possível quebra · quebrou">Range</th><th>Volume</th><th>Vela</th><th>Liquidez <span class="muted">(por varrer)</span></th></tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -150,6 +154,7 @@
     <ul>
       <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se a correção ainda está a cair ou se já virou. Em linguagem ICT: a tendência principal é o dealing range (equilibrium a 50%, zona de discount/premium); o movimento recente é onde acontece o MSS de entrada.</li>
       <li><b>Setups (painel no topo):</b> cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Checklist</b> (sem pontos): <b>Contexto</b> — a tendência principal do timeframe de contexto está no mesmo sentido; <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem (⚡) no movimento recente do timeframe de baixo; <b>FVG na quebra</b> — a quebra deixou FVG. 💧 = houve sweep do lado oposto antes da quebra (extra, não obrigatório). <b>✔ Pronto</b> quando os quatro estão cumpridos; senão <b>Em formação</b>, com o que falta. Entrada, stop e alvos são contigo.</li>
+      <li><b>Range</b> (movimento recente): o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito) e a sessão asiática (só 1H e abaixo). Mostra o sinal mais importante: <b>⚠ a tocar</b> o topo/fundo (só quando o preço lá chega), <b>💧 sweep</b> (a wick ou poucos fechos passaram e voltaram para dentro — a manipulação; “Londres varreu” quando o sweep do range asiático foi na sessão de Londres), <b>⚖ possível quebra</b> (fecho fora, ainda dentro da tolerância do timeframe, ex. 1/2) e <b>quebrou</b> (ficou fora mais do que a tolerância). Sem sinal mostra a posição no range (0% = fundo, 100% = topo). É independente da estrutura: não altera estados, quebras nem setups.</li>
       <li><b>Div.</b> (movimento recente) e painel do RSI: divergência normal entre os dois últimos swings do mesmo tipo da estrutura da app (incluindo o extremo da perna em curso). <span style="color:#26a69a">▲</span> de alta = fundo mais baixo com RSI mais alto; <span style="color:#ef5350">▼</span> de baixa = topo mais alto com RSI mais baixo. Só aparece enquanto está viva (é o par mais recente e a estrutura ainda não quebrou depois). No gráfico, as vivas a cheio e as antigas a tracejado, da camada que estás a ver.</li>
       <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep antes. Passa o rato por cima para ver o nível e o que a validou.</li>
       <li><b>📊 Testar no histórico</b>: percorre anos de histórico de vários ativos, vela a vela, sem ver o futuro, e mostra para cada nota a % de entradas que chegaram a cada alvo (1R, 2R, 3R, topo da perna nova, topo da perna da zona) antes do stop, e o ganho médio em R. É assim que se sabe se a nota merece confiança.</li>
@@ -164,6 +169,7 @@
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe. O gráfico fica sem estrutura até marcares o ponto de partida.
 <br>• <b>▶ Começar estrutura aqui</b> — apaga tudo o que o scanner tinha antes deste ponto. Daqui até à tua última marca só contam as tuas marcas; depois da última marca o scanner continua sozinho e nunca altera o que marcaste. Marca pelo menos o swing que define o limite (ex.: o HL que o LL quebra), senão a app não sabe que nível foi quebrado.
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
+<br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
 <br>• <b>↶ Desfazer</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.
 <br>As marcas ficam guardadas neste navegador (por par e timeframe) até carregares em “↺ Repor análise do scanner”. Noutro computador ou telemóvel ainda não aparecem.</li>
       <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
@@ -179,7 +185,7 @@
   </div>
   <div class="chartbox">
     <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Desfazer</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
-    <div id="editHint" class="edithint"><b>A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b> — é a única camada no gráfico e a única que é alterada. Para mudar, carrega em “Tendência principal” ou “Movimento recente”.<br>Modo edição: clica num <b>swing</b> (para o ignorar), numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”) ou numa <b>vela</b> (HH/LH/HL/LL ou “Começar estrutura aqui” — clica perto da máxima para topos, da mínima para fundos) ou num <b>FVG</b> (ignorar). Tudo é recalculado. As alterações ficam guardadas neste navegador até carregares em “Repor”.</div>
+    <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b> — é a única camada no gráfico e a única que é alterada. Para mudar, carrega em “Tendência principal” ou “Movimento recente”.<br>Modo edição: clica num <b>swing</b> (para o ignorar), numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”) ou numa <b>vela</b> (HH/LH/HL/LL ou “Começar estrutura aqui” — clica perto da máxima para topos, da mínima para fundos) ou num <b>FVG</b> (ignorar). Tudo é recalculado. As alterações ficam guardadas neste navegador até carregares em “Repor”.</div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
@@ -227,7 +233,10 @@
   <div class="field"><div>Volume “alto” na quebra<small>múltiplo da média das 20 velas anteriores</small></div><input id="setVol" type="number" min="1" max="5" step="0.1"></div>
   <div class="field"><div>Quebra “recente”<small>até quantas velas atrás</small></div><input id="setRecent" type="number" min="1" max="50"></div>
   <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
-  <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos (velas em hora UTC)</small></div><input id="setPrev" type="checkbox"></div>
+  <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups</small></div><input id="setPrev" type="checkbox"></div>
+  <div class="field"><div>Início do dia<small>meia-noite de Nova Iorque é a referência ICT; 00:00 UTC é a hora das velas diárias da Binance</small></div><select id="setDayStart"><option value="ny">00:00 Nova Iorque (ICT)</option><option value="utc">00:00 UTC</option></select></div>
+  <div class="field"><div>Ranges automáticos<small>caixas no gráfico e sinais na coluna Range (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label></span></div>
+  <div class="field"><div>Sessões (hora de Nova Iorque)<small>Ásia ≈ 01:00–05:00 UK, Londres ≈ 07:00–10:00 UK, Nova Iorque ≈ 12:00–15:00 UK. Formato: asia:20-24, londres:2-5, ny:7-10</small></div><input id="setSess" type="text" style="width:240px"></div>
   <div>Setups <span class="muted small">(zona → quebra)</span></div>
   <div id="setSetups"></div>
   <div style="margin-top:10px">Timeframes visíveis</div>
@@ -1055,7 +1064,7 @@
   ];
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
-    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', legRatio: 0.5, floorAtr: 1.5, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
+    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
     tfs: TFS.map((t) => t.id), showExt: true, showInt: true,
   };
 
@@ -1106,17 +1115,17 @@
 
   // ---------- correções manuais (guardadas neste navegador; o botão "Repor" volta à análise do scanner) ----------
   const EDKEY = 'mss_edits1';
-  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false });
+  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false, range: null, hideAuto: {} });
   const edits = {};
   (function loadEdits() {
     const raw = load(EDKEY, {});
     for (const k in raw) {
-      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank) });
+      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} });
       edits[k] = { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) };
     }
   })();
-  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
-  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank) }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
+  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {} }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
+  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
   function saveEdits() {
     const out = {};
     for (const k in edits) out[k] = serEd(edits[k]);
@@ -1147,7 +1156,7 @@
   }
   function editCount(id) {
     const e = getEdits(id, false); if (!e) return 0;
-    const L = (x) => x.ign.size + x.add.size + x.noBreak.size + x.yesBreak.size + (x.start ? 1 : 0) + (x.blank ? 1 : 0);
+    const L = (x) => x.ign.size + x.add.size + x.noBreak.size + x.yesBreak.size + (x.start ? 1 : 0) + (x.blank ? 1 : 0) + (x.range ? 1 : 0) + Object.keys(x.hideAuto || {}).length;
     return e.fvg.size + L(e.int) + L(e.ext);
   }
 
@@ -1175,7 +1184,7 @@
     setStatus('A carregar dados…');
     try {
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
-      const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')));
+      const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h');
       const needHourly = need.some((t) => t.api === '1h');
       const hourly = needHourly ? await klines(symbol, '1h', need.some((t) => t.agg) ? 3000 : 1000) : null;
       const results = await Promise.all(need.map(async (tf) => {
@@ -1303,17 +1312,13 @@
   }
   // máximos/mínimos do dia e da semana anteriores (velas UTC da Binance)
   function prevLevels() {
-    if (!settings.prevLevels) return [];
-    const out = [], now = Date.now();
-    const add = (tf, nameH, nameL) => {
-      const d = data[tf]; if (!d || d.candles.length < 2) return;
-      const cs = d.candles, cur = cs[cs.length - 1].ct > now ? cs[cs.length - 1] : null;
-      const prev = cur ? cs[cs.length - 2] : cs[cs.length - 1];
-      out.push({ name: nameH, short: tf === '1d' ? 'máx. dia ant.' : 'máx. semana ant.', p: prev.h, side: 1, taken: !!(cur && cur.h > prev.h) });
-      out.push({ name: nameL, short: tf === '1d' ? 'mín. dia ant.' : 'mín. semana ant.', p: prev.l, side: -1, taken: !!(cur && cur.l < prev.l) });
-    };
-    add('1d', 'Máximo do dia anterior', 'Mínimo do dia anterior');
-    add('1w', 'Máximo da semana anterior', 'Mínimo da semana anterior');
+    if (!settings.prevLevels || !data['1h']) return [];
+    const out = [], cs = data['1h'].candles;
+    for (const r of autoRanges().filter((x) => x.id === 'day' || x.id === 'week')) {
+      const after = cs.filter((c) => c.t >= r.t1), nm = r.id === 'day' ? 'dia' : 'semana';
+      out.push({ name: `Máximo ${r.id === 'day' ? 'do dia anterior' : 'da semana anterior'}`, short: `máx. ${nm} ant.`, p: r.top, side: 1, taken: after.some((c) => c.h > r.top) });
+      out.push({ name: `Mínimo ${r.id === 'day' ? 'do dia anterior' : 'da semana anterior'}`, short: `mín. ${nm} ant.`, p: r.bot, side: -1, taken: after.some((c) => c.l < r.bot) });
+    }
     return out;
   }
   function renderPrev() {
@@ -1325,6 +1330,92 @@
       const dist = (x.p - price) / price * 100;
       return `<span class="chip ${x.taken ? 'off' : ''}" title="${x.name}">${x.short} <b>${fmt(x.p)}</b> <span class="muted">${pct(dist, true)}</span>${x.taken ? ' · varrido' : ' · <span class="yes">por varrer</span>'}</span>`;
     }).join('');
+  }
+
+
+  // ---------- ranges: informação extra e independente da estrutura ----------
+  // Dia / semana anteriores (início do dia: meia-noite de Nova Iorque, como em ICT, ou 00:00 UTC), sessão asiática
+  // e um range manual por timeframe. Sinais: a tocar o limite, sweep (manipulação), possível quebra, quebra.
+  const nyFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', weekday: 'short' });
+  const WD = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
+  function nyParts(ms) { const o = {}; for (const p of nyFmt.formatToParts(ms)) o[p.type] = p.value; return { y: +o.year, m: +o.month, d: +o.day, h: (+o.hour) % 24, wd: WD[o.weekday] }; }
+  function dayKey(ms) { if (settings.dayStart === 'utc') return Math.floor(ms / 864e5); const p = nyParts(ms); return Date.UTC(p.y, p.m - 1, p.d) / 864e5; }
+  function weekKey(ms) { const dk = dayKey(ms); const wd = settings.dayStart === 'utc' ? (new Date(dk * 864e5).getUTCDay() + 6) % 7 : nyParts(ms).wd; return dk - wd; }
+  function sessionsCfg() {
+    const m = { asia: [20, 24], londres: [2, 5], ny: [7, 10] };
+    String(settings.sessions || '').split(/[,;]+/).forEach((p) => { const r = /(\w+)\s*:\s*(\d+)\s*-\s*(\d+)/.exec(p.trim()); if (r) m[r[1].toLowerCase()] = [+r[2], +r[3]]; });
+    return m;
+  }
+  const inSess = (h, s) => (s[0] <= s[1] ? h >= s[0] && h < s[1] : h >= s[0] || h < s[1]);
+  const TF_MS0 = { '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '12h': 432e5, '4h': 144e5, '3h': 108e5, '1h': 36e5, '15m': 9e5, '5m': 3e5, '3m': 18e4 };
+  // ranges automáticos (a partir das velas de 1H)
+  function autoRanges() {
+    const h = data['1h']; if (!h) return [];
+    const cs = h.candles, now = Date.now(), out = [];
+    const group = (keyFn, id, label, maxTf) => {
+      const cur = keyFn(now); let k = null; const g = [];
+      for (let i = cs.length - 1; i >= 0; i--) { const kk = keyFn(cs[i].t); if (kk >= cur) continue; if (k == null) k = kk; if (kk !== k) break; g.push(cs[i]); }
+      if (!g.length) return;
+      out.push({ id, label, auto: true, maxTf, top: Math.max(...g.map((c) => c.h)), bot: Math.min(...g.map((c) => c.l)), t0: g[g.length - 1].t, t1: g[0].ct + 1 });
+    };
+    if (settings.showDayR) group(dayKey, 'day', 'Dia ant.', 864e5);
+    if (settings.showWeekR) group(weekKey, 'week', 'Sem. ant.', 7 * 864e5);
+    if (settings.showAsiaR) {
+      const s = sessionsCfg().asia; let g = [], kk = null;
+      for (let i = cs.length - 1; i >= 0; i--) {
+        const c = cs[i], p = nyParts(c.t), inA = inSess(p.h, s);
+        if (!g.length) { if (inA && c.ct < now) { g.push(c); kk = c.t; } else if (inA) continue; else continue; }
+        else if (inA && kk - c.t <= 36e5 * 12) { g.push(c); kk = c.t; } else break;
+      }
+      // só uma sessão já terminada (a vela seguinte à última da sessão já abriu)
+      if (g.length && cs.some((c) => c.t > g[0].t && !inSess(nyParts(c.t).h, s))) out.push({ id: 'asia', label: 'Ásia', auto: true, maxTf: 36e5 + 1, top: Math.max(...g.map((c) => c.h)), bot: Math.min(...g.map((c) => c.l)), t0: g[g.length - 1].t, t1: g[0].ct + 1 });
+    }
+    return out;
+  }
+  function rangesFor(id) {
+    const ms = TF_MS0[id] || 0, e = getEdits(id, false), hide = (e && e.int.hideAuto) || {};
+    const rs = autoRanges().filter((r) => ms > 0 && ms < r.maxTf && !hide[r.id]);
+    if (e && e.int.range) rs.unshift(Object.assign({ id: 'manual', label: 'Range', auto: false }, e.int.range));
+    return rs;
+  }
+  // percorre as velas desse timeframe depois de o range se formar
+  function evalRange(d, r, id) {
+    const cs = d.candles, now = Date.now(), tol = failFor(id);
+    let s = cs.findIndex((c) => c.t >= r.t1); if (s < 0) s = cs.length;
+    let out = 0, outDir = 0, broken = null; const ev = [];
+    const lond = sessionsCfg().londres;
+    for (let k = s; k < cs.length; k++) {
+      const c = cs[k]; if (c.ct >= now) break;
+      const cu = c.c > r.top, cd = c.c < r.bot;
+      if (cu || cd) { const dir = cu ? 1 : -1; if (outDir === dir) out++; else { out = 1; outDir = dir; } if (out > tol) { broken = { dir, k }; break; } continue; }
+      if (out > 0) { ev.push({ dir: outDir, k, closes: out }); out = 0; outDir = 0; continue; }
+      if (c.h > r.top) ev.push({ dir: 1, k }); if (c.l < r.bot) ev.push({ dir: -1, k });
+    }
+    const last = cs[cs.length - 1], live = last.ct >= now ? last : null, nIdx = cs.length - 1;
+    ev.forEach((x) => { x.barsAgo = nIdx - x.k; x.london = r.id === 'asia' && inSess(nyParts(cs[x.k].t).h, lond); });
+    const pos = (d.price - r.bot) / ((r.top - r.bot) || 1) * 100;
+    let st;
+    if (broken) st = { key: 'break', dir: broken.dir, barsAgo: nIdx - broken.k, k: broken.k };
+    else if (out > 0) st = { key: 'possible', dir: outDir, closes: out, tol };
+    else if (live && (live.h >= r.top || live.l <= r.bot)) st = { key: 'touch', dir: live.h >= r.top ? 1 : -1 };
+    else if (ev.length && ev[ev.length - 1].barsAgo <= 20) st = Object.assign({ key: 'sweep' }, ev[ev.length - 1]);
+    else st = { key: 'inside', pos };
+    return { r, st, ev, pos, s };
+  }
+  const RPRI = { break: 5, possible: 4, touch: 3, sweep: 2, inside: 1 };
+  function rangeText(x, short) {
+    const s = x.st, side = (dir) => (dir === 1 ? 'topo' : 'fundo'), lb = x.r.label, br = short ? '<br><span class="muted small">' : ' <span class="muted small">';
+    if (s.key === 'break') return `<span class="${s.dir === 1 ? 'upc' : 'dnc'}">${s.dir === 1 ? '▲' : '▼'} quebrou</span>${br}${lb} · ${s.barsAgo}v</span>`;
+    if (s.key === 'possible') return `<span class="badge disp" style="padding:0 5px">⚖ ${s.dir === 1 ? '▲' : '▼'} ${s.closes}/${s.tol}</span>${br}${lb}</span>`;
+    if (s.key === 'touch') return `<span class="warn">⚠ ${side(s.dir)}</span>${br}${lb} · a tocar</span>`;
+    if (s.key === 'sweep') return `💧 ${side(s.dir)}${br}${s.london ? 'Londres · ' : ''}${lb} · ${s.barsAgo}v</span>`;
+    return `<span class="muted">▭ ${Math.round(s.pos)}%</span>${br}${lb}</span>`;
+  }
+  function rangeCell(d, id) {
+    const xs = rangesFor(id).map((r) => evalRange(d, r, id)); if (!xs.length) return '<span class="muted">·</span>';
+    const best = xs.slice().sort((a, b) => RPRI[b.st.key] - RPRI[a.st.key] || (a.r.auto ? 1 : 0) - (b.r.auto ? 1 : 0))[0];
+    const tip = xs.map((x) => `${x.r.label}: ${fmt(x.r.bot)} – ${fmt(x.r.top)} · ${rangeText(x).replace(/<[^>]+>/g, '')}`).join('\n');
+    return `<span title="${tip}">${rangeText(best, true)}</span>`;
   }
 
   // ---------- tabela ----------
@@ -1387,19 +1478,20 @@
       const rs = recentState(n);
       const extCells = x.trend ? `
         <td class="gl">${extBadge(x)}</td>
-        <td>${phaseCell(x)}</td>
+        <td class="wr" style="max-width:92px">${phaseCell(x)}</td>
         <td class="num">${pullCell(x)}</td>
-        <td class="num">${pct(Math.abs(x.toInvalid))} <span class="muted small">${fmt(x.protected)}</span></td>`
+        <td class="num">${pct(Math.abs(x.toInvalid))}<br><span class="muted small">${fmt(x.protected)}</span></td>`
         : `<td class="gl muted" colspan="4">sem estrutura suficiente</td>`;
       const intCells = n.trend ? `
         <td class="gl">${recentBadge(n, tf.id)}</td>
         <td class="num">${pullCell(n)}</td>
         <td>${brkCell(d, b)}${pendBadge(n)}</td>
         <td class="num">${divCell(d)}</td>
+        <td class="small">${rangeCell(d, tf.id)}</td>
         <td>${b ? (b.volume === 'sim' ? '<span class="yes">sim</span>' : '<span class="muted">não</span>') + (b.volRatio ? ` <span class="muted small">${b.volRatio.toFixed(1).replace('.', ',')}×</span>` : '') : '—'}</td>
         <td>${b ? (b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`) : '—'}</td>
         <td class="liq">${(settings.liqTfs || []).includes(tf.id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
-        : `<td class="gl muted" colspan="7">sem estrutura suficiente</td>`;
+        : `<td class="gl muted" colspan="8">sem estrutura suficiente</td>`;
       rows.push(`<tr data-tf="${tf.id}" class="${tf.id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${tf.label}</td>${extCells}${intCells}</tr>`);
     }
     $('#tbody').innerHTML = rows.join('');
@@ -1672,7 +1764,7 @@
     const q = (settings.liqTfs || []).includes(selectedTf) ? liquidity(d) : null;
     if (q && q.below) add(q.below.p, '#90a4ae', q.below.equal ? 'fundos iguais' : 'liquidez', 3, 1);
     if (q && q.above) add(q.above.p, '#90a4ae', q.above.equal ? 'topos iguais' : 'liquidez', 3, 1);
-    for (const x of prevLevels()) add(x.p, x.taken ? '#5c6b7a' : '#b39ddb', x.short + (x.taken ? ' (varrido)' : ''), 1, 1);
+
     drawState = { tf: selectedTf, d };
     if (range) chart.timeScale().setVisibleLogicalRange(range);
     else { const len = cs.length; chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, len - 160), to: len + 8 }); }
@@ -1691,6 +1783,20 @@
     const { d } = drawState, cl = d.closed;
     const X = (i) => (i >= cl.length ? paneW : ts.timeToCoordinate(cl[i].tt));
     const Y = (p) => candleSeries.priceToCoordinate(p);
+    // ranges (caixas): manual a cheio, automáticos a tracejado
+    const RCOL = { manual: '100,181,246', day: '179,157,219', week: '149,117,205', asia: '255,183,77' };
+    for (const x of rangesFor(drawState.tf).map((r) => evalRange(d, r, drawState.tf))) {
+      const r = x.r, col = RCOL[r.id] || '170,178,189', yt = Y(r.top), yb = Y(r.bot); if (yt == null || yb == null) continue;
+      let i0 = cl.findIndex((c) => c.t >= r.t0); if (i0 < 0) continue;
+      const xa = X(i0) ?? 0, xb = x.st.key === 'break' ? (X(x.st.k) ?? paneW) : paneW;
+      g.fillStyle = `rgba(${col},${r.auto ? 0.05 : 0.08})`; g.fillRect(xa, yt, xb - xa, yb - yt);
+      g.strokeStyle = `rgba(${col},0.9)`; g.lineWidth = r.auto ? 1 : 1.5; g.setLineDash(r.auto ? [4, 4] : []);
+      g.strokeRect(xa, yt, xb - xa, yb - yt);
+      if (!r.auto) { const ym = Y((r.top + r.bot) / 2); g.setLineDash([2, 4]); g.beginPath(); g.moveTo(xa, ym); g.lineTo(xb, ym); g.stroke(); }
+      g.setLineDash([]); g.fillStyle = `rgba(${col},1)`; g.font = '10px Inter, system-ui, sans-serif'; g.textAlign = 'left';
+      g.fillText(r.label + (r.auto ? '' : ' · EQ'), xa + 4, yt + 11);
+      for (const e of x.ev.slice(-6)) { const ex = X(e.k), ey = Y(e.dir === 1 ? r.top : r.bot); if (ex == null || ey == null) continue; g.fillText('💧', ex - 6, e.dir === 1 ? ey - 4 : ey + 14); }
+    }
     // FVGs por preencher (recentes)
     for (const f of d.int.res.fvgs.filter((f) => f.filled == null && f.mid >= cl.length - 300).slice(-12)) {
       const x1 = X(f.mid), y1 = Y(f.top), y2 = Y(f.bot); if (x1 == null || y1 == null || y2 == null) continue;
@@ -1755,6 +1861,7 @@
 
   // ---------- modo de edição ----------
   let editMode = false;
+  let pendingRange = null;   // primeiro clique do range manual (topo ou fundo)
   // só uma camada de cada vez no gráfico (leitura e edição): a do botão a amarelo
   let editLayer = settings.layer === 'ext' || (settings.layer == null && settings.showExt && !settings.showInt) ? 'ext' : 'int';
   const vE = () => editLayer === 'ext';
@@ -1766,6 +1873,7 @@
     $('#editBtn').classList.toggle('on', editMode);
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
+    const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
     $('#clearBtn').textContent = editMode ? `🧹 Apagar ${layerName(editLayer)}` : '🧹 Apagar estrutura';
     $('#resetBtn').disabled = !nEd;
@@ -1815,6 +1923,14 @@
         else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => { ed()[L].ign.add(T(sw.i)); done(); } });
       }
     }
+    // 1b) limites de um range: remover (manual) ou esconder (automático) neste timeframe
+    for (const r of rangesFor(id)) {
+      const yt = Y(r.top), yb = Y(r.bot), i0 = cl.findIndex((c) => c.t >= r.t0), xa = i0 >= 0 ? X(i0) : null;
+      if (yt == null || yb == null || xa == null || px < xa - 4) continue;
+      if (Math.abs(py - yt) > 6 && Math.abs(py - yb) > 6) continue;
+      if (r.auto) items.push({ label: `Esconder o range "${r.label}" neste timeframe`, run: () => { const e = ed(); e.int.hideAuto = Object.assign({}, e.int.hideAuto, { [r.id]: true }); done(); } });
+      else items.push({ label: `▭ Remover o range (${fmt(r.bot)} – ${fmt(r.top)})`, run: () => { ed().int.range = null; done(); } });
+    }
     // 2) quebras e quebras rejeitadas
     const layers = [[editLayer, layerName(editLayer)]];
     for (const [L, nome] of layers) {
@@ -1862,11 +1978,22 @@
         const mk = (lab, txt) => items.push({ label: `${txt} (${fmt(p)})`, run: () => { const e = ed(); e[L].ign.delete(T(q)); e[L].add.set(T(q), lab); done(); } });
         if (top) { mk('HH', '▲ Topo HH — quebra para cima'); mk('LH', '▲ Topo LH — sem quebra'); }
         else { mk('HL', '▼ Fundo HL — sem quebra'); mk('LL', '▼ Fundo LL — quebra para baixo'); }
+        if (L === 'int') items.push({ label: `▭ Começar range neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, nav: true, run: () => { pendingRange = { top, p, t: T(q) }; updateEditUi(); } });
         items.push({ label: `▶ Começar estrutura neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, run: () => {
           const e = ed(); e[L].start = { t: T(q), side: top ? 'H' : 'L' }; e[L].blank = false;
           for (const t of [...e[L].add.keys()]) if (t <= T(q)) e[L].add.delete(t);   // marcas antes do início deixam de contar
           done(); } });
       };
+      if (pendingRange && L === 'int') {
+        const pr = pendingRange, wantTop = !pr.top, q = ext(wantTop), p = wantTop ? cl[q].h : cl[q].l;
+        items.length = 0;
+        items.push({ head: true, label: `Range: ${pr.top ? 'topo' : 'fundo'} ${fmt(pr.p)}` });
+        items.push({ label: `▭ ${wantTop ? 'Topo' : 'Fundo'} do range aqui (${fmt(p)})`, run: () => {
+          const top = Math.max(pr.p, p), bot = Math.min(pr.p, p);
+          ed().int.range = { top, bot, t0: Math.min(pr.t, T(q)), t1: Math.max(pr.t, T(q)) + 1 }; pendingRange = null; done(); } });
+        items.push({ label: 'Cancelar o range', nav: true, run: () => { pendingRange = null; updateEditUi(); } });
+        openMenu(px, py, items); return;
+      }
       items.push({ head: true, label: `Marcar ${L === 'ext' ? 'na' : 'no'} ${nome}:` });
       side(nearTop); side(!nearTop);
     }
@@ -1915,7 +2042,7 @@
   function openSettings() {
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
-    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
+    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
@@ -1926,7 +2053,7 @@
     settings = Object.assign({}, settings, {
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, volMult: +$('#setVol').value,
-      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
+      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
       tfs: [...document.querySelectorAll('#setTfs input:checked')].map((i) => i.value),
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
@@ -2037,6 +2164,7 @@
     $('#reload').addEventListener('click', loadAll);
     $('#gear').addEventListener('click', openSettings);
     cloudInit();
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && pendingRange) { pendingRange = null; closeMenu(); updateEditUi(); } });
     $('#setCancel').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#setX').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#settings').addEventListener('click', (e) => { if (e.target.id === 'settings') $('#settings').classList.remove('open'); });   // clicar fora fecha
@@ -2067,6 +2195,6 @@
   window.MSS = { init, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }) };
 })();
 </script>
-<script>MSS.init();</script>
+<script>MSS.init(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
