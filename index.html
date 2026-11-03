@@ -204,6 +204,13 @@
     .favdetail #chart { height:420px; }
     body[data-mtab="favs"] .favdetail .legend { display:none; }
   }
+  .loginform { display:flex; flex-direction:column; gap:10px; }
+  .loginform label { display:flex; flex-direction:column; gap:4px; font-size:13px; color:var(--muted); }
+  .loginform input { background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:9px 10px; font-size:15px; }
+  .loginbtns { display:flex; gap:8px; } .loginbtns button { flex:1; padding:9px; }
+  .linkbtn { background:none; border:none; color:#64b5f6; cursor:pointer; padding:4px 0; text-align:left; font-size:13px; }
+  .logingoogle { margin-top:14px; padding-top:10px; border-top:1px solid var(--line); }
+  #loginDlg.open { display:flex; }
 </style>
 </head>
 <body>
@@ -216,7 +223,7 @@
   <span id="status" class="status"></span>
   <button id="reload" title="Atualizar agora">↻</button>
   <button id="helpBtn">Como ler</button>
-  <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none">Entrar com Google</button>
+  <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none">Entrar</button>
   <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
   <button id="gear">Definições</button>
 </header>
@@ -296,6 +303,20 @@
   <button id="btRun" class="primary">Correr teste</button> <span id="btProg" class="muted small" style="margin-left:8px"></span>
   <div id="btOut" style="margin-top:12px"></div>
   <div class="actions"><button onclick="document.getElementById('btModal').classList.remove('open')">Fechar</button></div>
+</div></div>
+<div id="loginDlg" class="modal"><div class="dialog" style="width:min(400px,94vw)">
+  <button id="loginClose" class="dlgclose" title="Fechar">✕</button>
+  <h2>Entrar</h2>
+  <p class="muted small" style="margin-top:0">Com conta, as tuas marcas, favoritos e definições ficam guardados e aparecem em qualquer computador ou telemóvel.</p>
+  <form id="loginForm" class="loginform">
+    <label>Email<input id="loginEmail" type="email" autocomplete="username" required></label>
+    <label>Password<input id="loginPass" type="password" autocomplete="current-password" minlength="6"></label>
+    <div id="loginMsg" class="small"></div>
+    <div class="loginbtns"><button type="submit" class="primary">Entrar</button><button type="button" id="loginNew">Criar conta</button></div>
+    <button type="button" id="loginForgot" class="linkbtn">Esqueci-me da password</button>
+  </form>
+  <div class="logingoogle"><span class="muted small">ou</span> <button type="button" id="loginGoogle" class="linkbtn">entrar com a conta Google</button></div>
+  <div style="height:14px"></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
   <button id="setX" class="dlgclose" title="Fechar">✕</button><h2>Definições</h2>
@@ -2513,7 +2534,7 @@
     if (!window.firebase || !window.FIREBASE_CONFIG) { b.style.display = 'none'; s.textContent = '☁ sem ligação ao servidor — a gravar só neste navegador'; return; }
     if (location.protocol === 'file:') { b.style.display = 'none'; s.textContent = '☁ o login só funciona no endereço publicado — a gravar só neste navegador'; return; }
     b.style.display = '';
-    if (!cloud.user) { b.textContent = 'Entrar com Google'; s.textContent = 'a gravar só neste navegador'; return; }
+    if (!cloud.user) { b.textContent = 'Entrar'; s.textContent = 'a gravar só neste navegador'; return; }
     b.textContent = 'Sair';
     s.textContent = cloud.err ? `☁ erro: ${cloud.err}` : cloud.pending ? '☁ a gravar…' : `☁ gravado · ${cloud.user.email || ''}`;
   }
@@ -2586,14 +2607,25 @@
         });
       } catch (e) { cloud.err = 'arranque'; }
     }
-    const b = $('#loginBtn');
-    if (b) b.addEventListener('click', () => {
-      const auth = window.firebase && window.firebase.auth();
-      if (!auth) return;
-      if (cloud.user) { auth.signOut(); return; }
-      const p = new window.firebase.auth.GoogleAuthProvider();
-      auth.signInWithPopup(p).catch((e) => { if (e && /popup/.test(e.code || '')) auth.signInWithRedirect(p); else { cloud.err = (e && e.code) || 'login'; cloudUi(); } });
-    });
+    // entrar: email e password (principal) ou conta Google (alternativa)
+    const b = $('#loginBtn'), dlg = $('#loginDlg'), msg = (t, ok) => { const m = $('#loginMsg'); m.textContent = t || ''; m.className = 'small ' + (ok ? 'yes' : 'warn'); };
+    const ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
+      'auth/email-already-in-use': 'Já existe uma conta com este email. Usa “Entrar”.', 'auth/weak-password': 'A password tem de ter pelo menos 6 caracteres.', 'auth/invalid-email': 'Email inválido.',
+      'auth/missing-password': 'Escreve a password.', 'auth/too-many-requests': 'Demasiadas tentativas. Espera uns minutos.', 'auth/operation-not-allowed': 'O login por email ainda não está ligado no Firebase (Authentication → Método de login → E-mail/senha).',
+      'auth/network-request-failed': 'Sem ligação à internet.' };
+    const fail = (e) => msg(ERR[e && e.code] || ('Erro: ' + ((e && (e.code || e.message)) || 'desconhecido')));
+    const auth = () => window.firebase && window.firebase.auth();
+    const creds = () => [$('#loginEmail').value.trim(), $('#loginPass').value];
+    if (b) b.addEventListener('click', () => { if (!auth()) return; if (cloud.user) { auth().signOut(); return; } msg(''); dlg.classList.add('open'); setTimeout(() => $('#loginEmail').focus(), 50); });
+    if (dlg) {
+      const close = () => dlg.classList.remove('open');
+      $('#loginClose').addEventListener('click', close);
+      dlg.addEventListener('click', (ev) => { if (ev.target === dlg) close(); });
+      $('#loginForm').addEventListener('submit', (ev) => { ev.preventDefault(); const [e, p] = creds(); msg('A entrar…', true); auth().signInWithEmailAndPassword(e, p).then(close).catch(fail); });
+      $('#loginNew').addEventListener('click', () => { const [e, p] = creds(); msg('A criar a conta…', true); auth().createUserWithEmailAndPassword(e, p).then(close).catch(fail); });
+      $('#loginForgot').addEventListener('click', () => { const [e] = creds(); if (!e) return msg('Escreve o teu email primeiro.'); auth().sendPasswordResetEmail(e).then(() => msg('Enviámos um email para repores a password (vê também o spam).', true)).catch(fail); });
+      $('#loginGoogle').addEventListener('click', () => { const p = new window.firebase.auth.GoogleAuthProvider(); auth().signInWithPopup(p).then(close).catch((e) => { if (e && /popup/.test(e.code || '')) auth().signInWithRedirect(p); else fail(e); }); });
+    }
     cloudUi();
   }
 
