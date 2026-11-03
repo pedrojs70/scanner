@@ -2340,6 +2340,7 @@
   function unmountDetail() { if (anchors) anchors.forEach(([n, c]) => c.parentNode.insertBefore(n, c.nextSibling)); if (detailWrap) detailWrap.remove(); }
   function closeFav() { favOpen = null; unmountDetail(); renderFavList(); }
   function favEvals(s) { return (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)); }
+  const FAV_SORTS = { az: 'Ordem: A–Z', crypto: 'Ordem: crypto primeiro', stocks: 'Ordem: ações primeiro', ready: 'Ordem: prontos primeiro' };
   function renderFavList() {
     const box = $('#favList'); if (!box) return;
     const favs = settings.favs || [], setups = (settings.setups || []).filter((x) => x.on);
@@ -2356,7 +2357,14 @@
         return `<span class="chip ${cls} favcell" title="${x.st.name}: zona ${pct(x.z.pullback)}"><span class="mname">${x.st.name} </span>${up ? '▲' : '▼'} ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
       });
       return { s, rank, cells, price: f.price };
-    }).sort((a, b) => b.rank - a.rank);
+    }).sort((a, b) => {
+      const fs = settings.favSort || 'az', cls = (x) => (isCrypto(x.s) ? 0 : 1);
+      if (fs === 'ready') return b.rank - a.rank || a.s.localeCompare(b.s);
+      if (fs === 'crypto') return cls(a) - cls(b) || a.s.localeCompare(b.s);
+      if (fs === 'stocks') return cls(b) - cls(a) || a.s.localeCompare(b.s);
+      return a.s.localeCompare(b.s);
+    });
+    const sb = $('#favSort'); if (sb) sb.textContent = FAV_SORTS[settings.favSort || 'az'];
     box.innerHTML = (rows.length ? `<div class="favgrid favh" style="${cols}"><span>Ativo</span><span>Preço</span>${setups.map((st) => `<span>${st.name}<br><span class="muted small">${ctxOf(st) ? tfLabel(ctxOf(st)) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></span>`).join('')}<span></span></div>` : '')
       + (rows.length ? rows.map((r) => `${favOpen === r.s ? '<div class="favopenwrap">' : ''}<div class="favgrid favrow ${r.rank === 4 ? 'ready' : ''} ${favOpen === r.s ? 'open' : ''}" style="${cols}" data-s="${r.s}"><span class="favsym">${favOpen === r.s ? '▾ ' : ''}${r.s}${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span>${r.cells.map((c) => `<span>${c}</span>`).join('')}<button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>${favOpen === r.s ? '<div class="favslot"></div></div>' : ''}`).join('')
         : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um nome ou ticker (ex.: apple, ETHUSDT) ou importa a tua watchlist do TradingView.</div>');
@@ -2369,7 +2377,7 @@
     if (!$('#favList')) {
       el.innerHTML = `<div class="favhead"><b>★ Favoritos</b> <span id="favCount" class="muted small"></span>
           <form id="favAdd" class="favadd" autocomplete="off" role="search"><input id="favIn" type="search" placeholder="nome ou ticker (ex.: apple, ETHUSDT)" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-np-ignore="true" data-np-autofill-type="ignore" data-form-type="other"><button type="submit">Adicionar</button></form>
-          <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
+          <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favSort" class="lyr" style="margin-left:0" title="Mudar a ordem da lista">Ordem: A–Z</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
         <div id="favSug" class="favsug"></div>
         <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
           <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
@@ -2380,6 +2388,7 @@
       $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
       $('#favImpGo').addEventListener('click', () => { addFavs($('#favImpTxt').value.split(/[\s,;]+/)); $('#favImpTxt').value = ''; $('#favImpBox').style.display = 'none'; });
       $('#favRef').addEventListener('click', () => scanFavs(true));
+      $('#favSort').addEventListener('click', () => { const ks = Object.keys(FAV_SORTS), cur = ks.indexOf(settings.favSort || 'az'); settings.favSort = ks[(cur + 1) % ks.length]; save('mss_settings4', settings); renderFavList(); });
     }
     renderFavList();
   }
