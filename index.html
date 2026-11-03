@@ -163,12 +163,13 @@
   #favs { display:none; margin-bottom:14px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:8px; }
   body[data-favs="1"] #favs { display:block; }
   .favhead { display:flex; align-items:center; gap:8px; flex-wrap:wrap; padding:4px 4px 8px; border-bottom:1px solid var(--line); }
-  .favadd { display:flex; gap:4px; margin-left:auto; } .favadd input { width:120px; background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
+  .favadd { display:flex; gap:4px; margin-left:auto; } .favadd input { width:220px; background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; padding:6px 8px; }
   .favimp { padding:8px 4px; } .favimp textarea { width:100%; margin:6px 0; background:#0f1216; color:var(--text); border:1px solid var(--line); border-radius:6px; }
   .favrow { display:flex; align-items:center; gap:10px; padding:7px 6px; border-bottom:1px solid var(--line); cursor:pointer; }
   .favrow:hover { background:#1a2029; } .favrow.ready { background:rgba(46,125,50,.12); }
   .favsym { font-weight:700; min-width:96px; } .favpx { min-width:80px; color:var(--muted); font-size:12px; }
   .favchips { flex:1; display:flex; flex-wrap:wrap; gap:4px; font-size:12px; }
+  .favsug { display:flex; flex-direction:column; gap:2px; padding:4px; } .favsug .sugi { text-align:left; background:#141a21; border:1px solid var(--line); border-radius:6px; padding:6px 8px; color:var(--text); cursor:pointer; }
   .favx { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; }
   #starBtn { background:none; border:none; color:#f5c518; font-size:20px; cursor:pointer; padding:0 4px; }
   @media (max-width:760px) {
@@ -1245,12 +1246,81 @@
     return { candles: cs, closed, price, ext: layer(E.analyze, settings.extAtr, settings.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, settings.intAtr, settings.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
   }
 
+
+  // ---------- ações (Yahoo Finance, através do Worker scanner-data) ----------
+  const STOCK_API = 'https://scanner-data.pedrojs70.workers.dev';
+  const Y_IV = { '1M': '1mo', '1w': '1wk', '1d': '1d', '1h': '1h', '15m': '15m', '5m': '5m' };   // 12H, 4H e 3H constroem-se a partir de 1H; 3m não existe
+  const Y_AGG = { '12h': 12, '4h': 4, '3h': 3 };
+  const Y_MS = { '1mo': 31 * 864e5, '1wk': 7 * 864e5, '1d': 864e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
+  // TradingView → Yahoo (sufixos de bolsa); EURONEXT é resolvido pela pesquisa
+  const PREFIX = { NASDAQ: '', NYSE: '', AMEX: '', NYSEARCA: '', NYSEAMERICAN: '', CBOE: '', BATS: '', OTC: '', XETR: '.DE', FWB: '.F', GETTEX: '.DE', LSE: '.L', LSIN: '.L', MIL: '.MI', BME: '.MC', SIX: '.SW', OMXSTO: '.ST', OMXHEX: '.HE', OMXCOP: '.CO', OSL: '.OL', TSX: '.TO', ASX: '.AX', VIE: '.VI', WSE: '.WA', ATHEX: '.AT', ISE: '.IR', EURONEXTLISBON: '.LS' };
+  const yMap = load('mss_ymap', {});
+  async function stockJSON(path) { const r = await fetch(STOCK_API + path); if (!r.ok) throw new Error('servidor de ações ' + r.status); return r.json(); }
+  async function yahooSym(s) {
+    if (yMap[s]) return yMap[s];
+    let y = s;
+    const m = /^([A-Z]+):(.+)$/.exec(s);
+    if (m) {
+      const [, ex, tk] = m;
+      if (PREFIX[ex] != null) y = tk.replace(/\./g, '-') + PREFIX[ex];
+      else {   // EURONEXT e outras: procura na Yahoo o ticker com a bolsa europeia certa
+        const r = await stockJSON('/search?q=' + encodeURIComponent(tk));
+        const hit = (r.results || []).find((x) => x.type === 'EQUITY' && x.symbol.split('.')[0] === tk && /\.(AS|PA|BR|LS|IR|OL)$/.test(x.symbol))
+          || (r.results || []).find((x) => x.symbol.split('.')[0] === tk) || (r.results || [])[0];
+        y = hit ? hit.symbol : tk;
+      }
+    }
+    yMap[s] = y; save('mss_ymap', yMap); return y;
+  }
+  // agrupa velas de 1H em 4H/3H/12H a contar da abertura de cada sessão (como o TradingView faz nas ações)
+  function aggregateSession(cs, k) {
+    const out = []; let day = null, n = 0, cur = null;
+    for (const c of cs) {
+      const d = new Date(c.t).toISOString().slice(0, 10);
+      if (d !== day) { day = d; n = 0; }
+      if (n % k === 0) { cur = { t: c.t, ct: c.ct, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v }; out.push(cur); }
+      else { cur.h = Math.max(cur.h, c.h); cur.l = Math.min(cur.l, c.l); cur.c = c.c; cur.v += c.v; cur.ct = c.ct; }
+      n++;
+    }
+    return out;
+  }
+  const yRows = (rows, iv) => rows.map((r, k) => ({ t: r[0], ct: (rows[k + 1] ? rows[k + 1][0] : r[0] + Y_MS[iv]) - 1, o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
+  // velas de vários timeframes de uma ação: { tfId: candles }
+  async function stockCandles(sym, tfIds) {
+    const y = await yahooSym(sym);
+    const ivs = new Set();
+    tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); });
+    if (!ivs.size) return {};
+    const r = await stockJSON(`/candles?s=${encodeURIComponent(y)}&i=${[...ivs].join(',')}`);
+    const got = r[y] || {}, out = {};
+    for (const id of tfIds) {
+      const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
+      let cs = yRows(got[iv].rows, iv);
+      if (Y_AGG[id]) cs = aggregateSession(cs, Y_AGG[id]);
+      if (cs.length > 30) out[id] = cs;
+    }
+    return out;
+  }
+
   async function loadAll() {
     const token = ++loadToken;
     setStatus('A carregar dados…');
     try {
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
       const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h');
+      if (!isCrypto(symbol)) {   // ação
+        const got = await stockCandles(symbol, need.map((t) => t.id));
+        if (token !== loadToken) return;
+        Object.keys(data).forEach((k) => delete data[k]);
+        for (const id in got) data[id] = computeTf(got[id], id);
+        if (!data[selectedTf]) selectedTf = Object.keys(data).includes('1d') ? '1d' : Object.keys(data)[0];
+        if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
+        $('#price').textContent = fmt(data[selectedTf].price);
+        setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + ' · Yahoo');
+        renderTable(); renderConfluence(); renderPrev(); renderChart(true);
+        clearTimeout(timer); if (settings.refresh) timer = setTimeout(loadAll, 120000);
+        return;
+      }
       const needHourly = need.some((t) => t.api === '1h');
       const hourly = needHourly ? await klines(symbol, '1h', need.some((t) => t.agg) ? 3000 : 1000) : null;
       const results = await Promise.all(need.map(async (tf) => {
@@ -1268,7 +1338,7 @@
       renderTable(); renderConfluence(); renderPrev(); renderChart(true);
     } catch (e) {
       if (token !== loadToken) return;
-      setStatus('Erro a obter dados da Binance: ' + (e.message || e) + ' — confirma o símbolo (ex.: BTCUSDT, ETHUSDT).', true);
+      setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : 'Erro a obter dados da ação: ') + (e.message || e) + ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).', true);
     }
     clearTimeout(timer);
     if (settings.refresh) timer = setTimeout(loadAll, 60000);
@@ -2165,6 +2235,12 @@
     return TFS.filter((t) => s.has(t.id));
   }
   async function loadFav(sym) {
+    if (!isCrypto(sym)) {
+      const got = await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
+      for (const id in got) out[id] = computeTf(got[id], id, sym);
+      const any = out['1d'] || Object.values(out)[0];
+      favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
+    }
     const tfs = favTfs(), out = {};
     let hourly = null;
     for (const tf of tfs) {
@@ -2193,7 +2269,6 @@
     const el = $('#favs'); if (!el) return;
     const favs = settings.favs || [];
     const rows = favs.map((s) => {
-      if (!isCrypto(s)) return { s, rank: -1, html: `<span class="muted small">ações — em breve</span>` };
       const f = favData[s]; if (!f) return { s, rank: -1, html: '<span class="muted small">a carregar…</span>' };
       const ev = (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)).filter(Boolean);
       const rank = Math.max(0, ...ev.map((x) => x.rank));
@@ -2205,18 +2280,38 @@
       return { s, rank, html: chips || '<span class="muted small">sem dados</span>', price: f.price };
     }).sort((a, b) => b.rank - a.rank);
     el.innerHTML = `<div class="favhead"><b>★ Favoritos</b> <span class="muted small">${favs.length} ativos · ${favProg || ''}</span>
-        <form id="favAdd" class="favadd"><input id="favIn" placeholder="ex.: ETHUSDT" spellcheck="false"><button type="submit">Adicionar</button></form>
+        <form id="favAdd" class="favadd"><input id="favIn" placeholder="nome ou ticker (ex.: apple, ETHUSDT)" spellcheck="false"><button type="submit">Adicionar</button></form>
         <button id="favImp" class="lyr" style="margin-left:0">Importar do TradingView</button> <button id="favRef" class="lyr" style="margin-left:0">↻</button></div>
+ <div id="favSug" class="favsug"></div>
       <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
         <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
-      ${rows.length ? rows.map((r) => `<div class="favrow ${r.rank === 4 ? 'ready' : ''}" data-s="${r.s}"><span class="favsym">${r.s}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span><span class="favchips">${r.html}</span><button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>`).join('')
+      ${rows.length ? rows.map((r) => `<div class="favrow ${r.rank === 4 ? 'ready' : ''}" data-s="${r.s}"><span class="favsym">${r.s}${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span><span class="favchips">${r.html}</span><button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>`).join('')
         : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um par (ex.: ETHUSDT) ou importa a tua watchlist do TradingView.</div>'}`;
-    $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); addFavs([$('#favIn').value]); });
+    $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#favIn').value.trim(); if (!v) return; if (isCrypto(normSym(v)) || /:/.test(v)) addFavs([v]); else favSearch(v, true); });
+    let st0 = null;
+    $('#favIn').addEventListener('input', () => { clearTimeout(st0); const v = $('#favIn').value.trim(); if (v.length >= 2) st0 = setTimeout(() => favSearch(v, false), 400); else $('#favSug').innerHTML = ''; });
     $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
     $('#favImpGo').addEventListener('click', () => addFavs($('#favImpTxt').value.split(/[\s,;]+/)));
     $('#favRef').addEventListener('click', () => scanFavs(true));
     el.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavs(); updateStar(); }));
     el.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => openSymbol(r.dataset.s)));
+  }
+  // pesquisa por nome (Yahoo): ações, ETFs e crypto (a crypto é convertida para o par da Binance)
+  async function favSearch(q, pickFirst) {
+    const box = $('#favSug'); if (!box) return;
+    const up = normSym(q);
+    const opts = [];
+    if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance', crypto: true });
+    try {
+      const r = await stockJSON('/search?q=' + encodeURIComponent(q));
+      for (const x of r.results || []) {
+        if (x.type === 'CRYPTOCURRENCY') { const b = x.symbol.split('-')[0] + 'USDT'; if (!opts.some((o) => o.symbol === b)) opts.push({ symbol: b, name: x.name, exch: 'Binance', crypto: true }); }
+        else if (['EQUITY', 'ETF', 'INDEX', 'MUTUALFUND'].includes(x.type) && !/=F$/.test(x.symbol)) opts.push(x);
+      }
+    } catch (e) { opts.push({ err: 'pesquisa indisponível (' + (e.message || e) + ')' }); }
+    if (pickFirst && opts.length === 1 && !opts[0].err) { addFavs([opts[0].symbol]); box.innerHTML = ''; return; }
+    box.innerHTML = opts.map((o) => o.err ? `<div class="muted small">${o.err}</div>` : `<button class="sugi" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button>`).join('') || '<div class="muted small">sem resultados</div>';
+    box.querySelectorAll('.sugi').forEach((b) => b.addEventListener('click', () => { addFavs([b.dataset.s]); $('#favIn').value = ''; box.innerHTML = ''; }));
   }
   function addFavs(list) {
     const cur = new Set(settings.favs || []); let n = 0;
@@ -2225,7 +2320,7 @@
   }
   async function scanFavs(force) {
     if (favBusy) { favAgain = true; return; } favBusy = true; favAgain = false;
-    const list = (settings.favs || []).filter(isCrypto).filter((s) => force || !favData[s] || Date.now() - favData[s].at > 4.5 * 60e3);
+    const list = (settings.favs || []).filter((s) => force || !favData[s] || Date.now() - favData[s].at > 4.5 * 60e3);
     let done = 0;
     const work = list.slice();
     const worker = async () => { while (work.length) { const s = work.shift(); try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavs(); } };
@@ -2235,7 +2330,6 @@
     if (favAgain) scanFavs(false);
   }
   function openSymbol(s) {
-    if (!isCrypto(s)) return;
     symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar();
     if (window.innerWidth <= 760) setMTab('resumo'); else { document.body.dataset.favs = ''; window.scrollTo(0, 0); }
   }
