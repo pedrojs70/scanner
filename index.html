@@ -184,7 +184,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Desfazer</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Desfazer</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b> — é a única camada no gráfico e a única que é alterada. Para mudar, carrega em “Tendência principal” ou “Movimento recente”.<br>Modo edição: clica num <b>swing</b> (para o ignorar), numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”) ou numa <b>vela</b> (HH/LH/HL/LL ou “Começar estrutura aqui” — clica perto da máxima para topos, da mínima para fundos) ou num <b>FVG</b> (ignorar). Tudo é recalculado. As alterações ficam guardadas neste navegador até carregares em “Repor”.</div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -236,6 +236,7 @@
   <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups</small></div><input id="setPrev" type="checkbox"></div>
   <div class="field"><div>Início do dia<small>meia-noite de Nova Iorque é a referência ICT; 00:00 UTC é a hora das velas diárias da Binance</small></div><select id="setDayStart"><option value="ny">00:00 Nova Iorque (ICT)</option><option value="utc">00:00 UTC</option></select></div>
   <div class="field"><div>Ranges automáticos<small>caixas no gráfico e sinais na coluna Range (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label></span></div>
+  <div class="field"><div>Killzones no gráfico<small>faixas de fundo em 1H e abaixo; o botão “⏱ Killzones” na barra do gráfico liga e desliga todas</small></div><span><label class="chk"><input id="setKzA" type="checkbox"> Ásia</label> <label class="chk"><input id="setKzL" type="checkbox"> Londres</label> <label class="chk"><input id="setKzN" type="checkbox"> Nova Iorque</label></span></div>
   <div class="field"><div>Sessões (hora de Nova Iorque)<small>Ásia ≈ 01:00–05:00 UK, Londres ≈ 07:00–10:00 UK, Nova Iorque ≈ 12:00–15:00 UK. Formato: asia:20-24, londres:2-5, ny:7-10</small></div><input id="setSess" type="text" style="width:240px"></div>
   <div>Setups <span class="muted small">(zona → quebra)</span></div>
   <div id="setSetups"></div>
@@ -1064,7 +1065,7 @@
   ];
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
-    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
+    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
     tfs: TFS.map((t) => t.id), showExt: true, showInt: true,
   };
 
@@ -1783,6 +1784,21 @@
     const { d } = drawState, cl = d.closed;
     const X = (i) => (i >= cl.length ? paneW : ts.timeToCoordinate(cl[i].tt));
     const Y = (p) => candleSeries.priceToCoordinate(p);
+    // killzones (faixas verticais de fundo, só em 1H e abaixo): Ásia, Londres, Nova Iorque
+    if (settings.kzOn && (TF_MS0[drawState.tf] || 0) <= 36e5) {
+      const cs = d.candles, sc = sessionsCfg();
+      if (!d._sess) d._sess = cs.map((c) => { const h = nyParts(c.t).h; return inSess(h, sc.asia) ? 'asia' : inSess(h, sc.londres) ? 'londres' : inSess(h, sc.ny) ? 'ny' : null; });
+      const KZ = { asia: ['255,183,77', 'Ásia', settings.kzAsia], londres: ['100,181,246', 'Londres', settings.kzLondon], ny: ['129,199,132', 'Nova Iorque', settings.kzNy] };
+      let bw = 6; try { bw = chart.timeScale().options().barSpacing || 6; } catch (e) {}
+      g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'left';
+      for (let i = 0; i < cs.length; i++) {
+        const s = d._sess[i]; if (!s || !KZ[s][2] || (i > 0 && d._sess[i - 1] === s)) continue;
+        let j = i; while (j + 1 < cs.length && d._sess[j + 1] === s) j++;
+        const xa = ts.timeToCoordinate(cs[i].tt), xb = ts.timeToCoordinate(cs[j].tt); if (xa == null || xb == null || xb < 0 || xa > paneW) continue;
+        g.fillStyle = `rgba(${KZ[s][0]},0.07)`; g.fillRect(xa - bw / 2, 0, xb - xa + bw, paneH);
+        g.fillStyle = `rgba(${KZ[s][0]},0.8)`; g.fillText(KZ[s][1], xa - bw / 2 + 2, paneH - 6);
+      }
+    }
     // ranges (caixas): manual a cheio, automáticos a tracejado
     const RCOL = { manual: '100,181,246', day: '179,157,219', week: '149,117,205', asia: '255,183,77' };
     for (const x of rangesFor(drawState.tf).map((r) => evalRange(d, r, drawState.tf))) {
@@ -1879,6 +1895,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
+    $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
   }
@@ -2042,7 +2059,7 @@
   function openSettings() {
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
-    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
+    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
@@ -2053,7 +2070,7 @@
     settings = Object.assign({}, settings, {
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, volMult: +$('#setVol').value,
-      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
+      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
       tfs: [...document.querySelectorAll('#setTfs input:checked')].map((i) => i.value),
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
@@ -2174,6 +2191,7 @@
     $('#editBtn').addEventListener('click', () => { editMode = !editMode; closeMenu(); updateEditUi(); renderChart(true); });
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
+    $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
     $('#clearBtn').addEventListener('click', (ev) => {
       const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
