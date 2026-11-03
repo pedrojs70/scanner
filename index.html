@@ -170,6 +170,7 @@
   .favsym { font-weight:700; min-width:96px; } .favpx { min-width:80px; color:var(--muted); font-size:12px; }
   .favchips { flex:1; display:flex; flex-wrap:wrap; gap:4px; font-size:12px; }
   .favsug { display:flex; flex-direction:column; gap:2px; padding:4px; } .favsug .sugi { text-align:left; background:#141a21; border:1px solid var(--line); border-radius:6px; padding:6px 8px; color:var(--text); cursor:pointer; }
+  .symsug { position:absolute; top:100%; left:0; z-index:80; min-width:320px; background:#0f1216; border:1px solid var(--line); border-radius:8px; box-shadow:0 6px 18px rgba(0,0,0,.5); }
   .favx { background:none; border:none; color:var(--muted); cursor:pointer; font-size:14px; }
   #starBtn { background:none; border:none; color:#f5c518; font-size:20px; cursor:pointer; padding:0 4px; }
   @media (max-width:760px) {
@@ -185,7 +186,7 @@
 <body>
 <header>
   <h1>Scanner de Estrutura</h1>
-  <form id="symForm"><input id="symbol" type="text" spellcheck="false" aria-label="Símbolo"><button type="submit">Abrir</button></form>
+  <form id="symForm" style="position:relative"><input id="symbol" type="text" spellcheck="false" aria-label="Símbolo" placeholder="ticker ou nome"><button type="submit">Abrir</button><div id="symSug" class="favsug symsug" style="display:none"></div></form>
   <button id="starBtn" title="Pôr nos favoritos">☆</button>
   <span id="price">—</span>
   <span class="spacer"></span>
@@ -223,7 +224,7 @@
       <li><b>📊 Testar no histórico</b>: percorre anos de histórico de vários ativos, vela a vela, sem ver o futuro, e mostra para cada nota a % de entradas que chegaram a cada alvo (1R, 2R, 3R, topo da perna nova, topo da perna da zona) antes do stop, e o ganho médio em R. É assim que se sabe se a nota merece confiança.</li>
       <li><b>Estados — movimento recente:</b> ⚡ Quebrou para cima/baixo = quebra fresca, o preço ainda não recuou 50% da perna nova: esperar. 🎯 Zona de compra/venda = depois dessa viragem, o preço recuou 50% ou mais da perna nova e ainda não fechou para lá da origem: zona de entrada. ▲ Subida / ▼ Descida = a viragem já foi confirmada por um novo topo/fundo (a coluna de correção continua a mostrar a profundidade do recuo atual). A entrada só falha com um fecho para lá da origem da perna (o estado muda para o sentido contrário).</li>
       <li><b>FVG da perna nova:</b> o scanner ignora FVGs que uma vela já atravessou com o fecho. Se houver vários, escolhe o que está na zona ≥ 50% do recuo (o primeiro que o preço encontra); se nenhum estiver, mostra o mais próximo, marcado “antes dos 50%”. <b>Por mitigar</b> = o preço ainda não voltou a tocar-lhe; <b>já tocado</b> = já houve uma primeira reação.</li>
-      <li><b>Liquidez próxima:</b> o topo e o fundo do movimento recente mais próximos do preço que <b>ainda não foram varridos</b> (nenhuma wick passou por eles) — é aí que estão os stops à espera. Por defeito aparece do Mensal ao 15m (no 5m e 3m estes níveis mudam a cada poucos minutos); escolhe os timeframes nas Definições. Distância em %; <b>perto</b> = a menos de 1× a amplitude média das velas desse timeframe. <b>Fundos/topos iguais</b> = dois ou mais swings praticamente ao mesmo preço: liquidez maior, alvo mais provável de um sweep. No cartão, um aviso “fundos por varrer perto” lembra que pode haver um sweep antes da reversão.</li>
+      <li><b>Liquidez próxima:</b> o topo e o fundo do movimento recente mais próximos do preço que <b>ainda não foram varridos</b> (nenhuma wick passou por eles) — é aí que estão os stops à espera. Por defeito aparece do Mensal ao 15m (no 5m estes níveis mudam a cada poucos minutos); escolhe os timeframes nas Definições. Distância em %; <b>perto</b> = a menos de 1× a amplitude média das velas desse timeframe. <b>Fundos/topos iguais</b> = dois ou mais swings praticamente ao mesmo preço: liquidez maior, alvo mais provável de um sweep. No cartão, um aviso “fundos por varrer perto” lembra que pode haver um sweep antes da reversão.</li>
       <li><b>Sweep:</b> a wick passa um topo/fundo mas a vela fecha para dentro — apanha liquidez <b>sem</b> quebrar estrutura. “Sweep antes” (na coluna da última quebra) = houve um sweep do lado oposto nas 20 velas antes da quebra atual: ex. varre os fundos sem fechar abaixo, inverte com força e só depois quebra o último topo mais baixo. Sweeps passados aparecem só como ✕ no gráfico.</li>
       <li><b>Dia / semana anteriores:</b> máximos e mínimos da vela diária e semanal anterior (hora UTC), com indicação se já foram varridos no dia/semana atual. Desliga-se nas Definições.</li>
       <li><b>Displacement (ICT):</b> no movimento recente, um fecho para lá do último swing só conta como quebra se houver displacement: (1) a vela da quebra é forte — corpo ≥ 1× o ATR e ≥ 60% da vela — ou (2) a quebra deixa um FVG relevante (≥ 0,3× o ATR) no mesmo sentido, ou (3) nas 3 velas seguintes há uma vela forte, um FVG relevante ou um fecho ≥ 1× o ATR para lá do nível (continuação). Além disso, (a) o fecho tem de ficar <b>claramente</b> para lá do nível — pelo menos 0,3× o ATR (uma vela forte cujo corpo está quase todo antes do nível e fecha “logo acima” não conta) — e (b) a <b>vela seguinte</b> também tem de fechar para lá do nível (aceitação); se fechar de volta para dentro, foi sweep. (c) <b>Quebra falhada</b>: mesmo depois de aceite, se nas 6 velas seguintes o preço fechar de volta para lá do nível (com a mesma margem), a quebra é anulada, passa a “sweep (quebra falhada)” e a estrutura volta ao que era. Enquanto espera, aparece <b>⏳ a confirmar</b>. Cada quebra aceite mostra <b>porquê</b> (no gráfico e na coluna “Última quebra”): vela forte, vela forte a seguir, FVG ou continuação — se uma quebra que achas falsa passou, vês qual regra a deixou passar e afinas esse valor nas Definições. Se o preço fechar de volta para dentro, ou se não houver continuação, a quebra é rejeitada e aparece no gráfico como linha cinzenta “sem displacement”. Na tendência principal é opcional (Definições).</li>
@@ -1118,26 +1119,38 @@
 <script>(function () {
   const LWC = window.LightweightCharts, E = window.StructureEngine;
   const TFS = [
+    { id: '1Y', label: 'Anual', api: '1M', magg: 12 },
+    { id: '6M', label: '6M', api: '1M', magg: 6 },
+    { id: '3M', label: '3M', api: '1M', magg: 3 },
     { id: '1M', label: 'Mensal', api: '1M', total: 1000 },
     { id: '1w', label: 'Semanal', api: '1w', total: 1000 },
     { id: '1d', label: 'Diário', api: '1d', total: 1000 },
-    { id: '12h', label: '12H', api: '12h', total: 1000 },
     { id: '4h', label: '4H', api: '4h', total: 1000 },
-    { id: '3h', label: '3H', api: '1h', agg: 3 },
     { id: '1h', label: '1H', api: '1h', total: 1000 },
     { id: '15m', label: '15m', api: '15m', total: 1000 },
     { id: '5m', label: '5m', api: '5m', total: 1000 },
-    { id: '3m', label: '3m', api: '3m', total: 1000 },
   ];
+  const TF_IDS = TFS.map((t) => t.id);
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
-    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '3m:6, 5m:6, 15m:6, 1h:6, 3h:5, 4h:5, 12h:3, 1d:2, 1w:1, 1M:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '12h', '4h', '3h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
+    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
     tfs: TFS.map((t) => t.id), showExt: true, showInt: true,
   };
 
-  let settings = Object.assign({}, DEFAULT_SETTINGS, load('mss_settings4', {}));
+  // timeframes da versão 2: sem 12H, 3H e 3m; com 3M, 6M e Anual
+  function migrateSettings(s) {
+    if ((s.tfVer || 1) < 2) {
+      s.tfs = [...new Set([...(s.tfs || []).filter((x) => TF_IDS.includes(x)), '1Y', '6M', '3M'])];
+      s.failByTf = String(s.failByTf || '').split(/[,;]+/).map((p) => p.trim()).filter((p) => p && !/^(3m|3h|12h)\s*:/.test(p)).concat(['3M:1', '6M:1', '1Y:1']).join(', ');
+      s.liqTfs = (s.liqTfs || []).filter((x) => TF_IDS.includes(x));
+      s.tfVer = 2;
+    }
+    s.tfs = (s.tfs || []).filter((x) => TF_IDS.includes(x));
+    return s;
+  }
+  let settings = migrateSettings(Object.assign({}, DEFAULT_SETTINGS, load('mss_settings4', {})));
   let symbol = load('mss_symbol', 'BTCUSDT');
-  let selectedTf = load('mss_tf', '1d');
+  let selectedTf = load('mss_tf', '1d'); if (!TF_IDS.includes(selectedTf)) selectedTf = '1d';
   const data = {};       // tf -> {candles, closed, ext:{res,snap}, int:{res,snap}, price}
   let loadToken = 0, timer = null;
 
@@ -1249,8 +1262,9 @@
 
   // ---------- ações (Yahoo Finance, através do Worker scanner-data) ----------
   const STOCK_API = 'https://scanner-data.pedrojs70.workers.dev';
-  const Y_IV = { '1M': '1mo', '1w': '1wk', '1d': '1d', '1h': '1h', '15m': '15m', '5m': '5m' };   // 12H, 4H e 3H constroem-se a partir de 1H; 3m não existe
-  const Y_AGG = { '12h': 12, '4h': 4, '3h': 3 };
+  const Y_IV = { '1M': '1mo', '1w': '1wk', '1d': '1d', '1h': '1h', '15m': '15m', '5m': '5m' };   // 4H constrói-se a partir de 1H; 3M, 6M e Anual a partir do mensal
+  const Y_AGG = { '4h': 4 };
+  const Y_MAGG = { '3M': 3, '6M': 6, '1Y': 12 };
   const Y_MS = { '1mo': 31 * 864e5, '1wk': 7 * 864e5, '1d': 864e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
   // TradingView → Yahoo (sufixos de bolsa); EURONEXT é resolvido pela pesquisa
   const PREFIX = { NASDAQ: '', NYSE: '', AMEX: '', NYSEARCA: '', NYSEAMERICAN: '', CBOE: '', BATS: '', OTC: '', XETR: '.DE', FWB: '.F', GETTEX: '.DE', LSE: '.L', LSIN: '.L', MIL: '.MI', BME: '.MC', SIX: '.SW', OMXSTO: '.ST', OMXHEX: '.HE', OMXCOP: '.CO', OSL: '.OL', TSX: '.TO', ASX: '.AX', VIE: '.VI', WSE: '.WA', ATHEX: '.AT', ISE: '.IR', EURONEXTLISBON: '.LS' };
@@ -1289,19 +1303,31 @@
   async function stockCandles(sym, tfIds) {
     const y = await yahooSym(sym);
     const ivs = new Set();
-    tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); });
+    tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); if (Y_MAGG[id]) ivs.add('1mo'); });
     if (!ivs.size) return {};
     const r = await stockJSON(`/candles?s=${encodeURIComponent(y)}&i=${[...ivs].join(',')}`);
     const got = r[y] || {}, out = {};
     for (const id of tfIds) {
-      const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
+      const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : Y_MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
       let cs = yRows(got[iv].rows, iv);
       if (Y_AGG[id]) cs = aggregateSession(cs, Y_AGG[id]);
-      if (cs.length > 30) out[id] = cs;
+      if (Y_MAGG[id]) cs = aggregateMonths(cs, Y_MAGG[id]);
+      if (cs.length > (Y_MAGG[id] ? 5 : 30)) out[id] = cs;
     }
     return out;
   }
 
+  // agrupa velas mensais em trimestres (3M), semestres (6M) e anos (1Y), alinhados ao calendário
+  function aggregateMonths(cs, k) {
+    const out = []; let key = null, cur = null;
+    for (const c of cs) {
+      const d = new Date(c.t), kk = d.getUTCFullYear() * 12 + Math.floor(d.getUTCMonth() / k) * k;
+      if (kk !== key) { key = kk; cur = { t: c.t, ct: c.ct, o: c.o, h: c.h, l: c.l, c: c.c, v: c.v }; out.push(cur); }
+      else { cur.h = Math.max(cur.h, c.h); cur.l = Math.min(cur.l, c.l); cur.c = c.c; cur.v += c.v; cur.ct = c.ct; }
+    }
+    if (out.length) { const last = out[out.length - 1], d = new Date(last.t), end = Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / k) * k + k, 1) - 1; last.ct = Math.max(last.ct, end); }   // o período em curso só fecha no fim do trimestre/semestre/ano
+    return out;
+  }
   async function loadAll() {
     const token = ++loadToken;
     setStatus('A carregar dados…');
@@ -1323,9 +1349,13 @@
       }
       const needHourly = need.some((t) => t.api === '1h');
       const hourly = needHourly ? await klines(symbol, '1h', need.some((t) => t.agg) ? 3000 : 1000) : null;
+      let monthly = null;
+      if (need.some((t) => t.magg)) monthly = await klines(symbol, '1M', 1000);
       const results = await Promise.all(need.map(async (tf) => {
         let cs;
-        if (tf.agg) cs = aggregate(hourly, tf.agg, 3600e3);
+        if (tf.magg) cs = aggregateMonths(monthly, tf.magg);
+        else if (tf.id === '1M' && monthly) cs = monthly;
+        else if (tf.agg) cs = aggregate(hourly, tf.agg, 3600e3);
         else if (tf.api === '1h') cs = hourly.slice(-1000);
         else cs = await klines(symbol, tf.api, tf.total);
         return [tf.id, cs];
@@ -1483,7 +1513,7 @@
     return m;
   }
   const inSess = (h, s) => (s[0] <= s[1] ? h >= s[0] && h < s[1] : h >= s[0] || h < s[1]);
-  const TF_MS0 = { '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '12h': 432e5, '4h': 144e5, '3h': 108e5, '1h': 36e5, '15m': 9e5, '5m': 3e5, '3m': 18e4 };
+  const TF_MS0 = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
   // ranges automáticos (a partir das velas de 1H)
   function autoRanges() {
     const h = data['1h']; if (!h) return [];
@@ -1661,7 +1691,7 @@
   }
 
   // ---------- painel de setups: zona (TF de cima) → quebra → entrada (TF de baixo) ----------
-  const CTX_DEFAULT = { '1w': '1M', '12h': '1w', '1d': '1w', '4h': '1d', '3h': '1d', '1h': '4h', '15m': '1h', '5m': '15m', '3m': '15m' };
+  const CTX_DEFAULT = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
   function ctxOf(st) { return st.ctx || CTX_DEFAULT[st.zone] || null; }
   // timeframes acima do de quebra até ao de contexto (do mais próximo ao mais alto): onde estão as parciais e o alvo final
   function chainOf(st) {
@@ -1732,6 +1762,8 @@
     const rows = on.map(evalSetup);
     const html = rows.map((r, k) => {
       const st = on[k];
+      const noTf = !isCrypto(symbol) ? [ctxOf(st), st.zone, st.trig].filter((id) => id && !Y_IV[id] && !Y_AGG[id] && !Y_MAGG[id]) : [];
+      if (noTf.length) return `<tr class="dim"><td class="tf">${st.name}</td><td colspan="5" class="muted">não disponível nesta ação — as ações não têm ${noTf.map(tfLabel).join(', ')}</td></tr>`;
       if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">a carregar dados de ${tfLabel(st.zone)} / ${tfLabel(st.trig)}…</td></tr>`;
       const up = r.dir === 1;
       const zoneCell = `<span class="chip ${r.zoneOk ? band(r.z.pullback) : 'off'}"><b>${tfLabel(st.zone)}</b> ${up ? '▲' : '▼'} ${pct(r.z.pullback)}${r.zoneOk ? ' ✔' : ''}</span>`;
@@ -1772,8 +1804,8 @@
   }
 
   // ---------- teste histórico ----------
-  const TF_MS = { '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '12h': 432e5, '4h': 144e5, '3h': 108e5, '1h': 36e5, '15m': 9e5, '5m': 3e5, '3m': 18e4 };
-  const HIST = { '1M': 150, '1w': 600, '1d': 2500, '12h': 4000, '4h': 6500, '3h': 6000, '1h': 17500, '15m': 35000, '5m': 34000, '3m': 20000 };
+  const TF_MS = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
+  const HIST = { '1Y': 20, '6M': 40, '3M': 80, '1M': 150, '1w': 600, '1d': 2500, '4h': 6500, '1h': 17500, '15m': 35000, '5m': 34000 };
   async function fetchTf(sym, id, count, cache) {
     const key = sym + '|' + id;
     if (cache[key] && cache[key].n >= count) return cache[key].cs;
@@ -1897,7 +1929,7 @@
   function renderChart(keepRange) {
     const d = data[selectedTf]; if (!d) return;
     $('#chartTitle').textContent = `${symbol} · ${TFS.find((t) => t.id === selectedTf).label}`;
-    document.querySelectorAll('.tfbtn').forEach((b) => b.classList.toggle('on', b.dataset.tf === selectedTf));
+    document.querySelectorAll('.tfbtn').forEach((b) => { b.classList.toggle('on', b.dataset.tf === selectedTf); b.style.display = !isCrypto(symbol) && !Y_IV[b.dataset.tf] && !Y_AGG[b.dataset.tf] && !Y_MAGG[b.dataset.tf] ? 'none' : ''; });   // ações: sem 3m
     $('#tgExt').classList.toggle('on', vE()); $('#tgInt').classList.toggle('on', vI());
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
     const range = keepRange && drawState && drawState.tf === selectedTf ? chart.timeScale().getVisibleLogicalRange() : null;
@@ -2245,9 +2277,10 @@
     let hourly = null;
     for (const tf of tfs) {
       let cs;
-      if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', 1500); cs = aggregate(hourly, tf.agg, 3600e3); }
+      if (tf.magg) cs = aggregateMonths(await klines(sym, '1M', 500), tf.magg);
+      else if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', 1500); cs = aggregate(hourly, tf.agg, 3600e3); }
       else cs = await klines(sym, tf.api, 500);
-      if (cs.length > 30) out[tf.id] = computeTf(cs, tf.id, sym);
+      if (cs.length > (tf.magg ? 5 : 30)) out[tf.id] = computeTf(cs, tf.id, sym);
     }
     const any = Object.values(out)[0];
     favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now() };
@@ -2295,6 +2328,24 @@
     $('#favRef').addEventListener('click', () => scanFavs(true));
     el.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavs(); updateStar(); }));
     el.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => openSymbol(r.dataset.s)));
+  }
+  // pesquisa de ativos (Yahoo + Binance): devolve opções { symbol, name, exch }
+  async function searchAssets(q) {
+    const up = normSym(q), opts = [];
+    if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance' });
+    try {
+      const r = await stockJSON('/search?q=' + encodeURIComponent(q));
+      for (const x of r.results || []) {
+        if (x.type === 'CRYPTOCURRENCY') { const b = x.symbol.split('-')[0] + 'USDT'; if (!opts.some((o) => o.symbol === b)) opts.push({ symbol: b, name: x.name, exch: 'Binance' }); }
+        else if (['EQUITY', 'ETF', 'INDEX', 'MUTUALFUND'].includes(x.type) && !/=F$/.test(x.symbol)) opts.push(x);
+      }
+    } catch (e) { opts.push({ err: 'pesquisa indisponível (' + (e.message || e) + ')' }); }
+    return opts;
+  }
+  function showSug(box, opts, pick) {
+    box.innerHTML = opts.map((o) => o.err ? `<div class="muted small">${o.err}</div>` : `<button type="button" class="sugi" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button>`).join('') || '<div class="muted small">sem resultados</div>';
+    box.style.display = 'flex';
+    box.querySelectorAll('.sugi').forEach((b) => b.addEventListener('mousedown', (ev) => { ev.preventDefault(); pick(b.dataset.s); box.innerHTML = ''; box.style.display = 'none'; }));
   }
   // pesquisa por nome (Yahoo): ações, ETFs e crypto (a crypto é convertida para o par da Binance)
   async function favSearch(q, pickFirst) {
@@ -2437,7 +2488,7 @@
       cloud.settingsJson = j;
       try {
         const r = JSON.parse(j); cloud.applying = true;
-        Object.assign(settings, r); save('mss_settings4', settings);
+        Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings);
         cloud.applying = false;
         editLayer = settings.layer === 'ext' ? 'ext' : 'int';
         loadAll();
@@ -2473,7 +2524,17 @@
     $('#symbol').value = symbol;
     $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>`).join('');
     document.querySelectorAll('.tfbtn').forEach((b) => b.addEventListener('click', () => selectTf(b.dataset.tf)));
-    $('#symForm').addEventListener('submit', (e) => { e.preventDefault(); symbol = $('#symbol').value.trim().toUpperCase(); save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); });
+    // caixa do par: abre o ticker exato; escrevendo um nome mostra sugestões (ações e crypto)
+    const symSug = $('#symSug'); let sq = null;
+    const openTyped = (v) => { symbol = normSym(v) || v.trim().toUpperCase(); $('#symbol').value = symbol; save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); symSug.style.display = 'none'; };
+    $('#symForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); const v = $('#symbol').value.trim(); if (!v) return;
+      if (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v)) return openTyped(v);   // ticker exato (BTCUSDT, AAPL, ASML.AS, NASDAQ:MSFT)
+      const opts = await searchAssets(v);
+      if (opts.length === 1 && !opts[0].err) openTyped(opts[0].symbol); else showSug(symSug, opts, openTyped);
+    });
+    $('#symbol').addEventListener('input', () => { clearTimeout(sq); const v = $('#symbol').value.trim(); if (v.length < 2) { symSug.style.display = 'none'; return; } sq = setTimeout(async () => showSug(symSug, await searchAssets(v), openTyped), 400); });
+    $('#symbol').addEventListener('blur', () => setTimeout(() => { symSug.style.display = 'none'; }, 150));
     $('#reload').addEventListener('click', loadAll);
     $('#gear').addEventListener('click', openSettings);
     cloudInit();
