@@ -315,7 +315,6 @@
     <div class="loginbtns"><button type="submit" class="primary">Entrar</button><button type="button" id="loginNew">Criar conta</button></div>
     <button type="button" id="loginForgot" class="linkbtn">Esqueci-me da password</button>
   </form>
-  <div class="logingoogle"><span class="muted small">ou</span> <button type="button" id="loginGoogle" class="linkbtn">entrar com a conta Google</button></div>
   <div style="height:14px"></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
@@ -418,12 +417,14 @@
     return fn;
   }
 
+  const hasMan = (ov) => !!(ov && ((ov.add && ov.add.size) || ov.start || (ov.yesBreak && ov.yesBreak.size)));
+
   function analyze(candles, options) {
     const o = Object.assign({}, DEFAULTS, options || {});
     const n = candles.length;
     const res = { n, swings: [], breaks: [], sweeps: [], fvgs: [], rejected: [], pending: null, state: null };
     if (options && options.ov && options.ov.blank && !options.ov.start) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
-    if (n < 10) return res;
+    if (n < 3 || (n < 10 && !hasMan(options && options.ov))) return res;   // séries curtas (ex.: anual): só com marcações manuais
     const H = (i) => candles[i].h, L = (i) => candles[i].l, C = (i) => candles[i].c;
 
     const pr = prep(candles, o), atr = pr.atr, volAvg = pr.volAvg;
@@ -730,7 +731,7 @@
     const n = candles.length;
     const res = { n, swings: [], breaks: [], sweeps: [], fvgs: [], rejected: [], pending: null, state: null };
     if (options && options.ov && options.ov.blank && !options.ov.start) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
-    if (n < 20) return res;
+    if (n < 3 || (n < 20 && !hasMan(options && options.ov))) return res;
     const H = (i) => candles[i].h, L = (i) => candles[i].l, C = (i) => candles[i].c;
     const pr = prep(candles, o), atr = pr.atr, volAvg = pr.volAvg;
     const fvgs = o.ov && o.ov.ignFvg && o.ov.ignFvg.size ? pr.fvgs.filter((f) => !o.ov.ignFvg.has(candles[f.mid].t)) : pr.fvgs;   // FVGs ignorados à mão
@@ -1990,12 +1991,11 @@
       mk(0, v.a.p, v.b.p); mk(1, v.ra, v.rb);
     }
     // swings externos com letra (os internos são desenhados no overlay)
-    const sw = vE() ? d.ext.res.swings.slice(-12) : [], letters = 'ABCDEFGHIJKL';
-    const off = 12 - sw.length;
+    const sw = vE() ? d.ext.res.swings.slice(-12) : [];
     markersApi.setMarkers(sw.map((s, k) => ({
       time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar',
       color: s.label === 'HH' || s.label === 'HL' ? '#26a69a' : s.label === 'LH' || s.label === 'LL' ? '#ef5350' : '#aab2bd',
-      shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${letters[k + off]} · ${s.manual ? '✎' : ''}${s.label}`,
+      shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}`,
     })));
     priceLines.forEach((p) => candleSeries.removePriceLine(p)); priceLines = [];
     const add = (price, color, title, style, w) => priceLines.push(candleSeries.createPriceLine({ price, color, title, lineWidth: w || 1, lineStyle: style, axisLabelVisible: true }));
@@ -2624,7 +2624,7 @@
       $('#loginForm').addEventListener('submit', (ev) => { ev.preventDefault(); const [e, p] = creds(); msg('A entrar…', true); auth().signInWithEmailAndPassword(e, p).then(close).catch(fail); });
       $('#loginNew').addEventListener('click', () => { const [e, p] = creds(); msg('A criar a conta…', true); auth().createUserWithEmailAndPassword(e, p).then(close).catch(fail); });
       $('#loginForgot').addEventListener('click', () => { const [e] = creds(); if (!e) return msg('Escreve o teu email primeiro.'); auth().sendPasswordResetEmail(e).then(() => msg('Enviámos um email para repores a password (vê também o spam).', true)).catch(fail); });
-      $('#loginGoogle').addEventListener('click', () => { const p = new window.firebase.auth.GoogleAuthProvider(); auth().signInWithPopup(p).then(close).catch((e) => { if (e && /popup/.test(e.code || '')) auth().signInWithRedirect(p); else fail(e); }); });
+      if ($('#loginGoogle')) $('#loginGoogle').addEventListener('click', () => { const p = new window.firebase.auth.GoogleAuthProvider(); auth().signInWithPopup(p).then(close).catch((e) => { if (e && /popup/.test(e.code || '')) auth().signInWithRedirect(p); else fail(e); }); });
     }
     cloudUi();
   }
