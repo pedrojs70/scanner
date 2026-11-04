@@ -467,7 +467,8 @@
     const ms = manualSetup(candles, ov), s0 = ms.s0;
     const firstClose = (lvl, dir, a, b) => { for (let q = a; q <= b; q++) if (dir === 1 ? C(q) > lvl : C(q) < lvl) return q; return b; };
     let lastManH = null, lastManL = null;
-    for (let j = 0; j < n; j++) {
+    const lastMarked = !!(ov && ov.add && n > 0 && ov.add.has(T(n - 1)));   // marcação manual na última vela fechada
+    for (let j = 0; j < n + (lastMarked ? 1 : 0); j++) {
       if (o.trace && j > 0) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
@@ -487,10 +488,10 @@
         if (lab === 'HH' || lab === 'LL') {
           const ref = was === nd && target && target.i < k ? target : null;   // só um topo/fundo já confirmado conta como nível quebrado; a perna em curso não
           if (was === -nd && prot && nd * (pt.p - prot.p) > 0) {
-            res.breaks.push({ type: 'CHoCH', dir: nd, level: prot.p, from: prot.i, i: firstClose(prot.p, nd, prot.i + 1, k), conf: j, manual: true, why: 'manual' });
+            res.breaks.push({ type: 'CHoCH', dir: nd, level: prot.p, from: prot.i, i: firstClose(prot.p, nd, prot.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual' });
             lastBroken = prot.p; kind = 'CHoCH';
           } else if (ref && ref.i < k && nd * (pt.p - ref.p) > 0) {
-            res.breaks.push({ type: 'BOS', dir: nd, level: ref.p, from: ref.i, i: firstClose(ref.p, nd, ref.i + 1, k), conf: j, manual: true, why: 'manual' });
+            res.breaks.push({ type: 'BOS', dir: nd, level: ref.p, from: ref.i, i: firstClose(ref.p, nd, ref.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual' });
             lastBroken = ref.p; kind = 'BOS';
           } else kind = was === -nd ? 'CHoCH' : (kind || 'BOS');
           // novo nível protegido: o fundo (topo) marcado à mão desde a referência anterior, senão o extremo contrário
@@ -509,10 +510,11 @@
         }
         const ex = res.swings.findIndex((s) => s.i === k && s.type === (top ? 'H' : 'L'));
         if (ex >= 0) res.swings.splice(ex, 1);
-        res.swings.push({ type: top ? 'H' : 'L', i: k, p: pt.p, conf: j, manual: true, manualLabel: lab.length === 2 ? lab : null });
+        res.swings.push({ type: top ? 'H' : 'L', i: k, p: pt.p, conf: Math.min(j, n - 1), manual: true, manualLabel: lab.length === 2 ? lab : null });
         if (top) lastManH = pt; else lastManL = pt;
         pend = null; block = null; cntWith = cntAgainst = 0;
       }
+      if (j === n) break;   // vela extra só para fechar uma marcação manual na última vela fechada
       // 1) atualizar o extremo da perna
       if (trend === 1) { if (H(j) > ext.p && !ignP(j)) { ext = { p: H(j), i: j }; counter = L(j); } else counter = Math.min(counter == null ? L(j) : counter, L(j)); }
       if (trend === -1) { if (L(j) < ext.p && !ignP(j)) { ext = { p: L(j), i: j }; counter = H(j); } else counter = Math.max(counter == null ? H(j) : counter, H(j)); }
@@ -782,7 +784,8 @@
       res.trace[j] = { trend, kind, prot: { p: pr.p, i: pr.i }, ext: ex, lb: lb || null, pend: pend ? { dir: pend.dir, i: pend.i } : null };
     };
     const ms = manualSetup(candles, ov), s0 = ms.s0;
-    for (let j = 1; j < n; j++) {
+    const lastMarked = !!(ov && ov.add && n > 0 && ov.add.has(T(n - 1)));
+    for (let j = 1; j < n + (lastMarked ? 1 : 0); j++) {
       if (o.trace && j > 1) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
@@ -807,19 +810,22 @@
             prev.broken = true;
           } else { trend = dir; kind = trend === -dir ? 'CHoCH' : (kind || 'BOS'); pend = null; watch = null; cntUp = cntDn = 0; return; }   // nada para quebrar: só define o sentido
           const type = trend === -dir ? 'CHoCH' : 'BOS';
-          res.breaks.push({ type, dir, level, from, i: bi, conf: j, manual: true, why: 'manual' }); allBreaks.push(res.breaks[res.breaks.length - 1]);
+          const dup = res.breaks.find((b) => b.dir === dir && b.level === level);   // a quebra já tinha sido detetada: não duplicar
+          if (dup) { trend = dir; kind = dup.type; lastBroken = level; pend = null; watch = null; cntUp = cntDn = 0; return; }
+          res.breaks.push({ type, dir, level, from, i: bi, conf: Math.min(j, n - 1), manual: true, why: 'manual' }); allBreaks.push(res.breaks[res.breaks.length - 1]);
           trend = dir; kind = type; lastBroken = level; pend = null; watch = null; cntUp = cntDn = 0;
         };
         if (isH) {
           if (lab === 'HH') force(1);
-          res.swings.push({ type: 'H', i: k, p: H(k), conf: j, manual: true, manualLabel });
-          lastSH = { p: H(k), i: k, broken: false, swept: false }; cntUp = 0; zdir = -1; lo = lowest(Math.min(k + 1, j), j); zLastH = H(k);
+          res.swings.push({ type: 'H', i: k, p: H(k), conf: Math.min(j, n - 1), manual: true, manualLabel });
+          lastSH = { p: H(k), i: k, broken: false, swept: false }; cntUp = 0; zdir = -1; lo = lowest(Math.min(k + 1, j, n - 1), Math.min(j, n - 1)); zLastH = H(k);
         } else {
           if (lab === 'LL') force(-1);
-          res.swings.push({ type: 'L', i: k, p: L(k), conf: j, manual: true, manualLabel });
-          lastSL = { p: L(k), i: k, broken: false, swept: false }; cntDn = 0; zdir = 1; hi = highest(Math.min(k + 1, j), j); zLastL = L(k);
+          res.swings.push({ type: 'L', i: k, p: L(k), conf: Math.min(j, n - 1), manual: true, manualLabel });
+          lastSL = { p: L(k), i: k, broken: false, swept: false }; cntDn = 0; zdir = 1; hi = highest(Math.min(k + 1, j, n - 1), Math.min(j, n - 1)); zLastL = L(k);
         }
       }
+      if (j === n) break;
       // 1) zigzag
       if (zdir >= 0 && H(j) > hi.p) hi = { p: H(j), i: j };
       if (zdir <= 0 && L(j) < lo.p) lo = { p: L(j), i: j };
@@ -2220,22 +2226,22 @@
     // íman: escolhe a ponta de pavio (máxima ou mínima) mais próxima do clique entre as velas vizinhas
     let k = param.logical != null ? Math.round(param.logical) : -1, snapTop = null;
     // clique em cima da própria vela (entre máxima e mínima): fica essa vela; fora dela: íman para o pavio mais próximo
-    const onCandle = k >= 0 && k <= cl.length - 2 && Y(cl[k].h) != null && py >= Y(cl[k].h) - 4 && py <= Y(cl[k].l) + 4;
+    const onCandle = k >= 0 && k <= cl.length - 1 && Y(cl[k].h) != null && py >= Y(cl[k].h) - 4 && py <= Y(cl[k].l) + 4;
     if (param.forceK == null && k >= 0 && !onCandle) {
       let best = 1e9;
-      for (let q = Math.max(0, k - 4); q <= Math.min(cl.length - 2, k + 4); q++) {
+      for (let q = Math.max(0, k - 4); q <= Math.min(cl.length - 1, k + 4); q++) {
         const x = X(q); if (x == null) continue;
         for (const [isTop, p] of [[true, cl[q].h], [false, cl[q].l]]) { const y = Y(p); if (y == null) continue; const dd = Math.hypot((px - x) * 1.5, py - y); if (dd < best) { best = dd; k = q; snapTop = isTop; } }
       }
     } else if (param.forceK != null) { k = param.forceK; snapTop = param.forceTop; }
-    if (k >= 0 && k <= cl.length - 2) {
+    if (k >= 0 && k <= cl.length - 1) {
       let c = cl[k];
       // mostra sempre as opções de topo e de fundo; primeiro o lado mais perto do clique
       const pr = candleSeries.coordinateToPrice(py);
       const nearTop = snapTop != null ? snapTop : (pr != null ? Math.abs(pr - c.h) <= Math.abs(pr - c.l) : true);
       // o lado clicado vai para o verdadeiro extremo local (vela ao lado incluída); o outro lado fica na vela clicada
       const nearTip = Math.abs(py - Y(nearTop ? c.h : c.l)) <= 20;
-      const ext = (top) => { if (top !== nearTop || (onCandle && !nearTip)) return k; let q0 = k; for (let q = Math.max(0, k - 1); q <= Math.min(cl.length - 2, k + 1); q++) if (top ? cl[q].h > cl[q0].h : cl[q].l < cl[q0].l) q0 = q; return q0; };
+      const ext = (top) => { if (top !== nearTop || (onCandle && !nearTip)) return k; let q0 = k; for (let q = Math.max(0, k - 1); q <= Math.min(cl.length - 1, k + 1); q++) if (top ? cl[q].h > cl[q0].h : cl[q].l < cl[q0].l) q0 = q; return q0; };
       const L = editLayer, nome = layerName(L);
       const side = (top) => {
         const q = ext(top), p = top ? cl[q].h : cl[q].l;
