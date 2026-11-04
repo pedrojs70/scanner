@@ -86,6 +86,8 @@
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
   #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
+  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
   .badge.near { background:rgba(255,213,79,.2); color:#ffd54f; padding:1px 6px; }
@@ -109,7 +111,9 @@
   .legend { display:flex; flex-wrap:wrap; gap:14px; padding:8px 12px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); }
   .sw { display:inline-block; width:14px; height:3px; vertical-align:middle; margin-right:5px; }
   #help { display:none; margin-top:14px; background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:6px 18px; color:#c8ced6; }
-  #help.open { display:block; } #help b { color:var(--text); } #help li { margin:4px 0; }
+  #help.open { display:block !important; position:fixed; top:56px; left:50%; transform:translateX(-50%); width:min(920px,94vw); max-height:84vh; overflow:auto; z-index:70; box-shadow:0 10px 40px rgba(0,0,0,.6); }
+  #helpClose { position:sticky; top:0; float:right; margin:6px -8px 0 0; background:var(--panel); border:1px solid var(--line); color:var(--text); border-radius:6px; padding:3px 9px; cursor:pointer; }
+  .helplink { margin-left:10px; background:none; border:none; color:#64b5f6; cursor:pointer; text-decoration:underline; font-size:inherit; padding:0; } #help b { color:var(--text); } #help li { margin:4px 0; }
   .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,.6); z-index:20; align-items:center; justify-content:center; }
   .modal.open { display:flex; }
   .dialog { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px 18px 0; width:min(560px, 94vw); max-height:90vh; overflow-y:auto; overscroll-behavior:contain; }
@@ -146,6 +150,10 @@
     body[data-mtab="grafico"] .legend { display:none; }
     .chartbar { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
     .chartbar > * { flex:0 0 auto; }
+    .chartbox.editing .chartbar { flex-wrap:wrap; overflow-x:visible; padding:6px 8px; gap:5px; }
+    .chartbox.editing #tfbar { display:flex; flex-wrap:nowrap; overflow-x:auto; max-width:100%; }
+    .chartbox.editing #chartTitle { display:none; }
+    .chartbox.max { z-index:90; }
     #editHint { font-size:11px; }
     #editMenu button { padding:11px 12px; font-size:14px; }
     #topBtn { bottom:72px; }
@@ -222,7 +230,7 @@
   <span class="spacer"></span>
   <span id="status" class="status"></span>
   <button id="reload" title="Atualizar agora">↻</button>
-  <button id="helpBtn">Como ler</button>
+  <button id="helpBtn">Ajuda</button>
   <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none">Entrar</button>
   <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
   <button id="gear">Definições</button>
@@ -245,6 +253,7 @@
     </table>
   </div>
   <div id="help">
+    <button id="helpClose">✕ Fechar</button>
     <ul>
       <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se a correção ainda está a cair ou se já virou. Em linguagem ICT: a tendência principal é o dealing range (equilibrium a 50%, zona de discount/premium); o movimento recente é onde acontece o MSS de entrada.</li>
       <li><b>Setups (painel no topo):</b> cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Checklist</b> (sem pontos): <b>Contexto</b> — a tendência principal do timeframe de contexto está no mesmo sentido; <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem (⚡) no movimento recente do timeframe de baixo; <b>FVG na quebra</b> — a quebra deixou FVG. 💧 = houve sweep do lado oposto antes da quebra (extra, não obrigatório). <b>✔ Pronto</b> quando os quatro estão cumpridos; senão <b>Em formação</b>, com o que falta. Entrada, stop e alvos são contigo.</li>
@@ -265,8 +274,8 @@
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
 <br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
 <br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
-<br>• <b>↶ Desfazer</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.
-<br>As marcas ficam guardadas neste navegador (por par e timeframe) até carregares em “↺ Repor análise do scanner”. Noutro computador ou telemóvel ainda não aparecem.</li>
+<br>• <b>↶ Back</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, “Começar estrutura” ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto: se um HL/LH vinha de uma quebra, essa quebra deixa de contar (fica como sweep); um HH/LL ignorado deixa de ser alvo de quebra. Tudo é recalculado e gravado logo.
+<br>As marcas são gravadas logo (por par e timeframe) neste navegador e, com sessão iniciada, na tua conta — aparecem nos outros aparelhos. Ficam até carregares em “↺ Repor análise do scanner”.</li>
       <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
       <li><b>Tendência principal:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem ainda não fez novo topo/fundo a confirmar.</li>
       <li><b>Regras de cada camada:</b> a tendência principal só muda quando o preço fecha para lá do <b>nível protegido</b> (o fundo de onde partiu a subida, ou o topo de onde partiu a descida). O movimento recente segue sempre os <b>swings mais recentes</b>: numa descida, só vira para cima com um fecho acima do último topo mais baixo; numa subida, só vira para baixo com um fecho abaixo do último fundo mais alto.</li>
@@ -279,14 +288,15 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Desfazer</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
-    <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b> — é a única camada no gráfico e a única que é alterada. Para mudar, carrega em “Tendência principal” ou “Movimento recente”.<br>Modo edição: clica num <b>swing</b> (para o ignorar), numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”) ou numa <b>vela</b> (HH/LH/HL/LL ou “Começar estrutura aqui” — clica perto da máxima para topos, da mínima para fundos) ou num <b>FVG</b> (ignorar). Tudo é recalculado. As alterações ficam guardadas neste navegador até carregares em “Repor”.</div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
       <span><i class="sw" style="background:#ce93d8"></i>limite do movimento recente</span>
       <span><i class="sw" style="background:#ffd54f"></i>50%</span><span><i class="sw" style="background:#ff9800"></i>65%</span><span><i class="sw" style="background:#ff5252"></i>91,8%</span>
-      <span>A · HH = swing da tendência principal &nbsp; • HL = swing do movimento recente (linhas pontilhadas finas)</span>
+      <span><b style="color:#ce93d8">✕</b> sweep de estrutura &nbsp; gotas de sweep: <b style="color:#f5c518">●</b> Ásia <b style="color:#81d4fa">●</b> Dia ant. <b style="color:#eceff1">●</b> Sem. ant. <b style="color:#a5d6a7">●</b> range manual — saem quando esse lado é quebrado</span>
+      <span>HH = swing da tendência principal &nbsp; • HL = swing do movimento recente (linhas pontilhadas finas)</span>
       <span><i class="sw" style="background:#26a69a"></i>BOS ▲</span>
       <span><i class="sw" style="background:#ef5350"></i>BOS ▼</span>
       <span><i class="sw" style="background:#ffb74d"></i>CHoCH</span>
@@ -333,6 +343,7 @@
   <div class="field"><div>Comissões por lado (%)<small>usadas no teste histórico</small></div><input id="setFee" type="number" min="0" max="1" step="0.01"></div>
   <div class="field"><div>Quebra falhada: velas de vigilância (padrão)<small>usado nos timeframes que não estão na lista abaixo. se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a sweep (0 = desligado)</small></div><input id="setFail" type="number" min="0" max="20"></div>
   <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
+  <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
   <div class="field"><div>Swing: proporção da perna<small>um topo/fundo conta quando o preço recua pelo menos esta fração da perna que o formou (0.5 = metade). Fica sempre entre o mínimo abaixo e o ATR da camada. 0 = só ATR</small></div><input id="setLegRatio" type="number" step="0.1" min="0" max="1"></div>
   <div class="field"><div>Swing: recuo mínimo (ATR)<small>nunca conta um swing com recuo menor do que isto, mesmo numa perna pequena</small></div><input id="setFloor" type="number" step="0.1" min="0.5" max="5"></div>
   <div class="field"><div>FVG mínimo para contar como displacement<small>tamanho do gap em múltiplos do ATR</small></div><input id="setFvgMin" type="number" min="0" max="3" step="0.1"></div>
@@ -343,9 +354,10 @@
   <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
   <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups</small></div><input id="setPrev" type="checkbox"></div>
   <div class="field"><div>Início do dia<small>meia-noite de Nova Iorque é a referência ICT; 00:00 UTC é a hora das velas diárias da Binance</small></div><select id="setDayStart"><option value="ny">00:00 Nova Iorque (ICT)</option><option value="utc">00:00 UTC</option></select></div>
-  <div class="field"><div>Ranges automáticos<small>caixas no gráfico e sinais na coluna Range (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label></span></div>
+  <div class="field"><div>Ranges automáticos<small>caixas no gráfico e sinais na coluna Range (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label> <label class="chk"><input id="setRLondon" type="checkbox"> Londres (1H e abaixo)</label></span></div>
+  <div class="field"><div>Horário das killzones<small>Cripto e ações: Ásia 01:00–05:00, Londres 07:00–10:00, NY 13:30–16:00 (hora UK). ICT clássico (forex/futuros): Ásia 01:00–05:00, Londres 07:00–10:00, NY 12:00–15:00, fecho de Londres 15:00–17:00. Seguem sempre a hora de Nova Iorque, por isso acertam-se sozinhas com a mudança de hora.</small></div><select id="setKzProf"><option value="cripto">Cripto e ações</option><option value="ict">ICT clássico</option></select></div>
   <div class="field"><div>Killzones no gráfico<small>faixas de fundo em 1H e abaixo; o botão “⏱ Killzones” na barra do gráfico liga e desliga todas</small></div><span><label class="chk"><input id="setKzA" type="checkbox"> Ásia</label> <label class="chk"><input id="setKzL" type="checkbox"> Londres</label> <label class="chk"><input id="setKzN" type="checkbox"> Nova Iorque</label></span></div>
-  <div class="field"><div>Sessões (hora de Nova Iorque)<small>Ásia ≈ 01:00–05:00 UK, Londres ≈ 07:00–10:00 UK, Nova Iorque ≈ 12:00–15:00 UK. Formato: asia:20-24, londres:2-5, ny:7-10</small></div><input id="setSess" type="text" style="width:240px"></div>
+  <div class="field"><div>Ajustar sessões à mão (opcional, hora de Nova Iorque)<small>Deixa vazio para usar o horário escolhido acima. Formato: asia:20-24, londres:2-5, ny:8.5-11 (8.5 = 8h30)</small></div><input id="setSess" type="text" style="width:240px"></div>
   <div>Setups <span class="muted small">(zona → quebra)</span></div>
   <div id="setSetups"></div>
   <div style="margin-top:10px">Timeframes visíveis</div>
@@ -445,6 +457,8 @@
     const ignP = (i) => !!(o.ov && o.ov.ign && o.ov.ign.size && o.ov.ign.has(candles[i].t));
     const lowest = (a, b) => { let m = -1; for (let i = a; i <= b; i++) if (!ignP(i) && (m < 0 || L(i) < L(m))) m = i; if (m < 0) m = a; return { p: L(m), i: m }; };
     const highest = (a, b) => { let m = -1; for (let i = a; i <= b; i++) if (!ignP(i) && (m < 0 || H(i) > H(m))) m = i; if (m < 0) m = a; return { p: H(m), i: m }; };
+    const lowestRaw = (a, b) => { let m = a; for (let i = a; i <= b; i++) if (L(i) < L(m)) m = i; return { p: L(m), i: m }; };
+    const highestRaw = (a, b) => { let m = a; for (let i = a; i <= b; i++) if (H(i) > H(m)) m = i; return { p: H(m), i: m }; };
 
     let trend = 0, kind = null;      // trend: 1 ascendente, -1 descendente; kind: 'BOS' | 'CHoCH'
     let prot = null;                 // nível protegido (fecho para lá dele inverte a estrutura)
@@ -516,12 +530,13 @@
       }
       if (j === n) break;   // vela extra só para fechar uma marcação manual na última vela fechada
       // 1) atualizar o extremo da perna
-      if (trend === 1) { if (H(j) > ext.p && !ignP(j)) { ext = { p: H(j), i: j }; counter = L(j); } else counter = Math.min(counter == null ? L(j) : counter, L(j)); }
-      if (trend === -1) { if (L(j) < ext.p && !ignP(j)) { ext = { p: L(j), i: j }; counter = H(j); } else counter = Math.max(counter == null ? H(j) : counter, H(j)); }
+      if (trend === 1) { if (H(j) > ext.p) { ext = { p: H(j), i: j }; counter = L(j); } else counter = Math.min(counter == null ? L(j) : counter, L(j)); }
+      if (trend === -1) { if (L(j) < ext.p) { ext = { p: L(j), i: j }; counter = H(j); } else counter = Math.max(counter == null ? H(j) : counter, H(j)); }
       // 2) pivots (só para o arranque) e fixação do alvo após o recuo começar
       const pv = j - o.pivotLen;
       if (pv > s0 && pv >= 0 && !ignP(pv)) { if (isPH(pv)) lastPH = { p: H(pv), i: pv }; if (isPL(pv)) lastPL = { p: L(pv), i: pv }; }
-      if (trend !== 0 && !target && j - ext.i >= o.lockBars) {
+      if (trend !== 0 && !target && j - ext.i >= o.lockBars && !ignP(ext.i)) {   // topo/fundo ignorado: não é alvo de quebra
+
         const a = atr[ext.i] || atr[j] || 0;
         const retr = counter == null ? 0 : Math.abs(ext.p - counter);
         const need = !(o.legRatio > 0) ? o.minRetraceAtr * a
@@ -555,6 +570,7 @@
       }
 
       const doCHoCH = (i0) => {             // CHoCH: a estrutura inverte
+        if (ignP(ext.i)) ext = d === 1 ? highest(prot.i, j) : lowest(prot.i, j);
         swing(d === 1 ? 'H' : 'L', ext);
         addBreak('CHoCH', -d, prot.p, prot.i, j, i0);
         trend = -d; kind = 'CHoCH';
@@ -565,7 +581,9 @@
       };
       const doBOS = (i0) => {               // BOS: a tendência continua
         const a = Math.min(target.i + 1, j);
-        const np = d === 1 ? lowest(a, j) : highest(a, j);
+        const np = d === 1 ? lowestRaw(a, j) : highestRaw(a, j);
+        // o recuo que esta quebra criaria (HL/LH) foi ignorado à mão: a quebra não conta (fica como sweep)
+        if (ignP(np.i)) { res.rejected.push({ type: 'BOS', dir: d, level: target.p, from: target.i, i: i0 == null ? j - o.confirm + 1 : i0, end: j, manual: true, ign: true, ignAt: np.i }); block = { dir: d, level: target.p }; cntAgainst = cntWith = 0; return false; }
         // o swing marcado é o extremo real da perna (pode ter varrido o nível com a wick)
         const top = d === 1 ? highest(target.i, Math.max(target.i, np.i - 1)) : lowest(target.i, Math.max(target.i, np.i - 1));
         swing(d === 1 ? 'H' : 'L', top); swing(d === 1 ? 'L' : 'H', np);
@@ -573,12 +591,13 @@
         kind = 'BOS'; prot = np;
         ext = d === 1 ? highest(np.i, j) : lowest(np.i, j);
         target = null; cntAgainst = cntWith = 0; counter = null;
+        return true;
       };
 
       // quebra à espera de displacement
       if (pend) {
         const st = forcedYes(pend.i) ? 'ok' : disp(pend.dir, pend.level, pend.i, j);
-        if (st === 'ok') { const w = forcedYes(pend.i) ? 'manual' : disp.why; if (pend.type === 'CHoCH') doCHoCH(pend.i); else if (target) doBOS(pend.i); tagWhy(w); pend = null; continue; }
+        if (st === 'ok') { const w = forcedYes(pend.i) ? 'manual' : disp.why; const okB = pend.type === 'CHoCH' ? (doCHoCH(pend.i), true) : target ? doBOS(pend.i) : false; if (okB) tagWhy(w); pend = null; continue; }
         if (st === 'wait') continue;
         res.rejected.push(Object.assign({ end: j }, pend)); block = { dir: pend.dir, level: pend.level }; pend = null;
       }
@@ -591,9 +610,9 @@
       const trigger = (type, dir, level, from) => {
         const i0 = j - o.confirm + 1;
         if (forcedNo(i0)) { res.rejected.push({ type, dir, level, from, i: i0, end: j, manual: true }); block = { dir, level }; cntAgainst = cntWith = 0; return; }
-        if (forcedYes(i0) || !o.requireDisp) { if (type === 'CHoCH') doCHoCH(i0); else doBOS(i0); if (forcedYes(i0)) res.breaks[res.breaks.length - 1].manual = true; return; }
+        if (forcedYes(i0) || !o.requireDisp) { const okB = type === 'CHoCH' ? (doCHoCH(i0), true) : doBOS(i0); if (okB && forcedYes(i0)) res.breaks[res.breaks.length - 1].manual = true; return; }
         const st = disp(dir, level, i0, j);
-        if (st === 'ok') { const w = disp.why; if (type === 'CHoCH') doCHoCH(i0); else doBOS(i0); tagWhy(w); return; }
+        if (st === 'ok') { const w = disp.why; const okB = type === 'CHoCH' ? (doCHoCH(i0), true) : doBOS(i0); if (okB) tagWhy(w); return; }
         const pd = { type, dir, level, from, i: i0 };
         if (st === 'wait') pend = pd;
         else { res.rejected.push(Object.assign({ end: j }, pd)); block = { dir, level }; }
@@ -610,6 +629,7 @@
     labelStructural(res.swings, res.breaks);   // um fundo abaixo do anterior só é LL se houve quebra (senão foi sweep: HL)
     enrich(res, candles, atr, volAvg, o);
     res.state = { trend, kind, prot, ext, target, lastBroken };
+    markInvalidSweeps(res);
     return res;
   }
 
@@ -711,6 +731,10 @@
   }
 
   // detalhe de cada quebra: FVG, volume, tipo de vela
+  // sweep invalidado: o mesmo nível acabou por ser quebrado (no mesmo sentido) depois do sweep — afinal não foi recolha de liquidez
+  function markInvalidSweeps(res) {
+    for (const sw of res.sweeps) sw.invalid = res.breaks.some((b) => b.dir === sw.dir && b.i >= sw.i && b.dir * (b.level - sw.level) >= -1e-9 * Math.abs(sw.level));   // quebra posterior no mesmo sentido, nesse nível ou para lá dele
+  }
   function enrich(res, candles, atr, volAvg, o) {
     const n = candles.length;
     for (const b of res.breaks) {
@@ -919,6 +943,7 @@
       const ext = trend === 1 ? highest(prot.i, n - 1) : lowest(prot.i, n - 1);
       res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken };
     }
+    markInvalidSweeps(res);
     return res;
   }
 
@@ -1184,8 +1209,8 @@
   const TF_IDS = TFS.map((t) => t.id);
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
-    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: 'asia:20-24, londres:2-5, ny:7-10', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
-    tfs: TFS.map((t) => t.id), showExt: true, showInt: true,
+    confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: '', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
+    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
   };
 
   // timeframes da versão 2: sem 12H, 3H e 3m; com 3M, 6M e Anual
@@ -1196,6 +1221,9 @@
       s.liqTfs = (s.liqTfs || []).filter((x) => TF_IDS.includes(x));
       s.tfVer = 2;
     }
+    // o texto das sessões antigo era só o horário por defeito: passa a valer o perfil de killzones
+    if (/^\s*asia:20-24,\s*londres:2-5,\s*ny:7-10\s*$/.test(s.sessions || '')) s.sessions = '';
+    { const seen = new Set(); s.failByTf = String(s.failByTf || '').split(/[,;]+/).map((p) => p.trim()).filter((p) => { const k = p.split(':')[0].trim(); if (!p || seen.has(k)) return false; seen.add(k); return true; }).join(', '); }   // sem repetidos
     s.tfs = (s.tfs || []).filter((x) => TF_IDS.includes(x));
     return s;
   }
@@ -1295,6 +1323,11 @@
   function failFor(id) {
     const m = {}; String(settings.failByTf || '').split(/[,;\s]+/).forEach((p) => { const [k, v] = p.split(':'); if (k && v != null && v !== '' && isFinite(+v)) m[k.trim()] = +v; });
     return m[id] != null ? m[id] : +settings.failBars;
+  }
+  // tolerância própria dos ranges (sweep vs quebra): fechos seguidos fora do range que ainda contam como sweep
+  function rangeTolFor(id) {
+    const m = {}; String(settings.rangeTolByTf || '').split(/[,;\s]+/).forEach((p) => { const [k, v] = p.split(':'); if (k && v != null && v !== '' && isFinite(+v)) m[k.trim()] = +v; });
+    return m[id] != null ? m[id] : 1;
   }
   function computeTf(cs, id, sym) {
     const now = Date.now();
@@ -1488,7 +1521,7 @@
   // houve um sweep do lado oposto pouco antes da quebra? (setup ICT mais forte)
   function sweepBeforeBreak(d) {
     const b = d.int.snap.lastBreak; if (!b) return false;
-    return d.int.res.sweeps.some((sw) => sw.dir === -b.dir && sw.i <= b.i && b.i - sw.i <= 20);
+    return d.int.res.sweeps.some((sw) => !sw.invalid && sw.dir === -b.dir && sw.i <= b.i && b.i - sw.i <= 20);
   }
 
   const pendBadge = (n) => n.pending ? `<br><span class="badge pend" title="Quebra ${n.pending.dir === 1 ? '▲' : '▼'} à espera de confirmação: faltam ${Math.max(0, n.pending.left)} velas">⏳ ${n.pending.dir === 1 ? '▲' : '▼'} ${Math.max(0, n.pending.left)}v</span>` : '';
@@ -1553,19 +1586,36 @@
   // ---------- ranges: informação extra e independente da estrutura ----------
   // Dia / semana anteriores (início do dia: meia-noite de Nova Iorque, como em ICT, ou 00:00 UTC), sessão asiática
   // e um range manual por timeframe. Sinais: a tocar o limite, sweep (manipulação), possível quebra, quebra.
-  const nyFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', weekday: 'short' });
+  const nyFmt = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York', hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', weekday: 'short' });
   const WD = { Mon: 0, Tue: 1, Wed: 2, Thu: 3, Fri: 4, Sat: 5, Sun: 6 };
-  function nyParts(ms) { const o = {}; for (const p of nyFmt.formatToParts(ms)) o[p.type] = p.value; return { y: +o.year, m: +o.month, d: +o.day, h: (+o.hour) % 24, wd: WD[o.weekday] }; }
+  function nyParts(ms) { const o = {}; for (const p of nyFmt.formatToParts(ms)) o[p.type] = p.value; return { y: +o.year, m: +o.month, d: +o.day, h: (+o.hour) % 24 + (+o.minute || 0) / 60, wd: WD[o.weekday] }; }
   function dayKey(ms) { if (settings.dayStart === 'utc') return Math.floor(ms / 864e5); const p = nyParts(ms); return Date.UTC(p.y, p.m - 1, p.d) / 864e5; }
   function weekKey(ms) { const dk = dayKey(ms); const wd = settings.dayStart === 'utc' ? (new Date(dk * 864e5).getUTCDay() + 6) % 7 : nyParts(ms).wd; return dk - wd; }
+  // perfis de killzones (hora de Nova Iorque): ICT clássico (forex/futuros) ou adaptado a cripto e ações (NY = dados às 8h30 + abertura das ações às 9h30)
+  const KZ_PROFILES = {
+    ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] },
+    cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] },
+  };
   function sessionsCfg() {
-    const m = { asia: [20, 24], londres: [2, 5], ny: [7, 10] };
-    String(settings.sessions || '').split(/[,;]+/).forEach((p) => { const r = /(\w+)\s*:\s*(\d+)\s*-\s*(\d+)/.exec(p.trim()); if (r) m[r[1].toLowerCase()] = [+r[2], +r[3]]; });
+    const m = Object.assign({}, KZ_PROFILES[settings.kzProfile] || KZ_PROFILES.cripto);
+    String(settings.sessions || '').split(/[,;]+/).forEach((p) => { const r = /(\w+)\s*:\s*([\d.]+)\s*-\s*([\d.]+)/.exec(p.trim()); if (r) m[r[1].toLowerCase()] = [+r[2], +r[3]]; });
     return m;
   }
   const inSess = (h, s) => (s[0] <= s[1] ? h >= s[0] && h < s[1] : h >= s[0] || h < s[1]);
+  // a vela (início h, duração em horas) toca na sessão? (velas de 1H que começam às 8h contam para uma sessão que começa às 8h30)
+  const candleInSess = (h, durH, s) => inSess(h, s) || (durH > 0 && [s[0]].some((x) => { const dx = ((x - h) % 24 + 24) % 24; return dx > 0 && dx < durH; }));
+  // em que killzone caiu uma vela (para etiquetar sweeps)
+  function kzOf(t, durH) { const sc = sessionsCfg(), h = nyParts(t).h; return candleInSess(h, durH, sc.londres) ? 'Londres' : candleInSess(h, durH, sc.ny) ? 'NY' : null; }
   const TF_MS0 = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
   // ranges automáticos (a partir das velas de 1H)
+  // cor de cada tipo de liquidez (caixa do range e respetivas gotas de sweep)
+  const SWCOL = { asia: '245,197,24', london: '255,145,0', day: '129,212,250', week: '236,239,241', manual: '165,214,167' };
+  // gota desenhada (os emojis não mudam de cor)
+  function drop(g, x, y, col, s) {
+    s = s || 1; g.save(); g.fillStyle = `rgba(${col},0.95)`; g.strokeStyle = 'rgba(15,18,22,0.9)'; g.lineWidth = 1;
+    g.beginPath(); g.moveTo(x, y - 7 * s); g.bezierCurveTo(x + 1.5 * s, y - 3.5 * s, x + 4.5 * s, y - 1 * s, x + 4.5 * s, y + 2 * s);
+    g.arc(x, y + 2 * s, 4.5 * s, 0, Math.PI); g.bezierCurveTo(x - 4.5 * s, y - 1 * s, x - 1.5 * s, y - 3.5 * s, x, y - 7 * s); g.closePath(); g.fill(); g.stroke(); g.restore();
+  }
   function autoRanges() {
     const h = data['1h']; if (!h) return [];
     const cs = h.candles, now = Date.now(), out = [];
@@ -1577,16 +1627,20 @@
     };
     if (settings.showDayR) group(dayKey, 'day', 'Dia ant.', 864e5);
     if (settings.showWeekR) group(weekKey, 'week', 'Sem. ant.', 7 * 864e5);
-    if (settings.showAsiaR) {
-      const s = sessionsCfg().asia; let g = [], kk = null;
+    // sessões já terminadas: topo e fundo da última sessão asiática e da última manhã de Londres (killzone)
+    const sessRange = (id, label, s) => {
+      let g = [], kk = null;
       for (let i = cs.length - 1; i >= 0; i--) {
-        const c = cs[i], p = nyParts(c.t), inA = inSess(p.h, s);
-        if (!g.length) { if (inA && c.ct < now) { g.push(c); kk = c.t; } else if (inA) continue; else continue; }
-        else if (inA && kk - c.t <= 36e5 * 12) { g.push(c); kk = c.t; } else break;
+        const c = cs[i], inS = inSess(nyParts(c.t).h, s);
+        if (!g.length) { if (inS && c.ct < now) { g.push(c); kk = c.t; } else continue; }
+        else if (inS && kk - c.t <= 36e5 * 12) { g.push(c); kk = c.t; } else break;
       }
       // só uma sessão já terminada (a vela seguinte à última da sessão já abriu)
-      if (g.length && cs.some((c) => c.t > g[0].t && !inSess(nyParts(c.t).h, s))) out.push({ id: 'asia', label: 'Ásia', auto: true, maxTf: 36e5 + 1, top: Math.max(...g.map((c) => c.h)), bot: Math.min(...g.map((c) => c.l)), t0: g[g.length - 1].t, t1: g[0].ct + 1 });
-    }
+      if (g.length && cs.some((c) => c.t > g[0].t && !inSess(nyParts(c.t).h, s))) out.push({ id, label, auto: true, maxTf: 36e5 + 1, top: Math.max(...g.map((c) => c.h)), bot: Math.min(...g.map((c) => c.l)), t0: g[g.length - 1].t, t1: g[0].ct + 1 });
+    };
+    const sc = sessionsCfg();
+    if (settings.showAsiaR) sessRange('asia', 'Ásia', sc.asia);
+    if (settings.showLondonR !== false) sessRange('london', 'Londres', sc.londres);
     return out;
   }
   function rangesFor(id) {
@@ -1597,10 +1651,9 @@
   }
   // percorre as velas desse timeframe depois de o range se formar
   function evalRange(d, r, id) {
-    const cs = d.candles, now = Date.now(), tol = failFor(id);
+    const cs = d.candles, now = Date.now(), tol = rangeTolFor(id);
     let s = cs.findIndex((c) => c.t >= r.t1); if (s < 0) s = cs.length;
     let out = 0, outDir = 0, broken = null; const ev = [];
-    const lond = sessionsCfg().londres;
     for (let k = s; k < cs.length; k++) {
       const c = cs[k]; if (c.ct >= now) break;
       const cu = c.c > r.top, cd = c.c < r.bot;
@@ -1608,8 +1661,11 @@
       if (out > 0) { ev.push({ dir: outDir, k, closes: out }); out = 0; outDir = 0; continue; }
       if (c.h > r.top) ev.push({ dir: 1, k }); if (c.l < r.bot) ev.push({ dir: -1, k });
     }
+    // range quebrado (fechos fora acima da tolerância): os sweeps desse lado afinal não o eram — saem
+    if (broken) for (let q = ev.length - 1; q >= 0; q--) if (ev[q].dir === broken.dir) ev.splice(q, 1);
     const last = cs[cs.length - 1], live = last.ct >= now ? last : null, nIdx = cs.length - 1;
-    ev.forEach((x) => { x.barsAgo = nIdx - x.k; x.london = r.id === 'asia' && inSess(nyParts(cs[x.k].t).h, lond); });
+    const durH = (TF_MS0[id] || 36e5) / 36e5;
+    ev.forEach((x) => { x.barsAgo = nIdx - x.k; const kz = kzOf(cs[x.k].t, durH); x.kz = kz && !(r.id === 'london' && kz === 'Londres') ? kz : null; });
     const pos = (d.price - r.bot) / ((r.top - r.bot) || 1) * 100;
     let st;
     if (broken) st = { key: 'break', dir: broken.dir, barsAgo: nIdx - broken.k, k: broken.k };
@@ -1625,7 +1681,7 @@
     if (s.key === 'break') return `<span class="${s.dir === 1 ? 'upc' : 'dnc'}">${s.dir === 1 ? '▲' : '▼'} quebrou</span>${br}${lb} · ${s.barsAgo}v</span>`;
     if (s.key === 'possible') return `<span class="badge disp" style="padding:0 5px">⚖ ${s.dir === 1 ? '▲' : '▼'} ${s.closes}/${s.tol}</span>${br}${lb}</span>`;
     if (s.key === 'touch') return `<span class="warn">⚠ ${side(s.dir)}</span>${br}${lb} · a tocar</span>`;
-    if (s.key === 'sweep') return `💧 ${side(s.dir)}${br}${s.london ? 'Londres · ' : ''}${lb} · ${s.barsAgo}v</span>`;
+    if (s.key === 'sweep') return `💧 ${side(s.dir)}${br}${s.kz ? s.kz + ' · ' : ''}${lb} · ${s.barsAgo}v</span>`;
     return `<span class="muted">▭ ${Math.round(s.pos)}%</span>${br}${lb}</span>`;
   }
   function rangeCell(d, id) {
@@ -1966,15 +2022,34 @@
     } } });
     candleSeries = chart.addSeries(LWC.CandlestickSeries, { upColor: '#26a69a', downColor: '#ef5350', borderVisible: false, wickUpColor: '#26a69a', wickDownColor: '#ef5350' });
     // painel de baixo: RSI(14) com divergências (no lugar do volume)
-    rsiSeries = chart.addSeries(LWC.LineSeries, { color: '#b39ddb', lineWidth: 1, priceLineVisible: false, lastValueVisible: true, priceFormat: { type: 'price', precision: 0, minMove: 1 }, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) }, 1);
-    rsiSeries.createPriceLine({ price: 70, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
-    rsiSeries.createPriceLine({ price: 30, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
-    rsiSeries.createPriceLine({ price: 50, color: '#323a45', lineWidth: 1, lineStyle: 3, axisLabelVisible: false });
-    try { chart.panes()[1].setHeight(130); } catch (e) {}
+    ensureRsi(true);
     markersApi = LWC.createSeriesMarkers(candleSeries, []);
     overlay = document.createElement('canvas'); overlay.className = 'overlay'; el.appendChild(overlay);
     ctx2d = overlay.getContext('2d');
     const loop = () => { draw(); requestAnimationFrame(loop); }; requestAnimationFrame(loop);
+  }
+
+  // painel do RSI: existe fora do modo edição; no modo edição sai para as velas ocuparem tudo
+  let rsiOn = true;
+  function ensureRsi(on) {
+    if (on && !rsiSeries) {
+      rsiSeries = chart.addSeries(LWC.LineSeries, { color: '#b39ddb', lineWidth: 1, priceLineVisible: false, lastValueVisible: true, priceFormat: { type: 'price', precision: 0, minMove: 1 }, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) }, 1);
+      rsiSeries.createPriceLine({ price: 70, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
+      rsiSeries.createPriceLine({ price: 30, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
+      rsiSeries.createPriceLine({ price: 50, color: '#323a45', lineWidth: 1, lineStyle: 3, axisLabelVisible: false });
+      try { chart.panes()[1].setHeight(130); } catch (e) {}
+    }
+    // no modo edição o painel encolhe a quase nada (remover o painel da biblioteca dá erros ao mudar de timeframe)
+    if (rsiSeries && rsiOn !== on) {
+      rsiOn = on; rsiSeries.applyOptions({ visible: on });
+      try {
+        const [p0, p1] = chart.panes();
+        if (p1) {
+          if (!on) p1.setStretchFactor(0.0001);
+          else { p0.setStretchFactor(1); p1.setStretchFactor(0.3); setTimeout(() => { try { if (rsiOn) chart.panes()[1].setHeight(130); } catch (e) {} }, 120); }   // depois de o gráfico voltar ao tamanho normal
+        }
+      } catch (e) {}
+    }
   }
 
   function renderChart(keepRange) {
@@ -1986,11 +2061,12 @@
     const range = keepRange && drawState && drawState.tf === selectedTf ? chart.timeScale().getVisibleLogicalRange() : null;
     const cs = d.candles;
     candleSeries.setData(cs.map((c) => ({ time: c.tt, open: c.o, high: c.h, low: c.l, close: c.c })));
+    ensureRsi(!editMode);
     if (!d._rsi) d._rsi = rsiOf(cs);
     rsiSeries.setData(cs.map((c, i) => (d._rsi[i] == null ? { time: c.tt } : { time: c.tt, value: d._rsi[i] })));
     // divergências da camada que estás a ver: linha no preço e no RSI (vivas a cheio, antigas esbatidas)
     divSeries.forEach((s) => chart.removeSeries(s)); divSeries = [];
-    for (const v of divergences(d, vE() ? 'ext' : 'int').slice(-8)) {
+    for (const v of editMode ? [] : divergences(d, vE() ? 'ext' : 'int').slice(-8)) {
       const col = v.dir === 1 ? '#26a69a' : '#ef5350', op = v.live ? 1 : 0.45, cl = d.closed;
       const mk = (pane, p1, p2) => { const s = chart.addSeries(LWC.LineSeries, { color: col, lineWidth: v.live ? 2 : 1, lineStyle: v.live ? 0 : 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, autoscaleInfoProvider: () => null }, pane);
         s.setData([{ time: cl[v.a.i].tt, value: p1 }, { time: cl[v.b.i].tt, value: p2 }]); s.applyOptions({ color: op < 1 ? col + '73' : col }); divSeries.push(s); };
@@ -2040,8 +2116,9 @@
     // killzones (faixas verticais de fundo, só em 1H e abaixo): Ásia, Londres, Nova Iorque
     if (settings.kzOn && (TF_MS0[drawState.tf] || 0) <= 36e5) {
       const cs = d.candles, sc = sessionsCfg();
-      if (!d._sess) d._sess = cs.map((c) => { const h = nyParts(c.t).h; return inSess(h, sc.asia) ? 'asia' : inSess(h, sc.londres) ? 'londres' : inSess(h, sc.ny) ? 'ny' : null; });
-      const KZ = { asia: ['255,183,77', 'Ásia', settings.kzAsia], londres: ['100,181,246', 'Londres', settings.kzLondon], ny: ['129,199,132', 'Nova Iorque', settings.kzNy] };
+      const durH = (TF_MS0[drawState.tf] || 36e5) / 36e5;
+      if (!d._sess || d._sessP !== settings.kzProfile + settings.sessions) { d._sessP = settings.kzProfile + settings.sessions; d._sess = cs.map((c) => { const h = nyParts(c.t).h; return candleInSess(h, durH, sc.asia) ? 'asia' : candleInSess(h, durH, sc.londres) ? 'londres' : candleInSess(h, durH, sc.ny) ? 'ny' : sc.fecho && candleInSess(h, durH, sc.fecho) ? 'fecho' : null; }); }
+      const KZ = { asia: ['255,183,77', 'Ásia', settings.kzAsia], londres: ['100,181,246', 'Londres', settings.kzLondon], ny: ['129,199,132', 'Nova Iorque', settings.kzNy], fecho: ['176,190,197', 'Fecho Londres', settings.kzLondon] };
       let bw = 6; try { bw = chart.timeScale().options().barSpacing || 6; } catch (e) {}
       g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'left';
       for (let i = 0; i < cs.length; i++) {
@@ -2053,7 +2130,7 @@
       }
     }
     // ranges (caixas): manual a cheio, automáticos a tracejado
-    const RCOL = { manual: '100,181,246', day: '179,157,219', week: '149,117,205', asia: '255,183,77' };
+    const RCOL = SWCOL;
     for (const x of rangesFor(drawState.tf).map((r) => evalRange(d, r, drawState.tf))) {
       const r = x.r, col = RCOL[r.id] || '170,178,189', yt = Y(r.top), yb = Y(r.bot); if (yt == null || yb == null) continue;
       let i0 = cl.findIndex((c) => c.t >= r.t0); if (i0 < 0) continue;
@@ -2064,7 +2141,8 @@
       if (!r.auto) { const ym = Y((r.top + r.bot) / 2); g.setLineDash([2, 4]); g.beginPath(); g.moveTo(xa, ym); g.lineTo(xb, ym); g.stroke(); }
       g.setLineDash([]); g.fillStyle = `rgba(${col},1)`; g.font = '10px Inter, system-ui, sans-serif'; g.textAlign = 'left';
       g.fillText(r.label + (r.auto ? '' : ' · EQ'), xa + 4, yt + 11);
-      for (const e of x.ev.slice(-6)) { const ex = X(e.k), ey = Y(e.dir === 1 ? r.top : r.bot); if (ex == null || ey == null) continue; g.fillText('💧', ex - 6, e.dir === 1 ? ey - 4 : ey + 14); }
+      const big = r.id === 'week' ? 1.35 : 1;
+      for (const e of x.ev.slice(-6)) { const ex = X(e.k), ey = Y(e.dir === 1 ? r.top : r.bot); if (ex == null || ey == null) continue; drop(g, ex, e.dir === 1 ? ey - 13 * big : ey + 13 * big, col, big); }
     }
     // FVGs por preencher (recentes)
     for (const f of d.int.res.fvgs.filter((f) => f.filled == null && f.mid >= cl.length - 300).slice(-12)) {
@@ -2117,7 +2195,7 @@
     }
     // sweeps de liquidez (internos; os externos com ✕ maior)
     const sweeps = (res, size) => {
-      for (const sw of res.sweeps.slice(-14)) {
+      for (const sw of res.sweeps.filter((s) => !s.invalid).slice(-14)) {
         const x = X(sw.i), y = Y(sw.level); if (x == null || y == null) continue;
         g.strokeStyle = '#ce93d8'; g.lineWidth = size > 4 ? 2 : 1.3; g.beginPath();
         g.moveTo(x - size, y - size); g.lineTo(x + size, y + size); g.moveTo(x + size, y - size); g.lineTo(x - size, y + size); g.stroke();
@@ -2139,7 +2217,7 @@
   function refreshTf(id) { data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
   function updateEditUi() {
     const nEd = editCount(selectedTf);
-    $('#editBtn').classList.toggle('on', editMode);
+    $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✕ Sair da edição' : '✎ Editar estrutura';
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
@@ -2149,7 +2227,7 @@
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
-    const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
+    const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Back (${nU})` : '↶ Back';
     $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
   }
   function closeMenu() { const m = $('#editMenu'); m.style.display = 'none'; m.innerHTML = ''; }
@@ -2212,9 +2290,10 @@
       }
       const r = (res.rejected || []).slice(-20).find((r) => nearSeg(r.from, r.i, r.level));
       if (r) {
-        if (r.manual) items.push({ label: `✎ Desfazer "não é quebra" (${nome})`, run: () => { ed()[L].noBreak.delete(T(r.i)); done(); } });
+        if (r.ign) items.push({ label: `É quebra — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (volta a contar o ${r.dir === 1 ? 'fundo' : 'topo'} que ignoraste)`, run: () => { ed()[L].ign.delete(T(r.ignAt)); done(); } });
+        else if (r.manual) items.push({ label: `✎ Desfazer "não é quebra" (${nome})`, run: () => { ed()[L].noBreak.delete(T(r.i)); done(); } });
         else items.push({ label: `É quebra — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (${nome})`, run: () => { ed()[L].yesBreak.add(T(r.i)); done(); } });
-        if (!r.manual) items.push({ label: `Confirmo: é sweep — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (${nome})`, run: () => { ed()[L].noBreak.add(T(r.i)); done(); } });
+        if (!r.manual && !r.ign) items.push({ label: `Confirmo: é sweep — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (${nome})`, run: () => { ed()[L].noBreak.add(T(r.i)); done(); } });
       }
     }
     // 3) FVG desenhado
@@ -2222,26 +2301,16 @@
       const x1 = X(f.mid), y1 = Y(f.top), y2 = Y(f.bot); return x1 != null && y1 != null && y2 != null && px >= x1 && py >= Math.min(y1, y2) - 2 && py <= Math.max(y1, y2) + 2;
     });
     if (fvHit) items.push({ label: `Ignorar este FVG (${fmt(fvHit.bot)} – ${fmt(fvHit.top)})`, run: () => { ed().fvg.add(T(fvHit.mid)); done(); } });
-    // 4) vela: marcar topo / fundo novo (movimento recente)
-    // íman: escolhe a ponta de pavio (máxima ou mínima) mais próxima do clique entre as velas vizinhas
-    let k = param.logical != null ? Math.round(param.logical) : -1, snapTop = null;
-    // clique em cima da própria vela (entre máxima e mínima): fica essa vela; fora dela: íman para o pavio mais próximo
-    const onCandle = k >= 0 && k <= cl.length - 1 && Y(cl[k].h) != null && py >= Y(cl[k].h) - 4 && py <= Y(cl[k].l) + 4;
-    if (param.forceK == null && k >= 0 && !onCandle) {
-      let best = 1e9;
-      for (let q = Math.max(0, k - 4); q <= Math.min(cl.length - 1, k + 4); q++) {
-        const x = X(q); if (x == null) continue;
-        for (const [isTop, p] of [[true, cl[q].h], [false, cl[q].l]]) { const y = Y(p); if (y == null) continue; const dd = Math.hypot((px - x) * 1.5, py - y); if (dd < best) { best = dd; k = q; snapTop = isTop; } }
-      }
-    } else if (param.forceK != null) { k = param.forceK; snapTop = param.forceTop; }
-    if (k >= 0 && k <= cl.length - 1) {
-      let c = cl[k];
-      // mostra sempre as opções de topo e de fundo; primeiro o lado mais perto do clique
-      const pr = candleSeries.coordinateToPrice(py);
-      const nearTop = snapTop != null ? snapTop : (pr != null ? Math.abs(pr - c.h) <= Math.abs(pr - c.l) : true);
-      // o lado clicado vai para o verdadeiro extremo local (vela ao lado incluída); o outro lado fica na vela clicada
-      const nearTip = Math.abs(py - Y(nearTop ? c.h : c.l)) <= 20;
-      const ext = (top) => { if (top !== nearTop || (onCandle && !nearTip)) return k; let q0 = k; for (let q = Math.max(0, k - 1); q <= Math.min(cl.length - 1, k + 1); q++) if (top ? cl[q].h > cl[q0].h : cl[q].l < cl[q0].l) q0 = q; return q0; };
+    // 4) vela: só quando o clique cai em cima da vela (corpo ou pavio), com uma margem de 7 píxeis; espaço vazio não abre nada
+    const TOL = 7, bw = ts.options().barSpacing || 6;
+    let k = param.forceK != null ? param.forceK : param.logical != null ? Math.round(param.logical) : -1;
+    const onCandle = param.forceK != null || (k >= 0 && k <= cl.length - 1 && X(k) != null && Y(cl[k].h) != null && Y(cl[k].l) != null
+      && Math.abs(px - X(k)) <= Math.max(bw / 2, 2) + TOL && py >= Y(cl[k].h) - TOL && py <= Y(cl[k].l) + TOL);
+    if (onCandle) {
+      const c = cl[k];
+      // mostra sempre as opções de topo e de fundo; primeiro o lado mais perto do clique. A marca fica sempre na vela clicada.
+      const nearTop = param.forceTop != null ? param.forceTop : Math.abs(py - Y(c.h)) <= Math.abs(py - Y(c.l));
+      const ext = () => k;
       const L = editLayer, nome = layerName(L);
       const side = (top) => {
         const q = ext(top), p = top ? cl[q].h : cl[q].l;
@@ -2281,6 +2350,16 @@
     document.body.appendChild(a); a.click(); a.remove();
   }
   function resetEdits() { pushUndo(selectedTf); delete edits[symbol + '|' + selectedTf]; saveEdits(); closeMenu(); refreshTf(selectedTf); }
+  // modo edição: gráfico em ecrã inteiro, só velas (sem RSI nem divergências) e só os botões da edição
+  let maxBeforeEdit = false;
+  function setEdit(on, keepRange) {
+    if (on === editMode) return;
+    editMode = on; closeMenu();
+    if (!on) pendingRange = null;
+    if (on) { maxBeforeEdit = $('.chartbox').classList.contains('max'); toggleMax(true); } else toggleMax(maxBeforeEdit);
+    $('.chartbox').classList.toggle('editing', on);
+    updateEditUi(); renderChart(keepRange !== false);
+  }
   function toggleMax(force) {
     const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
     box.classList.toggle('max', on); $('#maxBtn').textContent = on ? '✕ Fechar' : '⤢ Gráfico maior';
@@ -2293,7 +2372,7 @@
     const d = data[id]; if (!d || !d.int.snap.dispute) return;
     const sd = d.int.snap.dispute, dn = sd.dir === -1, cl = d.closed;
     editLayer = 'int'; settings.layer = 'int'; save('mss_settings4', settings);
-    editMode = true; updateEditUi(); renderChart(false);
+    if (editMode) { updateEditUi(); renderChart(false); } else setEdit(true, false);
     const n = d.candles.length; chart.timeScale().setVisibleLogicalRange({ from: Math.max(0, sd.i - 40), to: n + 3 });
     $('.chartbox').scrollIntoView({ behavior: 'smooth', block: 'start' });
     const t = cl[sd.i].t, dt = new Date(t).toISOString().slice(0, 10).split('-').reverse().join('/');
@@ -2510,7 +2589,7 @@
   function openSettings() {
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
-    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
+    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
@@ -2521,7 +2600,7 @@
     settings = Object.assign({}, settings, {
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, volMult: +$('#setVol').value,
-      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
+      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
       tfs: [...document.querySelectorAll('#setTfs input:checked')].map((i) => i.value),
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
@@ -2661,21 +2740,24 @@
     const onScroll = () => { tb.style.display = window.scrollY > 250 ? 'block' : 'none'; };
     window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
     tb.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && pendingRange) { pendingRange = null; closeMenu(); updateEditUi(); } });
+    document.addEventListener('keydown', (ev) => { if (ev.key === 'Escape' && pendingRange) { pendingRange = null; closeMenu(); updateEditUi(); ev.stopImmediatePropagation(); } });
     $('#setCancel').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#setX').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#settings').addEventListener('click', (e) => { if (e.target.id === 'settings') $('#settings').classList.remove('open'); });   // clicar fora fecha
     $('#setSave').addEventListener('click', applySettings);
     $('#helpBtn').addEventListener('click', () => $('#help').classList.toggle('open'));
+    $('#helpClose').addEventListener('click', () => $('#help').classList.remove('open'));
+    $('#editHelp').addEventListener('click', () => $('#help').classList.add('open'));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#help').classList.contains('open')) { $('#help').classList.remove('open'); e.stopImmediatePropagation(); } });
     $('#tgExt').addEventListener('click', () => { editLayer = 'ext'; settings.layer = 'ext'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    $('#editBtn').addEventListener('click', () => { editMode = !editMode; closeMenu(); updateEditUi(); renderChart(true); });
+    $('#editBtn').addEventListener('click', () => setEdit(!editMode));
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
     $('#clearBtn').addEventListener('click', (ev) => {
       const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
-      if (!editMode) { editMode = true; updateEditUi(); renderChart(true); }
+      if (!editMode) setEdit(true);
       const L = editLayer;
       openMenu(b.left - r.left, 8, [{ label: `Apagar a estrutura ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} neste timeframe`, run: () => {
         const e = getEdits(id, true); e[L] = Object.assign(newLayer(), { blank: true }); saveEdits(); refreshTf(id); } }]);
@@ -2686,7 +2768,7 @@
     $('#btRun').addEventListener('click', runBacktest);
     $('#btClose').addEventListener('click', () => $('#btModal').classList.remove('open'));
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeMenu(); toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if (!menuOpen && !pendingRange) setEdit(false); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
     initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll();
   }
