@@ -86,6 +86,7 @@
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
   #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
+  #autoBtn { display:none; } .chartbox.editing #autoBtn { display:inline-block; }
   .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
@@ -288,7 +289,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Estrutura automática</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -435,7 +436,7 @@
     const o = Object.assign({}, DEFAULTS, options || {});
     const n = candles.length;
     const res = { n, swings: [], breaks: [], sweeps: [], fvgs: [], rejected: [], pending: null, state: null };
-    if (options && options.ov && options.ov.blank && !options.ov.start) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
+    if (options && options.ov && options.ov.blank && !options.ov.start && !(options.ov.add && options.ov.add.size)) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
     if (n < 3 || (n < 10 && !hasMan(options && options.ov))) return res;   // séries curtas (ex.: anual): só com marcações manuais
     const H = (i) => candles[i].h, L = (i) => candles[i].l, C = (i) => candles[i].c;
 
@@ -487,7 +488,7 @@
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
           const pt = ms.side === 'H' ? { p: H(j), i: j } : { p: L(j), i: j };
-          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: 'Início', start: true });
+          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true });
           if (ms.side === 'H') { lastPH = pt; lastManH = pt; } else { lastPL = pt; lastManL = pt; }
         }
         continue;
@@ -677,6 +678,10 @@
       let k = -1; for (let i = 0; i < n; i++) if (candles[i].t === ov.start.t) { k = i; break; }
       if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; }
     }
+    // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início
+    if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
+      for (let i = 0; i < n - 1; i++) if (ov.add.has(candles[i].t)) { const lab = ov.add.get(candles[i].t); r.s0 = i; r.side = lab === 'HH' || lab === 'LH' || lab === 'H' ? 'H' : 'L'; r.label = lab.length === 2 ? lab : null; break; }
+    }
     if (r.s0 >= 0 && ov.add) for (let i = r.s0 + 1; i < n; i++) if (ov.add.has(candles[i].t)) r.lastMan = i;
     return r;
   }
@@ -756,7 +761,7 @@
     const o = Object.assign({}, DEFAULTS, { minRetraceAtr: 2 }, options || {});
     const n = candles.length;
     const res = { n, swings: [], breaks: [], sweeps: [], fvgs: [], rejected: [], pending: null, state: null };
-    if (options && options.ov && options.ov.blank && !options.ov.start) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
+    if (options && options.ov && options.ov.blank && !options.ov.start && !(options.ov.add && options.ov.add.size)) { res.blank = true; return res; }   // estrutura apagada: à espera do ponto de partida
     if (n < 3 || (n < 20 && !hasMan(options && options.ov))) return res;
     const H = (i) => candles[i].h, L = (i) => candles[i].l, C = (i) => candles[i].c;
     const pr = prep(candles, o), atr = pr.atr, volAvg = pr.volAvg;
@@ -813,8 +818,8 @@
       if (o.trace && j > 1) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
-          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); }
-          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); }
+          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); }
+          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); }
           hi = { p: H(j), i: j }; lo = { p: L(j), i: j };
         }
         continue;
@@ -2334,7 +2339,7 @@
       const sw = res.swings.filter(hit).sort((a, b) => Math.abs(Y(a.p) - py) - Math.abs(Y(b.p) - py))[0];
       if (sw) {
         const what = `${sw.label || (sw.type === 'H' ? 'topo' : 'fundo')} (${fmt(sw.p)})`;
-        if (sw.start) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { ed()[L].start = null; done(); } });
+        if (sw.start) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { const e = ed()[L]; if (e.start) e.start = null; else e.add.delete(T(sw.i)); done(); } });
         else if (sw.manual) items.push({ label: `✎ Remover a tua marca ${what} — ${layerName(L)}`, run: () => { ed()[L].add.delete(T(sw.i)); done(); } });
         else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => { ed()[L].ign.add(T(sw.i)); done(); } });
       }
@@ -2371,13 +2376,25 @@
     if (fvHit) items.push({ label: `Ignorar este FVG (${fmt(fvHit.bot)} – ${fmt(fvHit.top)})`, run: () => { ed().fvg.add(T(fvHit.mid)); done(); } });
     // 4) vela: só quando o clique cai em cima da vela (corpo ou pavio), com uma margem de 7 píxeis; espaço vazio não abre nada
     const TOL = 7, bw = ts.options().barSpacing || 6;
-    let k = param.forceK != null ? param.forceK : param.logical != null ? Math.round(param.logical) : -1;
-    const onCandle = param.forceK != null || (k >= 0 && k <= cl.length - 1 && X(k) != null && Y(cl[k].h) != null && Y(cl[k].l) != null
-      && Math.abs(px - X(k)) <= Math.max(bw / 2, 2) + TOL && py >= Y(cl[k].h) - TOL && py <= Y(cl[k].l) + TOL);
+    // com o gráfico muito afastado várias velas cabem nos mesmos píxeis: escolhe, entre as velas sob o clique,
+    // a que tem o pavio (máxima ou mínima) mais perto do clique — e só se o clique cair nessa vela (com margem)
+    let k = -1, pickTop = null;
+    if (param.forceK != null) k = param.forceK;
+    else if (param.logical != null) {
+      const k0 = Math.round(param.logical), r = Math.max(1, Math.ceil((TOL + 2) / Math.max(bw, 0.5)));
+      let best = Infinity;
+      for (let q = Math.max(0, k0 - r); q <= Math.min(cl.length - 1, k0 + r); q++) {
+        const x = X(q), yh = Y(cl[q].h), yl = Y(cl[q].l); if (x == null || yh == null || yl == null) continue;
+        if (Math.abs(px - x) > Math.max(bw / 2, 1) + TOL || py < yh - TOL || py > yl + TOL) continue;
+        const dh = Math.abs(py - yh), dl = Math.abs(py - yl), dd = Math.min(dh, dl) + Math.abs(px - x) * 0.5;
+        if (dd < best) { best = dd; k = q; pickTop = dh <= dl; }
+      }
+    }
+    const onCandle = k >= 0;
     if (onCandle) {
       const c = cl[k];
       // mostra sempre as opções de topo e de fundo; primeiro o lado mais perto do clique. A marca fica sempre na vela clicada.
-      const nearTop = param.forceTop != null ? param.forceTop : Math.abs(py - Y(c.h)) <= Math.abs(py - Y(c.l));
+      const nearTop = param.forceTop != null ? param.forceTop : pickTop != null ? pickTop : Math.abs(py - Y(c.h)) <= Math.abs(py - Y(c.l));
       const ext = () => k;
       const L = editLayer, nome = layerName(L);
       const side = (top) => {
@@ -2831,7 +2848,14 @@
       if (!editMode) setEdit(true);
       const L = editLayer;
       openMenu(b.left - r.left, 8, [{ label: `Apagar a estrutura ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} neste timeframe`, run: () => {
-        const e = getEdits(id, true); e[L] = Object.assign(newLayer(), { blank: true }); saveEdits(); refreshTf(id); } }]);
+        const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { blank: true, range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id); } }]);
+    });
+    $('#autoBtn').addEventListener('click', (ev) => {
+      const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect(), L = editLayer;
+      const lab = (TFS.find((t) => t.id === id) || {}).label || id;
+      openMenu(Math.max(0, b.left - r.left), 8, [
+        { head: true, label: `Vais perder as tuas marcações ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} no ${lab}` },
+        { label: `⟳ Sim, a app volta a criar a estrutura sozinha`, run: () => { const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id); } }]);
     });
     $('#maxBtn').addEventListener('click', () => toggleMax());
     $('#csvBtn').addEventListener('click', exportCsv);
