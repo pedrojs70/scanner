@@ -289,7 +289,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Estrutura automática</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Automática</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -2146,7 +2146,7 @@
       mk(0, v.a.p, v.b.p); mk(1, v.ra, v.rb);
     }
     // swings externos com letra (os internos são desenhados no overlay)
-    const sw = vE() ? d.ext.res.swings.slice(-12) : [];
+    const sw = vE() ? d.ext.res.swings.slice(-400) : [];   // todos (a biblioteca só desenha os que estão à vista)
     markersApi.setMarkers(sw.map((s, k) => ({
       time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar',
       color: s.label === 'HH' || s.label === 'HL' ? '#26a69a' : s.label === 'LH' || s.label === 'LL' ? '#ef5350' : '#aab2bd',
@@ -2229,9 +2229,13 @@
       const zone = (ya, yb, col) => { if (x0 != null && ya != null && yb != null) { g.fillStyle = col; g.fillRect(x0, Math.min(ya, yb), paneW - x0, Math.abs(yb - ya)); } };
       zone(y50, y65, 'rgba(255,213,79,0.07)'); zone(y65, y92, 'rgba(255,152,0,0.08)'); zone(y92, yp, 'rgba(255,82,82,0.10)');
     }
+    // só o que está à vista (com tanta história carregada, limitar aos "últimos N" escondia a estrutura antiga)
+    const vr = ts.getVisibleLogicalRange() || { from: 0, to: cl.length };
+    const visSeg = (a, b) => Math.max(a, b) >= vr.from - 2 && Math.min(a, b) <= vr.to + 2;
+    const visLast = (arr, a, b, n) => arr.filter((x) => visSeg(a(x), b(x))).slice(-n);
     const breaks = (res, internal) => {
       g.font = (internal ? '9px' : '10px') + ' Inter, system-ui, sans-serif'; g.textAlign = 'center';
-      for (const b of res.breaks.slice(internal ? -24 : -14)) {
+      for (const b of visLast(res.breaks, (b) => b.from, (b) => b.i, internal ? 40 : 30)) {
         const x1 = X(b.from), x2 = X(b.i), y = Y(b.level); if (x1 == null || x2 == null || y == null) continue;
         const col = b.type === 'CHoCH' ? '#ffb74d' : b.dir === 1 ? '#26a69a' : '#ef5350';
         g.strokeStyle = g.fillStyle = col; g.globalAlpha = internal ? 0.75 : 1;
@@ -2244,7 +2248,7 @@
     // quebras rejeitadas por falta de displacement (linha esbatida)
     const rejected = (res) => {
       g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'center';
-      for (const r of (res.rejected || []).slice(-10)) {
+      for (const r of visLast(res.rejected || [], (r) => r.from, (r) => r.i, 15)) {
         const x1 = X(r.from), x2 = X(r.i), y = Y(r.level); if (x1 == null || x2 == null || y == null) continue;
         g.strokeStyle = g.fillStyle = 'rgba(170,178,189,0.55)'; g.setLineDash([2, 4]); g.lineWidth = 1;
         g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
@@ -2259,7 +2263,7 @@
       breaks(d.int.res, true);
       // swings internos: ponto pequeno com rótulo
       g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'center';
-      for (const s of d.int.res.swings.slice(-30)) {
+      for (const s of visLast(d.int.res.swings, (s) => s.i, (s) => s.i, 60)) {
         const x = X(s.i), y = Y(s.p); if (x == null || y == null) continue;
         const col = s.label === 'HH' || s.label === 'HL' ? '#7fd8cf' : s.label === 'LH' || s.label === 'LL' ? '#f59a98' : '#aab2bd';
         g.fillStyle = col; g.beginPath(); g.arc(x, y, 2.5, 0, Math.PI * 2); g.fill();
@@ -2268,7 +2272,7 @@
     }
     // sweeps de liquidez (internos; os externos com ✕ maior)
     const sweeps = (res, size) => {
-      for (const sw of res.sweeps.filter((s) => !s.invalid).slice(-14)) {
+      for (const sw of visLast(res.sweeps.filter((s) => !s.invalid), (s) => s.i, (s) => s.i, 20)) {
         const x = X(sw.i), y = Y(sw.level); if (x == null || y == null) continue;
         g.strokeStyle = '#ce93d8'; g.lineWidth = size > 4 ? 2 : 1.3; g.beginPath();
         g.moveTo(x - size, y - size); g.lineTo(x + size, y + size); g.moveTo(x + size, y - size); g.lineTo(x - size, y + size); g.stroke();
@@ -2295,7 +2299,7 @@
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
-    $('#clearBtn').textContent = editMode ? `🧹 Apagar ${layerName(editLayer)}` : '🧹 Apagar estrutura';
+    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`; $('#autoBtn').title = `A app volta a criar sozinha a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe (apaga as tuas marcações dessa camada)`;
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
@@ -2356,12 +2360,12 @@
     const layers = [[editLayer, layerName(editLayer)]];
     for (const [L, nome] of layers) {
       const res = d[L].res;
-      const b = res.breaks.slice(-30).find((b) => nearSeg(b.from, b.i, b.level));
+      const b = res.breaks.slice().reverse().find((b) => nearSeg(b.from, b.i, b.level));
       if (b) {
         if (b.manual) items.push({ label: `✎ Desfazer "é quebra" (${nome})`, run: () => { ed()[L].yesBreak.delete(T(b.i)); done(); } });
         else items.push({ label: `Não é quebra, é sweep — ${b.type} ${b.dir === 1 ? '▲' : '▼'} em ${fmt(b.level)} (${nome})`, run: () => { ed()[L].noBreak.add(T(b.i)); done(); } });
       }
-      const r = (res.rejected || []).slice(-20).find((r) => nearSeg(r.from, r.i, r.level));
+      const r = (res.rejected || []).slice().reverse().find((r) => nearSeg(r.from, r.i, r.level));
       if (r) {
         if (r.ign) items.push({ label: `É quebra — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (volta a contar o ${r.dir === 1 ? 'fundo' : 'topo'} que ignoraste)`, run: () => { ed()[L].ign.delete(T(r.ignAt)); done(); } });
         else if (r.manual) items.push({ label: `✎ Desfazer "não é quebra" (${nome})`, run: () => { ed()[L].noBreak.delete(T(r.i)); done(); } });
