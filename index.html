@@ -1200,11 +1200,11 @@
     { id: '3M', label: '3M', api: '1M', magg: 3 },
     { id: '1M', label: 'Mensal', api: '1M', total: 1000 },
     { id: '1w', label: 'Semanal', api: '1w', total: 1000 },
-    { id: '1d', label: 'Diário', api: '1d', total: 1000 },
-    { id: '4h', label: '4H', api: '4h', total: 1000 },
-    { id: '1h', label: '1H', api: '1h', total: 1000 },
-    { id: '15m', label: '15m', api: '15m', total: 1000 },
-    { id: '5m', label: '5m', api: '5m', total: 1000 },
+    { id: '1d', label: 'Diário', api: '1d', total: 3000 },
+    { id: '4h', label: '4H', api: '4h', total: 3000 },
+    { id: '1h', label: '1H', api: '1h', total: 5000 },
+    { id: '15m', label: '15m', api: '15m', total: 5000 },
+    { id: '5m', label: '5m', api: '5m', total: 5000 },
   ];
   const TF_IDS = TFS.map((t) => t.id);
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
@@ -1247,17 +1247,85 @@
     }
     throw lastErr;
   }
-  async function klines(sym, interval, total) {
+  // ---------- velas guardadas no aparelho (IndexedDB) ----------
+  // a história descarrega-se uma vez; depois só se pedem as velas novas (a última, ainda aberta, é sempre substituída)
+  const IV_MS = { '1M': 31 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
+  const KMAX = 5000;   // nunca guardar mais do que isto por par e intervalo
+  let idbP = null;
+  function idb() {
+    if (!idbP) idbP = new Promise((res) => {
+      try {
+        const rq = indexedDB.open('mss_candles', 1);
+        rq.onupgradeneeded = () => rq.result.createObjectStore('kl');
+        rq.onsuccess = () => res(rq.result); rq.onerror = () => res(null);
+      } catch (e) { res(null); }
+    });
+    return idbP;
+  }
+  async function idbOp(mode, fn) {
+    const db = await idb(); if (!db) return null;
+    return new Promise((res) => { try { const tx = db.transaction('kl', mode), st = tx.objectStore('kl'), rq = fn(st); tx.oncomplete = () => res(rq ? rq.result : null); tx.onerror = () => res(null); } catch (e) { res(null); } });
+  }
+  // sem cache (teste no histórico: dezenas de milhares de velas, só para essa corrida)
+  async function klinesRaw(sym, interval, total) {
     let out = [], end = null;
     while (out.length < total) {
       const lim = Math.min(1000, total - out.length);
       const rows = await getJSON(`/api/v3/klines?symbol=${sym}&interval=${interval}&limit=${lim}` + (end ? `&endTime=${end}` : ''));
       if (!rows.length) break;
-      out = rows.concat(out);
-      end = rows[0][0] - 1;
+      out = rows.concat(out); end = rows[0][0] - 1;
       if (rows.length < lim) break;
     }
     return out.map((r) => ({ t: r[0], ct: r[6], o: +r[1], h: +r[2], l: +r[3], c: +r[4], v: +r[5] }));
+  }
+  const kCache = new Map(), kBusy = new Map();
+  const toRow = (r) => [r[0], r[6], +r[1], +r[2], +r[3], +r[4], +r[5]];
+  async function klines(sym, interval, total) {
+    const key = sym + '|' + interval;
+    while (kBusy.has(key)) { try { await kBusy.get(key); } catch (e) {} }   // o mesmo par/intervalo a ser pedido noutro sítio: espera e usa a cache
+    const p = klinesWork(key, sym, interval, Math.min(total, KMAX));
+    kBusy.set(key, p);
+    try { return await p; } finally { kBusy.delete(key); }
+  }
+  async function klinesWork(key, sym, interval, total) {
+    let c = kCache.get(key);
+    if (!c) { c = await idbOp('readonly', (st) => st.get(key)); if (c && c.rows) kCache.set(key, c); else c = null; }
+    const now = Date.now(), ms = IV_MS[interval] || 36e5;
+    let rows = c && c.rows && c.rows.length && (now - c.rows[c.rows.length - 1][0]) / ms < 4000 ? c.rows.slice() : [];
+    let full = !!(c && c.full && rows.length), changed = false;
+    // 1) velas novas desde a última guardada (inclui a última, que podia estar aberta)
+    if (rows.length) {
+      let from = rows[rows.length - 1][0], add = [];
+      for (let guard = 0; guard < 10; guard++) {
+        const got = await getJSON(`/api/v3/klines?symbol=${sym}&interval=${interval}&limit=1000&startTime=${from}`);
+        if (!got.length) break;
+        add = add.concat(got.map(toRow));
+        if (got.length < 1000) break;
+        from = got[got.length - 1][0] + 1;
+      }
+      if (add.length) { const t0 = add[0][0]; while (rows.length && rows[rows.length - 1][0] >= t0) rows.pop(); for (const r of add) if (!rows.length || r[0] > rows[rows.length - 1][0]) rows.push(r); changed = true; }
+    }
+    // 2) história mais antiga até ao total pedido
+    while (rows.length < total && !full) {
+      const lim = Math.min(1000, total - rows.length), end = rows.length ? rows[0][0] - 1 : null;
+      const got = await getJSON(`/api/v3/klines?symbol=${sym}&interval=${interval}&limit=${lim}` + (end != null ? `&endTime=${end}` : ''));
+      if (got.length) { const first = rows.length ? rows[0][0] : Infinity; rows = got.map(toRow).filter((r) => r[0] < first).concat(rows); changed = true; }
+      if (got.length < lim) { full = true; changed = true; }   // não há mais história (par recente)
+    }
+    if (rows.length > KMAX) { rows = rows.slice(-KMAX); full = false; }
+    const entry = { rows, full, at: now };
+    kCache.set(key, entry);
+    if (changed || !c || now - (c.at || 0) > 864e5) idbOp('readwrite', (st) => st.put(entry, key));
+    return rows.slice(-total).map((r) => ({ t: r[0], ct: r[1], o: r[2], h: r[3], l: r[4], c: r[5], v: r[6] }));
+  }
+  // limpeza: tira da cache os pares que não são favoritos nem o ativo aberto e não são usados há 7 dias
+  async function pruneCandles() {
+    const db = await idb(); if (!db) return;
+    const keep = new Set([...(settings.favs || []), symbol]);
+    try {
+      const tx = db.transaction('kl', 'readwrite'), st = tx.objectStore('kl'), rq = st.openCursor();
+      rq.onsuccess = () => { const cur = rq.result; if (!cur) return; const sym = String(cur.key).split('|')[0], v = cur.value || {}; if (!keep.has(sym) && Date.now() - (v.at || 0) > 7 * 864e5) cur.delete(); cur.continue(); };
+    } catch (e) {}
   }
   function aggregate(cs, k, ms) {
     const g = new Map();
@@ -1432,7 +1500,7 @@
         return;
       }
       const needHourly = need.some((t) => t.api === '1h');
-      const hourly = needHourly ? await klines(symbol, '1h', need.some((t) => t.agg) ? 3000 : 1000) : null;
+      const hourly = needHourly ? await klines(symbol, '1h', TFS.find((t) => t.id === '1h').total) : null;
       let monthly = null;
       if (need.some((t) => t.magg)) monthly = await klines(symbol, '1M', 1000);
       const results = await Promise.all(need.map(async (tf) => {
@@ -1440,7 +1508,7 @@
         if (tf.magg) cs = aggregateMonths(monthly, tf.magg);
         else if (tf.id === '1M' && monthly) cs = monthly;
         else if (tf.agg) cs = aggregate(hourly, tf.agg, 3600e3);
-        else if (tf.api === '1h') cs = hourly.slice(-1000);
+        else if (tf.api === '1h') cs = hourly;
         else cs = await klines(symbol, tf.api, tf.total);
         return [tf.id, cs];
       }));
@@ -1917,7 +1985,7 @@
     const key = sym + '|' + id;
     if (cache[key] && cache[key].n >= count) return cache[key].cs;
     const tf = TFS.find((t) => t.id === id);
-    let cs = tf.agg ? aggregate(await klines(sym, '1h', count * tf.agg + 3), tf.agg, 3600e3) : await klines(sym, tf.api, count);
+    let cs = tf.agg ? aggregate(await klinesRaw(sym, '1h', count * tf.agg + 3), tf.agg, 3600e3) : await klinesRaw(sym, tf.api, count);
     const now = Date.now();
     cs = cs.filter((c) => c.ct < now);
     cache[key] = { n: count, cs };
@@ -2403,12 +2471,15 @@
       favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
     }
     const tfs = favTfs(), out = {};
+    // orçamento de velas: até 30 favoritos, a história toda do ativo aberto; acima disso reduz (mínimo 1000)
+    const nFav = Math.max(1, (settings.favs || []).length);
+    const favN = (tf) => Math.round(Math.min(tf.total || 1000, Math.max(1000, (tf.total || 1000) * Math.min(1, 30 / nFav))));
     let hourly = null;
     for (const tf of tfs) {
       let cs;
       if (tf.magg) cs = aggregateMonths(await klines(sym, '1M', 500), tf.magg);
-      else if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', 1500); cs = aggregate(hourly, tf.agg, 3600e3); }
-      else cs = await klines(sym, tf.api, 500);
+      else if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', favN(TFS.find((t) => t.id === '1h'))); cs = aggregate(hourly, tf.agg, 3600e3); }
+      else cs = await klines(sym, tf.api, favN(tf));
       if (cs.length > (tf.magg ? 5 : 30)) out[tf.id] = computeTf(cs, tf.id, sym);
     }
     const any = Object.values(out)[0];
@@ -2770,7 +2841,7 @@
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if (!menuOpen && !pendingRange) setEdit(false); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll();
+    initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
   window.MSS = { init, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }) };
 })();
