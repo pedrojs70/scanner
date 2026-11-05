@@ -86,8 +86,7 @@
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
   #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
-  #autoBtn { display:none; } .chartbox.editing #autoBtn { display:inline-block; }
-  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
@@ -261,7 +260,7 @@
       <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se a correção ainda está a cair ou se já virou. Em linguagem ICT: a tendência principal é o dealing range (equilibrium a 50%, zona de discount/premium); o movimento recente é onde acontece o MSS de entrada.</li>
       <li><b>Setups (painel no topo):</b> cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Checklist</b> (sem pontos): <b>Contexto</b> — a tendência principal do timeframe de contexto está no mesmo sentido; <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem (⚡) no movimento recente do timeframe de baixo; <b>FVG na quebra</b> — a quebra deixou FVG. 💧 = houve sweep do lado oposto antes da quebra (extra, não obrigatório). <b>✔ Pronto</b> quando os quatro estão cumpridos; senão <b>Em formação</b>, com o que falta. Entrada, stop e alvos são contigo.</li>
       <li><b>Range</b> (movimento recente): o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito) e a sessão asiática (só 1H e abaixo). Mostra o sinal mais importante: <b>⚠ a tocar</b> o topo/fundo (só quando o preço lá chega), <b>💧 sweep</b> (a wick ou poucos fechos passaram e voltaram para dentro — a manipulação; “Londres varreu” quando o sweep do range asiático foi na sessão de Londres), <b>⚖ possível quebra</b> (fecho fora, ainda dentro da tolerância do timeframe, ex. 1/2) e <b>quebrou</b> (ficou fora mais do que a tolerância). Sem sinal mostra a posição no range (0% = fundo, 100% = topo). É independente da estrutura: não altera estados, quebras nem setups.</li>
-      <li><b>Div.</b> (movimento recente) e painel do RSI: divergência normal entre os dois últimos swings do mesmo tipo da estrutura da app (incluindo o extremo da perna em curso). <span style="color:#26a69a">▲</span> de alta = fundo mais baixo com RSI mais alto; <span style="color:#ef5350">▼</span> de baixa = topo mais alto com RSI mais baixo. Só aparece enquanto está viva (é o par mais recente e a estrutura ainda não quebrou depois). No gráfico, as vivas a cheio e as antigas a tracejado, da camada que estás a ver.</li>
+      <li><b>Div.</b> e painel do RSI: divergências como no “RSI Divergence” do TradingView. Os pontos são fundos/topos do próprio RSI (o mais baixo/alto das 5 velas antes e depois — ajustável nas Definições). <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa (o RSI não a atravessa). Viva (cheia) enquanto for a última e o preço não passar o 2.º ponto; antiga (esbatida) depois.</li><li><b>▬ POC</b> (só visual): preço com mais volume de cada dia (rosa) e de cada semana (verde-lima), como uma linha por cima das velas desse período. Liga e desliga no botão da barra do gráfico.</li>
       <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep antes. Passa o rato por cima para ver o nível e o que a validou.</li>
       <li><b>📊 Testar no histórico</b>: percorre anos de histórico de vários ativos, vela a vela, sem ver o futuro, e mostra para cada nota a % de entradas que chegaram a cada alvo (1R, 2R, 3R, topo da perna nova, topo da perna da zona) antes do stop, e o ganho médio em R. É assim que se sabe se a nota merece confiança.</li>
       <li><b>Estados — movimento recente:</b> ⚡ Quebrou para cima/baixo = quebra fresca, o preço ainda não recuou 50% da perna nova: esperar. 🎯 Zona de compra/venda = depois dessa viragem, o preço recuou 50% ou mais da perna nova e ainda não fechou para lá da origem: zona de entrada. ▲ Subida / ▼ Descida = a viragem já foi confirmada por um novo topo/fundo (a coluna de correção continua a mostrar a profundidade do recuo atual). A entrada só falha com um fecho para lá da origem da perna (o estado muda para o sentido contrário).</li>
@@ -291,7 +290,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Automática</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="pocBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC (preço com mais volume) de cada dia e de cada semana — só visual">▬ POC</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -299,6 +298,7 @@
       <span><i class="sw" style="background:#ce93d8"></i>limite do movimento recente</span>
       <span><i class="sw" style="background:#ffd54f"></i>50%</span><span><i class="sw" style="background:#ff9800"></i>65%</span><span><i class="sw" style="background:#ff5252"></i>91,8%</span>
       <span><b style="color:#ce93d8">✕</b> sweep de estrutura &nbsp; gotas de sweep: <b style="color:#f5c518">●</b> Ásia <b style="color:#81d4fa">●</b> Dia ant. <b style="color:#eceff1">●</b> Sem. ant. <b style="color:#a5d6a7">●</b> range manual — saem quando esse lado é quebrado</span>
+      <span><b style="color:#ff80ab">▬</b> POC diário <b style="color:#c6ff00">▬</b> POC semanal</span>
       <span>HH = swing da tendência principal &nbsp; • HL = swing do movimento recente (linhas pontilhadas finas)</span>
       <span><i class="sw" style="background:#26a69a"></i>BOS ▲</span>
       <span><i class="sw" style="background:#ef5350"></i>BOS ▼</span>
@@ -347,6 +347,8 @@
   <div class="field"><div>Quebra falhada: velas de vigilância (padrão)<small>usado nos timeframes que não estão na lista abaixo. se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a sweep (0 = desligado)</small></div><input id="setFail" type="number" min="0" max="20"></div>
   <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
   <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
+  <div class="field"><div>POC no gráfico<small>preço com mais volume de cada dia (calculado com velas de 15m) e de cada semana (velas de 1H); uma linha por cima das velas desse período. O botão “▬ POC” na barra do gráfico liga e desliga. Só visual: não entra nos setups</small></div><span><label class="chk"><input id="setPocD" type="checkbox"> diário</label> <label class="chk"><input id="setPocW" type="checkbox"> semanal</label></span></div>
+  <div class="field"><div>Divergências RSI: velas de cada lado<small>um fundo/topo do RSI tem de ser o mais baixo/alto das n velas antes e depois (TradingView usa 5). Mais baixo = mais divergências; mais alto = menos e mais fortes</small></div><input id="setDivPiv" type="number" min="2" max="15"></div>
   <div class="field"><div>Swing: proporção da perna<small>um topo/fundo conta quando o preço recua pelo menos esta fração da perna que o formou (0.5 = metade). Fica sempre entre o mínimo abaixo e o ATR da camada. 0 = só ATR</small></div><input id="setLegRatio" type="number" step="0.1" min="0" max="1"></div>
   <div class="field"><div>Swing: recuo mínimo (ATR)<small>nunca conta um swing com recuo menor do que isto, mesmo numa perna pequena</small></div><input id="setFloor" type="number" step="0.1" min="0.5" max="5"></div>
   <div class="field"><div>FVG mínimo para contar como displacement<small>tamanho do gap em múltiplos do ATR</small></div><input id="setFvgMin" type="number" min="0" max="3" step="0.1"></div>
@@ -492,6 +494,8 @@
           const pt = ms.side === 'H' ? { p: H(j), i: j } : { p: L(j), i: j };
           res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true });
           if (ms.side === 'H') { lastPH = pt; lastManH = pt; } else { lastPL = pt; lastManL = pt; }
+          // o início já diz o sentido: num fundo começa a subir, num topo começa a descer (protegido no próprio início)
+          trend = ms.side === 'H' ? -1 : 1; prot = pt; ext = pt; target = null; counter = null; kind = null;
         }
         continue;
       }
@@ -849,8 +853,8 @@
       if (o.trace && j > 1) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
-          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); }
-          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); }
+          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); trend = -1; }
+          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); trend = 1; }
           hi = { p: H(j), i: j }; lo = { p: L(j), i: j };
         }
         continue;
@@ -1255,7 +1259,7 @@
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
     confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: '', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
-    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
+    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, divPivot: 5, pocOn: false, pocDay: true, pocWeek: true, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
   };
 
   // timeframes da versão 2: sem 12H, 3H e 3m; com 3M, 6M e Anual
@@ -1729,6 +1733,31 @@
     g.beginPath(); g.moveTo(x, y - 7 * s); g.bezierCurveTo(x + 1.5 * s, y - 3.5 * s, x + 4.5 * s, y - 1 * s, x + 4.5 * s, y + 2 * s);
     g.arc(x, y + 2 * s, 4.5 * s, 0, Math.PI); g.bezierCurveTo(x - 4.5 * s, y - 1 * s, x - 1.5 * s, y - 3.5 * s, x, y - 7 * s); g.closePath(); g.fill(); g.stroke(); g.restore();
   }
+  // POC (preço com mais volume) por dia / semana, a partir de velas mais curtas (15m para o dia, 1H para a semana)
+  // o volume de cada vela é repartido por igual entre a máxima e a mínima; 50 níveis de preço por período
+  function pocMap(src, keyFn, tag) {
+    if (!src || !src.candles || !src.candles.length) return null;
+    const ck = tag + '|' + settings.dayStart + '|' + src.candles.length + '|' + src.candles[src.candles.length - 1].c;
+    if (src._poc && src._poc[tag] && src._poc[tag].ck === ck) return src._poc[tag].m;
+    const groups = new Map();
+    for (const c of src.candles) { const k = keyFn(c.t); let g = groups.get(k); if (!g) groups.set(k, g = []); g.push(c); }
+    const m = new Map(), N = 50;
+    for (const [k, g] of groups) {
+      let lo = Infinity, hi = -Infinity; for (const c of g) { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; }
+      if (!(hi > lo)) { m.set(k, lo); continue; }
+      const step = (hi - lo) / N, bins = new Float64Array(N);
+      for (const c of g) {
+        const v = c.v || 0; if (!v) continue;
+        if (c.h <= c.l) { bins[Math.min(N - 1, Math.floor((c.l - lo) / step))] += v; continue; }
+        const b0 = Math.max(0, Math.floor((c.l - lo) / step)), b1 = Math.min(N - 1, Math.floor((c.h - lo) / step));
+        for (let b = b0; b <= b1; b++) { const a0 = Math.max(c.l, lo + b * step), a1 = Math.min(c.h, lo + (b + 1) * step); if (a1 > a0) bins[b] += v * (a1 - a0) / (c.h - c.l); }
+      }
+      let best = 0; for (let b = 1; b < N; b++) if (bins[b] > bins[best]) best = b;
+      m.set(k, lo + (best + 0.5) * step);
+    }
+    (src._poc = src._poc || {})[tag] = { ck, m };
+    return m;
+  }
   function autoRanges() {
     const h = data['1h']; if (!h) return [];
     const cs = h.candles, now = Date.now(), out = [];
@@ -1818,33 +1847,38 @@
   }
   // divergência normal: topo mais alto com RSI mais baixo (▼) / fundo mais baixo com RSI mais alto (▲), entre swings seguidos do mesmo tipo.
   // "viva" = é o par mais recente desse tipo e a estrutura ainda não quebrou depois dele. Inclui o extremo da perna em curso.
-  function divergences(d, L) {
+  // divergências RSI como no "RSI Divergence" do TradingView: pontos (pivots) no próprio RSI, n velas de cada lado;
+  // Bull = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; Bear = dois topos do RSI a descer com o preço a fazer topo mais alto.
+  // Regra extra: a linha que une os dois pontos tem de ficar limpa (o RSI não a atravessa entre eles). Distância entre 5 e 60 velas.
+  function divergences(d) {
     if (!d._rsi) d._rsi = rsiOf(d.candles);
-    const r = d._rsi, res = d[L].res, out = [];
-    const sw = res.swings.filter((s) => !s.start && s.i < d.closed.length).slice().sort((a, b) => a.i - b.i);
-    const st = res.state;
-    if (st && st.ext && st.trend) {
-      const ty = st.trend === 1 ? 'H' : 'L', last = sw.filter((s) => s.type === ty).pop();
-      if (st.ext.i < d.closed.length && (!last || (st.ext.i > last.i && (ty === 'H' ? st.ext.p > last.p : st.ext.p < last.p)))) sw.push({ type: ty, i: st.ext.i, p: st.ext.p, provisional: true });
-    }
-    for (const ty of ['H', 'L']) {
-      const xs = sw.filter((s) => s.type === ty);
-      for (let k = 1; k < xs.length; k++) {
-        const a = xs[k - 1], b = xs[k], ra = r[a.i], rb = r[b.i];
-        if (ra == null || rb == null) continue;
-        const bear = ty === 'H' && b.p > a.p && rb < ra, bull = ty === 'L' && b.p < a.p && rb > ra;
-        if (!bear && !bull) continue;
-        const lastOfType = k === xs.length - 1;
-        const brokeAfter = res.breaks.some((x) => x.i > b.i);
-        out.push({ dir: bull ? 1 : -1, a, b, ra, rb, live: lastOfType && !brokeAfter });
+    const key = (settings.divPivot || 5) + '|' + d.closed.length;
+    if (d._div && d._divKey === key) return d._div;
+    const r = d._rsi, cl = d.closed, n = cl.length, P = Math.max(2, +settings.divPivot || 5), out = [];
+    const isPiv = (i, lo) => { if (r[i] == null || i - P < 0 || i + P >= n) return false;
+      for (let k = 1; k <= P; k++) { const x = r[i - k], y = r[i + k]; if (x == null || y == null) return false; if (lo ? (x < r[i] || y < r[i]) : (x > r[i] || y > r[i])) return false; } return true; };
+    for (const lo of [true, false]) {
+      const piv = []; for (let i = P; i < n - P; i++) if (isPiv(i, lo)) piv.push(i);
+      for (let k = 1; k < piv.length; k++) {
+        const a = piv[k - 1], b = piv[k], dist = b - a; if (dist < 5 || dist > 60) continue;
+        const ra = r[a], rb = r[b], pa = lo ? cl[a].l : cl[a].h, pb = lo ? cl[b].l : cl[b].h;
+        const ok = lo ? rb > ra && pb < pa : rb < ra && pb > pa; if (!ok) continue;
+        let clean = true;
+        for (let j = a + 1; j < b && clean; j++) { const line = ra + (rb - ra) * (j - a) / dist; if (r[j] == null || (lo ? r[j] < line - 0.01 : r[j] > line + 0.01)) clean = false; }
+        if (!clean) continue;
+        // viva: é o último ponto deste tipo e o preço ainda não passou o extremo do 2.º ponto
+        let live = k === piv.length - 1;
+        if (live) for (let j = b + 1; j < n; j++) if (lo ? cl[j].l < pb : cl[j].h > pb) { live = false; break; }
+        out.push({ dir: lo ? 1 : -1, a: { i: a, p: pa }, b: { i: b, p: pb }, ra, rb, live });
       }
     }
-    return out.sort((x, y) => x.b.i - y.b.i);
+    out.sort((x, y) => x.b.i - y.b.i);
+    d._div = out; d._divKey = key; return out;
   }
   function divCell(d) {
-    const v = divergences(d, 'int').filter((x) => x.live).pop();
+    const v = divergences(d).filter((x) => x.live).pop();
     if (!v) return '<span class="muted">·</span>';
-    const t = `Divergência ${v.dir === 1 ? 'de alta' : 'de baixa'}: ${v.dir === 1 ? 'fundo' : 'topo'} ${fmt(v.a.p)} → ${fmt(v.b.p)}${v.b.provisional ? ' (perna em curso)' : ''}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}`;
+    const t = `Divergência ${v.dir === 1 ? 'de alta' : 'de baixa'}: ${v.dir === 1 ? 'fundo' : 'topo'} ${fmt(v.a.p)} → ${fmt(v.b.p)}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}`;
     return `<span title="${t}" style="font-size:16px;color:${v.dir === 1 ? '#26a69a' : '#ef5350'}">${v.dir === 1 ? '▲' : '▼'}</span>`;
   }
   // última quebra em formato curto: ▲ BOS · 27v · FVG ✔ · 💧 (o porquê da validação fica no tooltip)
@@ -1855,6 +1889,9 @@
     return `<span title="${tip}" style="white-space:nowrap"><span class="${b.dir === 1 ? 'upc' : 'dnc'}">${b.dir === 1 ? '▲' : '▼'} ${b.type}</span> <span class="muted">${b.barsAgo}v</span></span>${ex ? `<br><span class="small">${ex}</span>` : ''}`;
   }
 
+  // camada que termina num troço manual: a app não marca nada de novo nela (não deteta quebras novas)
+  const frozen = (dd, L) => { const sg = dd && dd[L] && dd[L].res && dd[L].res.segs; return !!(sg && sg.length && sg[sg.length - 1].mode === 'man'); };
+  const frozenBadge = '<br><span class="badge" style="background:#f5c518;color:#111" title="Esta camada termina num troço manual: a app não marca pontos nem quebras novas. No gráfico, em modo edição, escolhe ⏩ Continuar automático na vela a seguir à tua última marca.">✋ manual — não atualiza</span>';
   function renderTable() {
     const rows = [];
     for (const tf of TFS) {
@@ -1863,13 +1900,13 @@
       const b = n.lastBreak;
       const rs = recentState(n);
       const extCells = x.trend ? `
-        <td class="gl">${extBadge(x)}</td>
+        <td class="gl">${extBadge(x)}${frozen(d, 'ext') ? frozenBadge : ''}</td>
         <td class="wr" style="max-width:92px">${phaseCell(x)}</td>
         <td class="num">${pullCell(x)}</td>
         <td class="num">${pct(Math.abs(x.toInvalid))}<br><span class="muted small">${fmt(x.protected)}</span></td>`
-        : `<td class="gl muted" colspan="4">sem estrutura suficiente</td>`;
+        : `<td class="gl muted" colspan="4">sem estrutura suficiente${frozen(d, 'ext') ? frozenBadge : ''}</td>`;
       const intCells = n.trend ? `
-        <td class="gl">${recentBadge(n, tf.id)}</td>
+        <td class="gl">${recentBadge(n, tf.id)}${frozen(d, 'int') ? frozenBadge : ''}</td>
         <td class="num">${pullCell(n)}</td>
         <td>${brkCell(d, b)}${pendBadge(n)}</td>
         <td class="num">${divCell(d)}</td>
@@ -1877,7 +1914,7 @@
         <td>${b ? (b.volume === 'sim' ? '<span class="yes">sim</span>' : '<span class="muted">não</span>') + (b.volRatio ? ` <span class="muted small">${b.volRatio.toFixed(1).replace('.', ',')}×</span>` : '') : '—'}</td>
         <td>${b ? (b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`) : '—'}</td>
         <td class="liq">${(settings.liqTfs || []).includes(tf.id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
-        : `<td class="gl muted" colspan="8">sem estrutura suficiente</td>`;
+        : `<td class="gl muted" colspan="8">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
       rows.push(`<tr data-tf="${tf.id}" class="${tf.id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${tf.label}</td>${extCells}${intCells}</tr>`);
     }
     $('#tbody').innerHTML = rows.join('');
@@ -1984,7 +2021,9 @@
       const st = on[k];
       const noTf = !isCrypto(symbol) ? [ctxOf(st), st.zone, st.trig].filter((id) => id && !Y_IV[id] && !Y_AGG[id] && !Y_MAGG[id]) : [];
       if (noTf.length) return `<tr class="dim"><td class="tf">${st.name}</td><td colspan="5" class="muted">não disponível nesta ação — as ações não têm ${noTf.map(tfLabel).join(', ')}</td></tr>`;
-      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">${setupWhy(data, st).long}</td></tr>`;
+      const fz = [[st.zone, 'ext'], [st.trig, 'int'], [ctxOf(st), 'ext']].filter(([id, L]) => id && frozen(data[id], L)).map(([id, L]) => `${tfLabel(id)} (${L === 'ext' ? 'tendência principal' : 'movimento recente'})`);
+      const fzNote = fz.length ? `<div class="small" style="color:#f5c518;margin-top:3px">✋ ${fz.join(', ')} em modo manual — não atualiza até escolheres ⏩ Continuar automático</div>` : '';
+      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">${setupWhy(data, st).long}${fzNote}</td></tr>`;
       const up = r.dir === 1;
       const zoneCell = `<span class="chip ${r.zoneOk ? band(r.z.pullback) : 'off'}"><b>${tfLabel(st.zone)}</b> ${up ? '▲' : '▼'} ${pct(r.z.pullback)}${r.zoneOk ? ' ✔' : ''}</span>`;
       const trigCell = r.trig ? `<span class="chip ${r.trig.ok ? (up ? 'trgu' : 'trgd') : 'off'}"><b>${tfLabel(st.trig)}</b> ${r.trig.txt}</span>` : '—';
@@ -2007,7 +2046,7 @@
         <td class="tf">${st.name} <span class="muted small">${cid ? tfLabel(cid) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></td>
         <td><span class="${up ? 'upc' : 'dnc'}">${up ? '▲ compra' : '▼ venda'}</span></td>
         <td>${zoneCell}</td><td>${trigCell}</td><td>${chk}</td>
-        <td>${estado}${r.warn ? '<br>' + r.warn : ''}</td></tr>`;
+        <td>${estado}${r.warn ? '<br>' + r.warn : ''}${fzNote}</td></tr>`;
     }).join('');
     $('#confluence').innerHTML = `<div class="setups"><table><thead><tr><th>Setup</th><th>Sentido</th><th>1 · Zona (correção ≥ 50%)</th><th>2 · Quebra de estrutura</th><th>Checklist</th><th>Estado</th></tr></thead><tbody>${html}</tbody></table></div>`;
     const ms = $('#msetups');
@@ -2113,6 +2152,7 @@
   }
 
   // ---------- gráfico ----------
+  let rsiMarkers = null;
   let chart, candleSeries, rsiSeries, divSeries = [], markersApi, priceLines = [], overlay, ctx2d, drawState = null;
   function initChart() {
     const el = $('#chart');
@@ -2147,6 +2187,7 @@
   function ensureRsi(on) {
     if (on && !rsiSeries) {
       rsiSeries = chart.addSeries(LWC.LineSeries, { color: '#b39ddb', lineWidth: 1, priceLineVisible: false, lastValueVisible: true, priceFormat: { type: 'price', precision: 0, minMove: 1 }, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) }, 1);
+      rsiMarkers = LWC.createSeriesMarkers(rsiSeries, []);
       rsiSeries.createPriceLine({ price: 70, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
       rsiSeries.createPriceLine({ price: 30, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
       rsiSeries.createPriceLine({ price: 50, color: '#323a45', lineWidth: 1, lineStyle: 3, axisLabelVisible: false });
@@ -2179,12 +2220,15 @@
     rsiSeries.setData(cs.map((c, i) => (d._rsi[i] == null ? { time: c.tt } : { time: c.tt, value: d._rsi[i] })));
     // divergências da camada que estás a ver: linha no preço e no RSI (vivas a cheio, antigas esbatidas)
     divSeries.forEach((s) => chart.removeSeries(s)); divSeries = [];
-    for (const v of editMode ? [] : divergences(d, vE() ? 'ext' : 'int').slice(-8)) {
+    const divs = editMode ? [] : divergences(d).slice(-10);
+    for (const v of divs) {
       const col = v.dir === 1 ? '#26a69a' : '#ef5350', op = v.live ? 1 : 0.45, cl = d.closed;
       const mk = (pane, p1, p2) => { const s = chart.addSeries(LWC.LineSeries, { color: col, lineWidth: v.live ? 2 : 1, lineStyle: v.live ? 0 : 2, priceLineVisible: false, lastValueVisible: false, crosshairMarkerVisible: false, autoscaleInfoProvider: () => null }, pane);
         s.setData([{ time: cl[v.a.i].tt, value: p1 }, { time: cl[v.b.i].tt, value: p2 }]); s.applyOptions({ color: op < 1 ? col + '73' : col }); divSeries.push(s); };
       mk(0, v.a.p, v.b.p); mk(1, v.ra, v.rb);
     }
+    // etiquetas Bull / Bear no painel do RSI, no 2.º ponto de cada divergência
+    if (rsiMarkers) rsiMarkers.setMarkers(divs.map((v) => ({ time: d.closed[v.b.i].tt, position: v.dir === 1 ? 'belowBar' : 'aboveBar', shape: v.dir === 1 ? 'arrowUp' : 'arrowDown', color: v.live ? (v.dir === 1 ? '#26a69a' : '#ef5350') : (v.dir === 1 ? '#26a69a88' : '#ef535088'), text: v.dir === 1 ? 'Bull' : 'Bear' })));
     // swings externos com letra (os internos são desenhados no overlay)
     const sw = vE() ? d.ext.res.swings.slice(-400) : [];   // todos (a biblioteca só desenha os que estão à vista)
     markersApi.setMarkers(sw.map((s, k) => ({
@@ -2312,6 +2356,30 @@
         g.fillText((s.manual ? '✎' : '') + s.label, x, s.type === 'H' ? y - 6 : y + 13);
       }
     }
+    // POC diário / semanal: uma linha por cima das velas de cada dia / semana (só visual)
+    if (settings.pocOn && !editMode) {
+      const tfMs = TF_MS0[drawState.tf] || 0, cs = d.candles, bwp = Math.max(2, ts.options().barSpacing || 6);
+      const XC = (i) => ts.timeToCoordinate(cs[i].tt);
+      const runs = (keyFn, map, col, wdt, lab) => {
+        if (!map) return;
+        let i0 = 0;
+        for (let i = 1; i <= cs.length; i++) {
+          if (i < cs.length && keyFn(cs[i].t) === keyFn(cs[i0].t)) continue;
+          const k = keyFn(cs[i0].t), p = map.get(k);
+          if (p != null) {
+            const xa = XC(i0), xb = XC(i - 1), y = Y(p);
+            if (xa != null && xb != null && y != null && xb >= -bwp && xa <= paneW + bwp) {
+              const x1 = xa - bwp / 2 + 1, x2 = xb + bwp / 2 - 1;
+              g.strokeStyle = col; g.lineWidth = wdt; g.setLineDash([]); g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
+              if (x2 - x1 > 46) { g.fillStyle = col; g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'left'; g.fillText(lab, x1 + 2, y - 3); }
+            }
+          }
+          i0 = i;
+        }
+      };
+      if (settings.pocWeek !== false && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMap(data['1h'] || data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.9)', 2, 'POC S');
+      if (settings.pocDay !== false && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMap(data['15m'] || data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
+    }
     // troços manual / automático da camada à vista: linha vertical tracejada onde começa cada um
     {
       const segs = (vE() ? d.ext.res.segs : d.int.res.segs) || [];
@@ -2354,10 +2422,11 @@
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
-    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`; $('#autoBtn').title = `A app volta a criar sozinha a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe (apaga as tuas marcações dessa camada)`;
+    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`;
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
+    $('#pocBtn').classList.toggle('on', !!settings.pocOn); $('#pocBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Back (${nU})` : '↶ Back';
     $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
@@ -2366,7 +2435,14 @@
   function openMenu(x, y, items) {
     const m = $('#editMenu');
     m.innerHTML = items.map((it, k) => it.head ? `<div class="mhead">${it.label}</div>` : `<button data-k="${k}">${it.label}</button>`).join('') + '<button data-k="x" class="muted">Cancelar</button>';
-    m.style.left = Math.min(x + 8, $('#chart').clientWidth - 260) + 'px'; m.style.top = Math.max(4, y - 10) + 'px'; m.style.display = 'block';
+    // nunca sai do gráfico: abre para cima / para a esquerda quando é preciso; se não couber, fica com scroll
+    const box = $('#chart'), cw = box.clientWidth, ch = box.clientHeight;
+    m.style.maxHeight = Math.max(120, ch - 8) + 'px'; m.style.overflowY = 'auto';
+    m.style.visibility = 'hidden'; m.style.display = 'block'; m.style.left = '0px'; m.style.top = '0px';
+    const mw = m.offsetWidth, mh = m.offsetHeight;
+    let left = x + 8; if (left + mw > cw - 4) left = Math.max(4, x - mw - 8);
+    let top = y - 10; if (top + mh > ch - 4) top = Math.max(4, Math.min(y + 10, ch - 4) - mh);
+    m.style.left = left + 'px'; m.style.top = Math.max(4, top) + 'px'; m.style.visibility = '';
     m.querySelectorAll('button').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); const k = b.dataset.k; closeMenu(); if (k !== 'x') { if (!items[+k].nav) pushUndo(selectedTf); items[+k].run(); } }));
   }
   // início antigo (sem modo): manual até à última marca e automático depois -> passa a modos explícitos
@@ -2514,13 +2590,11 @@
       if (segs.length && k > segs[0].i) {
         const cur = segs.filter((s) => s.i <= k).slice(-1)[0], tk = T(k);
         if (cur && cur.mode === 'man') items.push({ label: '⏩ Continuar automático', run: () => { const e = ed(); e[L].modes = (e[L].modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'auto' }]); fixLegacy(e[L], segs); done(); } });
-        if (cur && cur.mode === 'auto') items.push({ label: '✋ Continuar manual', nav: true, run: () => {
-          openMenu(px, py, [{ head: true, label: 'Apaga tudo o que está marcado desta vela para a frente (o que está para trás fica)' },
-            { label: '✋ Sim, continuar manual', run: () => {
-              const e = ed(), x = e[L];
-              for (const t of [...x.add.keys()]) if (t >= tk) x.add.delete(t);
-              for (const s of [x.ign, x.noBreak, x.yesBreak]) for (const t of [...s]) if (t >= tk) s.delete(t);
-              x.modes = (x.modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'man' }]); fixLegacy(x, segs); done(); } }]); } });
+        if (cur && cur.mode === 'auto') items.push({ label: '✋ Continuar manual', run: () => {
+          const e = ed(), x = e[L];
+          for (const t of [...x.add.keys()]) if (t >= tk) x.add.delete(t);
+          for (const s of [x.ign, x.noBreak, x.yesBreak]) for (const t of [...s]) if (t >= tk) s.delete(t);
+          x.modes = (x.modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'man' }]); fixLegacy(x, segs); done(); } });
       }
     }
     if (items.length) openMenu(px, py, items);
@@ -2664,9 +2738,11 @@
       const ev = favEvals(s), rank = Math.max(0, ...ev.filter(Boolean).map((x) => x.rank));
       const cells = ev.map((x, k) => {
         if (!x) { const w = setupWhy(f.tfs || {}, setups[k]); return `<span class="muted small" title="${w.long}">${w.short}</span>`; }
+        const fzs = [[setups[k].zone, 'ext'], [setups[k].trig, 'int'], [ctxOf(setups[k]), 'ext']].filter(([id, L]) => id && frozen((f.tfs || {})[id], L)).map(([id]) => tfLabel(id));
+        const fzTag = fzs.length ? ` <span title="Em modo manual (não atualiza): ${fzs.join(', ')}" style="color:#f5c518">✋ ${fzs[0]} manual</span>` : '';
         const up = x.dir === 1, cls = x.rank === 4 ? (up ? 'entu' : 'entd') : x.rank >= 2 ? band(x.z.pullback) : 'off';
         const txt = x.rank === 4 ? '✔ Pronto' : x.rank === 1 ? 'fora da zona' : 'falta: ' + x.missing.join(', ');
-        return `<span class="chip ${cls} favcell" title="${x.st.name}: zona ${pct(x.z.pullback)}"><span class="mname">${x.st.name} </span>${up ? '▲' : '▼'} ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
+        return `<span class="chip ${cls} favcell" title="${x.st.name}: zona ${pct(x.z.pullback)}"><span class="mname">${x.st.name} </span>${up ? '▲' : '▼'} ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}${fzTag}</span>`;
       });
       return { s, rank, cells, price: f.price };
     }).sort((a, b) => {
@@ -2796,7 +2872,7 @@
   function openSettings() {
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
-    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
+    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setPocD').checked = settings.pocDay !== false; $('#setPocW').checked = settings.pocWeek !== false; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
@@ -2807,7 +2883,7 @@
     settings = Object.assign({}, settings, {
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, volMult: +$('#setVol').value,
-      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
+      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, divPivot: Math.max(2, Math.min(15, +$('#setDivPiv').value || 5)), pocDay: $('#setPocD').checked, pocWeek: $('#setPocW').checked, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
       tfs: [...document.querySelectorAll('#setTfs input:checked')].map((i) => i.value),
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
@@ -2960,14 +3036,15 @@
     $('#editBtn').addEventListener('click', () => setEdit(!editMode));
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
+    $('#pocBtn').addEventListener('click', () => { settings.pocOn = !settings.pocOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
-    $('#clearBtn').addEventListener('click', (ev) => {
-      const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
+    $('#clearBtn').addEventListener('click', () => {
+      const id = selectedTf;
       if (!editMode) setEdit(true);
       const L = editLayer;
-      openMenu(b.left - r.left, 8, [{ label: `Apagar a estrutura ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} neste timeframe`, run: () => {
-        const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { blank: true, range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id); } }]);
+      pushUndo(id);
+      const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { blank: true, range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id);
     });
     $('#importBtn').addEventListener('click', (ev) => {
       const id = selectedTf, d = data[id], r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
@@ -2982,13 +3059,6 @@
           { label: '⤓ Sim, importar', run: () => { const e = getEdits(id, true); for (const s of miss) { const t = cl[s.i].t; e.int.ign.delete(t); if (!e.int.add.has(t)) e.int.add.set(t, s.type); } saveEdits(); refreshTf(id); } }]
         : [{ head: true, label: 'O movimento recente já tem todos os pontos da tendência principal' }];
       openMenu(Math.max(0, b.left - r.left), 8, items);
-    });
-    $('#autoBtn').addEventListener('click', (ev) => {
-      const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect(), L = editLayer;
-      const lab = (TFS.find((t) => t.id === id) || {}).label || id;
-      openMenu(Math.max(0, b.left - r.left), 8, [
-        { head: true, label: `Vais perder as tuas marcações ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} no ${lab}` },
-        { label: `⟳ Sim, a app volta a criar a estrutura sozinha`, run: () => { const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id); } }]);
     });
     $('#maxBtn').addEventListener('click', () => toggleMax());
     $('#csvBtn').addEventListener('click', exportCsv);
