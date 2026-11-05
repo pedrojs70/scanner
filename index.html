@@ -3009,8 +3009,20 @@
     if (row) window.scrollTo({ top: row.getBoundingClientRect().top + window.scrollY - hdr - 6, behavior: 'smooth' });
   }
   // pesquisa de ativos (Yahoo + Binance): devolve opções { symbol, name, exch }
+  // metais preciosos: contratos futuros contínuos da COMEX/NYMEX (Yahoo), que a pesquisa normal não mostra
+  const METALS = [
+    { symbol: 'GC=F', name: 'Ouro (gold) · futuro', exch: 'COMEX', keys: ['gold', 'ouro', 'xau', 'gc=f'] },
+    { symbol: 'SI=F', name: 'Prata (silver) · futuro', exch: 'COMEX', keys: ['silver', 'prata', 'xag', 'si=f'] },
+    { symbol: 'PL=F', name: 'Platina (platinum) · futuro', exch: 'NYMEX', keys: ['platinum', 'platina', 'xpt', 'pl=f'] },
+    { symbol: 'PA=F', name: 'Paládio (palladium) · futuro', exch: 'NYMEX', keys: ['palladium', 'paladio', 'paládio', 'xpd', 'pa=f'] },
+  ];
+  function metalHits(q) {
+    const v = String(q || '').trim().toLowerCase(); if (v.length < 2) return [];
+    if (/^(metais|metals|metal)/.test(v)) return METALS.slice();
+    return METALS.filter((m) => m.keys.some((k) => k.startsWith(v) || v.startsWith(k)));
+  }
   async function searchAssets(q) {
-    const up = normSym(q), opts = [];
+    const up = normSym(q), opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch }));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance' });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3030,7 +3042,7 @@
   async function favSearch(q, pickFirst) {
     const box = $('#favSug'); if (!box) return;
     const up = normSym(q);
-    const opts = [];
+    const opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch }));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance', crypto: true });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3236,7 +3248,7 @@
     const openTyped = (v) => { const ns = normSym(v) || v.trim().toUpperCase(); symSug.style.display = 'none'; if ((settings.favs || []).includes(ns) || favOpen) return openSymbol(ns); symbol = ns; $('#symbol').value = symbol; save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); symSug.style.display = 'none'; };
     $('#symForm').addEventListener('submit', async (e) => {
       e.preventDefault(); const v = $('#symbol').value.trim(); if (!v) return;
-      if (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v)) return openTyped(v);   // ticker exato (BTCUSDT, AAPL, ASML.AS, NASDAQ:MSFT)
+      if (!metalHits(v).length && (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v) || /^[A-Z]{1,3}=F$/i.test(v))) return openTyped(v);   // ticker exato (BTCUSDT, AAPL, ASML.AS, NASDAQ:MSFT)
       const opts = await searchAssets(v);
       if (opts.length === 1 && !opts[0].err) openTyped(opts[0].symbol); else showSug(symSug, opts, openTyped);
     });
