@@ -199,6 +199,8 @@
   .favcell .mname { display:none; }
   .favrow.open { background:#1d2530; position:sticky; top:var(--hdr, 60px); z-index:4; border:1px solid #f5c518; border-radius:8px 8px 0 0; box-shadow:0 4px 10px rgba(0,0,0,.4); }
   input[type=search]::-webkit-search-cancel-button { display:none; }
+  .favchart { margin-left:8px; background:none; border:1px solid var(--line); border-radius:6px; padding:1px 6px; cursor:pointer; font-size:14px; line-height:1.3; vertical-align:middle; }
+  .favchart:hover { border-color:#f5c518; }
   .favdetail { border:1px solid #f5c518; border-radius:10px; margin:6px 0 12px; padding:8px; background:#0f1216; }
   .favdethead { display:flex; align-items:center; gap:8px; padding:2px 4px 8px; }
   .favdetail .chartbox { margin-top:10px; }
@@ -1982,7 +1984,7 @@
       const st = on[k];
       const noTf = !isCrypto(symbol) ? [ctxOf(st), st.zone, st.trig].filter((id) => id && !Y_IV[id] && !Y_AGG[id] && !Y_MAGG[id]) : [];
       if (noTf.length) return `<tr class="dim"><td class="tf">${st.name}</td><td colspan="5" class="muted">não disponível nesta ação — as ações não têm ${noTf.map(tfLabel).join(', ')}</td></tr>`;
-      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">a carregar dados de ${tfLabel(st.zone)} / ${tfLabel(st.trig)}…</td></tr>`;
+      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">${setupWhy(data, st).long}</td></tr>`;
       const up = r.dir === 1;
       const zoneCell = `<span class="chip ${r.zoneOk ? band(r.z.pullback) : 'off'}"><b>${tfLabel(st.zone)}</b> ${up ? '▲' : '▼'} ${pct(r.z.pullback)}${r.zoneOk ? ' ✔' : ''}</span>`;
       const trigCell = r.trig ? `<span class="chip ${r.trig.ok ? (up ? 'trgu' : 'trgd') : 'off'}"><b>${tfLabel(st.trig)}</b> ${r.trig.txt}</span>` : '—';
@@ -2157,7 +2159,7 @@
         const [p0, p1] = chart.panes();
         if (p1) {
           if (!on) p1.setStretchFactor(0.0001);
-          else { p0.setStretchFactor(1); p1.setStretchFactor(0.3); setTimeout(() => { try { if (rsiOn) chart.panes()[1].setHeight(130); } catch (e) {} }, 120); }   // depois de o gráfico voltar ao tamanho normal
+          else { p0.setStretchFactor(1); p1.setStretchFactor(0.3); setTimeout(() => { try { if (rsiOn) chart.panes()[1].setHeight(Math.max(110, Math.round($('#chart').clientHeight * 0.2))); } catch (e) {} }, 160); }   // depois de o gráfico voltar ao tamanho normal
         }
       } catch (e) {}
     }
@@ -2548,6 +2550,8 @@
   function toggleMax(force) {
     const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
     box.classList.toggle('max', on); $('#maxBtn').textContent = on ? '✕ Fechar' : '⤢ Gráfico maior';
+    setTimeout(() => { try { if (rsiOn && chart.panes()[1]) chart.panes()[1].setHeight(Math.max(110, Math.round($('#chart').clientHeight * 0.2))); } catch (e) {} }, 150);   // RSI com ~20% da altura
+    if (!on && chartFromFav) { chartFromFav = false; setTimeout(() => { const s = favOpen; closeFav(); const row = s && document.querySelector(`.favrow[data-s="${CSS.escape(s)}"]`); if (row) row.scrollIntoView({ block: 'center' }); }, 0); }
     document.body.style.overflow = on ? 'hidden' : '';
   }
 
@@ -2603,6 +2607,13 @@
     favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now() };
   }
   // avaliação de um setup num ativo dos favoritos (mesmas regras do painel de setups)
+  // porque é que um setup não pode ser avaliado (dados em falta ou tendência principal da zona sem sentido)
+  function setupWhy(dm, st) {
+    const dz = dm[st.zone], dt = dm[st.trig];
+    if (!dz || !dt) return { short: 'a carregar…', long: `a carregar dados de ${tfLabel(st.zone)} / ${tfLabel(st.trig)}…` };
+    const lab = dz.ext.snap.label || 'sem sentido definido';
+    return { short: `sem tendência no ${tfLabel(st.zone)}`, long: `${tfLabel(st.zone)}: a tendência principal não tem sentido definido (${lab}) — sem isso o setup não é avaliado` };
+  }
   function favSetup(sym, st) {
     const dm = (favData[sym] || {}).tfs || {}, dz = dm[st.zone], dt = dm[st.trig];
     if (!dz || !dt || !dz.ext.snap.trend) return null;
@@ -2633,6 +2644,13 @@
   }
   function unmountDetail() { if (anchors) anchors.forEach(([n, c]) => c.parentNode.insertBefore(n, c.nextSibling)); if (detailWrap) detailWrap.remove(); }
   function closeFav() { favOpen = null; unmountDetail(); renderFavList(); }
+  // ícone 📈: abre o ativo e o gráfico logo em ecrã inteiro (leitura, com RSI); ao fechar o gráfico volta à lista
+  let chartFromFav = false;
+  function openFavChart(s) {
+    if (favOpen !== s) toggleFav(s);
+    chartFromFav = true;
+    setTimeout(() => { toggleMax(true); renderChart(true); }, 60);
+  }
   function favEvals(s) { return (settings.setups || []).filter((x) => x.on).map((st) => favSetup(s, st)); }
   const FAV_SORTS = { az: 'Ordem: A–Z', crypto: 'Ordem: crypto primeiro', stocks: 'Ordem: ações primeiro', ready: 'Ordem: prontos primeiro' };
   function renderFavList() {
@@ -2645,7 +2663,7 @@
       if (!f) return { s, rank: -1, cells: setups.map(() => '<span class="muted small">a carregar…</span>') };
       const ev = favEvals(s), rank = Math.max(0, ...ev.filter(Boolean).map((x) => x.rank));
       const cells = ev.map((x, k) => {
-        if (!x) return '<span class="muted small">—</span>';
+        if (!x) { const w = setupWhy(f.tfs || {}, setups[k]); return `<span class="muted small" title="${w.long}">${w.short}</span>`; }
         const up = x.dir === 1, cls = x.rank === 4 ? (up ? 'entu' : 'entd') : x.rank >= 2 ? band(x.z.pullback) : 'off';
         const txt = x.rank === 4 ? '✔ Pronto' : x.rank === 1 ? 'fora da zona' : 'falta: ' + x.missing.join(', ');
         return `<span class="chip ${cls} favcell" title="${x.st.name}: zona ${pct(x.z.pullback)}"><span class="mname">${x.st.name} </span>${up ? '▲' : '▼'} ${txt}${x.sweep ? ' 💧' : ''}${x.disp ? ' ⚖' : ''}</span>`;
@@ -2660,10 +2678,11 @@
     });
     const sb = $('#favSort'); if (sb) sb.textContent = FAV_SORTS[settings.favSort || 'az'];
     box.innerHTML = (rows.length ? `<div class="favgrid favh" style="${cols}"><span>Ativo</span><span>Preço</span>${setups.map((st) => `<span>${st.name}<br><span class="muted small">${ctxOf(st) ? tfLabel(ctxOf(st)) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></span>`).join('')}<span></span></div>` : '')
-      + (rows.length ? rows.map((r) => `${favOpen === r.s ? '<div class="favopenwrap">' : ''}<div class="favgrid favrow ${r.rank === 4 ? 'ready' : ''} ${favOpen === r.s ? 'open' : ''}" style="${cols}" data-s="${r.s}"><span class="favsym">${favOpen === r.s ? '▾ ' : ''}${r.s}${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span>${r.cells.map((c) => `<span>${c}</span>`).join('')}<button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>${favOpen === r.s ? '<div class="favslot"></div></div>' : ''}`).join('')
+      + (rows.length ? rows.map((r) => `${favOpen === r.s ? '<div class="favopenwrap">' : ''}<div class="favgrid favrow ${r.rank === 4 ? 'ready' : ''} ${favOpen === r.s ? 'open' : ''}" style="${cols}" data-s="${r.s}"><span class="favsym">${favOpen === r.s ? '▾ ' : ''}${r.s}<button class="favchart" data-c="${r.s}" title="Abrir o gráfico">📈</button>${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span>${r.cells.map((c) => `<span>${c}</span>`).join('')}<button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>${favOpen === r.s ? '<div class="favslot"></div></div>' : ''}`).join('')
         : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um nome ou ticker (ex.: apple, ETHUSDT) ou importa a tua watchlist do TradingView.</div>');
     box.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); if (favOpen === b.dataset.x) { favOpen = null; unmountDetail(); } settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavList(); updateStar(); }));
     box.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => toggleFav(r.dataset.s)));
+    box.querySelectorAll('.favchart').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); openFavChart(b.dataset.c); }));
     const slot = box.querySelector('.favslot'); if (slot && favOpen) mountDetail(slot);
   }
   function renderFavs() {
