@@ -2463,11 +2463,15 @@
     if (param.forceK != null) k = param.forceK;
     else if (param.logical != null) {
       const k0 = Math.round(param.logical), r = Math.max(1, Math.ceil((TOL + 2) / Math.max(bw, 0.5)));
-      let best = Infinity;
+      // 1.º a vela que está mesmo debaixo do clique (corpo ou pavio); só se não houver nenhuma, a de pavio mais perto dentro da margem
+      let best = Infinity, bestDirect = Infinity;
       for (let q = Math.max(0, k0 - r); q <= Math.min(cl.length - 1, k0 + r); q++) {
         const x = X(q), yh = Y(cl[q].h), yl = Y(cl[q].l); if (x == null || yh == null || yl == null) continue;
-        if (Math.abs(px - x) > Math.max(bw / 2, 1) + TOL || py < yh - TOL || py > yl + TOL) continue;
-        const dh = Math.abs(py - yh), dl = Math.abs(py - yl), dd = Math.min(dh, dl) + Math.abs(px - x) * 0.5;
+        const dx = Math.abs(px - x); if (dx > Math.max(bw / 2, 1) + TOL || py < yh - TOL || py > yl + TOL) continue;
+        const dh = Math.abs(py - yh), dl = Math.abs(py - yl);
+        if (bw >= 3 && dx <= bw / 2) { if (dx < bestDirect) { bestDirect = dx; k = q; pickTop = dh <= dl; } continue; }
+        if (bestDirect < Infinity) continue;
+        const dd = Math.min(dh, dl) + dx * 0.5;
         if (dd < best) { best = dd; k = q; pickTop = dh <= dl; }
       }
     }
