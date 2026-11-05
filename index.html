@@ -86,7 +86,7 @@
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
   #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
-  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
@@ -303,7 +303,7 @@
       <li><b>Editar estrutura (no gráfico):</b> liga “✎ Editar estrutura” e clica numa vela — perto da máxima para opções de topo, perto da mínima para opções de fundo. O gráfico mostra sempre uma só camada — a do botão a amarelo (“Tendência principal” ou “Movimento recente”), tanto a ler como a editar; editas essa. Cada camada e cada timeframe têm as suas próprias marcas. O clique “cola” à ponta de pavio mais próxima.
 <br>• <b>HH / LL</b> — este topo/fundo quebrou a estrutura. <b>LH / HL</b> — não houve quebra.
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe. O gráfico fica sem estrutura até marcares o ponto de partida.
-<br>• <b>▶ Início manual / ▶ Início automático</b> (no bloco de topo ou de fundo da vela) — a estrutura começa aqui; o que está para trás deixa de contar. <b>Manual</b>: só contam as tuas marcas, a app não acrescenta nada. <b>Automático</b>: a app marca sozinha e tu corriges. Depois do início, numa vela mais à frente: <b>⏩ Continuar automático</b> (a app passa a marcar sozinha a partir daí) ou <b>✋ Continuar manual</b> (apaga o que está marcado dessa vela para a frente — nunca para trás — e a partir daí só contam as tuas marcas). Linhas verticais tracejadas mostram onde começa cada troço. <b>⤓ Importar da principal</b> (movimento recente): acrescenta como topo/fundo os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL. <b>⟳ Automática</b>: apaga as tuas marcas desta camada e a app volta a fazer tudo.
+<br>• <b>▶ Início manual / ▶ Início automático</b> (no bloco de topo ou de fundo da vela) — a estrutura começa aqui; o que está para trás deixa de contar. <b>Manual</b>: só contam as tuas marcas, a app não acrescenta nada. <b>Automático</b>: a app marca sozinha e tu corriges. Depois do início, numa vela mais à frente: <b>⏩ Continuar automático</b> (a app passa a marcar sozinha a partir daí) ou <b>✋ Continuar manual</b> (apaga o que está marcado dessa vela para a frente — nunca para trás — e a partir daí só contam as tuas marcas). Linhas verticais tracejadas mostram onde começa cada troço. <b>⤓ Importar da principal</b> (movimento recente): acrescenta como topo/fundo os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL. <b>Mover o automático</b>: arrasta a linha azul tracejada do automático para a direita (ou, no menu de uma vela, <b>⏩ Mover o automático para aqui</b>). Os pontos que a app marcou entre a linha antiga e a nova ficam como marcas tuas (✎), esse troço fica como está, e a app só marca sozinha daí para a frente. A linha fica como referência da última vez que reviste o gráfico. <b>Em modo edição</b> o gráfico fica limpo: só velas e estrutura.
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
 <br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
 <br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
@@ -321,7 +321,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -386,6 +386,8 @@
   <div id="setTfs"></div>
   <div>Coluna “Liquidez próxima” nos timeframes <span class="muted small">(o aviso no cartão funciona sempre, em todos)</span></div>
   <div id="setLiq" class="settfs"></div>
+  <div class="field"><div>Cópias de segurança das marcações<small>a app guarda uma cópia por dia, antes de juntar com a conta (ao fazer login) e antes de repor uma cópia; ficam as 10 mais recentes, neste aparelho</small></div><span style="display:flex;gap:6px;flex-wrap:wrap"><select id="bakSel" style="max-width:260px"></select><button id="bakRestore" type="button">Repor</button></span></div>
+  <div class="field"><div>Exportar velas<small>descarrega as velas do timeframe que estás a ver no gráfico (para afinar a app com o Claude)</small></div><button id="csvBtn" type="button">⬇ Exportar velas</button></div>
   <div class="actions"><button id="setCancel">Cancelar</button><button id="setSave" class="primary">Guardar</button></div>
 </div></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -545,6 +547,8 @@
           trend = nd; prot = pt;
           target = prevExt ? { p: prevExt.p, i: prevExt.i } : null;
           ext = nd === 1 ? highest(k, j - 1 >= k ? j - 1 : k) : lowest(k, j - 1 >= k ? j - 1 : k); counter = null;
+          // HL/LH marcado antes de o topo/fundo da perna ser ultrapassado: a perna continua a ir até esse topo/fundo
+          if (prevExt && (nd === 1 ? prevExt.p > ext.p : prevExt.p < ext.p)) ext = { p: prevExt.p, i: prevExt.i };
         }
         const ex = res.swings.findIndex((s) => s.i === k && s.type === (top ? 'H' : 'L'));
         if (ex >= 0) res.swings.splice(ex, 1);
@@ -1006,7 +1010,10 @@
       // limite = último swing contrário ainda por quebrar (o "ponto 3")
       let prot = trend === 1 ? lastSL : lastSH;
       if (!prot || prot.broken || (lb && prot.i < lb.from)) prot = lb ? (trend === 1 ? lowest(lb.from, n - 1) : highest(lb.from, n - 1)) : (trend === 1 ? (lastSL || lowest(0, n - 1)) : (lastSH || highest(0, n - 1)));
-      const ext = trend === 1 ? highest(prot.i, n - 1) : lowest(prot.i, n - 1);
+      let ext = trend === 1 ? highest(prot.i, n - 1) : lowest(prot.i, n - 1);
+      // topo/fundo marcado à mão antes do limite e ainda por quebrar: a perna vai até ele (não só até ao extremo depois do limite)
+      const opp = trend === 1 ? lastSH : lastSL, isMan = (i) => !!(ov && ov.add && ov.add.has(T(i))) || (s0 >= 0 && i === s0);
+      if (opp && !opp.broken && opp.i < prot.i && (isMan(opp.i) || isMan(prot.i)) && (trend === 1 ? opp.p > ext.p : opp.p < ext.p)) ext = { p: opp.p, i: opp.i };
       res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken };
     }
     markInvalidSweeps(res);
@@ -1419,12 +1426,26 @@
   })();
   const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {}, modes: x.modes || [], noLvl: [...(x.noLvl || [])] }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
   const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
+  // hora da última alteração de cada gráfico (para, ao juntar com a conta, ganhar sempre a versão mais recente)
+  const EDAT = 'mss_edits_at', edAt = load(EDAT, {}), edLast = {};
+  for (const k in edits) edLast[k] = JSON.stringify(serEd(edits[k]));
   function saveEdits() {
-    const out = {};
-    for (const k in edits) out[k] = serEd(edits[k]);
-    save(EDKEY, out);
+    const out = {}, now = Date.now();
+    for (const k in edits) { out[k] = serEd(edits[k]); const j = JSON.stringify(out[k]); if (edLast[k] !== j) { edLast[k] = j; edAt[k] = now; } }
+    for (const k in edLast) if (!edits[k]) { delete edLast[k]; edAt[k] = now; }
+    save(EDKEY, out); save(EDAT, edAt);
     cloudPushEdits();
   }
+  // cópias de segurança das marcações (neste navegador): antes de juntar com a conta, antes de repor uma cópia e uma por dia
+  const BAKKEY = 'mss_backups1';
+  function makeBackup(why, extra) {
+    if (!Object.keys(edLast).length) return;
+    const list = load(BAKKEY, []);
+    list.unshift(Object.assign({ at: Date.now(), why, edits: Object.assign({}, edLast), settings: JSON.stringify(settings) }, extra || {}));
+    while (list.length > 10) list.pop();
+    try { localStorage.setItem(BAKKEY, JSON.stringify(list)); } catch (e) { while (list.length > 2) { list.pop(); try { localStorage.setItem(BAKKEY, JSON.stringify(list)); break; } catch (e2) {} } }
+  }
+  (function dailyBackup() { const list = load(BAKKEY, []); if (!list.length || Date.now() - list[0].at > 864e5) makeBackup('diária'); })();
   // desfazer passo a passo (por par e timeframe; guardado neste navegador)
   const UNDOKEY = 'mss_undo1';
   const undo = load(UNDOKEY, {});
@@ -2294,7 +2315,7 @@
     if (vI() && n.dispute) { const dn = n.dispute.dir === -1;
       add(n.dispute.confirm, '#f5c518', `em disputa: quebra ${dn ? '▼' : '▲'} confirma se fechar ${dn ? 'abaixo' : 'acima'}`, 2, 1);
       add(n.dispute.sweep, '#f5c518', `em disputa: sweep se fechar ${dn ? 'acima' : 'abaixo'}`, 2, 1); }
-    const q = (settings.liqTfs || []).includes(selectedTf) ? liquidity(d) : null;
+    const q = !editMode && (settings.liqTfs || []).includes(selectedTf) ? liquidity(d) : null;
     if (q && q.below) add(q.below.p, '#90a4ae', q.below.equal ? 'fundos iguais' : 'liquidez', 3, 1);
     if (q && q.above) add(q.above.p, '#90a4ae', q.above.equal ? 'topos iguais' : 'liquidez', 3, 1);
 
@@ -2317,7 +2338,8 @@
     const X = (i) => (i >= cl.length ? paneW : ts.timeToCoordinate(cl[i].tt));
     const Y = (p) => candleSeries.priceToCoordinate(p);
     // killzones (faixas verticais de fundo, só em 1H e abaixo): Ásia, Londres, Nova Iorque
-    if (settings.kzOn && (TF_MS0[drawState.tf] || 0) <= 36e5) {
+    // em modo edição o gráfico fica limpo: só velas e estrutura (sem killzones, ranges automáticos, FVGs, zonas, liquidez, POC, médias)
+    if (settings.kzOn && !editMode && (TF_MS0[drawState.tf] || 0) <= 36e5) {
       const cs = d.candles, sc = sessionsCfg();
       const durH = (TF_MS0[drawState.tf] || 36e5) / 36e5;
       if (!d._sess || d._sessP !== settings.kzProfile + settings.sessions) { d._sessP = settings.kzProfile + settings.sessions; d._sess = cs.map((c) => { const h = nyParts(c.t).h; return candleInSess(h, durH, sc.asia) ? 'asia' : candleInSess(h, durH, sc.londres) ? 'londres' : candleInSess(h, durH, sc.ny) ? 'ny' : sc.fecho && candleInSess(h, durH, sc.fecho) ? 'fecho' : null; }); }
@@ -2334,7 +2356,7 @@
     }
     // ranges (caixas): manual a cheio, automáticos a tracejado
     const RCOL = SWCOL;
-    for (const x of rangesFor(drawState.tf).map((r) => evalRange(d, r, drawState.tf))) {
+    for (const x of rangesFor(drawState.tf).filter((r) => !editMode || !r.auto).map((r) => evalRange(d, r, drawState.tf))) {
       const r = x.r, col = RCOL[r.id] || '170,178,189', yt = Y(r.top), yb = Y(r.bot); if (yt == null || yb == null) continue;
       let i0 = cl.findIndex((c) => c.t >= r.t0); if (i0 < 0) continue;
       const xa = X(i0) ?? 0, xb = x.st.key === 'break' ? (X(x.st.k) ?? paneW) : paneW;
@@ -2348,13 +2370,13 @@
       for (const e of x.ev.slice(-6)) { const ex = X(e.k), ey = Y(e.dir === 1 ? r.top : r.bot); if (ex == null || ey == null) continue; drop(g, ex, e.dir === 1 ? ey - 13 * big : ey + 13 * big, col, big); }
     }
     // FVGs por preencher (recentes)
-    for (const f of d.int.res.fvgs.filter((f) => f.filled == null && f.mid >= cl.length - 300).slice(-12)) {
+    if (!editMode) for (const f of d.int.res.fvgs.filter((f) => f.filled == null && f.mid >= cl.length - 300).slice(-12)) {
       const x1 = X(f.mid), y1 = Y(f.top), y2 = Y(f.bot); if (x1 == null || y1 == null || y2 == null) continue;
       g.fillStyle = f.dir === 1 ? 'rgba(38,166,154,0.16)' : 'rgba(239,83,80,0.16)';
       g.fillRect(x1, Math.min(y1, y2), paneW - x1, Math.abs(y2 - y1) || 1);
     }
     const xs = d.ext.snap;
-    if (vE() && xs.trend) {
+    if (vE() && xs.trend && !editMode) {
       const x0 = X(d.ext.res.state.ext.i), y50 = Y(xs.levels[50]), y65 = Y(xs.levels[65]), y92 = Y(xs.levels[918]), yp = Y(xs.protected);
       const zone = (ya, yb, col) => { if (x0 != null && ya != null && yb != null) { g.fillStyle = col; g.fillRect(x0, Math.min(ya, yb), paneW - x0, Math.abs(yb - ya)); } };
       zone(y50, y65, 'rgba(255,213,79,0.07)'); zone(y65, y92, 'rgba(255,152,0,0.08)'); zone(y92, yp, 'rgba(255,82,82,0.10)');
@@ -2363,6 +2385,14 @@
     const vr = ts.getVisibleLogicalRange() || { from: 0, to: cl.length };
     const visSeg = (a, b) => Math.max(a, b) >= vr.from - 2 && Math.min(a, b) <= vr.to + 2;
     const visLast = (arr, a, b, n) => arr.filter((x) => visSeg(a(x), b(x))).slice(-n);
+    // textos das quebras e dos sweeps: se um cair em cima de outro já desenhado, desce/sobe uma linha
+    const placed = [];
+    const putText = (txt, x, y, below) => {
+      const w = g.measureText(txt).width, al = g.textAlign, x0 = al === 'right' ? x - w : al === 'center' ? x - w / 2 : x;
+      const hit = (yy) => placed.some((p) => x0 < p.x1 && x0 + w > p.x0 && yy - 9 < p.y1 && yy + 2 > p.y0);
+      let yy = y; for (let k = 1; k <= 4 && hit(yy); k++) yy = y + (below ? 11 : -11) * k;
+      placed.push({ x0, x1: x0 + w, y0: yy - 9, y1: yy + 2 }); g.fillText(txt, x, yy);
+    };
     const breaks = (res, internal) => {
       g.font = (internal ? '9px' : '10px') + ' Inter, system-ui, sans-serif'; g.textAlign = 'center';
       for (const b of visLast(res.breaks, (b) => b.from, (b) => b.i, internal ? 40 : 30)) {
@@ -2372,7 +2402,7 @@
         g.setLineDash(internal ? [2, 3] : b.type === 'CHoCH' ? [5, 3] : []); g.lineWidth = internal ? 1 : 1.6;
         g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
         const txt = (b.manual ? '✎ ' : '') + b.type + (b.why && b.why !== 'manual' ? ' · ' + b.why : ''), long = Math.abs(x2 - x1) > g.measureText(txt).width + 12;
-        g.textAlign = long ? 'right' : 'center'; g.fillText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, b.dir === 1 ? y - 4 : y + 11);
+        g.textAlign = long ? 'right' : 'center'; putText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, b.dir === 1 ? y - 4 : y + 11, b.dir !== 1);
       }
       g.setLineDash([]); g.globalAlpha = 1;
     };
@@ -2384,7 +2414,7 @@
         g.strokeStyle = g.fillStyle = 'rgba(170,178,189,0.42)'; g.setLineDash([2, 4]); g.lineWidth = 1;
         g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
         const txt = r.ign ? '✎ sweep (ponto ignorado)' : r.manual ? '✎ sweep (não é quebra)' : r.failed ? 'sweep (quebra falhada)' : 'sweep (quebra falsa)', long = Math.abs(x2 - x1) > g.measureText(txt).width + 12;
-        g.textAlign = long ? 'right' : 'center'; g.fillText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, r.dir === 1 ? y + 11 : y - 4);
+        g.textAlign = long ? 'right' : 'center'; putText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, r.dir === 1 ? y + 11 : y - 4, r.dir === 1);
       }
       g.setLineDash([]);
     };
@@ -2434,6 +2464,11 @@
     {
       const segs = (vE() ? d.ext.res.segs : d.int.res.segs) || [];
       g.font = '10px Inter, system-ui, sans-serif'; g.textAlign = 'left';
+      if (autoDrag && autoDrag.x != null) {   // a arrastar a linha do automático
+        g.strokeStyle = 'rgba(100,181,246,1)'; g.lineWidth = 2; g.setLineDash([6, 4]);
+        g.beginPath(); g.moveTo(autoDrag.x, 0); g.lineTo(autoDrag.x, paneH); g.stroke(); g.setLineDash([]);
+        g.fillStyle = 'rgba(100,181,246,1)'; g.fillText('⏩ automático a partir daqui', autoDrag.x + 4, 28);
+      }
       segs.forEach((s, k) => {
         const x = X(s.i); if (x == null || x < -2 || x > paneW + 2) return;
         const man = s.mode === 'man', col = man ? '245,197,24' : '100,181,246';
@@ -2502,7 +2537,64 @@
     const imp = segs.find((s) => s.implicit), cl = data[selectedTf].closed;
     if (imp && cl[imp.i] && !(x.modes || []).some((m) => m.t <= cl[imp.i].t)) x.modes = [{ t: cl[imp.i].t, mode: 'auto' }].concat(x.modes || []).sort((p, q) => p.t - q.t);
   }
+  // mover a linha do automático para a vela k: os pontos que a app marcou entre a linha antiga e a nova passam a marcas tuas (✎),
+  // esse troço fica manual (tal como está) e a app só marca sozinha daí para a frente
+  function autoLineInfo(L) {
+    const d = data[selectedTf]; if (!d) return null;
+    const segs = d[L].res.segs || []; const last = segs[segs.length - 1];
+    return last && last.mode === 'auto' ? { segs, cur: last } : null;
+  }
+  function moveAuto(L, k) {
+    const d = data[selectedTf], info = autoLineInfo(L); if (!d || !info || k <= info.cur.i || k >= d.closed.length) return false;
+    const { segs, cur } = info, cl = d.closed, T = (i) => cl[i].t, res = d[L].res;
+    pushUndo(selectedTf);
+    const x = getEdits(selectedTf, true)[L];
+    fixLegacy(x, segs);
+    for (const s of res.swings) {
+      if (s.i < cur.i || s.i >= k || s.manual || s.start || s.provisional) continue;
+      if (x.ign.has(T(s.i))) continue;
+      x.add.set(T(s.i), ['HH', 'HL', 'LH', 'LL'].includes(s.label) ? s.label : s.type === 'H' ? 'H' : 'L');
+    }
+    const t0 = T(cur.i), tPrev = cur.i > 0 ? T(cur.i - 1) : -Infinity;
+    if (cur.i === segs[0].i && x.start) x.start.mode = 'man';
+    x.modes = (x.modes || []).map((m) => (m.mode === 'auto' && m.t <= t0 && m.t > tPrev ? { t: m.t, mode: 'man' } : m)).filter((m) => m.t < T(k));
+    x.modes.push({ t: T(k), mode: 'auto' });
+    saveEdits(); refreshTf(selectedTf);
+    return true;
+  }
+  // arrastar a linha azul do automático (só em modo edição): ao largar, chama moveAuto
+  let autoDrag = null, suppressClick = false;
+  function initAutoDrag() {
+    const el = $('#chart');
+    const lineX = () => { const info = editMode && autoLineInfo(editLayer); if (!info) return null; const d = data[selectedTf], c = d.closed[info.cur.i]; const x = c ? chart.timeScale().timeToCoordinate(c.tt) : null; return x == null ? null : { x, info }; };
+    const pos = (ev) => { const r = el.getBoundingClientRect(), p = ev.touches ? ev.touches[0] || ev.changedTouches[0] : ev; return { x: p.clientX - r.left, y: p.clientY - r.top }; };
+    const start = (ev) => {
+      if (!editMode || autoDrag) return; const lx = lineX(); if (!lx) return;
+      const p = pos(ev), tol = ev.touches ? 16 : 7;
+      if (Math.abs(p.x - lx.x) > tol) return;
+      ev.stopPropagation(); ev.preventDefault();
+      autoDrag = { x: p.x }; closeMenu();
+      chart.applyOptions({ handleScroll: false, handleScale: false });
+    };
+    const move = (ev) => {
+      if (autoDrag) { ev.stopPropagation(); ev.preventDefault(); autoDrag.x = pos(ev).x; draw(); return; }
+      if (!editMode || ev.touches) return; const lx = lineX();
+      el.style.cursor = lx && Math.abs(pos(ev).x - lx.x) <= 7 ? 'ew-resize' : '';
+    };
+    const end = (ev) => {
+      if (!autoDrag) return; ev.stopPropagation();
+      const x = autoDrag.x; autoDrag = null; suppressClick = true; setTimeout(() => { suppressClick = false; }, 350);
+      chart.applyOptions({ handleScroll: true, handleScale: true });
+      const d = data[selectedTf], lg = chart.timeScale().coordinateToLogical(x);
+      const k = lg == null ? -1 : Math.min(d.closed.length - 1, Math.round(lg));
+      if (!moveAuto(editLayer, k)) draw();
+    };
+    el.addEventListener('mousedown', start, true); el.addEventListener('touchstart', start, { capture: true, passive: false });
+    window.addEventListener('mousemove', move, true); window.addEventListener('touchmove', move, { capture: true, passive: false });
+    window.addEventListener('mouseup', end, true); window.addEventListener('touchend', end, true);
+  }
   function onChartClick(param) {
+    if (suppressClick) return;
     if (!param.point || !drawState || (param.paneIndex != null && param.paneIndex !== 0)) return;
     const id = selectedTf, d = data[id], cl = d.closed, ts = chart.timeScale();
     const X = (i) => ts.timeToCoordinate(cl[i].tt), Y = (p) => candleSeries.priceToCoordinate(p);
@@ -2640,6 +2732,7 @@
       if (segs.length && k > segs[0].i) {
         const cur = segs.filter((s) => s.i <= k).slice(-1)[0], tk = T(k);
         if (cur && cur.mode === 'man') items.push({ label: '⏩ Continuar automático', run: () => { const e = ed(); e[L].modes = (e[L].modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'auto' }]); fixLegacy(e[L], segs); done(); } });
+        if (cur && cur.mode === 'auto' && cur === segs[segs.length - 1]) items.push({ label: '⏩ Mover o automático para aqui', nav: true, run: () => moveAuto(L, k) });
         if (cur && cur.mode === 'auto') items.push({ label: '✋ Continuar manual', run: () => {
           const e = ed(), x = e[L];
           for (const t of [...x.add.keys()]) if (t >= tk) x.add.delete(t);
@@ -2919,7 +3012,24 @@
   function recomputeAll() { for (const id of Object.keys(data)) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderPrev(); renderChart(true); }
 
   // ---------- definições ----------
+  function renderBackups() {
+    const sel = $('#bakSel'); if (!sel) return;
+    const list = load(BAKKEY, []);
+    const f = (ms) => new Date(ms).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    sel.innerHTML = list.length ? list.map((b, i) => `<option value="${i}">${f(b.at)} · ${b.why} · ${Object.keys(b.edits || {}).length} gráficos</option>`).join('') : '<option value="">ainda não há cópias</option>';
+    $('#bakRestore').disabled = !list.length;
+  }
+  function restoreBackup() {
+    const list = load(BAKKEY, []), b = list[+$('#bakSel').value]; if (!b) return;
+    if (!confirm('Repor as marcações desta cópia? As marcações atuais são guardadas antes numa nova cópia, por isso podes voltar atrás.')) return;
+    makeBackup('antes de repor uma cópia');
+    for (const k of Object.keys(edits)) delete edits[k];
+    for (const k in b.edits) { try { edits[k] = deserEd(JSON.parse(b.edits[k])); } catch (e) {} }
+    saveEdits(); renderBackups();
+    Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll();
+  }
   function openSettings() {
+    renderBackups();
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
     $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
@@ -2967,7 +3077,7 @@
     for (const k of keys) {
       const j = edits[k] ? JSON.stringify(serEd(edits[k])) : null;
       if (j === (cloud.synced[k] || null)) continue;
-      if (j) { cloud.synced[k] = j; cloudWrite(col.doc(docId(k)), (r) => r.set({ key: k, json: j, at: Date.now() })); }
+      if (j) { cloud.synced[k] = j; cloudWrite(col.doc(docId(k)), (r) => r.set({ key: k, json: j, at: edAt[k] || Date.now() })); }
       else { delete cloud.synced[k]; cloudWrite(col.doc(docId(k)), (r) => r.delete()); }
     }
   }
@@ -2982,13 +3092,25 @@
     let firstE = true, firstS = true;
     cloud.unsubs.push(base.collection('edits').onSnapshot((snap) => {
       const touched = new Set();
+      const chs = snap.docChanges();
+      // 1.ª leitura depois do login: guarda uma cópia do que está neste navegador e, em cada gráfico que existe
+      // nos dois lados com conteúdo diferente, fica a versão alterada mais recentemente (sem hora conhecida aqui: fica a da conta)
+      let keepLocal = new Set();
+      if (firstE) {
+        const conflicts = {};
+        chs.forEach((ch) => { if (ch.type === 'removed') return; const dt = ch.doc.data(), k = dt.key || ch.doc.id;
+          if (edLast[k] && edLast[k] !== dt.json) { conflicts[k] = { json: dt.json, at: dt.at || 0 }; if (edAt[k] && edAt[k] > (dt.at || 0)) keepLocal.add(k); } });
+        if (Object.keys(conflicts).length) makeBackup('antes de juntar com a conta', { cloud: conflicts });   // só quando há diferenças
+      }
       cloud.applying = true;
-      snap.docChanges().forEach((ch) => {
+      chs.forEach((ch) => {
         const dt = ch.doc.data(), k = dt.key || ch.doc.id;
         if (ch.type === 'removed') { delete cloud.synced[k]; if (!firstE && edits[k]) { delete edits[k]; touched.add(k); } return; }
         if (cloud.synced[k] === dt.json) return;
         cloud.synced[k] = dt.json;
-        try { edits[k] = deserEd(JSON.parse(dt.json)); touched.add(k); } catch (e) {}
+        if (keepLocal.has(k)) return;   // a versão deste navegador é mais recente: vai ser enviada para a conta
+        if (!firstE && dt.at && edAt[k] && edAt[k] > dt.at) return;   // eco antigo de uma alteração já ultrapassada aqui
+        try { edits[k] = deserEd(JSON.parse(dt.json)); edLast[k] = JSON.stringify(serEd(edits[k])); edAt[k] = dt.at || Date.now(); touched.add(k); } catch (e) {}
       });
       saveEdits();
       cloud.applying = false;
@@ -3061,6 +3183,7 @@
     $('#setX').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#settings').addEventListener('click', (e) => { if (e.target.id === 'settings') $('#settings').classList.remove('open'); });   // clicar fora fecha
     $('#setSave').addEventListener('click', applySettings);
+    $('#bakRestore').addEventListener('click', restoreBackup);
     $('#helpBtn').addEventListener('click', () => $('#help').classList.toggle('open'));
     $('#helpClose').addEventListener('click', () => $('#help').classList.remove('open'));
     $('#editHelp').addEventListener('click', () => $('#help').classList.add('open'));
@@ -3103,7 +3226,7 @@
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if (!menuOpen && !pendingRange) setEdit(false); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
+    initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
   // ---------- ecrã de entrada: aparece antes da app arrancar; a app só corre depois do login ----------
   const AUTH_ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
