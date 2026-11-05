@@ -271,11 +271,11 @@
       <li><b>Editar estrutura (no gráfico):</b> liga “✎ Editar estrutura” e clica numa vela — perto da máxima para opções de topo, perto da mínima para opções de fundo. O gráfico mostra sempre uma só camada — a do botão a amarelo (“Tendência principal” ou “Movimento recente”), tanto a ler como a editar; editas essa. Cada camada e cada timeframe têm as suas próprias marcas. O clique “cola” à ponta de pavio mais próxima.
 <br>• <b>HH / LL</b> — este topo/fundo quebrou a estrutura. <b>LH / HL</b> — não houve quebra.
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe. O gráfico fica sem estrutura até marcares o ponto de partida.
-<br>• <b>▶ Começar estrutura aqui</b> — apaga tudo o que o scanner tinha antes deste ponto. Daqui até à tua última marca só contam as tuas marcas; depois da última marca o scanner continua sozinho e nunca altera o que marcaste. Marca pelo menos o swing que define o limite (ex.: o HL que o LL quebra), senão a app não sabe que nível foi quebrado.
+<br>• <b>▶ Início manual / ▶ Início automático</b> (no bloco de topo ou de fundo da vela) — a estrutura começa aqui; o que está para trás deixa de contar. <b>Manual</b>: só contam as tuas marcas, a app não acrescenta nada. <b>Automático</b>: a app marca sozinha e tu corriges. Depois do início, numa vela mais à frente: <b>⏩ Continuar automático</b> (a app passa a marcar sozinha a partir daí) ou <b>✋ Continuar manual</b> (apaga o que está marcado dessa vela para a frente — nunca para trás — e a partir daí só contam as tuas marcas). Linhas verticais tracejadas mostram onde começa cada troço. <b>⤓ Importar da principal</b> (movimento recente): acrescenta como topo/fundo os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL. <b>⟳ Automática</b>: apaga as tuas marcas desta camada e a app volta a fazer tudo.
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
 <br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
 <br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
-<br>• <b>↶ Back</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, “Começar estrutura” ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto: se um HL/LH vinha de uma quebra, essa quebra deixa de contar (fica como sweep); um HH/LL ignorado deixa de ser alvo de quebra. Tudo é recalculado e gravado logo.
+<br>• <b>↶ Back</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, início manual/automático, continuar manual/automático ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto e nunca o passa para a vela ao lado: se era um HL/LH criado por uma quebra, essa quebra deixa de contar; se era um HH/LL, a quebra que o criou passa a sweep e esse nível deixa de poder ser quebrado nessa perna. Na linha cinzenta que fica, “É quebra” desfaz. Tudo é recalculado e gravado logo.
 <br>As marcas são gravadas logo (por par e timeframe) neste navegador e, com sessão iniciada, na tua conta — aparecem nos outros aparelhos. Ficam até carregares em “↺ Repor análise do scanner”.</li>
       <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
       <li><b>Tendência principal:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem ainda não fez novo topo/fundo a confirmar.</li>
@@ -289,7 +289,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Automática</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="autoBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcações desta camada neste timeframe e a app volta a criar a estrutura sozinha">⟳ Automática</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -503,10 +503,10 @@
         if (lab === 'HH' || lab === 'LL') {
           const ref = was === nd && target && target.i < k ? target : null;   // só um topo/fundo já confirmado conta como nível quebrado; a perna em curso não
           if (was === -nd && prot && nd * (pt.p - prot.p) > 0) {
-            res.breaks.push({ type: 'CHoCH', dir: nd, level: prot.p, from: prot.i, i: firstClose(prot.p, nd, prot.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual' });
+            res.breaks.push({ type: 'CHoCH', dir: nd, level: prot.p, from: prot.i, i: firstClose(prot.p, nd, prot.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual', mark: T(k) });
             lastBroken = prot.p; kind = 'CHoCH';
           } else if (ref && ref.i < k && nd * (pt.p - ref.p) > 0) {
-            res.breaks.push({ type: 'BOS', dir: nd, level: ref.p, from: ref.i, i: firstClose(ref.p, nd, ref.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual' });
+            res.breaks.push({ type: 'BOS', dir: nd, level: ref.p, from: ref.i, i: firstClose(ref.p, nd, ref.i + 1, k), conf: Math.min(j, n - 1), manual: true, why: 'manual', mark: T(k) });
             lastBroken = ref.p; kind = 'BOS';
           } else kind = was === -nd ? 'CHoCH' : (kind || 'BOS');
           // novo nível protegido: o fundo (topo) marcado à mão desde a referência anterior, senão o extremo contrário
@@ -531,12 +531,13 @@
       }
       if (j === n) break;   // vela extra só para fechar uma marcação manual na última vela fechada
       // 1) atualizar o extremo da perna
-      if (trend === 1) { if (H(j) > ext.p) { ext = { p: H(j), i: j }; counter = L(j); } else counter = Math.min(counter == null ? L(j) : counter, L(j)); }
-      if (trend === -1) { if (L(j) < ext.p) { ext = { p: L(j), i: j }; counter = H(j); } else counter = Math.max(counter == null ? H(j) : counter, H(j)); }
+      const frozen = ms.manAt(j);   // troço manual: o extremo da perna fica nas tuas marcas
+      if (trend === 1 && !frozen) { if (H(j) > ext.p) { ext = { p: H(j), i: j }; counter = L(j); } else counter = Math.min(counter == null ? L(j) : counter, L(j)); }
+      if (trend === -1 && !frozen) { if (L(j) < ext.p) { ext = { p: L(j), i: j }; counter = H(j); } else counter = Math.max(counter == null ? H(j) : counter, H(j)); }
       // 2) pivots (só para o arranque) e fixação do alvo após o recuo começar
       const pv = j - o.pivotLen;
       if (pv > s0 && pv >= 0 && !ignP(pv)) { if (isPH(pv)) lastPH = { p: H(pv), i: pv }; if (isPL(pv)) lastPL = { p: L(pv), i: pv }; }
-      if (trend !== 0 && !target && j - ext.i >= o.lockBars && !ignP(ext.i)) {   // topo/fundo ignorado: não é alvo de quebra
+      if (trend !== 0 && !target && j - ext.i >= o.lockBars && !ignP(ext.i) && !ms.manAt(j)) {   // topo/fundo ignorado: não é alvo de quebra
 
         const a = atr[ext.i] || atr[j] || 0;
         const retr = counter == null ? 0 : Math.abs(ext.p - counter);
@@ -545,7 +546,7 @@
         if (retr >= need) target = { p: ext.p, i: ext.i };
       }
 
-      if (s0 >= 0 && j <= ms.lastMan) continue;   // zona manual: só as marcas do utilizador
+      if (ms.manAt(j)) continue;   // troço manual: só as marcas do utilizador
       // 3) arranque
       if (trend === 0) {
         if (lastPH && C(j) > lastPH.p) {
@@ -571,22 +572,24 @@
       }
 
       const doCHoCH = (i0) => {             // CHoCH: a estrutura inverte
-        if (ignP(ext.i)) ext = d === 1 ? highest(prot.i, j) : lowest(prot.i, j);
-        swing(d === 1 ? 'H' : 'L', ext);
+        // topo/fundo ignorado à mão: não aparece como ponto, mas o preço continua a ser a origem da nova tendência
+        if (!ignP(ext.i)) swing(d === 1 ? 'H' : 'L', ext);
         addBreak('CHoCH', -d, prot.p, prot.i, j, i0);
         trend = -d; kind = 'CHoCH';
         prot = ext;
         const a2 = Math.min(prot.i + 1, j);
         ext = trend === 1 ? highest(a2, j) : lowest(a2, j);
         target = null; cntAgainst = cntWith = 0; counter = null;
+        return true;
       };
       const doBOS = (i0) => {               // BOS: a tendência continua
-        const a = Math.min(target.i + 1, j);
+        const segA = ms.segs.length ? ms.segs.filter((s) => s.i <= j).slice(-1)[0] : null;   // início do troço automático atual
+        const a = Math.min(Math.max(target.i + 1, segA && segA.mode === 'auto' && segA.i > s0 ? segA.i : 0), j);
         const np = d === 1 ? lowestRaw(a, j) : highestRaw(a, j);
         // o recuo que esta quebra criaria (HL/LH) foi ignorado à mão: a quebra não conta (fica como sweep)
         if (ignP(np.i)) { res.rejected.push({ type: 'BOS', dir: d, level: target.p, from: target.i, i: i0 == null ? j - o.confirm + 1 : i0, end: j, manual: true, ign: true, ignAt: np.i }); block = { dir: d, level: target.p }; cntAgainst = cntWith = 0; return false; }
         // o swing marcado é o extremo real da perna (pode ter varrido o nível com a wick)
-        const top = d === 1 ? highest(target.i, Math.max(target.i, np.i - 1)) : lowest(target.i, Math.max(target.i, np.i - 1));
+        const top = ms.manAt(target.i) ? target : d === 1 ? highest(target.i, Math.max(target.i, np.i - 1)) : lowest(target.i, Math.max(target.i, np.i - 1));
         swing(d === 1 ? 'H' : 'L', top); swing(d === 1 ? 'L' : 'H', np);
         addBreak('BOS', d, target.p, target.i, j, i0);
         kind = 'BOS'; prot = np;
@@ -598,7 +601,7 @@
       // quebra à espera de displacement
       if (pend) {
         const st = forcedYes(pend.i) ? 'ok' : disp(pend.dir, pend.level, pend.i, j);
-        if (st === 'ok') { const w = forcedYes(pend.i) ? 'manual' : disp.why; const okB = pend.type === 'CHoCH' ? (doCHoCH(pend.i), true) : target ? doBOS(pend.i) : false; if (okB) tagWhy(w); pend = null; continue; }
+        if (st === 'ok') { const w = forcedYes(pend.i) ? 'manual' : disp.why; const okB = pend.type === 'CHoCH' ? doCHoCH(pend.i) : target ? doBOS(pend.i) : false; if (okB) tagWhy(w); pend = null; continue; }
         if (st === 'wait') continue;
         res.rejected.push(Object.assign({ end: j }, pend)); block = { dir: pend.dir, level: pend.level }; pend = null;
       }
@@ -610,10 +613,19 @@
 
       const trigger = (type, dir, level, from) => {
         const i0 = j - o.confirm + 1;
+        // nível marcado como "não foi quebrado" (ignoraste o HH/LL que essa quebra criava): nunca conta enquanto for este o nível
+        const lk = T(from) + '|' + dir;
+        const lkFull = ov && ov.noLvl && [...ov.noLvl].find((s) => s === lk || s.startsWith(lk + '|'));
+        if (lkFull) {
+          const last = res.rejected[res.rejected.length - 1];
+          if (last && last.lvl === lkFull) last.end = j; else res.rejected.push({ type, dir, level, from, i: i0, end: j, manual: true, lvl: lkFull });
+          if (type === 'BOS' && target && !ignP(target.i)) swing(dir === 1 ? 'H' : 'L', target);   // o nível continua a ser um ponto da estrutura
+          block = { dir, level }; cntAgainst = cntWith = 0; return;
+        }
         if (forcedNo(i0)) { res.rejected.push({ type, dir, level, from, i: i0, end: j, manual: true }); block = { dir, level }; cntAgainst = cntWith = 0; return; }
-        if (forcedYes(i0) || !o.requireDisp) { const okB = type === 'CHoCH' ? (doCHoCH(i0), true) : doBOS(i0); if (okB && forcedYes(i0)) res.breaks[res.breaks.length - 1].manual = true; return; }
+        if (forcedYes(i0) || !o.requireDisp) { const okB = type === 'CHoCH' ? doCHoCH(i0) : doBOS(i0); if (okB && forcedYes(i0)) res.breaks[res.breaks.length - 1].manual = true; return; }
         const st = disp(dir, level, i0, j);
-        if (st === 'ok') { const w = disp.why; const okB = type === 'CHoCH' ? (doCHoCH(i0), true) : doBOS(i0); if (okB) tagWhy(w); return; }
+        if (st === 'ok') { const w = disp.why; const okB = type === 'CHoCH' ? doCHoCH(i0) : doBOS(i0); if (okB) tagWhy(w); return; }
         const pd = { type, dir, level, from, i: i0 };
         if (st === 'wait') pend = pd;
         else { res.rejected.push(Object.assign({ end: j }, pd)); block = { dir, level }; }
@@ -626,7 +638,8 @@
     if (o.trace && n) rec(n - 1);
     if (pend) res.pending = Object.assign({ waited: n - 1 - pend.i, left: o.contBars - (n - 1 - pend.i) }, pend);
     // o extremo da perna já confirmado pelo recuo (alvo) também é um swing, mesmo antes de ser quebrado
-    if (target && !res.swings.some((s) => s.i === target.i)) res.swings.push({ type: trend === 1 ? 'H' : 'L', i: target.i, p: target.p, provisional: true });
+    res.segs = ms.segs;
+    if (target && !ms.lastIsMan && !res.swings.some((s) => s.i === target.i)) res.swings.push({ type: trend === 1 ? 'H' : 'L', i: target.i, p: target.p, provisional: true });
     labelStructural(res.swings, res.breaks);   // um fundo abaixo do anterior só é LL se houve quebra (senão foi sweep: HL)
     enrich(res, candles, atr, volAvg, o);
     res.state = { trend, kind, prot, ext, target, lastBroken };
@@ -671,18 +684,34 @@
   // rótulos HH/HL/LH/LL
 
   // ponto de partida manual e zona manual (do início até à última marca só contam as marcas do utilizador)
+  // ponto de partida e modos (manual / automático) por troços: cada troço vai de uma mudança de modo até à seguinte
   function manualSetup(candles, ov) {
-    const n = candles.length, r = { s0: -1, side: null, lastMan: -1 };
+    const n = candles.length, r = { s0: -1, side: null, lastMan: -1, label: null, segs: [], manAt: () => false };
     if (!ov) return r;
+    const idxOf = (t) => { let lo = 0, hi = n - 1; while (lo <= hi) { const m = (lo + hi) >> 1; if (candles[m].t === t) return m; if (candles[m].t < t) lo = m + 1; else hi = m - 1; } return -1; };
+    const firstAtOrAfter = (t) => { let lo = 0, hi = n; while (lo < hi) { const m = (lo + hi) >> 1; if (candles[m].t < t) lo = m + 1; else hi = m; } return lo; };
+    let mode0 = null;
     if (ov.start && ov.start.t != null) {
-      let k = -1; for (let i = 0; i < n; i++) if (candles[i].t === ov.start.t) { k = i; break; }
-      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; }
+      const k = idxOf(ov.start.t);
+      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; }
     }
-    // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início
+    // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início (manual)
     if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
-      for (let i = 0; i < n - 1; i++) if (ov.add.has(candles[i].t)) { const lab = ov.add.get(candles[i].t); r.s0 = i; r.side = lab === 'HH' || lab === 'LH' || lab === 'H' ? 'H' : 'L'; r.label = lab.length === 2 ? lab : null; break; }
+      for (let i = 0; i < n - 1; i++) if (ov.add.has(candles[i].t)) { const lab = ov.add.get(candles[i].t); r.s0 = i; r.side = lab === 'HH' || lab === 'LH' || lab === 'H' ? 'H' : 'L'; r.label = lab.length === 2 ? lab : null; mode0 = 'man'; break; }
     }
-    if (r.s0 >= 0 && ov.add) for (let i = r.s0 + 1; i < n; i++) if (ov.add.has(candles[i].t)) r.lastMan = i;
+    if (r.s0 < 0) return r;
+    if (ov.add) for (let i = r.s0 + 1; i < n; i++) if (ov.add.has(candles[i].t)) r.lastMan = i;
+    // troços: o início abre o primeiro; cada mudança de modo (depois do início) abre o seguinte
+    const segs = [];
+    if (mode0 === 'legacy') { if (r.lastMan < 0) segs.push({ i: r.s0, mode: 'auto' }); else { segs.push({ i: r.s0, mode: 'man' }); if (r.lastMan + 1 < n) segs.push({ i: r.lastMan + 1, mode: 'auto', implicit: true }); } }
+    else segs.push({ i: r.s0, mode: mode0 });
+    if (mode0 !== 'legacy' && ov.modes && ov.modes.length) {
+      for (const m of ov.modes.slice().sort((a, b) => a.t - b.t)) { const i = firstAtOrAfter(m.t); if (i > r.s0 && i < n) segs.push({ i, mode: m.mode === 'man' ? 'man' : 'auto' }); }
+    }
+    r.segs = segs;
+    const modeAt = (j) => { let md = null; for (const s of r.segs) { if (s.i <= j) md = s.mode; else break; } return md; };
+    r.manAt = (j) => j >= r.s0 && modeAt(j) === 'man';
+    r.lastIsMan = r.segs.length ? r.segs[r.segs.length - 1].mode === 'man' : false;
     return r;
   }
 
@@ -824,7 +853,7 @@
         }
         continue;
       }
-      const manZone = s0 >= 0 && j <= ms.lastMan;   // zona manual: o scanner não cria swings nem quebras
+      const manZone = ms.manAt(j);   // troço manual: o scanner não cria swings nem quebras
       // 0) swing marcado à mão na vela anterior
       if (ov && ov.add && ov.add.has(T(j - 1)) && (s0 < 0 || j - 1 > s0)) {
         const k = j - 1, lab = ov.add.get(T(k)), isH = lab === 'H' || lab === 'HH' || lab === 'LH';
@@ -841,7 +870,7 @@
           const type = trend === -dir ? 'CHoCH' : 'BOS';
           const dup = res.breaks.find((b) => b.dir === dir && b.level === level);   // a quebra já tinha sido detetada: não duplicar
           if (dup) { trend = dir; kind = dup.type; lastBroken = level; pend = null; watch = null; cntUp = cntDn = 0; return; }
-          res.breaks.push({ type, dir, level, from, i: bi, conf: Math.min(j, n - 1), manual: true, why: 'manual' }); allBreaks.push(res.breaks[res.breaks.length - 1]);
+          res.breaks.push({ type, dir, level, from, i: bi, conf: Math.min(j, n - 1), manual: true, why: 'manual', mark: T(k) }); allBreaks.push(res.breaks[res.breaks.length - 1]);
           trend = dir; kind = type; lastBroken = level; pend = null; watch = null; cntUp = cntDn = 0;
         };
         if (isH) {
@@ -856,8 +885,8 @@
       }
       if (j === n) break;
       // 1) zigzag
-      if (zdir >= 0 && H(j) > hi.p) hi = { p: H(j), i: j };
-      if (zdir <= 0 && L(j) < lo.p) lo = { p: L(j), i: j };
+      if (!manZone && zdir >= 0 && H(j) > hi.p) hi = { p: H(j), i: j };
+      if (!manZone && zdir <= 0 && L(j) < lo.p) lo = { p: L(j), i: j };
       const isManual = (i) => !!(ov && ov.add && ov.add.has(T(i)));
       if (zdir >= 0 && j > hi.i && hi.p - L(j) >= (brk(1, hi.p) ? flo(hi.i, j) : thr(hi.i, j, hi.p - zLastL))) {
         if (!manZone && !ignored(hi.i) && !isManual(hi.i)) { res.swings.push({ type: 'H', i: hi.i, p: hi.p, conf: j }); lastSH = { p: hi.p, i: hi.i, broken: false, swept: false }; cntUp = 0; }
@@ -894,6 +923,7 @@
           watch = null; openDispute(b);
         }
       }
+      if (dispute && forcedNo(dispute.i)) dispute = null;   // marcada como sweep: não volta a contar
       if (dispute && j > dispute.conf && !manZone) {
         if (dispute.dir * (C(j) - dispute.lo) > 0) {          // a quebra confirmou-se: conta desde a vela original
           const b = { type: trend === -dispute.dir ? 'CHoCH' : 'BOS', dir: dispute.dir, level: dispute.level, from: dispute.from, i: dispute.i, conf: j, why: 'confirmada depois' };
@@ -922,6 +952,13 @@
         if (dir === 1) cntUp = cnt; else cntDn = cnt;
         if (pend || cnt < o.confirm) return;
         const i0 = j - o.confirm + 1;
+        const lk = T(sw.i) + '|' + dir;
+        const lkFull = ov && ov.noLvl && [...ov.noLvl].find((s) => s === lk || s.startsWith(lk + '|'));
+        if (lkFull) {
+          const last = res.rejected[res.rejected.length - 1];
+          if (last && last.lvl === lkFull) last.end = j; else res.rejected.push({ type: trend === -dir ? 'CHoCH' : 'BOS', dir, level: sw.p, from: sw.i, i: i0, end: j, manual: true, lvl: lkFull });
+          sw.blocked = true; if (dir === 1) cntUp = 0; else cntDn = 0; return;
+        }
         if (forcedNo(i0)) { res.rejected.push({ type: trend === -dir ? 'CHoCH' : 'BOS', dir, level: sw.p, from: sw.i, i: i0, end: j, manual: true }); sw.blocked = true; if (dir === 1) cntUp = 0; else cntDn = 0; return; }
         if (forcedYes(i0)) { doBreak(dir, sw, i0); res.breaks[res.breaks.length - 1].manual = true; return; }
         if (!o.requireDisp) return doBreak(dir, sw, i0);
@@ -940,6 +977,7 @@
     enrich({ breaks: allBreaks, fvgs: res.fvgs }, candles, atr, volAvg, o);   // inclui quebras que depois falharam (para o trace)
     res.atr = atr[n - 1];
     res.dispute = dispute;
+    res.segs = ms.segs;
     if (trend) {
       const lb = res.breaks[res.breaks.length - 1];
       // limite = último swing contrário ainda por quebrar (o "ponto 3")
@@ -1347,17 +1385,17 @@
 
   // ---------- correções manuais (guardadas neste navegador; o botão "Repor" volta à análise do scanner) ----------
   const EDKEY = 'mss_edits1';
-  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false, range: null, hideAuto: {} });
+  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false, range: null, hideAuto: {}, modes: [], noLvl: new Set() });
   const edits = {};
   (function loadEdits() {
     const raw = load(EDKEY, {});
     for (const k in raw) {
-      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} });
+      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} });
       edits[k] = { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) };
     }
   })();
-  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {} }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
-  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
+  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {}, modes: x.modes || [], noLvl: [...(x.noLvl || [])] }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
+  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
   function saveEdits() {
     const out = {};
     for (const k in edits) out[k] = serEd(edits[k]);
@@ -1388,7 +1426,7 @@
   }
   function editCount(id) {
     const e = getEdits(id, false); if (!e) return 0;
-    const L = (x) => x.ign.size + x.add.size + x.noBreak.size + x.yesBreak.size + (x.start ? 1 : 0) + (x.blank ? 1 : 0) + (x.range ? 1 : 0) + Object.keys(x.hideAuto || {}).length;
+    const L = (x) => x.ign.size + x.add.size + x.noBreak.size + x.yesBreak.size + (x.start ? 1 : 0) + (x.modes ? x.modes.length : 0) + (x.noLvl ? x.noLvl.size : 0) + (x.blank ? 1 : 0) + (x.range ? 1 : 0) + Object.keys(x.hideAuto || {}).length;
     return e.fvg.size + L(e.int) + L(e.ext);
   }
 
@@ -2241,7 +2279,8 @@
         g.strokeStyle = g.fillStyle = col; g.globalAlpha = internal ? 0.75 : 1;
         g.setLineDash(internal ? [2, 3] : b.type === 'CHoCH' ? [5, 3] : []); g.lineWidth = internal ? 1 : 1.6;
         g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
-        g.fillText((b.manual ? '✎ ' : '') + b.type + (b.why && b.why !== 'manual' ? ' · ' + b.why : ''), (x1 + x2) / 2, b.dir === 1 ? y - 4 : y + 11);
+        const txt = (b.manual ? '✎ ' : '') + b.type + (b.why && b.why !== 'manual' ? ' · ' + b.why : ''), long = Math.abs(x2 - x1) > g.measureText(txt).width + 12;
+        g.textAlign = long ? 'right' : 'center'; g.fillText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, b.dir === 1 ? y - 4 : y + 11);
       }
       g.setLineDash([]); g.globalAlpha = 1;
     };
@@ -2250,9 +2289,10 @@
       g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'center';
       for (const r of visLast(res.rejected || [], (r) => r.from, (r) => r.i, 15)) {
         const x1 = X(r.from), x2 = X(r.i), y = Y(r.level); if (x1 == null || x2 == null || y == null) continue;
-        g.strokeStyle = g.fillStyle = 'rgba(170,178,189,0.55)'; g.setLineDash([2, 4]); g.lineWidth = 1;
+        g.strokeStyle = g.fillStyle = 'rgba(170,178,189,0.42)'; g.setLineDash([2, 4]); g.lineWidth = 1;
         g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
-        g.fillText(r.manual ? '✎ sweep (não é quebra)' : r.failed ? 'sweep (quebra falhada)' : 'sweep (quebra falsa)', (x1 + x2) / 2, r.dir === 1 ? y - 4 : y + 11);
+        const txt = r.ign ? '✎ sweep (ponto ignorado)' : r.manual ? '✎ sweep (não é quebra)' : r.failed ? 'sweep (quebra falhada)' : 'sweep (quebra falsa)', long = Math.abs(x2 - x1) > g.measureText(txt).width + 12;
+        g.textAlign = long ? 'right' : 'center'; g.fillText(txt, long ? Math.max(x1, x2) - 3 : (x1 + x2) / 2, r.dir === 1 ? y + 11 : y - 4);
       }
       g.setLineDash([]);
     };
@@ -2269,6 +2309,19 @@
         g.fillStyle = col; g.beginPath(); g.arc(x, y, 2.5, 0, Math.PI * 2); g.fill();
         g.fillText((s.manual ? '✎' : '') + s.label, x, s.type === 'H' ? y - 6 : y + 13);
       }
+    }
+    // troços manual / automático da camada à vista: linha vertical tracejada onde começa cada um
+    {
+      const segs = (vE() ? d.ext.res.segs : d.int.res.segs) || [];
+      g.font = '10px Inter, system-ui, sans-serif'; g.textAlign = 'left';
+      segs.forEach((s, k) => {
+        const x = X(s.i); if (x == null || x < -2 || x > paneW + 2) return;
+        const man = s.mode === 'man', col = man ? '245,197,24' : '100,181,246';
+        g.strokeStyle = `rgba(${col},${editMode ? 0.8 : 0.4})`; g.lineWidth = 1; g.setLineDash([6, 4]);
+        g.beginPath(); g.moveTo(x, 0); g.lineTo(x, paneH); g.stroke(); g.setLineDash([]);
+        g.fillStyle = `rgba(${col},${editMode ? 1 : 0.6})`;
+        g.fillText((k === 0 ? 'início ' : '') + (man ? '✋ manual' : '⏩ automático'), x + 4, 14);
+      });
     }
     // sweeps de liquidez (internos; os externos com ✕ maior)
     const sweeps = (res, size) => {
@@ -2299,7 +2352,7 @@
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
-    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`; $('#autoBtn').title = `A app volta a criar sozinha a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe (apaga as tuas marcações dessa camada)`;
+    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`; $('#autoBtn').title = `A app volta a criar sozinha a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe (apaga as tuas marcações dessa camada)`;
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
@@ -2314,6 +2367,13 @@
     m.style.left = Math.min(x + 8, $('#chart').clientWidth - 260) + 'px'; m.style.top = Math.max(4, y - 10) + 'px'; m.style.display = 'block';
     m.querySelectorAll('button').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); const k = b.dataset.k; closeMenu(); if (k !== 'x') { if (!items[+k].nav) pushUndo(selectedTf); items[+k].run(); } }));
   }
+  // início antigo (sem modo): manual até à última marca e automático depois -> passa a modos explícitos
+  function fixLegacy(x, segs) {
+    if (!x.start || x.start.mode) return;
+    x.start.mode = segs[0] ? segs[0].mode : 'auto';
+    const imp = segs.find((s) => s.implicit), cl = data[selectedTf].closed;
+    if (imp && cl[imp.i] && !(x.modes || []).some((m) => m.t <= cl[imp.i].t)) x.modes = [{ t: cl[imp.i].t, mode: 'auto' }].concat(x.modes || []).sort((p, q) => p.t - q.t);
+  }
   function onChartClick(param) {
     if (!param.point || !drawState || (param.paneIndex != null && param.paneIndex !== 0)) return;
     const id = selectedTf, d = data[id], cl = d.closed, ts = chart.timeScale();
@@ -2321,7 +2381,7 @@
     const px = param.point.x, py = param.point.y, T = (i) => cl[i].t;
     const ed = () => getEdits(id, true);
     const done = () => { saveEdits(); refreshTf(id); };
-    const nearSeg = (from, to, lvl) => { const x1 = X(from), x2 = X(to), y = Y(lvl); return x1 != null && x2 != null && y != null && Math.abs(py - y) <= 5 && px >= Math.min(x1, x2) - 4 && px <= Math.max(x1, x2) + 4; };
+    const nearSeg = (from, to, lvl) => { const x1 = X(from), x2 = X(to), y = Y(lvl); return x1 != null && x2 != null && y != null && Math.abs(py - y) <= 10 && px >= Math.min(x1, x2) - 6 && px <= Math.max(x1, x2) + 6; };
     const items = [];
     // 0) linhas amarelas da disputa: decidir aqui
     const dsp = d.int.snap.dispute;
@@ -2345,7 +2405,15 @@
         const what = `${sw.label || (sw.type === 'H' ? 'topo' : 'fundo')} (${fmt(sw.p)})`;
         if (sw.start) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { const e = ed()[L]; if (e.start) e.start = null; else e.add.delete(T(sw.i)); done(); } });
         else if (sw.manual) items.push({ label: `✎ Remover a tua marca ${what} — ${layerName(L)}`, run: () => { ed()[L].add.delete(T(sw.i)); done(); } });
-        else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => { ed()[L].ign.add(T(sw.i)); done(); } });
+        else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => {
+          const x = ed()[L]; x.ign.add(T(sw.i));
+          // um HH/LL só existe por causa da quebra que o fez: ignorá-lo = essa quebra era sweep
+          if (sw.label === 'HH' || sw.label === 'LL') {
+            const dir = sw.type === 'H' ? 1 : -1, prevOpp = res.swings.filter((s) => s.type !== sw.type && s.i < sw.i).slice(-1)[0];
+            const b = res.breaks.filter((b) => b.dir === dir && b.i <= sw.i && (!prevOpp || b.i >= prevOpp.i) && b.mark == null && !b.manual).slice(-1)[0];
+            if (b) { if (!x.noLvl) x.noLvl = new Set(); x.yesBreak.delete(T(b.i)); x.noLvl.add(T(b.from) + '|' + b.dir + '|' + T(sw.i)); }
+          }
+          done(); } });
       }
     }
     // 1b) limites de um range: remover (manual) ou esconder (automático) neste timeframe
@@ -2356,21 +2424,30 @@
       if (r.auto) items.push({ label: `Esconder o range "${r.label}" neste timeframe`, run: () => { const e = ed(); e.int.hideAuto = Object.assign({}, e.int.hideAuto, { [r.id]: true }); done(); } });
       else items.push({ label: `▭ Remover o range (${fmt(r.bot)} – ${fmt(r.top)})`, run: () => { ed().int.range = null; done(); } });
     }
-    // 2) quebras e quebras rejeitadas
-    const layers = [[editLayer, layerName(editLayer)]];
-    for (const [L, nome] of layers) {
-      const res = d[L].res;
-      const b = res.breaks.slice().reverse().find((b) => nearSeg(b.from, b.i, b.level));
-      if (b) {
-        if (b.manual) items.push({ label: `✎ Desfazer "é quebra" (${nome})`, run: () => { ed()[L].yesBreak.delete(T(b.i)); done(); } });
-        else items.push({ label: `Não é quebra, é sweep — ${b.type} ${b.dir === 1 ? '▲' : '▼'} em ${fmt(b.level)} (${nome})`, run: () => { ed()[L].noBreak.add(T(b.i)); done(); } });
+    // 2) quebras e quebras rejeitadas: todas as linhas debaixo do clique (podem estar várias no mesmo nível), cada uma com a data
+    {
+      const L = editLayer, nome = layerName(L), res = d[L].res;
+      const dd = (i) => { const t = new Date(cl[i].t); return t.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: '2-digit' }) + ((TF_MS0[id] || 0) < 864e5 ? ' ' + t.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''); };
+      const arrow = (x) => (x.dir === 1 ? '▲' : '▼');
+      const bs = res.breaks.filter((b) => nearSeg(b.from, b.i, b.level)).slice(-4).reverse();
+      const rs = (res.rejected || []).filter((r) => nearSeg(r.from, r.i, r.level)).slice(-4).reverse();
+      for (const b of bs) {
+        const tag = `${b.type} ${arrow(b)} ${fmt(b.level)} · ${dd(b.i)}`;
+        if (b.mark != null) {   // quebra criada por um HH/LL teu: "não é quebra" passa a marca para LH/HL
+          const lab = ed()[L].add.get(b.mark), alt = lab === 'HH' ? 'LH' : lab === 'LL' ? 'HL' : null;
+          if (alt) items.push({ label: `Não é quebra, é sweep — ${tag} (o teu ${lab} passa a ${alt})`, run: () => { ed()[L].add.set(b.mark, alt); done(); } });
+        } else if (b.manual) items.push({ label: `✎ Desfazer "é quebra" — ${tag}`, run: () => { ed()[L].yesBreak.delete(T(b.i)); done(); } });
+        else items.push({ label: `Não é quebra, é sweep — ${tag}`, run: () => { const x = ed()[L]; x.yesBreak.delete(T(b.i)); x.noBreak.add(T(b.i)); done(); } });
       }
-      const r = (res.rejected || []).slice().reverse().find((r) => nearSeg(r.from, r.i, r.level));
-      if (r) {
-        if (r.ign) items.push({ label: `É quebra — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (volta a contar o ${r.dir === 1 ? 'fundo' : 'topo'} que ignoraste)`, run: () => { ed()[L].ign.delete(T(r.ignAt)); done(); } });
-        else if (r.manual) items.push({ label: `✎ Desfazer "não é quebra" (${nome})`, run: () => { ed()[L].noBreak.delete(T(r.i)); done(); } });
-        else items.push({ label: `É quebra — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (${nome})`, run: () => { ed()[L].yesBreak.add(T(r.i)); done(); } });
-        if (!r.manual && !r.ign) items.push({ label: `Confirmo: é sweep — ${r.dir === 1 ? '▲' : '▼'} em ${fmt(r.level)} (${nome})`, run: () => { ed()[L].noBreak.add(T(r.i)); done(); } });
+      for (const r of rs) {
+        const tag = `${arrow(r)} ${fmt(r.level)} · ${dd(r.i)}`;
+        if (r.ign) items.push({ label: `É quebra — ${tag} (volta a contar o ponto que ignoraste)`, run: () => { ed()[L].ign.delete(T(r.ignAt)); done(); } });
+        else if (r.lvl) items.push({ label: `É quebra — ${tag} (volta a contar o ponto que ignoraste)`, run: () => { const x = ed()[L]; if (x.noLvl) x.noLvl.delete(r.lvl); const it = +String(r.lvl).split('|')[2]; if (it) x.ign.delete(it); done(); } });
+        else if (r.manual) items.push({ label: `✎ Desfazer "não é quebra" — ${tag}`, run: () => { ed()[L].noBreak.delete(T(r.i)); done(); } });
+        else {
+          items.push({ label: `É quebra — ${tag}`, run: () => { const x = ed()[L]; x.noBreak.delete(T(r.i)); x.yesBreak.add(T(r.i)); done(); } });
+          items.push({ label: `Confirmo: é sweep — ${tag}`, run: () => { ed()[L].noBreak.add(T(r.i)); done(); } });
+        }
       }
     }
     // 3) FVG desenhado
@@ -2407,10 +2484,12 @@
         if (top) { mk('HH', '▲ Topo HH — quebra para cima'); mk('LH', '▲ Topo LH — sem quebra'); }
         else { mk('HL', '▼ Fundo HL — sem quebra'); mk('LL', '▼ Fundo LL — quebra para baixo'); }
         if (L === 'int') items.push({ label: `▭ Começar range neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, nav: true, run: () => { pendingRange = { top, p, t: T(q) }; updateEditUi(); } });
-        items.push({ label: `▶ Começar estrutura neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, run: () => {
-          const e = ed(); e[L].start = { t: T(q), side: top ? 'H' : 'L' }; e[L].blank = false;
+        const begin = (mode) => () => {
+          const e = ed(); e[L].start = { t: T(q), side: top ? 'H' : 'L', mode }; e[L].blank = false; e[L].modes = [];
           for (const t of [...e[L].add.keys()]) if (t <= T(q)) e[L].add.delete(t);   // marcas antes do início deixam de contar
-          done(); } });
+          done(); };
+        items.push({ label: `▶ Início manual neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, run: begin('man') });
+        items.push({ label: `▶ Início automático neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, run: begin('auto') });
       };
       if (pendingRange && L === 'int') {
         const pr = pendingRange, wantTop = !pr.top, q = ext(wantTop), p = wantTop ? cl[q].h : cl[q].l;
@@ -2424,6 +2503,19 @@
       }
       items.push({ head: true, label: `Marcar ${L === 'ext' ? 'na' : 'no'} ${nome}:` });
       side(nearTop); side(!nearTop);
+      // mudar de modo a partir desta vela (só depois de haver um início)
+      const segs = d[L].res.segs || [];
+      if (segs.length && k > segs[0].i) {
+        const cur = segs.filter((s) => s.i <= k).slice(-1)[0], tk = T(k);
+        if (cur && cur.mode === 'man') items.push({ label: '⏩ Continuar automático', run: () => { const e = ed(); e[L].modes = (e[L].modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'auto' }]); fixLegacy(e[L], segs); done(); } });
+        if (cur && cur.mode === 'auto') items.push({ label: '✋ Continuar manual', nav: true, run: () => {
+          openMenu(px, py, [{ head: true, label: 'Apaga tudo o que está marcado desta vela para a frente (o que está para trás fica)' },
+            { label: '✋ Sim, continuar manual', run: () => {
+              const e = ed(), x = e[L];
+              for (const t of [...x.add.keys()]) if (t >= tk) x.add.delete(t);
+              for (const s of [x.ign, x.noBreak, x.yesBreak]) for (const t of [...s]) if (t >= tk) s.delete(t);
+              x.modes = (x.modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'man' }]); fixLegacy(x, segs); done(); } }]); } });
+      }
     }
     if (items.length) openMenu(px, py, items);
   }
@@ -2853,6 +2945,20 @@
       const L = editLayer;
       openMenu(b.left - r.left, 8, [{ label: `Apagar a estrutura ${L === 'ext' ? 'da' : 'do'} ${layerName(L)} neste timeframe`, run: () => {
         const e = getEdits(id, true), o = e[L] || {}; e[L] = Object.assign(newLayer(), { blank: true, range: o.range || null, hideAuto: o.hideAuto || {} }); saveEdits(); refreshTf(id); } }]);
+    });
+    $('#importBtn').addEventListener('click', (ev) => {
+      const id = selectedTf, d = data[id], r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect();
+      if (!d) return;
+      const cl = d.closed, e0 = getEdits(id, false), st = e0 && e0.int.start ? e0.int.start.t : null;
+      const have = new Set(d.int.res.swings.map((s) => s.type + s.i));
+      const miss = d.ext.res.swings.filter((s) => !s.start && cl[s.i] && (st == null || cl[s.i].t > st) && !have.has(s.type + s.i));
+      const nt = miss.filter((s) => s.type === 'H').length, nf = miss.length - nt;
+      const lab = (TFS.find((t) => t.id === id) || {}).label || id;
+      const items = miss.length
+        ? [{ head: true, label: `Vou acrescentar ${miss.length} ponto${miss.length > 1 ? 's' : ''} (${nt} topo${nt === 1 ? '' : 's'}, ${nf} fundo${nf === 1 ? '' : 's'}) ao movimento recente no ${lab}` },
+          { label: '⤓ Sim, importar', run: () => { const e = getEdits(id, true); for (const s of miss) { const t = cl[s.i].t; e.int.ign.delete(t); if (!e.int.add.has(t)) e.int.add.set(t, s.type); } saveEdits(); refreshTf(id); } }]
+        : [{ head: true, label: 'O movimento recente já tem todos os pontos da tendência principal' }];
+      openMenu(Math.max(0, b.left - r.left), 8, items);
     });
     $('#autoBtn').addEventListener('click', (ev) => {
       const id = selectedTf, r = $('#chart').getBoundingClientRect(), b = ev.currentTarget.getBoundingClientRect(), L = editLayer;
