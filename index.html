@@ -87,7 +87,7 @@
   #resetBtn:disabled, #undoBtn:disabled, #redoBtn:disabled, #saveBtn:disabled { opacity:.45; cursor:default; }
   #saveBtn.dirty { background:#2e7d32; border-color:#2e7d32; color:#fff; font-weight:600; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
-  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
@@ -237,6 +237,23 @@
   #authGate .gatewait { display:none; color:var(--muted); font-size:14px; text-align:center; padding:26px 0; }
   #authGate.wait .gatewait { display:block; } #authGate.wait form, #authGate.down form { display:none; }
   #authGate .gatedown { display:none; color:var(--text); font-size:14px; text-align:center; } #authGate.down .gatedown { display:block; } #gateRetry { width:100%; padding:11px; }
+
+  /* ---------- tema claro ---------- */
+  body.light { --bg:#f4f6f8; --panel:#ffffff; --line:#dde2e8; --text:#1d2430; --muted:#6b7480; --up:#12897c; --dn:#d93a37; --lat:#c46a00; --acc:#0288d1; }
+  body.light button { background:#f1f3f6; } body.light button:hover { border-color:#b8c0ca; }
+  body.light input[type=text], body.light select, body.light input[type=number], body.light input[type=search], body.light #symbol { background:#fff; color:var(--text); }
+  body.light .lyr.on { background:#dbe5f0; border-color:#9fb0c2; }
+  body.light tbody tr:hover { background:#f0f3f7; } body.light tr.sel { background:#e6eef7 !important; }
+  body.light .editmenu { background:#fff; border-color:#cfd6de; box-shadow:0 8px 24px rgba(0,0,0,.18); } body.light .editmenu button:hover { background:#eef2f6; }
+  body.light .edithint { color:#7a5a00; background:rgba(255,213,79,.2); } body.light #editMenu .mhead { color:#a07800; }
+  body.light #topBtn { background:#fff; color:#333; border-color:#cfd6de; } body.light #mtabs { background:#fff; }
+  body.light #help { color:#333; } body.light .helplink { color:#0277bd; } body.light .modal { background:rgba(0,0,0,.35); }
+  body.light .stg.s1, body.light .ph-b50 { color:#a07800; } body.light .stg.s2 { color:#0277bd; }
+  body.light .pill.b50, body.light .chip.b50, body.light .badge.near { color:#8a6500; } body.light .pill.b65, body.light .chip.b65, body.light .ph-b65 { color:#b35600; }
+  body.light .pill.b92, body.light .chip.b92, body.light .chip.bx, body.light .ph-b92 { color:#c62828; } body.light .pill.b0, body.light .ph-b0 { color:#0277bd; }
+  body.light .pill.pc, body.light .ph-cont { color:#0f8073; } body.light .badge.rng { color:#4a5563; } body.light .badge.pend { color:#3d4652; }
+  body.light .chip.rf-pos2 { color:#1b5e20; } body.light .chip.rf-pos { color:#0277bd; } body.light .chip.rf-neg { color:#b35600; } body.light .btwarn { color:#a85a00; } body.light .nota.hi { color:#2e7d32; }
+  body.light #mtabs button.on { color:#a07800; border-top-color:#f5c518; }
 </style>
 </head>
 <body>
@@ -267,6 +284,7 @@
   <button id="helpBtn">Ajuda</button>
   <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none" title="Terminar a sessão">Sair</button>
   <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
+  <button id="themeBtn" title="Mudar para fundo branco">☀</button>
   <button id="gear">Definições</button>
 </header>
 <main>
@@ -322,7 +340,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -1289,7 +1307,7 @@
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
     confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: '', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
-    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, divPivot: 5, pocD: false, pocW: false, emaOn: false, smaOn: false, kcOn: false, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
+    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, divPivot: 5, pocD: false, pocW: false, emaOn: false, smaOn: false, kcOn: false, rangesDW: false, theme: 'dark', rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
   };
 
   // timeframes da versão 2: sem 12H, 3H e 3m; com 3M, 6M e Anual
@@ -2215,6 +2233,17 @@
 
   // ---------- gráfico ----------
   let rsiMarkers = null;
+  // tema claro / escuro (botão ☀/☾ no cabeçalho)
+  function applyTheme() {
+    const light = settings.theme === 'light';
+    document.body.classList.toggle('light', light);
+    SWCOL.week = light ? '84,96,112' : '236,239,241';
+    const tb = $('#themeBtn'); if (tb) { tb.textContent = light ? '☾' : '☀'; tb.title = light ? 'Mudar para fundo escuro' : 'Mudar para fundo branco'; }
+    if (chart) chart.applyOptions({ layout: { background: { color: light ? '#ffffff' : '#0f1216' }, textColor: light ? '#4a5563' : '#aab2bd' },
+      grid: { vertLines: { color: light ? '#eef0f3' : '#1b2027' }, horzLines: { color: light ? '#eef0f3' : '#1b2027' } },
+      rightPriceScale: { borderColor: light ? '#d5dae0' : '#2a313b' }, timeScale: { borderColor: light ? '#d5dae0' : '#2a313b' } });
+    if (drawState) draw();
+  }
   let chart, candleSeries, rsiSeries, divSeries = [], markersApi, priceLines = [], overlay, ctx2d, drawState = null;
   function initChart() {
     const el = $('#chart');
@@ -2304,7 +2333,7 @@
         sr.setData(cs.map((c, i) => (vals[i] == null ? { time: c.tt } : { time: c.tt, value: vals[i] }))); indSeries.push(sr);
       };
       if (settings.emaOn) { I.e8 = I.e8 || emaOf(cl, 8); I.e21 = I.e21 || emaOf(cl, 21); line(I.e8, '#00e5ff', 1, 0, 'EMA 8'); line(I.e21, '#ff9100', 1, 0, 'EMA 21'); }
-      if (settings.smaOn) { I.s50 = I.s50 || smaOf(cl, 50); I.s100 = I.s100 || smaOf(cl, 100); I.s200 = I.s200 || smaOf(cl, 200); line(I.s50, '#e6e6e6', 1, 0, 'SMA 50'); line(I.s100, '#b388ff', 1, 0, 'SMA 100'); line(I.s200, '#ffd600', 2, 0, 'SMA 200'); }
+      if (settings.smaOn) { I.s50 = I.s50 || smaOf(cl, 50); I.s100 = I.s100 || smaOf(cl, 100); I.s200 = I.s200 || smaOf(cl, 200); line(I.s50, settings.theme === 'light' ? '#555d68' : '#e6e6e6', 1, 0, 'SMA 50'); line(I.s100, '#b388ff', 1, 0, 'SMA 100'); line(I.s200, settings.theme === 'light' ? '#d4a000' : '#ffd600', 2, 0, 'SMA 200'); }
       if (settings.kcOn) {
         if (!I.kc) { const mid = emaOf(cl, 20), a = atrOf(cs, 10); I.kc = { mid, up: mid.map((m, i) => (m == null || a[i] == null ? null : m + 3 * a[i])), dn: mid.map((m, i) => (m == null || a[i] == null ? null : m - 3 * a[i])) }; }
         line(I.kc.up, '#64b5f6', 1, 0, 'KC +3ATR'); line(I.kc.mid, '#64b5f6', 1, 2, ''); line(I.kc.dn, '#64b5f6', 1, 0, 'KC −3ATR');
@@ -2372,7 +2401,7 @@
     }
     // ranges (caixas): manual a cheio, automáticos a tracejado
     const RCOL = SWCOL;
-    for (const x of rangesFor(drawState.tf).filter((r) => !editMode || !r.auto).map((r) => evalRange(d, r, drawState.tf))) {
+    for (const x of rangesFor(drawState.tf).filter((r) => (!editMode || !r.auto) && (settings.rangesDW || (r.id !== 'day' && r.id !== 'week'))).map((r) => evalRange(d, r, drawState.tf))) {
       const r = x.r, col = RCOL[r.id] || '170,178,189', yt = Y(r.top), yb = Y(r.bot); if (yt == null || yb == null) continue;
       let i0 = cl.findIndex((c) => c.t >= r.t0); if (i0 < 0) continue;
       const xa = X(i0) ?? 0, xb = x.st.key === 'break' ? (X(x.st.k) ?? paneW) : paneW;
@@ -2473,7 +2502,7 @@
           i0 = i;
         }
       };
-      if (settings.pocW && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMulti(data['1h'], data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.95)', wideW(), 'POC S');
+      if (settings.pocW && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMulti(data['1h'], data['4h'], weekKey, 'w'), (settings.theme === 'light' ? 'rgba(110,160,0,0.95)' : 'rgba(198,255,0,0.95)'), wideW(), 'POC S');
       if (settings.pocD && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMulti(data['15m'], data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
     }
     // troços manual / automático da camada à vista: linha vertical tracejada onde começa cada um
@@ -2527,7 +2556,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 ? '' : 'none'; $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -3172,7 +3201,7 @@
       cloud.settingsJson = j;
       try {
         const r = JSON.parse(j); cloud.applying = true;
-        Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings);
+        Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings); applyTheme();
         cloud.applying = false;
         editLayer = settings.layer === 'ext' ? 'ext' : 'int';
         loadAll();
@@ -3278,7 +3307,9 @@
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
+    initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); applyTheme();
+    $('#themeBtn').addEventListener('click', () => { settings.theme = settings.theme === 'light' ? 'dark' : 'light'; save('mss_settings4', settings); applyTheme(); if (drawState) renderChart(true); });
+    $('#rngBtn').addEventListener('click', () => { settings.rangesDW = !settings.rangesDW; save('mss_settings4', settings); updateEditUi(); renderChart(true); }); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
   // ---------- ecrã de entrada: aparece antes da app arrancar; a app só corre depois do login ----------
   const AUTH_ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
