@@ -84,7 +84,8 @@
   .editmenu button:hover { background:#26303b; }
   #editBtn.on { background:#ffd54f; color:#1a1400; border-color:#ffd54f; font-weight:600; }
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
-  #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
+  #resetBtn:disabled, #undoBtn:disabled, #redoBtn:disabled, #saveBtn:disabled { opacity:.45; cursor:default; }
+  #saveBtn.dirty { background:#2e7d32; border-color:#2e7d32; color:#fff; font-weight:600; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
   .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
@@ -307,7 +308,7 @@
 <br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
 <br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
 <br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
-<br>• <b>↶ Back</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, início manual/automático, continuar manual/automático ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto e nunca o passa para a vela ao lado: se era um HL/LH criado por uma quebra, essa quebra deixa de contar; se era um HH/LL, a quebra que o criou passa a sweep e esse nível deixa de poder ser quebrado nessa perna. Na linha cinzenta que fica, “É quebra” desfaz. Tudo é recalculado e gravado logo.
+<br>• <b>💾 Gravar</b> — em modo edição as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só são gravadas no aparelho e na conta quando carregas em Gravar. Ao sair da edição com alterações por gravar, a app pergunta: Gravar / Descartar / Continuar a editar.<br>• <b>↶ Desfazer / ↷ Refazer</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez, e Refazer volta a pô-la. Só guarda o que fizeste desde a última gravação: ao abrir a app e depois de gravar começa vazio.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, início manual/automático, continuar manual/automático ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto e nunca o passa para a vela ao lado: se era um HL/LH criado por uma quebra, essa quebra deixa de contar; se era um HH/LL, a quebra que o criou passa a sweep e esse nível deixa de poder ser quebrado nessa perna. Na linha cinzenta que fica, “É quebra” desfaz. Tudo é recalculado logo (e gravado quando carregas em 💾 Gravar).
 <br>As marcas são gravadas logo (por par e timeframe) neste navegador e, com sessão iniciada, na tua conta — aparecem nos outros aparelhos. Ficam até carregares em “↺ Repor análise do scanner”.</li>
       <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
       <li><b>Tendência principal:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem ainda não fez novo topo/fundo a confirmar.</li>
@@ -321,7 +322,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -347,6 +348,11 @@
   <button id="btRun" class="primary">Correr teste</button> <span id="btProg" class="muted small" style="margin-left:8px"></span>
   <div id="btOut" style="margin-top:12px"></div>
   <div class="actions"><button onclick="document.getElementById('btModal').classList.remove('open')">Fechar</button></div>
+</div></div>
+<div id="saveDlg" class="modal" style="z-index:400"><div class="dialog" style="width:min(380px,94vw)">
+  <h2 style="margin-top:0">Gravar as alterações?</h2>
+  <p class="muted small">Tens alterações à estrutura que ainda não foram gravadas.</p>
+  <div class="actions" style="flex-wrap:wrap;gap:8px"><button id="sdStay">Continuar a editar</button><button id="sdDiscard">Descartar</button><button id="sdSave" class="primary">💾 Gravar</button></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
   <button id="setX" class="dlgclose" title="Fechar">✕</button><h2>Definições</h2>
@@ -1429,7 +1435,13 @@
   // hora da última alteração de cada gráfico (para, ao juntar com a conta, ganhar sempre a versão mais recente)
   const EDAT = 'mss_edits_at', edAt = load(EDAT, {}), edLast = {};
   for (const k in edits) edLast[k] = JSON.stringify(serEd(edits[k]));
+  // em modo edição as alterações ficam em rascunho até carregares em 💾 Gravar (fora da edição gravam logo)
+  let draft = null;   // { snap: cópia gravada de todas as marcações, dirty }
   function saveEdits() {
+    if (draft) { draft.dirty = true; if (typeof updateEditUi === 'function') updateEditUi(); return; }
+    persistEdits();
+  }
+  function persistEdits() {
     const out = {}, now = Date.now();
     for (const k in edits) { out[k] = serEd(edits[k]); const j = JSON.stringify(out[k]); if (edLast[k] !== j) { edLast[k] = j; edAt[k] = now; } }
     for (const k in edLast) if (!edits[k]) { delete edLast[k]; edAt[k] = now; }
@@ -1447,21 +1459,25 @@
   }
   (function dailyBackup() { const list = load(BAKKEY, []); if (!list.length || Date.now() - list[0].at > 864e5) makeBackup('diária'); })();
   // desfazer passo a passo (por par e timeframe; guardado neste navegador)
-  const UNDOKEY = 'mss_undo1';
-  const undo = load(UNDOKEY, {});
+  // desfazer / refazer: só em memória e só desde a última gravação (ao abrir a app ou depois de gravar começa vazio)
+  try { localStorage.removeItem('mss_undo1'); } catch (e) {}
+  const undo = {}, redo = {};
   function pushUndo(id) {
     const k = symbol + '|' + id, e = edits[k];
     (undo[k] = undo[k] || []).push(e ? serEd(e) : null);
-    if (undo[k].length > 50) undo[k].shift();
-    save(UNDOKEY, undo);
+    if (undo[k].length > 100) undo[k].shift();
+    redo[k] = [];
   }
-  function undoStep() {
-    const k = symbol + '|' + selectedTf, st = undo[k];
+  function swapStep(from, to) {
+    const k = symbol + '|' + selectedTf, st = from[k];
     if (!st || !st.length) return;
+    const e = edits[k]; (to[k] = to[k] || []).push(e ? serEd(e) : null);
     const prev = st.pop();
     if (prev) edits[k] = deserEd(prev); else delete edits[k];
-    save(UNDOKEY, undo); saveEdits(); closeMenu(); refreshTf(selectedTf);
+    saveEdits(); closeMenu(); refreshTf(selectedTf);
   }
+  const undoStep = () => swapStep(undo, redo), redoStep = () => swapStep(redo, undo);
+  const redoCount = (id) => (redo[symbol + '|' + id] || []).length;
   const undoCount = (id) => (undo[symbol + '|' + id] || []).length;
   function getEdits(id, create, sym) {
     const k = (sym || symbol) + '|' + id;
@@ -2513,7 +2529,10 @@
     $('#dispBtn').style.display = dsp ? '' : 'none';
     $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 ? '' : 'none'; $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
-    const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Back (${nU})` : '↶ Back';
+    const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
+    const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
+    const dirty = !!(draft && draft.dirty); $('#saveBtn').disabled = !dirty; $('#saveBtn').classList.toggle('dirty', dirty); $('#saveBtn').textContent = dirty ? '💾 Gravar *' : '💾 Gravado';
+    $('#saveBtn').style.display = $('#redoBtn').style.display = editMode ? '' : 'none';
     $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
   }
   function closeMenu() { const m = $('#editMenu'); m.style.display = 'none'; m.innerHTML = ''; }
@@ -2551,7 +2570,7 @@
     const x = getEdits(selectedTf, true)[L];
     fixLegacy(x, segs);
     for (const s of res.swings) {
-      if (s.i < cur.i || s.i >= k || s.manual || s.start || s.provisional) continue;
+      if (s.i < cur.i || s.i >= k || s.manual || s.start) continue;   // inclui o topo/fundo da perna ainda por quebrar
       if (x.ign.has(T(s.i))) continue;
       x.add.set(T(s.i), ['HH', 'HL', 'LH', 'LL'].includes(s.label) ? s.label : s.type === 'H' ? 'H' : 'L');
     }
@@ -2559,7 +2578,11 @@
     if (cur.i === segs[0].i && x.start) x.start.mode = 'man';
     x.modes = (x.modes || []).map((m) => (m.mode === 'auto' && m.t <= t0 && m.t > tPrev ? { t: m.t, mode: 'man' } : m)).filter((m) => m.t < T(k));
     x.modes.push({ t: T(k), mode: 'auto' });
+    const sig = (dd) => { const sn = dd[L].snap; return dd[L].res.swings.filter((s) => s.i < k).map((s) => s.type + s.i + ':' + s.p).join('|') + '#' + sn.protected + '#' + sn.extreme; };
+    const before = sig(d);
     saveEdits(); refreshTf(selectedTf);
+    const d2 = data[selectedTf];
+    if (d2 && sig(d2) !== before) setTimeout(() => alert('Atenção: ao mover a linha, a estrutura mudou em algum ponto. Se não estiver como querias, carrega em ↶ Desfazer.'), 50);
     return true;
   }
   // arrastar a linha azul do automático (só em modo edição): ao largar, chama moveAuto
@@ -2758,11 +2781,33 @@
   let maxBeforeEdit = false;
   function setEdit(on, keepRange) {
     if (on === editMode) return;
+    if (on) draft = { snap: Object.assign({}, edLast), dirty: false };
+    else draft = null;
     editMode = on; closeMenu();
     if (!on) pendingRange = null;
     if (on) { maxBeforeEdit = $('.chartbox').classList.contains('max'); toggleMax(true); } else toggleMax(maxBeforeEdit);
     $('.chartbox').classList.toggle('editing', on);
     updateEditUi(); renderChart(keepRange !== false);
+  }
+  // gravar / descartar o rascunho da edição
+  function clearHistory() { for (const k of Object.keys(undo)) delete undo[k]; for (const k of Object.keys(redo)) delete redo[k]; }
+  function commitDraft() {
+    if (draft) { draft.dirty = false; draft.snap = {}; }
+    const keep = draft; draft = null; persistEdits(); draft = keep; if (draft) draft.snap = Object.assign({}, edLast);
+    clearHistory(); updateEditUi();
+  }
+  function discardDraft() {
+    if (!draft) return;
+    const snap = draft.snap;
+    for (const k of Object.keys(edits)) delete edits[k];
+    for (const k in snap) { try { edits[k] = deserEd(JSON.parse(snap[k])); } catch (e) {} }
+    draft.dirty = false; clearHistory();
+    for (const id of Object.keys(data)) if (data[id] && data[id].candles) data[id] = computeTf(data[id].candles, id);
+    renderTable(); renderConfluence(); renderChart(true); updateEditUi();
+  }
+  function requestExitEdit() {
+    if (!draft || !draft.dirty) return setEdit(false);
+    $('#saveDlg').classList.add('open');
   }
   function toggleMax(force) {
     const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
@@ -3025,7 +3070,8 @@
     makeBackup('antes de repor uma cópia');
     for (const k of Object.keys(edits)) delete edits[k];
     for (const k in b.edits) { try { edits[k] = deserEd(JSON.parse(b.edits[k])); } catch (e) {} }
-    saveEdits(); renderBackups();
+    { const keep = draft; draft = null; persistEdits(); draft = keep; if (draft) { draft.snap = Object.assign({}, edLast); draft.dirty = false; } clearHistory(); }
+    renderBackups();
     Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll();
   }
   function openSettings() {
@@ -3189,7 +3235,13 @@
     $('#editHelp').addEventListener('click', () => $('#help').classList.add('open'));
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#help').classList.contains('open')) { $('#help').classList.remove('open'); e.stopImmediatePropagation(); } });
     $('#tgExt').addEventListener('click', () => { editLayer = 'ext'; settings.layer = 'ext'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    $('#editBtn').addEventListener('click', () => setEdit(!editMode));
+    $('#editBtn').addEventListener('click', () => (editMode ? requestExitEdit() : setEdit(true)));
+    $('#redoBtn').addEventListener('click', redoStep);
+    $('#saveBtn').addEventListener('click', commitDraft);
+    $('#sdSave').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); commitDraft(); setEdit(false); });
+    $('#sdDiscard').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); discardDraft(); setEdit(false); });
+    $('#sdStay').addEventListener('click', () => $('#saveDlg').classList.remove('open'));
+    window.addEventListener('beforeunload', (ev) => { if (draft && draft.dirty) { ev.preventDefault(); ev.returnValue = ''; } });
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
     $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
@@ -3224,7 +3276,7 @@
     $('#btRun').addEventListener('click', runBacktest);
     $('#btClose').addEventListener('click', () => $('#btModal').classList.remove('open'));
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if (!menuOpen && !pendingRange) setEdit(false); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
     initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
