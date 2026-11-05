@@ -220,10 +220,39 @@
   .loginbtns { display:flex; gap:8px; } .loginbtns button { flex:1; padding:9px; }
   .linkbtn { background:none; border:none; color:#64b5f6; cursor:pointer; padding:4px 0; text-align:left; font-size:13px; }
   .logingoogle { margin-top:14px; padding-top:10px; border-top:1px solid var(--line); }
-  #loginDlg.open { display:flex; }
+  /* ecrã de entrada (antes da app) */
+  body.gated { overflow:hidden; }
+  #authGate { position:fixed; inset:0; z-index:200; background:radial-gradient(1200px 600px at 50% -10%, #16202b 0%, var(--bg) 60%); display:flex; align-items:center; justify-content:center; padding:20px; }
+  .gatecard { width:min(380px,100%); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:28px 24px 20px; box-shadow:0 20px 60px rgba(0,0,0,.45); }
+  .gatelogo { display:flex; align-items:center; gap:10px; margin-bottom:6px; }
+  .gatelogo h1 { font-size:19px; margin:0; font-weight:600; }
+  .gatesub { color:var(--muted); font-size:13px; margin:0 0 18px; }
+  .gatepass { position:relative; } .gatepass input { width:100%; box-sizing:border-box; padding-right:40px; }
+  #gateEye { position:absolute; right:4px; bottom:4px; background:none; border:none; padding:5px 7px; font-size:15px; opacity:.75; }
+  .gatemsg { min-height:18px; font-size:13px; } .gatemsg.warn { color:#ffb74d; } .gatemsg.yes { color:#7ee08a; }
+  #gateForm button.primary { width:100%; padding:11px; font-size:15px; }
+  #gateNew { width:100%; padding:10px; }
+  .gatefoot { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+  #authGate .gatewait { display:none; color:var(--muted); font-size:14px; text-align:center; padding:26px 0; }
+  #authGate.wait .gatewait { display:block; } #authGate.wait form { display:none; }
 </style>
 </head>
 <body>
+<div id="authGate" class="wait">
+  <div class="gatecard">
+    <div class="gatelogo"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="4" y="9" width="5" height="12" rx="1" fill="#26a69a"/><line x1="6.5" y1="5" x2="6.5" y2="25" stroke="#26a69a" stroke-width="1.5"/><rect x="12.5" y="12" width="5" height="9" rx="1" fill="#ef5350"/><line x1="15" y1="8" x2="15" y2="24" stroke="#ef5350" stroke-width="1.5"/><rect x="21" y="5" width="5" height="11" rx="1" fill="#26a69a"/><line x1="23.5" y1="2" x2="23.5" y2="19" stroke="#26a69a" stroke-width="1.5"/></svg><h1>Scanner de Estrutura</h1></div>
+    <p class="gatesub">Entra na tua conta: favoritos, marcas e definições ficam guardados e iguais em todos os teus aparelhos.</p>
+    <div class="gatewait">A verificar a sessão…</div>
+    <form id="gateForm" class="loginform" autocomplete="on">
+      <label>Email<input id="gateEmail" type="email" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></label>
+      <label class="gatepass">Password<input id="gatePass" type="password" name="password" autocomplete="current-password"><button type="button" id="gateEye" title="Mostrar / esconder">👁</button></label>
+      <div id="gateMsg" class="gatemsg"></div>
+      <button type="submit" class="primary">Entrar</button>
+      <button type="button" id="gateNew">Criar conta</button>
+      <div class="gatefoot"><button type="button" id="gateForgot" class="linkbtn">Esqueci-me da password</button></div>
+    </form>
+  </div>
+</div>
 <header>
   <h1>Scanner de Estrutura</h1>
   <form id="symForm" style="position:relative" autocomplete="off" role="search"><input id="symbol" type="search" spellcheck="false" aria-label="Símbolo" placeholder="ticker ou nome" autocomplete="off" autocorrect="off" autocapitalize="off" data-lpignore="true" data-1p-ignore="true" data-bwignore="true" data-np-ignore="true" data-np-autofill-type="ignore" data-form-type="other"><button type="submit">Abrir</button><div id="symSug" class="favsug symsug" style="display:none"></div></form>
@@ -233,7 +262,7 @@
   <span id="status" class="status"></span>
   <button id="reload" title="Atualizar agora">↻</button>
   <button id="helpBtn">Ajuda</button>
-  <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none">Entrar</button>
+  <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none" title="Terminar a sessão">Sair</button>
   <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
   <button id="gear">Definições</button>
 </header>
@@ -316,19 +345,6 @@
   <button id="btRun" class="primary">Correr teste</button> <span id="btProg" class="muted small" style="margin-left:8px"></span>
   <div id="btOut" style="margin-top:12px"></div>
   <div class="actions"><button onclick="document.getElementById('btModal').classList.remove('open')">Fechar</button></div>
-</div></div>
-<div id="loginDlg" class="modal"><div class="dialog" style="width:min(400px,94vw)">
-  <button id="loginClose" class="dlgclose" title="Fechar">✕</button>
-  <h2>Entrar</h2>
-  <p class="muted small" style="margin-top:0">Com conta, as tuas marcas, favoritos e definições ficam guardados e aparecem em qualquer computador ou telemóvel.</p>
-  <form id="loginForm" class="loginform">
-    <label>Email<input id="loginEmail" type="email" autocomplete="username" required></label>
-    <label>Password<input id="loginPass" type="password" autocomplete="current-password" minlength="6"></label>
-    <div id="loginMsg" class="small"></div>
-    <div class="loginbtns"><button type="submit" class="primary">Entrar</button><button type="button" id="loginNew">Criar conta</button></div>
-    <button type="button" id="loginForgot" class="linkbtn">Esqueci-me da password</button>
-  </form>
-  <div style="height:14px"></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
   <button id="setX" class="dlgclose" title="Fechar">✕</button><h2>Definições</h2>
@@ -1758,6 +1774,14 @@
     (src._poc = src._poc || {})[tag] = { ck, m };
     return m;
   }
+  // junta o POC de uma fonte fina (15m / 1H) com o de uma mais grossa (1H / 4H) para os períodos que a fina não cobre por inteiro
+  function pocMulti(fine, coarse, keyFn, tag) {
+    const a = pocMap(fine, keyFn, tag), b = pocMap(coarse, keyFn, tag + 'c');
+    if (!a) return b; if (!b) return a;
+    const k0 = keyFn(fine.candles[0].t), out = new Map(b);
+    for (const [k, p] of a) if (k !== k0 || !b.has(k)) out.set(k, p);   // o 1.º período da fonte fina pode estar cortado
+    return out;
+  }
   function autoRanges() {
     const h = data['1h']; if (!h) return [];
     const cs = h.candles, now = Date.now(), out = [];
@@ -2360,16 +2384,20 @@
     if (settings.pocOn && !editMode) {
       const tfMs = TF_MS0[drawState.tf] || 0, cs = d.candles, bwp = Math.max(2, ts.options().barSpacing || 6);
       const XC = (i) => ts.timeToCoordinate(cs[i].tt);
+      // velas diárias/semanais abrem às 00:00 UTC (= véspera em Nova Iorque): usa o meio da vela para saber o dia/semana
+      const KC = (keyFn, i) => keyFn(cs[i].t + (tfMs >= 864e5 ? tfMs / 2 : 0));
+      const wide = tfMs >= 7 * 864e5;   // no semanal cada semana é uma só vela: traço mais largo que a vela
+      const wideW = () => (wide ? 3 : 2);
       const runs = (keyFn, map, col, wdt, lab) => {
         if (!map) return;
         let i0 = 0;
         for (let i = 1; i <= cs.length; i++) {
-          if (i < cs.length && keyFn(cs[i].t) === keyFn(cs[i0].t)) continue;
-          const k = keyFn(cs[i0].t), p = map.get(k);
+          if (i < cs.length && KC(keyFn, i) === KC(keyFn, i0)) continue;
+          const k = KC(keyFn, i0), p = map.get(k);
           if (p != null) {
             const xa = XC(i0), xb = XC(i - 1), y = Y(p);
             if (xa != null && xb != null && y != null && xb >= -bwp && xa <= paneW + bwp) {
-              const x1 = xa - bwp / 2 + 1, x2 = xb + bwp / 2 - 1;
+              const x1 = xa - bwp / 2 + (wide ? -3 : 1), x2 = xb + bwp / 2 + (wide ? 3 : -1);
               g.strokeStyle = col; g.lineWidth = wdt; g.setLineDash([]); g.beginPath(); g.moveTo(x1, y); g.lineTo(x2, y); g.stroke();
               if (x2 - x1 > 46) { g.fillStyle = col; g.font = '9px Inter, system-ui, sans-serif'; g.textAlign = 'left'; g.fillText(lab, x1 + 2, y - 3); }
             }
@@ -2377,8 +2405,8 @@
           i0 = i;
         }
       };
-      if (settings.pocWeek !== false && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMap(data['1h'] || data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.9)', 2, 'POC S');
-      if (settings.pocDay !== false && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMap(data['15m'] || data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
+      if (settings.pocWeek !== false && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMulti(data['1h'], data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.95)', wideW(), 'POC S');
+      if (settings.pocDay !== false && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMulti(data['15m'], data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
     }
     // troços manual / automático da camada à vista: linha vertical tracejada onde começa cada um
     {
@@ -2901,8 +2929,8 @@
     const b = $('#loginBtn'), s = $('#cloudSt'); if (!b || !s) return;
     if (!window.firebase || !window.FIREBASE_CONFIG) { b.style.display = 'none'; s.textContent = '☁ sem ligação ao servidor — a gravar só neste navegador'; return; }
     if (location.protocol === 'file:') { b.style.display = 'none'; s.textContent = '☁ o login só funciona no endereço publicado — a gravar só neste navegador'; return; }
+    if (!cloud.user) { b.style.display = 'none'; s.textContent = 'a gravar só neste navegador'; return; }
     b.style.display = '';
-    if (!cloud.user) { b.textContent = 'Entrar'; s.textContent = 'a gravar só neste navegador'; return; }
     b.textContent = 'Sair';
     s.textContent = cloud.err ? `☁ erro: ${cloud.err}` : cloud.pending ? '☁ a gravar…' : `☁ gravado · ${cloud.user.email || ''}`;
   }
@@ -2968,32 +2996,15 @@
       try {
         if (!fb.apps.length) fb.initializeApp(window.FIREBASE_CONFIG);
         cloud.db = fb.firestore();
-        fb.auth().getRedirectResult().catch(() => {});
         fb.auth().onAuthStateChanged((u) => {
           cloud.unsubs.forEach((f) => f()); cloud.unsubs = []; cloud.synced = {}; cloud.settingsJson = null; cloud.err = null;
           cloud.user = u; if (u) cloudStart(); cloudUi();
         });
       } catch (e) { cloud.err = 'arranque'; }
     }
-    // entrar: email e password (principal) ou conta Google (alternativa)
-    const b = $('#loginBtn'), dlg = $('#loginDlg'), msg = (t, ok) => { const m = $('#loginMsg'); m.textContent = t || ''; m.className = 'small ' + (ok ? 'yes' : 'warn'); };
-    const ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
-      'auth/email-already-in-use': 'Já existe uma conta com este email. Usa “Entrar”.', 'auth/weak-password': 'A password tem de ter pelo menos 6 caracteres.', 'auth/invalid-email': 'Email inválido.',
-      'auth/missing-password': 'Escreve a password.', 'auth/too-many-requests': 'Demasiadas tentativas. Espera uns minutos.', 'auth/operation-not-allowed': 'O login por email ainda não está ligado no Firebase (Authentication → Método de login → E-mail/senha).',
-      'auth/network-request-failed': 'Sem ligação à internet.' };
-    const fail = (e) => msg(ERR[e && e.code] || ('Erro: ' + ((e && (e.code || e.message)) || 'desconhecido')));
-    const auth = () => window.firebase && window.firebase.auth();
-    const creds = () => [$('#loginEmail').value.trim(), $('#loginPass').value];
-    if (b) b.addEventListener('click', () => { if (!auth()) return; if (cloud.user) { auth().signOut(); return; } msg(''); dlg.classList.add('open'); setTimeout(() => $('#loginEmail').focus(), 50); });
-    if (dlg) {
-      const close = () => dlg.classList.remove('open');
-      $('#loginClose').addEventListener('click', close);
-      dlg.addEventListener('click', (ev) => { if (ev.target === dlg) close(); });
-      $('#loginForm').addEventListener('submit', (ev) => { ev.preventDefault(); const [e, p] = creds(); msg('A entrar…', true); auth().signInWithEmailAndPassword(e, p).then(close).catch(fail); });
-      $('#loginNew').addEventListener('click', () => { const [e, p] = creds(); msg('A criar a conta…', true); auth().createUserWithEmailAndPassword(e, p).then(close).catch(fail); });
-      $('#loginForgot').addEventListener('click', () => { const [e] = creds(); if (!e) return msg('Escreve o teu email primeiro.'); auth().sendPasswordResetEmail(e).then(() => msg('Enviámos um email para repores a password (vê também o spam).', true)).catch(fail); });
-      if ($('#loginGoogle')) $('#loginGoogle').addEventListener('click', () => { const p = new window.firebase.auth.GoogleAuthProvider(); auth().signInWithPopup(p).then(close).catch((e) => { if (e && /popup/.test(e.code || '')) auth().signInWithRedirect(p); else fail(e); }); });
-    }
+    // sair: volta ao ecrã de entrada (a página recarrega)
+    const b = $('#loginBtn');
+    if (b) b.addEventListener('click', () => { const a = window.firebase && window.firebase.auth(); if (a && cloud.user) a.signOut(); });
     cloudUi();
   }
 
@@ -3070,9 +3081,38 @@
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
     initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
-  window.MSS = { init, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }) };
+  // ---------- ecrã de entrada: aparece antes da app arrancar; a app só corre depois do login ----------
+  // Sem Firebase (scripts não carregaram, sem internet na 1.ª vez) ou em file:// a app arranca logo, a gravar só neste navegador.
+  const AUTH_ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
+    'auth/email-already-in-use': 'Já existe uma conta com este email. Usa “Entrar”.', 'auth/weak-password': 'A password tem de ter pelo menos 6 caracteres.', 'auth/invalid-email': 'Email inválido.',
+    'auth/missing-password': 'Escreve a password.', 'auth/missing-email': 'Escreve o teu email.', 'auth/too-many-requests': 'Demasiadas tentativas. Espera uns minutos.', 'auth/operation-not-allowed': 'O login por email ainda não está ligado no Firebase (Authentication → Método de login → E-mail/senha).',
+    'auth/network-request-failed': 'Sem ligação à internet.' };
+  function boot() {
+    const fb = window.firebase, gate = $('#authGate');
+    const run = () => { if (gate) gate.remove(); document.body.classList.remove('gated'); init(); };
+    if (!gate || !fb || !window.FIREBASE_CONFIG || location.protocol === 'file:') return run();
+    let auth;
+    try { if (!fb.apps.length) fb.initializeApp(window.FIREBASE_CONFIG); auth = fb.auth(); } catch (e) { return run(); }
+    document.body.classList.add('gated');
+    const msg = (t, ok) => { const m = $('#gateMsg'); m.textContent = t || ''; m.className = 'gatemsg ' + (ok ? 'yes' : 'warn'); };
+    const fail = (e) => { busy(false); msg(AUTH_ERR[e && e.code] || ('Erro: ' + ((e && (e.code || e.message)) || 'desconhecido'))); };
+    const busy = (on) => gate.querySelectorAll('button, input').forEach((x) => { x.disabled = on; });
+    const creds = () => [$('#gateEmail').value.trim(), $('#gatePass').value];
+    $('#gateForm').addEventListener('submit', (ev) => { ev.preventDefault(); const [e, p] = creds(); if (!e) return msg('Escreve o teu email.'); if (!p) return msg('Escreve a password.'); busy(true); msg('A entrar…', true); auth.signInWithEmailAndPassword(e, p).catch(fail); });
+    $('#gateNew').addEventListener('click', () => { const [e, p] = creds(); if (!e) return msg('Escreve o teu email.'); if ((p || '').length < 6) return msg('Escolhe uma password com pelo menos 6 caracteres.'); busy(true); msg('A criar a conta…', true); auth.createUserWithEmailAndPassword(e, p).catch(fail); });
+    $('#gateForgot').addEventListener('click', () => { const [e] = creds(); if (!e) return msg('Escreve o teu email primeiro.'); auth.sendPasswordResetEmail(e).then(() => msg('Enviámos um email para repores a password (vê também o spam).', true)).catch(fail); });
+    $('#gateEye').addEventListener('click', () => { const i = $('#gatePass'); i.type = i.type === 'password' ? 'text' : 'password'; $('#gateEye').textContent = i.type === 'password' ? '👁' : '🙈'; });
+    let started = false;
+    auth.onAuthStateChanged((u) => {
+      if (u) { if (!started) { started = true; run(); } return; }
+      if (started) { location.reload(); return; }      // saiu: volta ao ecrã de entrada limpo
+      gate.classList.remove('wait'); busy(false);
+      setTimeout(() => { const e = $('#gateEmail'); if (e && !e.value) e.focus(); }, 50);
+    });
+  }
+  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }) };
 })();
 </script>
-<script>MSS.init(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
+<script>MSS.boot(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
 </body>
 </html>
