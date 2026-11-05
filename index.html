@@ -86,7 +86,7 @@
   #editMenu .mhead { padding:6px 12px 2px; font-size:11px; color:#f5c518; text-transform:uppercase; letter-spacing:.04em; }
   #resetBtn:disabled, #undoBtn:disabled { opacity:.45; cursor:default; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
-  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing #csvBtn, .chartbox.editing .legend { display:none !important; }
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
@@ -234,7 +234,8 @@
   #gateNew { width:100%; padding:10px; }
   .gatefoot { display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
   #authGate .gatewait { display:none; color:var(--muted); font-size:14px; text-align:center; padding:26px 0; }
-  #authGate.wait .gatewait { display:block; } #authGate.wait form { display:none; }
+  #authGate.wait .gatewait { display:block; } #authGate.wait form, #authGate.down form { display:none; }
+  #authGate .gatedown { display:none; color:var(--text); font-size:14px; text-align:center; } #authGate.down .gatedown { display:block; } #gateRetry { width:100%; padding:11px; }
 </style>
 </head>
 <body>
@@ -243,6 +244,7 @@
     <div class="gatelogo"><svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect x="4" y="9" width="5" height="12" rx="1" fill="#26a69a"/><line x1="6.5" y1="5" x2="6.5" y2="25" stroke="#26a69a" stroke-width="1.5"/><rect x="12.5" y="12" width="5" height="9" rx="1" fill="#ef5350"/><line x1="15" y1="8" x2="15" y2="24" stroke="#ef5350" stroke-width="1.5"/><rect x="21" y="5" width="5" height="11" rx="1" fill="#26a69a"/><line x1="23.5" y1="2" x2="23.5" y2="19" stroke="#26a69a" stroke-width="1.5"/></svg><h1>Scanner de Estrutura</h1></div>
     <p class="gatesub">Entra na tua conta: favoritos, marcas e definições ficam guardados e iguais em todos os teus aparelhos.</p>
     <div class="gatewait">A verificar a sessão…</div>
+    <div class="gatedown"><p>Não foi possível ligar ao servidor de login. Verifica a ligação à internet.</p><button type="button" id="gateRetry" class="primary">Tentar de novo</button></div>
     <form id="gateForm" class="loginform" autocomplete="on">
       <label>Email<input id="gateEmail" type="email" name="email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false"></label>
       <label class="gatepass">Password<input id="gatePass" type="password" name="password" autocomplete="current-password"><button type="button" id="gateEye" title="Mostrar / esconder">👁</button></label>
@@ -289,7 +291,7 @@
       <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se a correção ainda está a cair ou se já virou. Em linguagem ICT: a tendência principal é o dealing range (equilibrium a 50%, zona de discount/premium); o movimento recente é onde acontece o MSS de entrada.</li>
       <li><b>Setups (painel no topo):</b> cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Checklist</b> (sem pontos): <b>Contexto</b> — a tendência principal do timeframe de contexto está no mesmo sentido; <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem (⚡) no movimento recente do timeframe de baixo; <b>FVG na quebra</b> — a quebra deixou FVG. 💧 = houve sweep do lado oposto antes da quebra (extra, não obrigatório). <b>✔ Pronto</b> quando os quatro estão cumpridos; senão <b>Em formação</b>, com o que falta. Entrada, stop e alvos são contigo.</li>
       <li><b>Range</b> (movimento recente): o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito) e a sessão asiática (só 1H e abaixo). Mostra o sinal mais importante: <b>⚠ a tocar</b> o topo/fundo (só quando o preço lá chega), <b>💧 sweep</b> (a wick ou poucos fechos passaram e voltaram para dentro — a manipulação; “Londres varreu” quando o sweep do range asiático foi na sessão de Londres), <b>⚖ possível quebra</b> (fecho fora, ainda dentro da tolerância do timeframe, ex. 1/2) e <b>quebrou</b> (ficou fora mais do que a tolerância). Sem sinal mostra a posição no range (0% = fundo, 100% = topo). É independente da estrutura: não altera estados, quebras nem setups.</li>
-      <li><b>Div.</b> e painel do RSI: divergências como no “RSI Divergence” do TradingView. Os pontos são fundos/topos do próprio RSI (o mais baixo/alto das 5 velas antes e depois — ajustável nas Definições). <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa (o RSI não a atravessa). Viva (cheia) enquanto for a última e o preço não passar o 2.º ponto; antiga (esbatida) depois.</li><li><b>▬ POC</b> (só visual): preço com mais volume de cada dia (rosa) e de cada semana (verde-lima), como uma linha por cima das velas desse período. Liga e desliga no botão da barra do gráfico.</li>
+      <li><b>Div.</b> e painel do RSI: divergências como no “RSI Divergence” do TradingView. Os pontos são fundos/topos do próprio RSI (o mais baixo/alto das 5 velas antes e depois — ajustável nas Definições). <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa (o RSI não a atravessa). Viva (cheia) enquanto for a última e o preço não passar o 2.º ponto; antiga (esbatida) depois.</li><li><b>▬ POC D / ▬ POC S</b> (só visual): preço com mais volume de cada dia (rosa) e de cada semana (verde-lima), como uma linha por cima das velas desse período. Cada um tem o seu botão na barra do gráfico e liga/desliga sozinho. O diário aparece até ao gráfico diário; o semanal até ao semanal.</li>
       <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep antes. Passa o rato por cima para ver o nível e o que a validou.</li>
       <li><b>📊 Testar no histórico</b>: percorre anos de histórico de vários ativos, vela a vela, sem ver o futuro, e mostra para cada nota a % de entradas que chegaram a cada alvo (1R, 2R, 3R, topo da perna nova, topo da perna da zona) antes do stop, e o ganho médio em R. É assim que se sabe se a nota merece confiança.</li>
       <li><b>Estados — movimento recente:</b> ⚡ Quebrou para cima/baixo = quebra fresca, o preço ainda não recuou 50% da perna nova: esperar. 🎯 Zona de compra/venda = depois dessa viragem, o preço recuou 50% ou mais da perna nova e ainda não fechou para lá da origem: zona de entrada. ▲ Subida / ▼ Descida = a viragem já foi confirmada por um novo topo/fundo (a coluna de correção continua a mostrar a profundidade do recuo atual). A entrada só falha com um fecho para lá da origem da perna (o estado muda para o sentido contrário).</li>
@@ -319,7 +321,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="pocBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC (preço com mais volume) de cada dia e de cada semana — só visual">▬ POC</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe">↶ Back</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button><button id="csvBtn" class="lyr" style="margin-left:0" title="Descarrega as velas deste timeframe para enviares ao Claude">⬇ Exportar velas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -363,7 +365,6 @@
   <div class="field"><div>Quebra falhada: velas de vigilância (padrão)<small>usado nos timeframes que não estão na lista abaixo. se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a sweep (0 = desligado)</small></div><input id="setFail" type="number" min="0" max="20"></div>
   <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
   <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
-  <div class="field"><div>POC no gráfico<small>preço com mais volume de cada dia (calculado com velas de 15m) e de cada semana (velas de 1H); uma linha por cima das velas desse período. O botão “▬ POC” na barra do gráfico liga e desliga. Só visual: não entra nos setups</small></div><span><label class="chk"><input id="setPocD" type="checkbox"> diário</label> <label class="chk"><input id="setPocW" type="checkbox"> semanal</label></span></div>
   <div class="field"><div>Divergências RSI: velas de cada lado<small>um fundo/topo do RSI tem de ser o mais baixo/alto das n velas antes e depois (TradingView usa 5). Mais baixo = mais divergências; mais alto = menos e mais fortes</small></div><input id="setDivPiv" type="number" min="2" max="15"></div>
   <div class="field"><div>Swing: proporção da perna<small>um topo/fundo conta quando o preço recua pelo menos esta fração da perna que o formou (0.5 = metade). Fica sempre entre o mínimo abaixo e o ATR da camada. 0 = só ATR</small></div><input id="setLegRatio" type="number" step="0.1" min="0" max="1"></div>
   <div class="field"><div>Swing: recuo mínimo (ATR)<small>nunca conta um swing com recuo menor do que isto, mesmo numa perna pequena</small></div><input id="setFloor" type="number" step="0.1" min="0.5" max="5"></div>
@@ -1275,7 +1276,7 @@
   const HOSTS = ['https://data-api.binance.vision', 'https://api.binance.com'];
   const DEFAULT_SETTINGS = {
     confirm: 1, lockBars: 2, extAtr: 3, intAtr: 2, prevLevels: true, setups: [{ name: 'Longo prazo', ctx: '1M', zone: '1w', trig: '4h', on: true }, { name: 'Swing', ctx: '1w', zone: '1d', trig: '1h', on: true }, { name: 'Day trade', ctx: '1d', zone: '4h', trig: '15m', on: true }, { name: 'Scalp', ctx: '4h', zone: '1h', trig: '5m', on: true }], btAssets: 'BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT', minRR: 3, feePct: 0.1, stopBufAtr: 0.1, dispInt: true, dispExt: false, dispAtr: 1, contBars: 3, fvgMinAtr: 0.3, contAtr: 1, closeMarginAtr: 0.3, acceptBars: 1, failBars: 4, failByTf: '5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1', favs: [], legRatio: 0.5, floorAtr: 1.5, dayStart: 'ny', sessions: '', showDayR: true, showWeekR: true, showAsiaR: true, kzOn: true, kzAsia: true, kzLondon: true, kzNy: true, liqTfs: ['1M', '1w', '1d', '4h', '1h', '15m'], volMult: 1.5, recent: 5, refresh: true,
-    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, divPivot: 5, pocOn: false, pocDay: true, pocWeek: true, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
+    tfs: TFS.map((t) => t.id), showExt: true, showInt: true, kzProfile: 'cripto', showLondonR: true, divPivot: 5, pocD: false, pocW: false, rangeTolByTf: '5m:3, 15m:2, 1h:1, 4h:1, 1d:1',
   };
 
   // timeframes da versão 2: sem 12H, 3H e 3m; com 3M, 6M e Anual
@@ -2381,7 +2382,7 @@
       }
     }
     // POC diário / semanal: uma linha por cima das velas de cada dia / semana (só visual)
-    if (settings.pocOn && !editMode) {
+    if ((settings.pocD || settings.pocW) && !editMode) {
       const tfMs = TF_MS0[drawState.tf] || 0, cs = d.candles, bwp = Math.max(2, ts.options().barSpacing || 6);
       const XC = (i) => ts.timeToCoordinate(cs[i].tt);
       // velas diárias/semanais abrem às 00:00 UTC (= véspera em Nova Iorque): usa o meio da vela para saber o dia/semana
@@ -2405,8 +2406,8 @@
           i0 = i;
         }
       };
-      if (settings.pocWeek !== false && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMulti(data['1h'], data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.95)', wideW(), 'POC S');
-      if (settings.pocDay !== false && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMulti(data['15m'], data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
+      if (settings.pocW && tfMs > 0 && tfMs <= 7 * 864e5) runs(weekKey, pocMulti(data['1h'], data['4h'], weekKey, 'w'), 'rgba(198,255,0,0.95)', wideW(), 'POC S');
+      if (settings.pocD && tfMs > 0 && tfMs <= 864e5) runs(dayKey, pocMulti(data['15m'], data['1h'], dayKey, 'd'), 'rgba(255,128,171,0.95)', 1.5, 'POC D');
     }
     // troços manual / automático da camada à vista: linha vertical tracejada onde começa cada um
     {
@@ -2454,7 +2455,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocBtn').classList.toggle('on', !!settings.pocOn); $('#pocBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 ? '' : 'none'; $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Back (${nU})` : '↶ Back';
     $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
@@ -2900,7 +2901,7 @@
   function openSettings() {
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr;
-    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setPocD').checked = settings.pocDay !== false; $('#setPocW').checked = settings.pocWeek !== false; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
+    $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
@@ -2911,7 +2912,7 @@
     settings = Object.assign({}, settings, {
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, volMult: +$('#setVol').value,
-      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, divPivot: Math.max(2, Math.min(15, +$('#setDivPiv').value || 5)), pocDay: $('#setPocD').checked, pocWeek: $('#setPocW').checked, legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
+      recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, divPivot: Math.max(2, Math.min(15, +$('#setDivPiv').value || 5)), legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
       tfs: [...document.querySelectorAll('#setTfs input:checked')].map((i) => i.value),
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
@@ -3047,7 +3048,8 @@
     $('#editBtn').addEventListener('click', () => setEdit(!editMode));
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
-    $('#pocBtn').addEventListener('click', () => { settings.pocOn = !settings.pocOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
+    $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
+    $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
     $('#clearBtn').addEventListener('click', () => {
@@ -3082,7 +3084,6 @@
     initChart(); chart.subscribeClick(onChartClick); updateEditUi(); loadAll(); setTimeout(pruneCandles, 30e3);
   }
   // ---------- ecrã de entrada: aparece antes da app arrancar; a app só corre depois do login ----------
-  // Sem Firebase (scripts não carregaram, sem internet na 1.ª vez) ou em file:// a app arranca logo, a gravar só neste navegador.
   const AUTH_ERR = { 'auth/invalid-credential': 'Email ou password errados.', 'auth/wrong-password': 'Password errada.', 'auth/user-not-found': 'Não há conta com este email. Usa “Criar conta”.', 'auth/invalid-login-credentials': 'Email ou password errados.',
     'auth/email-already-in-use': 'Já existe uma conta com este email. Usa “Entrar”.', 'auth/weak-password': 'A password tem de ter pelo menos 6 caracteres.', 'auth/invalid-email': 'Email inválido.',
     'auth/missing-password': 'Escreve a password.', 'auth/missing-email': 'Escreve o teu email.', 'auth/too-many-requests': 'Demasiadas tentativas. Espera uns minutos.', 'auth/operation-not-allowed': 'O login por email ainda não está ligado no Firebase (Authentication → Método de login → E-mail/senha).',
@@ -3090,10 +3091,14 @@
   function boot() {
     const fb = window.firebase, gate = $('#authGate');
     const run = () => { if (gate) gate.remove(); document.body.classList.remove('gated'); init(); };
-    if (!gate || !fb || !window.FIREBASE_CONFIG || location.protocol === 'file:') return run();
-    let auth;
-    try { if (!fb.apps.length) fb.initializeApp(window.FIREBASE_CONFIG); auth = fb.auth(); } catch (e) { return run(); }
+    if (!gate || location.protocol === 'file:') return run();   // file:// só serve para testes no computador
     document.body.classList.add('gated');
+    // sem login não se entra: se o servidor de login não carregar, fica no ecrã de entrada com um aviso e "Tentar de novo"
+    const down = () => { gate.classList.remove('wait'); gate.classList.add('down'); };
+    $('#gateRetry').addEventListener('click', () => location.reload());
+    let auth;
+    if (!fb || !window.FIREBASE_CONFIG) return down();
+    try { if (!fb.apps.length) fb.initializeApp(window.FIREBASE_CONFIG); auth = fb.auth(); } catch (e) { return down(); }
     const msg = (t, ok) => { const m = $('#gateMsg'); m.textContent = t || ''; m.className = 'gatemsg ' + (ok ? 'yes' : 'warn'); };
     const fail = (e) => { busy(false); msg(AUTH_ERR[e && e.code] || ('Erro: ' + ((e && (e.code || e.message)) || 'desconhecido'))); };
     const busy = (on) => gate.querySelectorAll('button, input').forEach((x) => { x.disabled = on; });
