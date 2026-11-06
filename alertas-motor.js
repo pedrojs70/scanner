@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T21:24:13.853Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T21:30:46.768Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -935,9 +935,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
 
   // ---------- 3) liquidez semanal: máximo / mínimo da semana anterior, decidido pelo fecho de 1H ----------
-  function weekAlerts(sym, c1h, S, A, st, now, out) {
+  function weekAlerts(sym, c1h, c5, S, A, st, now, out) {
     if (!c1h) return;
-    const lv = levels(c1h, S, now);
+    const lv = levels(c1h, S, now), sc = sessionsCfg(S);
+    // dia anterior apanhado dentro de uma killzone ligada: já foi avisado no ponto 3 (vela de 5m) — aqui não se repete
+    const kzOnly = (p, side, t1) => {
+      if (!A.kzOn || !A.kzDay || !c5) return false;
+      const kzs = [A.kzLondon && sc.londres, A.kzNy && sc.ny].filter(Boolean);
+      for (const c of c5) { if (c.t < t1 || c.ct >= now) continue; if (side === 1 ? c.h > p : c.l < p) return kzs.some((z) => inSess(nyParts(c.t).h, z)); }
+      return false;
+    };
     for (const [id, on] of [['week', A.weekOn], ['day', A.dayOn]]) {
       const r = lv[id]; if (!on || !r) continue;
       for (const side of [1, -1]) {
@@ -948,6 +955,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         if (st.seen[key]) continue;
         st.seen[key] = now;
         if (c.ct < now - 3 * 36e5 || st.silent) continue;
+        if (id === 'day' && kzOnly(p, side, r.t1)) continue;
         const back = side === 1 ? c.c <= p : c.c >= p;
         if (back ? !A.weekSweep : !A.weekClose) continue;
         const nm = (side === 1 ? 'Máximo' : 'Mínimo') + (id === 'week' ? ' da semana anterior' : ' do dia anterior');
@@ -970,7 +978,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     trackerAlerts(sym, dm, A, st, now, out);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
-    weekAlerts(sym, raw['1h'], S, A, st, now, out);
+    weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     return out;
   }
   function pruneState(st, now) {
