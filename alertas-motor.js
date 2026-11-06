@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T21:09:28.721Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T21:24:13.853Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -674,7 +674,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false,
     fvgOn: true,
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
-    weekOn: true, weekSweep: true, weekClose: true,
+    weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
   };
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -765,7 +765,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const s = new Set();
     if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); });
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
-    if (A.weekOn) s.add('1h');
+    if (A.weekOn || A.dayOn) s.add('1h');
     return [...s];
   }
 
@@ -936,24 +936,27 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
 
   // ---------- 3) liquidez semanal: máximo / mínimo da semana anterior, decidido pelo fecho de 1H ----------
   function weekAlerts(sym, c1h, S, A, st, now, out) {
-    if (!A.weekOn || !c1h) return;
-    const r = levels(c1h, S, now).week; if (!r) return;
-    for (const side of [1, -1]) {
-      const p = side === 1 ? r.top : r.bot;
-      let j = -1; for (let k = 0; k < c1h.length; k++) { const c = c1h[k]; if (c.t < r.t1 || c.ct >= now) continue; if (side === 1 ? c.h > p : c.l < p) { j = k; break; } }
-      if (j < 0) continue;
-      const c = c1h[j], key = `w|${sym}|${r.t1}|${side}`;
-      if (st.seen[key]) continue;
-      st.seen[key] = now;
-      if (c.ct < now - 3 * 36e5 || st.silent) continue;
-      const back = side === 1 ? c.c <= p : c.c >= p;
-      if (back ? !A.weekSweep : !A.weekClose) continue;
-      const nm = side === 1 ? 'Máximo da semana anterior' : 'Mínimo da semana anterior';
-      out.push({ kind: 'week', sym, text: [
-        `${back ? '💧' : side === 1 ? '▲' : '▼'} <b>Liquidez semanal · ${esc(sym)}</b>`,
-        back ? `${nm} (${fmt(p)}) varrido — <b>sweep</b>: a vela de 1H fechou de volta ${side === 1 ? 'abaixo' : 'acima'} (${fmt(c.c)})`
-          : `${nm} (${fmt(p)}) apanhado <b>com vela</b>: a vela de 1H fechou ${side === 1 ? 'acima' : 'abaixo'} (${fmt(c.c)})`,
-      ].join('\n') });
+    if (!c1h) return;
+    const lv = levels(c1h, S, now);
+    for (const [id, on] of [['week', A.weekOn], ['day', A.dayOn]]) {
+      const r = lv[id]; if (!on || !r) continue;
+      for (const side of [1, -1]) {
+        const p = side === 1 ? r.top : r.bot;
+        let j = -1; for (let k = 0; k < c1h.length; k++) { const c = c1h[k]; if (c.t < r.t1 || c.ct >= now) continue; if (side === 1 ? c.h > p : c.l < p) { j = k; break; } }
+        if (j < 0) continue;
+        const c = c1h[j], key = `${id === 'week' ? 'w' : 'd'}|${sym}|${r.t1}|${side}`;
+        if (st.seen[key]) continue;
+        st.seen[key] = now;
+        if (c.ct < now - 3 * 36e5 || st.silent) continue;
+        const back = side === 1 ? c.c <= p : c.c >= p;
+        if (back ? !A.weekSweep : !A.weekClose) continue;
+        const nm = (side === 1 ? 'Máximo' : 'Mínimo') + (id === 'week' ? ' da semana anterior' : ' do dia anterior');
+        out.push({ kind: id, sym, text: [
+          `${back ? '💧' : side === 1 ? '▲' : '▼'} <b>Liquidez ${id === 'week' ? 'semanal' : 'diária'} · ${esc(sym)}</b>`,
+          back ? `${nm} (${fmt(p)}) varrido — <b>sweep</b>: a vela de 1H fechou de volta ${side === 1 ? 'abaixo' : 'acima'} (${fmt(c.c)})`
+            : `${nm} (${fmt(p)}) apanhado <b>com vela</b>: a vela de 1H fechou ${side === 1 ? 'acima' : 'abaixo'} (${fmt(c.c)})`,
+        ].join('\n') });
+      }
     }
   }
 

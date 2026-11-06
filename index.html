@@ -390,7 +390,7 @@
       <li><b>1 · Setup:</b> a zona do setup em Zona de Long/Short (correção ≥ 50%, ajustável) e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido. A mensagem traz o FVG, a força e o volume da vela da quebra, o fecho, o contexto, a confluência (SMA 50/100/200 perto, preço fora do Keltner ±3ATR) e o nível que invalida.</li>
       <li><b>2 · FVG no pullback:</b> depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
       <li><b>3 · Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
-      <li><b>4 · Liquidez semanal:</b> máximo ou mínimo da semana anterior apanhado; o fecho da vela de 1H diz se foi sweep ou com vela.</li>
+      <li><b>4 · Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
       <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
     </ul>
 
@@ -474,9 +474,11 @@
     <br><span class="muted small">Liquidez:</span> <label class="chk"><input id="alKzA" type="checkbox"> topo/fundo da Ásia</label> <label class="chk"><input id="alKzD" type="checkbox"> topo/fundo do dia anterior</label> <label class="chk"><input id="alKzLo" type="checkbox"> topo/fundo de Londres (na NY)</label>
     <br><span class="muted small">O horário é o das Definições (perfil das killzones).</span></div>
 
-  <h3 class="sethead">4 · Liquidez semanal</h3>
-  <label class="chk alline"><input id="alWk" type="checkbox"> Avisar quando o máximo ou o mínimo da semana anterior é apanhado (decidido pelo fecho de 1H)</label>
-  <div class="alrow"><label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
+  <h3 class="sethead">4 · Liquidez da semana / do dia anteriores <span class="muted small">(a qualquer hora)</span></h3>
+  <div class="small muted">Avisar quando o máximo ou o mínimo é apanhado (decidido pelo fecho da vela de 1H):</div>
+  <label class="chk alline"><input id="alWk" type="checkbox"> topo/fundo da <b>semana</b> anterior</label>
+  <label class="chk alline"><input id="alDy" type="checkbox"> topo/fundo do <b>dia</b> anterior <span class="muted small">(dá mais alertas)</span></label>
+  <div class="alrow"><span class="muted small">Tipo:</span> <label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
 
   <h3 class="sethead">Ligar o Telegram</h3>
   <ol class="alsteps">
@@ -3337,8 +3339,8 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, weekSweep: true, weekClose: true };
-  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alWkS: 'weekSweep', alWkC: 'weekClose' };
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true };
+  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
