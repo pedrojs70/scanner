@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T21:30:46.768Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T22:09:05.056Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -670,7 +670,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const MAGG = { '3M': 3, '6M': 6, '1Y': 12 };
   // opções dos alertas (settings.alerts na app)
   const A_DEF = {
-    on: true, tgToken: '', tgChat: '',
+    on: true, tgToken: '', tgChat: '', relay: '',
     setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false,
     fvgOn: true,
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
@@ -999,6 +999,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const BINANCE = 'https://data-api.binance.vision';
   const STOCK_API = 'https://scanner-data.pedrojs70.workers.dev';
   const BUDGET = 45;            // pedidos de velas por volta: 288 voltas × ~50 pedidos cabe na quota diária do Google (20 000)
+  const MAX_ASSETS = 12;        // ativos analisados por volta (tempo de execução diário do Google: 90 min)
   const TIME_MAX = 240e3;       // não começa ativos novos depois de 4 minutos (máximo do Google: 6)
   const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   const API_IV = { '1M': '1M', '1w': '1w', '1d': '1d', '4h': '4h', '1h': '1h', '15m': '15m', '5m': '5m' };
@@ -1066,8 +1067,34 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (saved && Date.now() - +(saved.split('|')[1] || 0) < 864e5) { viaProxy = saved[0] === 'p'; return; }
     const r = http(BINANCE + '/api/v3/klines?symbol=BTCUSDT&interval=1d&limit=1');
     viaProxy = r.code !== 200;
-    if (viaProxy) { const q = http(STOCK_API + '/klines?symbol=BTCUSDT&interval=1d&limit=1'); if (q.code !== 200) throw new Error('a Binance recusa o Google (' + r.code + ') e o Worker scanner-data ainda não tem a rota /klines (' + q.code + '): atualiza o worker na Cloudflare com o código novo'); }
+    if (viaProxy) { const q = http(STOCK_API + '/klines?symbol=BTCUSDT&interval=1d&limit=1'); if (q.code !== 200) throw new Error('a Binance recusa o Google (' + r.code + ') e a Cloudflare (' + q.code + '): põe o endereço do intermediário (Vercel) na página Alertas da app'); }
     p.setProperty('binRoute', (viaProxy ? 'p' : 'd') + '|' + Date.now());
+  }
+  // pelo intermediário no Vercel (Dublin): um pedido por ativo com todos os timeframes
+  function relayCandles(relay, syms, tfs, edits) {
+    const base = relay.replace(/\/+$/, '') + '/api/velas?';
+    const api = [...new Set(tfs.map((id) => (C.MAGG[id] ? '1M' : id)))].filter((id) => API_IV[id]);
+    const res = UrlFetchApp.fetchAll(syms.map((s) => ({ url: base + 'symbol=' + s + '&i=' + api.join(',') + '&limit=1000', muteHttpExceptions: true })));
+    const out = {};
+    const conv = (rows) => rows.map((r) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5], ct: r[6] }));
+    res.forEach((r, k) => {
+      const s = syms[k], o = (out[s] = {});
+      if (r.getResponseCode() !== 200) { o._err = 'intermediário ' + r.getResponseCode(); return; }
+      const j = JSON.parse(r.getContentText());
+      for (const id of api) {
+        const v = j[id];
+        if (!Array.isArray(v)) { o._err = (v && v.error) || ('sem velas ' + id); return; }
+        let cs = conv(v);
+        const need = Math.min(...tfs.filter((t) => (C.MAGG[t] ? '1M' : t) === id).map((t) => C.earliestEdit(edits[s + '|' + t])));
+        for (let g = 0; g < 4 && cs.length && need < cs[0].t; g++) {
+          const rr = http(base + 'symbol=' + s + '&i=' + id + '&limit=1000&endTime=' + (cs[0].t - 1));
+          if (rr.code !== 200) break; const m = JSON.parse(rr.text)[id]; if (!Array.isArray(m) || !m.length) break; cs = conv(m).concat(cs);
+        }
+        o[id] = cs;
+      }
+      for (const id of tfs) if (C.MAGG[id] && o['1M']) o[id] = C.aggregateMonths(o['1M'], C.MAGG[id]);
+    });
+    return out;
   }
   function cryptoCandles(syms, tfs, edits) {
     const reqs = [], keys = [];
@@ -1148,15 +1175,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     try { fsList(a, 'edits').forEach((f) => { const k = f.key && f.key.stringValue, j = f.json && f.json.stringValue; if (k && j) { try { edits[k] = C.deserEd(JSON.parse(j)); } catch (e) {} } }); }
     catch (e) { hb.err.push(String(e.message || e)); }
     const tfs = C.neededTfs(S, A);
-    const costOf = (s) => (isCrypto(s) ? new Set(tfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
+    const relay = String(A.relay || '').trim();
+    const costOf = (s) => (isCrypto(s) && !relay ? new Set(tfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
     // primeiro os ativos com setups a seguir (o toque no FVG não pode esperar), depois os outros à vez
     const order = [...new Set(st.trk.map((x) => x.sym))];
     for (let k = 0; k < favs.length; k++) { const s = favs[(st.cur + k) % favs.length]; if (order.indexOf(s) < 0) order.push(s); }
     const batch = []; let used = 0;
-    for (const s of order) { const c = costOf(s); if (batch.length && used + c > BUDGET) break; batch.push(s); used += c; }
+    for (const s of order) { const c = costOf(s); if (batch.length && (used + c > BUDGET || batch.length >= MAX_ASSETS)) break; batch.push(s); used += c; }
     const rotated = batch.filter((s) => !st.trk.some((x) => x.sym === s)).length;
     st.cur = favs.length ? (st.cur + Math.max(1, rotated)) % favs.length : 0;
-    const crypto = batch.filter(isCrypto), cdata = crypto.length ? cryptoCandles(crypto, tfs, edits) : {};
+    const crypto = batch.filter(isCrypto), cdata = crypto.length ? (relay ? relayCandles(relay, crypto, tfs, edits) : cryptoCandles(crypto, tfs, edits)) : {};
     const msgs = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }

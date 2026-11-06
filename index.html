@@ -489,6 +489,10 @@
   </ol>
   <div class="small muted">Chat: <span id="alChatSt">—</span> · <a href="#" id="alChatMan" class="helplink">escrever o chat id à mão</a> <input id="alChat" type="text" style="display:none;width:150px" placeholder="chat id"></div>
 
+  <h3 class="sethead">Intermediário das velas <span class="muted small">(Vercel, em Dublin — a Binance recusa os servidores do Google)</span></h3>
+  <div class="small">Endereço do teu projeto no Vercel: <input id="alRelay" type="text" spellcheck="false" autocomplete="off" style="width:100%;margin-top:4px" placeholder="https://o-teu-projeto.vercel.app"></div>
+  <div style="margin-top:6px"><button id="alRelayTest" class="lyr">🧪 Testar</button> <span id="alRelayMsg" class="small"></span></div>
+
   <h3 class="sethead">Instalar o vigia <span class="muted small">(Google Apps Script, grátis — só uma vez)</span></h3>
   <div id="alMotor" class="small" style="margin:4px 0"></div>
   <ol class="alsteps">
@@ -3339,7 +3343,7 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true };
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true };
   const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}) });
@@ -3393,7 +3397,7 @@ function motor_() {
     alDraft = alCfg();
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
     $('#alMin').value = alDraft.minPull;
-    $('#alTok').value = alDraft.tgToken || '';
+    $('#alTok').value = alDraft.tgToken || ''; $('#alRelay').value = alDraft.relay || ''; $('#alRelayMsg').textContent = '';
     $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
     $('#alLinkMsg').textContent = ''; $('#alCopyMsg').textContent = '';
@@ -3404,6 +3408,7 @@ function motor_() {
     for (const id in AL_CHK) alDraft[AL_CHK[id]] = $('#' + id).checked;
     alDraft.minPull = Math.max(0, Math.min(100, +$('#alMin').value || 50));
     alDraft.tgToken = $('#alTok').value.trim();
+    alDraft.relay = $('#alRelay').value.trim().replace(/\/+$/, '');
     if ($('#alChat').style.display !== 'none') alDraft.tgChat = $('#alChat').value.trim();
     (settings.setups || []).forEach((x, k) => { const i = document.querySelector(`[data-al="${k}"]`); if (i) alDraft.setups[x.name] = i.checked; });
     return alDraft;
@@ -3435,6 +3440,19 @@ function motor_() {
     $('#alCancel').addEventListener('click', () => $('#alerts').classList.remove('open'));
     $('#alSave').addEventListener('click', saveAlerts);
     $('#alLink').addEventListener('click', linkTelegram);
+    $('#alRelayTest').addEventListener('click', async () => {
+      const m = $('#alRelayMsg'), say = (t, ok) => { m.textContent = t; m.className = 'small ' + (ok ? 'yes' : 'warn'); };
+      let u = $('#alRelay').value.trim().replace(/\/+$/, '');
+      if (u && !/^https?:\/\//.test(u)) { u = 'https://' + u; $('#alRelay').value = u; }
+      if (!/^https:\/\/[\w.-]+$/.test(u)) return say('Cola o endereço que o Vercel te deu (ex.: https://binance-velas.vercel.app).');
+      say('A testar…', true);
+      try {
+        const j = await fetch(u + '/api/velas?symbol=BTCUSDT&i=1d&limit=2', { cache: 'no-store' }).then((r) => r.json());
+        const rows = j['1d'];
+        if (!Array.isArray(rows)) return say('O intermediário respondeu mas a Binance recusou: ' + ((rows && rows.error) || j.error || 'erro') + ' (região ' + (j.regiao || '?') + ').');
+        say(`✔ funciona · região ${j.regiao}${/^dub|^fra|^lhr|^cdg|^arn/.test(j.regiao || '') ? ' (Europa)' : ''} · BTC ${fmt(rows[rows.length - 1][4])}. Carrega em Guardar.`, true);
+      } catch (e) { say('Não respondeu (' + (e.message || e) + '). Confirma o endereço e se o Deploy no Vercel terminou.'); }
+    });
     $('#alRefresh').addEventListener('click', alLoadStatus);
     $('#alChatMan').addEventListener('click', (e) => { e.preventDefault(); const i = $('#alChat'); i.style.display = ''; i.focus(); });
     $('#alCopy').addEventListener('click', async () => {
