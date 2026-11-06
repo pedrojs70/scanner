@@ -137,6 +137,16 @@
   #setTfs, #setLiq { display:flex; flex-wrap:wrap; gap:8px 14px; margin:6px 0 12px; }
   .chk { white-space:nowrap; }
   .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
+  .alst { padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-bottom:10px; font-size:13px; }
+  .albig { font-weight:600; font-size:14px; }
+  #alerts .alline { white-space:normal; display:block; padding-left:22px; text-indent:-22px; } #alerts .alline input { margin-right:6px; }
+  .alrow { margin:6px 0 4px 22px; line-height:1.9; }
+  #alSetups { margin-top:4px; }
+  .alsteps { margin:6px 0; padding-left:20px; line-height:1.55; font-size:13px; } .alsteps li { margin:4px 0; }
+  .allog { max-height:340px; overflow-y:auto; font-size:12px; }
+  .allog .ali { border-bottom:1px solid var(--line); padding:6px 0; } .allog .ali .t { color:var(--muted); font-size:11px; }
+  #alerts code { background:rgba(127,127,127,.15); padding:0 4px; border-radius:4px; }
+  @media (max-width:760px) { #alertBtn { padding:4px 8px; } }
   .primary { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
   @media (max-width:700px){ #chart { height:420px; } header { padding:10px; } main { padding:10px; } }
 
@@ -305,6 +315,7 @@
   <span id="cloudSt" class="status"></span><button id="loginBtn" style="display:none" title="Terminar a sessão">Sair</button>
   <button id="favBtn" title="Ver os favoritos">★ Favoritos</button>
   <button id="themeBtn" title="Mudar para fundo branco">☀</button>
+  <button id="alertBtn" title="Alertas no Telegram">🔔 Alertas</button>
   <button id="gear">Definições</button>
 </header>
 <main>
@@ -373,6 +384,16 @@
       <li><b>★ Favoritos:</b> a estrela ☆ ao lado do ativo põe-no (ou tira-o) da lista; “★ Favoritos” mostra cada ativo com o resumo de cada setup (“fora da zona”, “falta: …”, “✔ Pronto”, e “contra X%” quando for o caso), ordenada pelo que está mais pronto. Toca num ativo para o abrir; 📈 abre o gráfico em ecrã inteiro.</li>
     </ul>
 
+    <h3 class="helphead">🔔 Alertas no Telegram</h3>
+    <ul>
+      <li><b>🔔 Alertas</b> (botão no topo): escolhes o que queres receber, ligas o Telegram e instalas o <b>vigia</b> — um pequeno programa no Google Apps Script (grátis) que corre de 5 em 5 minutos, mesmo com o computador desligado. Só vigia os ★ favoritos e usa as tuas marcações.</li>
+      <li><b>1 · Setup:</b> a zona do setup em Zona de Long/Short (correção ≥ 50%, ajustável) e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido. A mensagem traz o FVG, a força e o volume da vela da quebra, o fecho, o contexto, a confluência (SMA 50/100/200 perto, preço fora do Keltner ±3ATR) e o nível que invalida.</li>
+      <li><b>2 · FVG no pullback:</b> depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
+      <li><b>3 · Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
+      <li><b>4 · Liquidez semanal:</b> máximo ou mínimo da semana anterior apanhado; o fecho da vela de 1H diz se foi sweep ou com vela.</li>
+      <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
+    </ul>
+
     <h3 class="helphead">6 · Gráfico</h3>
     <ul>
       <li><b>Camada:</b> o gráfico mostra uma camada de cada vez — a do botão a amarelo (“Tendência principal” ou “Movimento recente”).</li>
@@ -430,6 +451,58 @@
   <h2 style="margin-top:0">Gravar as alterações?</h2>
   <p class="muted small">Tens alterações à estrutura que ainda não foram gravadas.</p>
   <div class="actions" style="flex-wrap:wrap;gap:8px"><button id="sdStay">Continuar a editar</button><button id="sdDiscard">Descartar</button><button id="sdSave" class="primary">💾 Gravar</button></div>
+</div></div>
+<div id="alerts" class="modal"><div class="dialog" style="width:min(680px,96vw)">
+  <button id="alX" class="dlgclose" title="Fechar">✕</button><h2>🔔 Alertas no Telegram</h2>
+  <div id="alSt" class="alst"></div>
+  <label class="chk albig alline"><input id="alOn" type="checkbox"> Alertas ligados <span class="muted small">(desliga tudo de uma vez, sem perder as escolhas)</span></label>
+  <p class="muted small" style="margin:6px 0 0">Só para os ativos dos ★ favoritos. O vigia verifica de 5 em 5 minutos e avisa no fecho das velas.</p>
+
+  <h3 class="sethead">1 · Setup <span class="muted small">(a base)</span></h3>
+  <label class="chk alline"><input id="alSetup" type="checkbox"> Avisar quando o TF da zona está em Zona de Long/Short e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido</label>
+  <div id="alSetups" class="alrow"></div>
+  <div class="field"><div>Correção mínima da zona<small>a zona só conta a partir desta correção (%)</small></div><input id="alMin" type="number" min="0" max="100" step="1"></div>
+  <div class="alrow"><span class="muted small">Filtros extra (desligados = só informação na mensagem):</span><br>
+    <label class="chk"><input id="alFFvg" type="checkbox"> só com FVG</label> <label class="chk"><input id="alFStrong" type="checkbox"> só vela forte</label> <label class="chk"><input id="alFVol" type="checkbox"> só volume alto</label> <label class="chk"><input id="alFCtx" type="checkbox"> só contexto a favor</label></div>
+
+  <h3 class="sethead">2 · FVG no pullback <span class="muted small">(depois do alerta de setup)</span></h3>
+  <label class="chk alline"><input id="alFvg" type="checkbox"> Avisar logo que o preço toca num FVG do TF de gatilho para lá dos 50% da pernada da quebra; e quando o setup fica invalidado</label>
+
+  <h3 class="sethead">3 · Killzones <span class="muted small">(só dentro das horas)</span></h3>
+  <label class="chk alline"><input id="alKz" type="checkbox"> Avisar quando a liquidez é apanhada dentro de uma killzone (velas de 5m)</label>
+  <div class="alrow"><span class="muted small">Killzones:</span> <label class="chk"><input id="alKzL" type="checkbox"> Londres</label> <label class="chk"><input id="alKzN" type="checkbox"> Nova Iorque</label>
+    <br><span class="muted small">Liquidez:</span> <label class="chk"><input id="alKzA" type="checkbox"> topo/fundo da Ásia</label> <label class="chk"><input id="alKzD" type="checkbox"> topo/fundo do dia anterior</label> <label class="chk"><input id="alKzLo" type="checkbox"> topo/fundo de Londres (na NY)</label>
+    <br><span class="muted small">O horário é o das Definições (perfil das killzones).</span></div>
+
+  <h3 class="sethead">4 · Liquidez semanal</h3>
+  <label class="chk alline"><input id="alWk" type="checkbox"> Avisar quando o máximo ou o mínimo da semana anterior é apanhado (decidido pelo fecho de 1H)</label>
+  <div class="alrow"><label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
+
+  <h3 class="sethead">Ligar o Telegram</h3>
+  <ol class="alsteps">
+    <li>No Telegram procura <b>@BotFather</b>, envia <code>/newbot</code>, escolhe um nome e um nome de utilizador (tem de acabar em “bot”). Ele responde com um <b>token</b> (algo como <code>123456:ABC…</code>).</li>
+    <li>Cola o token aqui: <input id="alTok" type="text" spellcheck="false" autocomplete="off" style="width:100%;margin-top:4px" placeholder="123456789:AA…"></li>
+    <li>Abre o teu robô no Telegram (o link vem na mensagem do BotFather), carrega em <b>Iniciar</b> e envia-lhe “olá”.</li>
+    <li><button id="alLink" class="lyr">🔗 Ligar e enviar teste</button> <span id="alLinkMsg" class="small"></span></li>
+  </ol>
+  <div class="small muted">Chat: <span id="alChatSt">—</span> · <a href="#" id="alChatMan" class="helplink">escrever o chat id à mão</a> <input id="alChat" type="text" style="display:none;width:150px" placeholder="chat id"></div>
+
+  <h3 class="sethead">Instalar o vigia <span class="muted small">(Google Apps Script, grátis — só uma vez)</span></h3>
+  <div id="alMotor" class="small" style="margin:4px 0"></div>
+  <ol class="alsteps">
+    <li>Carrega em <button id="alCopy" class="lyr">📋 Copiar código do vigia</button> <span id="alCopyMsg" class="small"></span><br><span class="muted small">O código leva a tua chave de acesso à conta da app: não o partilhes.</span></li>
+    <li>Abre <a href="https://script.google.com/home/projects/create" target="_blank" rel="noopener" class="helplink">script.google.com → Novo projeto</a> (com a tua conta Google).</li>
+    <li>Apaga o que lá está, cola o código e carrega em 💾 <b>Guardar</b>. Dá um nome ao projeto (ex.: “Vigia scanner”).</li>
+    <li>Na barra de cima escolhe a função <b>instalar</b> e carrega em <b>▷ Executar</b>.</li>
+    <li>O Google pede autorização: <b>Rever permissões</b> → escolhe a tua conta → <b>Avançadas</b> → <b>Aceder a Vigia scanner (não seguro)</b> → <b>Permitir</b>. (É “não seguro” só porque o código é teu e não foi verificado pelo Google.)</li>
+    <li>Recebes no Telegram “Teste do vigia” e “Vigia ligado”. A partir daí corre sozinho de 5 em 5 minutos, mesmo com o computador desligado.</li>
+  </ol>
+  <p class="muted small">Para parar: no Apps Script escolhe a função <b>parar</b> e executa. Ou desliga “Alertas ligados” aqui em cima. As mudanças nesta página chegam ao vigia na volta seguinte.</p>
+  <textarea id="alCode" readonly style="display:none"></textarea>
+
+  <h3 class="sethead">Histórico <span class="muted small">(últimos alertas enviados)</span> <button id="alRefresh" class="lyr" style="margin-left:6px">↻</button></h3>
+  <div id="alLog" class="allog"></div>
+  <div class="actions"><button id="alCancel">Cancelar</button><button id="alSave" class="primary">Guardar</button></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
   <button id="setX" class="dlgclose" title="Fechar">✕</button><h2>Definições</h2>
@@ -3263,6 +3336,114 @@
   }
 
 
+  // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, weekSweep: true, weekClose: true };
+  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alWkS: 'weekSweep', alWkC: 'weekClose' };
+  let alDraft = null;
+  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}) });
+  const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
+  function alChatUi() { $('#alChatSt').innerHTML = alDraft.tgChat ? `<span class="yes">✔ ligado (chat ${alDraft.tgChat})</span>` : '<span class="warn">ainda não ligado</span>'; }
+  function alertCode() {
+    const u = cloud.user, chave = u && u.refreshToken;
+    if (!chave) return null;
+    const motor = new URL('alertas-motor.js', location.href.split('#')[0]).href;
+    return `// Vigia do Scanner de Estrutura — cola este código todo no Apps Script, guarda e executa a função "instalar" uma vez.
+// A CHAVE dá acesso à tua conta da app (${u.email || ''}): não partilhes este código.
+const CHAVE = '${chave}';
+const MOTOR = '${motor}';
+
+function instalar() { parar(); ScriptApp.newTrigger('vigiar').timeBased().everyMinutes(5).create(); motor_().testar({ chave: CHAVE }); vigiar(); }
+function vigiar() { motor_().vigiar({ chave: CHAVE }); }
+function testar() { motor_().testar({ chave: CHAVE }); }
+function parar() { ScriptApp.getProjectTriggers().forEach(function (t) { ScriptApp.deleteTrigger(t); }); }
+function recomecar() { motor_().reset(); }
+function motor_() {
+  const r = UrlFetchApp.fetch(MOTOR + '?t=' + Date.now(), { muteHttpExceptions: true });
+  if (r.getResponseCode() !== 200) throw new Error('Não encontrei o alertas-motor.js no site (' + r.getResponseCode() + '). Puseste-o no GitHub ao lado do index.html?');
+  return new Function(r.getContentText() + '\\nreturn MSS_ALERTAS;')();
+}
+`;
+  }
+  // texto de uma mensagem do Telegram mostrado na app (só negrito e itálico)
+  const alHtml = (t) => String(t).replace(/&(?!amp;|lt;|gt;)/g, '&amp;').replace(/<(?!\/?[bi]>)/g, '&lt;').replace(/\n/g, '<br>');
+  async function alLoadStatus() {
+    const st = $('#alSt'), lg = $('#alLog');
+    if (!cloud.user || !cloud.db) { st.innerHTML = '<span class="warn">Sem ligação à conta — os alertas precisam do login.</span>'; lg.innerHTML = ''; return; }
+    st.innerHTML = '<span class="muted">a ver o estado do vigia…</span>';
+    try {
+      const d = await cloud.db.collection('users').doc(cloud.user.uid).collection('meta').doc('alertlog').get();
+      const j = d.exists && d.data().json ? JSON.parse(d.data().json) : null;
+      if (!j) { st.innerHTML = '⚪ <b>Vigia ainda não instalado</b> <span class="muted">— segue os passos de “Instalar o vigia” mais abaixo.</span>'; lg.innerHTML = '<span class="muted">Ainda não há alertas.</span>'; return; }
+      const late = Date.now() - j.lastRun > 20 * 6e4;
+      st.innerHTML = (j.off ? `🟡 <b>Vigia parado:</b> ${j.off}` : late ? `🔴 <b>O vigia não corre desde ${new Date(j.lastRun).toLocaleString('pt-PT')}</b> <span class="muted">— vê no Apps Script se o acionador “vigiar” ainda existe (ou executa “instalar” outra vez).</span>`
+        : `🟢 <b>Vigia ativo</b> · última volta ${agoTxt(j.lastRun)} · ${j.done ? j.done.length : 0} de ${j.favs} favoritos nesta volta${j.favs > (j.done || []).length ? ' <span class="muted">(os outros vão à vez nas voltas seguintes)</span>' : ''}`)
+        + (j.err && j.err.length ? `<br><span class="warn small">⚠ ${j.err.slice(0, 3).map((e) => String(e).replace(/</g, '&lt;')).join(' · ')}</span>` : '');
+      lg.innerHTML = (j.log || []).length ? j.log.map((x) => `<div class="ali"><div class="t">${new Date(x.at).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>${alHtml(x.text)}</div>`).join('') : '<span class="muted">Ainda não há alertas.</span>';
+    } catch (e) { st.innerHTML = `<span class="warn">Não consegui ler o estado do vigia (${(e && e.code) || e}).</span>`; }
+  }
+  async function alCheckMotor() {
+    const m = $('#alMotor');
+    if (location.protocol === 'file:') { m.innerHTML = ''; return; }
+    try { const r = await fetch('alertas-motor.js?t=' + Date.now(), { method: 'HEAD', cache: 'no-store' }); m.innerHTML = r.ok ? '<span class="yes">✔ alertas-motor.js encontrado no site</span>' : '<span class="warn">⚠ falta o ficheiro alertas-motor.js no site: põe-no no GitHub ao lado do index.html</span>'; }
+    catch (e) { m.innerHTML = ''; }
+  }
+  function openAlerts() {
+    alDraft = alCfg();
+    for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
+    $('#alMin').value = alDraft.minPull;
+    $('#alTok').value = alDraft.tgToken || '';
+    $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
+    $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
+    $('#alLinkMsg').textContent = ''; $('#alCopyMsg').textContent = '';
+    alChatUi(); alLoadStatus(); alCheckMotor();
+    $('#alerts').classList.add('open');
+  }
+  function readAlerts() {
+    for (const id in AL_CHK) alDraft[AL_CHK[id]] = $('#' + id).checked;
+    alDraft.minPull = Math.max(0, Math.min(100, +$('#alMin').value || 50));
+    alDraft.tgToken = $('#alTok').value.trim();
+    if ($('#alChat').style.display !== 'none') alDraft.tgChat = $('#alChat').value.trim();
+    (settings.setups || []).forEach((x, k) => { const i = document.querySelector(`[data-al="${k}"]`); if (i) alDraft.setups[x.name] = i.checked; });
+    return alDraft;
+  }
+  function saveAlerts() { settings = Object.assign({}, settings, { alerts: readAlerts() }); save('mss_settings4', settings); $('#alerts').classList.remove('open'); }
+  async function linkTelegram() {
+    const msg = (t, ok) => { const m = $('#alLinkMsg'); m.textContent = t; m.className = 'small ' + (ok ? 'yes' : 'warn'); };
+    const tok = $('#alTok').value.trim();
+    if (!/^\d+:[\w-]{20,}$/.test(tok)) return msg('Cola primeiro o token que o BotFather te deu (números, dois pontos e letras).');
+    msg('A procurar a tua mensagem…', true);
+    try {
+      const api = (m, body) => fetch(`https://api.telegram.org/bot${tok}/${m}`, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined).then((r) => r.json());
+      const me = await api('getMe'); if (!me.ok) return msg('O Telegram não aceitou este token. Confirma que o copiaste todo.');
+      let chat = alDraft.tgChat;
+      const up = await api('getUpdates');
+      const msgs = ((up && up.result) || []).map((u) => u.message || u.edited_message || u.channel_post).filter(Boolean);
+      if (msgs.length) chat = String(msgs[msgs.length - 1].chat.id);
+      if (!chat) return msg(`Ainda não vejo mensagens. Abre @${me.result.username} no Telegram, carrega em Iniciar, envia “olá” e tenta outra vez.`);
+      const r = await api('sendMessage', { chat_id: chat, text: '✅ <b>Scanner de Estrutura</b>\nO Telegram está ligado à app. Falta instalar o vigia (página Alertas).', parse_mode: 'HTML' });
+      if (!r.ok) return msg('Não consegui enviar: ' + (r.description || 'erro'));
+      alDraft.tgToken = tok; alDraft.tgChat = chat; alChatUi();
+      settings = Object.assign({}, settings, { alerts: readAlerts() }); save('mss_settings4', settings);
+      msg(`Ligado a @${me.result.username}. Vê a mensagem de teste no Telegram.`, true);
+    } catch (e) { msg('Não consegui falar com o Telegram daqui (' + (e.message || e) + '). Escreve o chat id à mão: pede-o ao @userinfobot.'); }
+  }
+  function alertsInit() {
+    $('#alertBtn').addEventListener('click', openAlerts);
+    $('#alX').addEventListener('click', () => $('#alerts').classList.remove('open'));
+    $('#alCancel').addEventListener('click', () => $('#alerts').classList.remove('open'));
+    $('#alSave').addEventListener('click', saveAlerts);
+    $('#alLink').addEventListener('click', linkTelegram);
+    $('#alRefresh').addEventListener('click', alLoadStatus);
+    $('#alChatMan').addEventListener('click', (e) => { e.preventDefault(); const i = $('#alChat'); i.style.display = ''; i.focus(); });
+    $('#alCopy').addEventListener('click', async () => {
+      const m = $('#alCopyMsg'), code = alertCode();
+      if (!code) { m.textContent = 'Precisas de ter o login feito.'; m.className = 'small warn'; return; }
+      try { await navigator.clipboard.writeText(code); m.textContent = '✔ copiado — agora cola no Apps Script'; m.className = 'small yes'; }
+      catch (e) { const ta = $('#alCode'); ta.style.display = ''; ta.value = code; ta.style.width = '100%'; ta.style.height = '160px'; ta.select(); m.textContent = 'Seleciona o texto abaixo e copia (Ctrl+C).'; m.className = 'small warn'; }
+    });
+  }
+
+
   // ---------- gravação online (Firebase): login com Google; marcas e definições guardadas na conta ----------
   // Firestore: users/{uid}/edits/{par|tf} = { json } (uma por par e timeframe) e users/{uid}/meta/settings = { json }.
   // Primeiro login: junta o que estava neste navegador ao que está na conta (a conta ganha em caso de conflito).
@@ -3382,7 +3563,7 @@
     $('#gear').addEventListener('click', openSettings);
     cloudInit();
     document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => setMTab(b.dataset.t)));
-    favsInit();
+    favsInit(); alertsInit();
     setMTab('favs');
     // botão "voltar ao topo": aparece quando se desce na página (no telemóvel o gráfico ocupa o ecrã e prende o deslizar)
     const tb = $('#topBtn');
@@ -3441,7 +3622,7 @@
     $('#btRun').addEventListener('click', runBacktest);
     $('#btClose').addEventListener('click', () => $('#btModal').classList.remove('open'));
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); } });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); $('#alerts').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
     initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); applyTheme();
     // clique direito na escala dos preços (à direita): volta ao ajuste automático, como o duplo clique
