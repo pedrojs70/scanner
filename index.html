@@ -75,6 +75,8 @@
   .chip.b50 { background:rgba(255,213,79,.18); color:#ffd54f; } .chip.b65 { background:rgba(255,152,0,.22); color:#ffb74d; }
   /* movimento recente mais compacto: colunas secundárias com letra e espaço menores */
   .tablewrap td.rc { font-size:12px; padding-left:4px; padding-right:4px; } .tablewrap td.rc .small, .tablewrap td.small.rc { font-size:11px; }
+  .tablewrap td.rw { width:1%; }
+  .tablewrap td.rngc { white-space:normal; min-width:120px; max-width:150px; }
   .lvl50 { color:rgba(245,197,24,.62); }
   .chip.b0 { background:rgba(79,195,247,.15); color:#81d4fa; }
   .chip.b92, .chip.bx { background:rgba(255,82,82,.22); color:#ff8a80; }
@@ -315,9 +317,9 @@
   <div class="tablewrap">
     <table>
       <thead>
-        <tr class="grp"><th></th><th colspan="4" class="gl">TENDÊNCIA PRINCIPAL <span class="muted">· onde estamos</span></th><th colspan="8" class="gl">MOVIMENTO RECENTE <span class="muted">· quebra e entrada</span></th></tr>
+        <tr class="grp"><th></th><th colspan="4" class="gl">TENDÊNCIA PRINCIPAL <span class="muted">· onde estamos</span></th><th colspan="7" class="gl">MOVIMENTO RECENTE <span class="muted">· quebra e entrada</span></th></tr>
         <tr><th>TF</th><th class="gl">Estrutura</th><th>Fase</th><th>Correção</th><th>Range <span class="muted">(limite · topo/fundo)</span></th>
-        <th class="gl">Estado</th><th>Correção<br>da perna</th><th>Última<br>quebra</th><th title="Divergência RSI nos swings do movimento recente: ▲ de alta, ▼ de baixa">Div.</th><th title="Ranges: o teu range manual, dia e semana anteriores e sessão asiática. ⚠ a tocar o limite · 💧 sweep · ⚖ possível quebra · quebrou">Range</th><th>Volume<br>da quebra</th><th>Vela<br>da quebra</th><th>Liquidez <span class="muted">(por varrer)</span></th></tr>
+        <th class="gl">Estado</th><th>Correção<br>da perna</th><th>Última<br>quebra</th><th title="Divergência RSI nos swings do movimento recente: ▲ de alta, ▼ de baixa">Div.</th><th title="Ranges: o teu range manual, dia e semana anteriores e sessão asiática. ⚠ a tocar o limite · 💧 sweep · ⚖ possível quebra · quebrou">Range</th><th>Vela da quebra<br><span class="muted">força · volume · fecho</span></th><th>Liquidez <span class="muted">(por varrer)</span></th></tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -358,7 +360,7 @@
       <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep do lado oposto nas 20 velas antes. Passa o rato por cima para ver o nível e o que a validou.</li>
       <li><b>Div.:</b> divergência RSI viva (ver Gráfico).</li>
       <li><b>Range:</b> o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito), Ásia e Londres (só 1H e abaixo). Numa linha o estado e por baixo a caixa com os preços (no teu range também o EQ). Estados: <b>quebrou · Nv</b> (ficou fora mais do que a tolerância do timeframe), <b>⚖ 1/2</b> (fecho fora, ainda dentro da tolerância), <b>⚠ a tocar</b> (a vela atual está no limite), <b>💧 sweep</b> (o pavio passou e voltou para dentro; indica a killzone, se for o caso), <b>▭ X%</b> (dentro: 0% = fundo, 100% = topo). Só informação: não muda a estrutura nem os setups.</li>
-      <li><b>Volume da quebra:</b> “sim” quando a vela da quebra teve ≥ 1,5× o volume médio das 20 anteriores. <b>Vela da quebra:</b> <b>forte</b> = corpo ≥ 1× o ATR e ≥ 60% da vela; <b>fraca</b> = corpo &lt; 0,5× o ATR; por baixo, a que distância do nível fechou (“fecho 0,8 ATR além”) — <span class="warn">fecho colado</span> = menos de 0,3 ATR: quebra suspeita, mesmo com vela forte. São sinais de qualidade, não condições do setup.</li>
+      <li><b>Vela da quebra:</b> força, volume e fecho da vela que fez a quebra. Volume: “vol 1,8×” = 1,8 vezes o volume médio das 20 velas anteriores (a verde a partir de 1,5×, volume alto). Força: <b>forte</b> = corpo ≥ 1× o ATR e ≥ 60% da vela; <b>fraca</b> = corpo &lt; 0,5× o ATR; por baixo, a que distância do nível fechou (“fecho 0,8 ATR além”) — <span class="warn">fecho colado</span> = menos de 0,3 ATR: quebra suspeita, mesmo com vela forte. São sinais de qualidade, não condições do setup.</li>
       <li><b>Liquidez (por varrer):</b> o topo e o fundo do movimento recente mais próximos do preço que <b>ainda não foram varridos</b> — onde estão os stops à espera (“—” = não há nenhum desse lado). Distância em %; <span class="badge near">perto</span> = a menos de 1× o ATR; <b>topos/fundos iguais</b> = dois ou mais swings praticamente ao mesmo preço: liquidez óbvia, alvo provável de um sweep. Escolhe em que timeframes aparece nas Definições.</li>
     </ul>
 
@@ -1732,7 +1734,9 @@
   // range da tendência principal: limite, topo/fundo da perna (preço e distância) e, discreto, o nível dos 50%
   // vela da quebra: força do corpo e a que distância do nível fechou (fecho colado = quebra suspeita)
   function candleCell(b) {
-    const k = b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`;
+    const vr = b.volRatio ? b.volRatio.toFixed(1).replace('.', ',') + '×' : '';
+    const vol = vr ? ` <span class="${b.volume === 'sim' ? 'yes' : 'muted'} small" title="volume da vela da quebra: ${vr} a média das 20 anteriores${b.volume === 'sim' ? ' (alto)' : ''}">vol ${vr}</span>` : '';
+    const k = (b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`) + vol;
     if (b.closeAtr == null) return k;
     const ca = b.closeAtr.toFixed(1).replace('.', ',');
     return k + (b.closeTight ? `<br><span class="warn small" title="o fecho ficou a ${ca} ATR do nível quebrado — muito perto: quebra suspeita">fecho colado</span>` : `<br><span class="muted small" title="distância do fecho ao nível quebrado">fecho ${ca} ATR além</span>`);
@@ -1994,7 +1998,7 @@
   // estado numa linha; por baixo a caixa com o mínimo e o máximo (e o EQ num range teu)
   function rangeText(x, short) {
     const s = x.st, side = (dir) => (dir === 1 ? 'topo' : 'fundo'), r = x.r, br = short ? '<br><span class="muted small">' : ' <span class="muted small">';
-    const box = `${r.label} ${fmt(r.bot)} – ${fmt(r.top)}${r.auto ? '' : ' · EQ ' + fmt((r.top + r.bot) / 2)}`;
+    const box = `${r.label} <span style="white-space:nowrap">${fmt(r.bot)} – ${fmt(r.top)}</span>${r.auto ? '' : ' · EQ ' + fmt((r.top + r.bot) / 2)}`;
     if (s.key === 'break') return `<span class="${s.dir === 1 ? 'upc' : 'dnc'}">${s.dir === 1 ? '▲' : '▼'} quebrou · ${s.barsAgo}v</span>${br}${box}</span>`;
     if (s.key === 'possible') return `<span class="badge disp" style="padding:0 5px">⚖ ${s.dir === 1 ? '▲' : '▼'} ${s.closes}/${s.tol}</span>${br}${box}</span>`;
     if (s.key === 'touch') return `<span class="warn">⚠ ${side(s.dir)} · a tocar</span>${br}${box}</span>`;
@@ -2081,15 +2085,14 @@
         <td class="liq">${legRangeCell(x, d)}</td>`
         : `<td class="gl muted" colspan="4">sem estrutura suficiente${frozen(d, 'ext') ? frozenBadge : ''}</td>`;
       const intCells = n.trend ? `
-        <td class="gl">${recentBadge(n, tf.id)}${frozen(d, 'int') ? frozenBadge : ''}</td>
-        <td class="num">${pullCell(n)}</td>
-        <td>${brkCell(d, b)}${pendBadge(n)}</td>
-        <td class="num rc">${divCell(d)}</td>
-        <td class="small rc">${rangeCell(d, tf.id)}</td>
-        <td class="rc">${b ? (b.volume === 'sim' ? '<span class="yes">sim</span>' : '<span class="muted">não</span>') + (b.volRatio ? ` <span class="muted small">${b.volRatio.toFixed(1).replace('.', ',')}×</span>` : '') : '—'}</td>
-        <td class="rc">${b ? candleCell(b) : '—'}</td>
-        <td class="liq">${(settings.liqTfs || []).includes(tf.id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
-        : `<td class="gl muted" colspan="8">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
+        <td class="gl rw">${recentBadge(n, tf.id)}${frozen(d, 'int') ? frozenBadge : ''}</td>
+        <td class="num rw">${pullCell(n)}</td>
+        <td class="rw">${brkCell(d, b)}${pendBadge(n)}</td>
+        <td class="num rc rw">${divCell(d)}</td>
+        <td class="small rc rngc rw">${rangeCell(d, tf.id)}</td>
+        <td class="rc rw">${b ? candleCell(b) : '—'}</td>
+        <td class="liq rw">${(settings.liqTfs || []).includes(tf.id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
+        : `<td class="gl muted" colspan="7">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
       rows.push(`<tr data-tf="${tf.id}" class="${tf.id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${tf.label}</td>${extCells}${intCells}</tr>`);
     }
     $('#tbody').innerHTML = rows.join('');
@@ -2214,8 +2217,11 @@
       const sweep = brk ? sweepBeforeBreak(data[st.trig]) : false;
       // contexto: só informação — "A favor" ou "Contra (recuo do timeframe de contexto)", com a cor da profundidade
       const ctxChip = !(cx && cx.trend) ? `<span class="chip rf-neu" title="sem dados do timeframe de contexto">? Contexto</span>`
-        : cx.trend === r.dir ? `<span class="chip rf-pos2" title="${tfLabel(cid)} no mesmo sentido">✔ A favor</span>`
-        : `<span class="chip ${band(cx.pullback)}" title="${tfLabel(cid)} ${cx.trend === 1 ? 'em subida' : 'em descida'}: recuo de ${pct(cx.pullback)} — abaixo de 50% ainda há espaço até à zona dele (${fmt(cx.levels[50])})">Contra (${pct(cx.pullback)})</span>`;
+        : cx.trend === r.dir ? `<span class="chip rf-pos2" title="${tfLabel(cid)} no mesmo sentido">Contexto: ✔ A favor</span>`
+        : `<span class="chip ${band(cx.pullback)}" title="${tfLabel(cid)} ${cx.trend === 1 ? 'em subida' : 'em descida'}: recuo de ${pct(cx.pullback)} — abaixo de 50% ainda há espaço até à zona dele (${fmt(cx.levels[50])})">Contexto: Contra (${pct(cx.pullback)})</span>`;
+      // coluna do contexto: o timeframe, a direção e quanto recuou (como a coluna da zona)
+      const ctxCell = !(cx && cx.trend) ? '<span class="muted small">sem dados</span>'
+        : `<span class="chip ${cx.trend === r.dir ? 'rf-pos2' : band(cx.pullback)}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
       const chk = ctxChip + ' ' + items.filter((it) => !it[3]).map(([nm, ok, tip]) => `<span class="chip ${ok ? 'rf-pos2' : ok === false ? 'off' : 'rf-neu'}" title="${tip}">${ok ? '✔' : ok === false ? '✘' : '?'} ${nm}</span>`).join(' ')
         + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '');
       const missing = items.filter((it) => !it[3] && !it[1]).map(([nm]) => nm.toLowerCase());
@@ -2225,10 +2231,10 @@
       return `<tr class="${ready ? (up ? 'su-ok' : 'sd-ok') : ''} ${!r.zoneOk ? 'dim' : ''}">
         <td class="tf">${st.name} <span class="muted small">${cid ? tfLabel(cid) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></td>
         <td><span class="${up ? 'upc' : 'dnc'}">${up ? '▲ Long' : '▼ Short'}</span></td>
-        <td>${zoneCell}</td><td>${trigCell}</td><td>${chk}</td>
+        <td>${ctxCell}</td><td>${zoneCell}</td><td>${trigCell}</td><td>${chk}</td>
         <td>${estado}${r.warn ? '<br>' + r.warn : ''}${fzNote}</td></tr>`;
     }).join('');
-    $('#confluence').innerHTML = `<div class="setups"><table><thead><tr><th>Setup</th><th>Sentido</th><th>1 · Zona (correção ≥ 50%)</th><th>2 · Quebra de estrutura</th><th>Checklist</th><th>Estado</th></tr></thead><tbody>${html}</tbody></table></div>`;
+    $('#confluence').innerHTML = `<div class="setups"><table><thead><tr><th>Setup</th><th>Sentido</th><th>Contexto</th><th>1 · Zona (correção ≥ 50%)</th><th>2 · Quebra de estrutura</th><th>Checklist</th><th>Estado</th></tr></thead><tbody>${html}</tbody></table></div>`;
     const ms = $('#msetups');
     if (ms) ms.innerHTML = '<div class="sechead" style="display:block !important">Setups</div>' + rows.map((r, k) => {
       const st = on[k]; if (!r) return `<div class="mcard">${st.name} <span class="muted">a carregar…</span></div>`;
@@ -2236,9 +2242,9 @@
       const tds = tmp.querySelectorAll('td');
       return `<div class="mcard ${tds[0] && tmp.querySelector('tr').className.includes('ok') ? 'hot' : ''}">
         <div class="r1">${tds[0] ? tds[0].innerHTML : ''} ${tds[1] ? tds[1].innerHTML : ''}</div>
-        <div class="r2">${tds[2] ? tds[2].innerHTML : ''} ${tds[3] ? tds[3].innerHTML : ''}</div>
-        <div class="r2">${tds[4] ? tds[4].innerHTML : ''}</div>
-        <div class="r2">${tds[5] ? tds[5].innerHTML : ''}</div></div>`;
+        <div class="r2">${tds[2] ? tds[2].innerHTML : ''} ${tds[3] ? tds[3].innerHTML : ''} ${tds[4] ? tds[4].innerHTML : ''}</div>
+        <div class="r2">${tds[5] ? tds[5].innerHTML : ''}</div>
+        <div class="r2">${tds[6] ? tds[6].innerHTML : ''}</div></div>`;
     }).join('');
   }
 
