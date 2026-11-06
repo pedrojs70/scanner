@@ -73,6 +73,9 @@
   .chip { padding:2px 8px; border-radius:6px; font-size:12px; white-space:nowrap; border:1px solid transparent; }
   .chip.off { color:var(--muted); border-color:var(--line); }
   .chip.b50 { background:rgba(255,213,79,.18); color:#ffd54f; } .chip.b65 { background:rgba(255,152,0,.22); color:#ffb74d; }
+  /* movimento recente mais compacto: colunas secundárias com letra e espaço menores */
+  .tablewrap td.rc { font-size:12px; padding-left:4px; padding-right:4px; } .tablewrap td.rc .small, .tablewrap td.small.rc { font-size:11px; }
+  .lvl50 { color:rgba(245,197,24,.62); }
   .chip.b0 { background:rgba(79,195,247,.15); color:#81d4fa; }
   .chip.b92, .chip.bx { background:rgba(255,82,82,.22); color:#ff8a80; }
   .chip.trgu { background:#1e6f66; color:#e6fffb; } .chip.trgd { background:#8e2b2b; color:#ffecec; }
@@ -106,6 +109,11 @@
   .ph-bx, .ph-lim { color:#ff5252; font-weight:700; }
   .chartbox { margin-top:14px; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
   .chartbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--line); }
+  /* 1.ª linha: timeframes, camadas e edição, com o Fechar/Gráfico maior à direita; 2.ª linha: indicadores */
+  .chartbar .cbreak { flex-basis:100%; height:0; order:5; }
+  .chartbar #rngBtn, .chartbar #emaBtn, .chartbar #smaBtn, .chartbar #kcBtn, .chartbar #pocDBtn, .chartbar #pocWBtn, .chartbar #kzBtn { order:6; }
+  .chartbar #maxBtn { order:4; margin-left:auto; }
+  .chartbox.editing .chartbar #editBtn { order:4; margin-left:auto; }
   #chartTitle { font-weight:600; margin-right:10px; }
   .tfbtn { padding:3px 8px; font-size:12px; } .tfbtn.on { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
   #chart { position:relative; height:560px; }
@@ -151,7 +159,7 @@
     body[data-mtab="grafico"] #chart { height:calc(100vh - 230px); min-height:360px; }
     body[data-mtab="grafico"] .legend { display:none; }
     .chartbar { flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .chartbar > * { flex:0 0 auto; }
+    .chartbar > * { flex:0 0 auto; } .chartbar .cbreak { display:none; }
     .chartbox.editing .chartbar { flex-wrap:wrap; overflow-x:visible; padding:6px 8px; gap:5px; }
     .chartbox.editing #tfbar { display:flex; flex-wrap:nowrap; overflow-x:auto; max-width:100%; }
     .chartbox.editing #chartTitle { display:none; }
@@ -258,9 +266,12 @@
   body.light .favrow:hover { background:#f0f3f7; } body.light .favrow.open { background:#fff7d6; box-shadow:0 4px 10px rgba(0,0,0,.12); }
   body.light .favdetail { background:#fafbfc; } body.light .favadd input, body.light .favimp textarea { background:#fff; color:var(--text); }
   body.light .favsug .sugi { background:#fff; } body.light .favrow.ready { background:rgba(46,125,50,.10); }
-  body.light .chip.off { color:#5b6573; border-color:#cfd6de; } body.light .favx { color:#5b6573; }
+  body.light .lvl50 { color:#b08a12; } body.light .chip.off { color:#5b6573; border-color:#cfd6de; } body.light .favx { color:#5b6573; }
   body.light .chip.trgu { background:#d5f0ec; color:#0f6b61; } body.light .chip.trgd { background:#fbe0df; color:#a32622; }
   body.light .badge.trgu { background:#d5f0ec; color:#0f6b61; } body.light .badge.trgd { background:#fbe0df; color:#a32622; }
+  .sethead { font-size:14px; margin:16px 0 4px; padding-bottom:4px; border-bottom:1px solid var(--line); color:var(--text); } .sethead.sub { font-size:12px; color:var(--muted); margin-top:12px; }
+  .setadv { margin-top:16px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; } .setadv summary { cursor:pointer; }
+  .helphead { font-size:14px; margin:16px 0 4px; padding-bottom:4px; border-bottom:1px solid var(--line); } #help .helphead:first-of-type { margin-top:4px; }
 </style>
 </head>
 <body>
@@ -313,41 +324,80 @@
   </div>
   <div id="help">
     <button id="helpClose">✕ Fechar</button>
+    <h3 class="helphead">1 · Conta e dados</h3>
     <ul>
-      <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se a correção ainda está a cair ou se já virou. Em linguagem ICT: a tendência principal é o dealing range (equilibrium a 50%, zona de discount/premium); o movimento recente é onde acontece o MSS de entrada.</li>
-      <li><b>Setups (painel no topo):</b> cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Checklist</b> (sem pontos): <b>Contexto</b> (só informação, não é obrigatório) — <b>✔ A favor</b> se a tendência principal do timeframe de contexto vai no mesmo sentido, ou <b>Contra (X%)</b> com o recuo atual desse timeframe: abaixo de 50% ainda há espaço até à zona dele; <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem (⚡) no movimento recente do timeframe de baixo; <b>FVG na quebra</b> — a quebra deixou FVG. 💧 = houve sweep do lado oposto antes da quebra (extra, não obrigatório). <b>✔ Pronto</b> quando Zona, Quebra e FVG estão cumpridos (com a nota “a favor” ou “contra” o timeframe de contexto); senão <b>Em formação</b>, com o que falta. Entrada, stop e alvos são contigo.</li>
-      <li><b>Range</b> (movimento recente): o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito) e a sessão asiática (só 1H e abaixo). Mostra o sinal mais importante: <b>⚠ a tocar</b> o topo/fundo (só quando o preço lá chega), <b>💧 sweep</b> (a wick ou poucos fechos passaram e voltaram para dentro — a manipulação; “Londres varreu” quando o sweep do range asiático foi na sessão de Londres), <b>⚖ possível quebra</b> (fecho fora, ainda dentro da tolerância do timeframe, ex. 1/2) e <b>quebrou</b> (ficou fora mais do que a tolerância). Sem sinal mostra a posição no range (0% = fundo, 100% = topo). É independente da estrutura: não altera estados, quebras nem setups.</li>
-      <li><b>Div.</b> e painel do RSI: divergências como no “RSI Divergence” do TradingView. Os pontos são fundos/topos do próprio RSI (o mais baixo/alto das 5 velas antes e depois — ajustável nas Definições). <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa (o RSI não a atravessa). Viva (cheia) enquanto for a última e o preço não passar o 2.º ponto; antiga (esbatida) depois.</li><li><b>▬ POC D / ▬ POC S</b> (só visual): preço com mais volume de cada dia (rosa) e de cada semana (verde-lima), como uma linha por cima das velas desse período. Cada um tem o seu botão na barra do gráfico e liga/desliga sozinho. O diário aparece até ao gráfico diário; o semanal até ao semanal.</li><li><b>EMA 8/21</b>, <b>SMA 50/100/200</b> e <b>Keltner ±3ATR</b> (só visual): cada grupo tem o seu botão na barra do gráfico. EMA 8 azul-claro, EMA 21 laranja; SMA 50 cinza, SMA 100 roxo, SMA 200 amarelo. Keltner: linha do meio = EMA 20 (tracejada), limites = EMA 20 ± 3 × ATR de 10 velas (azul). Calculadas com as velas do timeframe que estás a ver.</li>
-      <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep antes. Passa o rato por cima para ver o nível e o que a validou.</li>
-      <li><b>📊 Testar no histórico</b>: percorre anos de histórico de vários ativos, vela a vela, sem ver o futuro, e mostra para cada nota a % de entradas que chegaram a cada alvo (1R, 2R, 3R, topo da perna nova, topo da perna da zona) antes do stop, e o ganho médio em R. É assim que se sabe se a nota merece confiança.</li>
-      <li><b>Estados — movimento recente:</b> ⚡ Quebrou para cima/baixo = quebra fresca, o preço ainda não recuou 50% da perna nova: esperar. 🎯 Zona de Long/Short = depois dessa viragem, o preço recuou 50% ou mais da perna nova e ainda não fechou para lá da origem: zona de entrada. ▲ Subida / ▼ Descida = a viragem já foi confirmada por um novo topo/fundo (a coluna de correção continua a mostrar a profundidade do recuo atual). A entrada só falha com um fecho para lá da origem da perna (o estado muda para o sentido contrário).</li>
-      <li><b>FVG da perna nova:</b> o scanner ignora FVGs que uma vela já atravessou com o fecho. Se houver vários, escolhe o que está na zona ≥ 50% do recuo (o primeiro que o preço encontra); se nenhum estiver, mostra o mais próximo, marcado “antes dos 50%”. <b>Por mitigar</b> = o preço ainda não voltou a tocar-lhe; <b>já tocado</b> = já houve uma primeira reação.</li>
-      <li><b>Liquidez próxima:</b> o topo e o fundo do movimento recente mais próximos do preço que <b>ainda não foram varridos</b> (nenhuma wick passou por eles) — é aí que estão os stops à espera. Por defeito aparece do Mensal ao 15m (no 5m estes níveis mudam a cada poucos minutos); escolhe os timeframes nas Definições. Distância em %; <b>perto</b> = a menos de 1× a amplitude média das velas desse timeframe. <b>Fundos/topos iguais</b> = dois ou mais swings praticamente ao mesmo preço: liquidez maior, alvo mais provável de um sweep. No cartão, um aviso “fundos por varrer perto” lembra que pode haver um sweep antes da reversão.</li>
-      <li><b>Sweep:</b> a wick passa um topo/fundo mas a vela fecha para dentro — apanha liquidez <b>sem</b> quebrar estrutura. “Sweep antes” (na coluna da última quebra) = houve um sweep do lado oposto nas 20 velas antes da quebra atual: ex. varre os fundos sem fechar abaixo, inverte com força e só depois quebra o último topo mais baixo. Sweeps passados aparecem só como ✕ no gráfico.</li>
-      <li><b>Dia / semana anteriores:</b> máximos e mínimos da vela diária e semanal anterior (hora UTC), com indicação se já foram varridos no dia/semana atual. Desliga-se nas Definições.</li>
-      <li><b>Displacement (ICT):</b> no movimento recente, um fecho para lá do último swing só conta como quebra se houver displacement: (1) a vela da quebra é forte — corpo ≥ 1× o ATR e ≥ 60% da vela — ou (2) a quebra deixa um FVG relevante (≥ 0,3× o ATR) no mesmo sentido, ou (3) nas 3 velas seguintes há uma vela forte, um FVG relevante ou um fecho ≥ 1× o ATR para lá do nível (continuação). Além disso, (a) o fecho tem de ficar <b>claramente</b> para lá do nível — pelo menos 0,3× o ATR (uma vela forte cujo corpo está quase todo antes do nível e fecha “logo acima” não conta) — e (b) a <b>vela seguinte</b> também tem de fechar para lá do nível (aceitação); se fechar de volta para dentro, foi sweep. (c) <b>Quebra falhada</b>: mesmo depois de aceite, se nas 6 velas seguintes o preço fechar de volta para lá do nível (com a mesma margem), a quebra é anulada, passa a “sweep (quebra falhada)” e a estrutura volta ao que era. Enquanto espera, aparece <b>⏳ a confirmar</b>. Cada quebra aceite mostra <b>porquê</b> (no gráfico e na coluna “Última quebra”): vela forte, vela forte a seguir, FVG ou continuação — se uma quebra que achas falsa passou, vês qual regra a deixou passar e afinas esse valor nas Definições. Se o preço fechar de volta para dentro, ou se não houver continuação, a quebra é rejeitada e aparece no gráfico como linha cinzenta “sem displacement”. Na tendência principal é opcional (Definições).</li>
-      <li><b>Editar estrutura (no gráfico):</b> liga “✎ Editar estrutura” e clica numa vela — perto da máxima para opções de topo, perto da mínima para opções de fundo. O gráfico mostra sempre uma só camada — a do botão a amarelo (“Tendência principal” ou “Movimento recente”), tanto a ler como a editar; editas essa. Cada camada e cada timeframe têm as suas próprias marcas. O clique “cola” à ponta de pavio mais próxima.
+      <li><b>Entrar:</b> a app abre sempre na página de login (email e password; “Criar conta” e “Esqueci-me da password”). A sessão fica guardada no aparelho. <b>Sair</b> (no cabeçalho) volta à página de login.</li>
+      <li><b>Gravação:</b> marcas, favoritos e definições ficam neste aparelho e na tua conta, iguais em todos os aparelhos. Quando o mesmo gráfico tem versões diferentes no aparelho e na conta, fica a alterada mais recentemente.</li>
+      <li><b>Cópias de segurança</b> (Definições → Conta e dados): a app guarda uma cópia das marcações por dia, antes de juntar com a conta e antes de repor uma cópia (ficam as 10 mais recentes, neste aparelho). <b>Repor</b> volta a essa cópia — as marcações atuais são guardadas antes, por isso podes voltar atrás.</li>
+      <li><b>Dados:</b> cripto da Binance (ex.: BTCUSDT, PAXGUSDT). Ações e ETFs pelo nome ou ticker (ex.: apple, GLD). Metais: escreve <b>ouro / gold</b>, <b>prata / silver</b>, <b>platina / platinum</b>, <b>paládio / palladium</b> ou <b>metais</b> — são os futuros contínuos (GC=F, SI=F, PL=F, PA=F): sem velas ao fim de semana, pequenos saltos na troca de contrato, e histórico curto no 5m/15m. A estrutura usa só velas <b>fechadas</b>; as percentagens usam o preço atual. Horas no fuso do teu aparelho.</li>
+      <li><b>Exportar velas</b> (Definições → Conta e dados): descarrega as velas do timeframe que estás a ver — serve para afinar a app com o Claude.</li>
+      <li><b>☀ / ☾</b> no cabeçalho: fundo branco ou escuro.</li>
+    </ul>
+
+    <h3 class="helphead">2 · As duas camadas e as regras</h3>
+    <ul>
+      <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se o recuo ainda está a decorrer ou se já virou. Em ICT: a tendência principal é o dealing range (equilíbrio a 50%, discount/premium); o movimento recente é onde acontece o MSS de entrada. Cada camada tem as suas próprias marcas.</li>
+      <li><b>Quando muda cada camada:</b> a tendência principal só muda com um fecho para lá do <b>limite</b> (o fundo de onde partiu a subida, ou o topo de onde partiu a descida). O movimento recente segue os <b>swings mais recentes</b>: numa descida só vira para cima com um fecho acima do último topo mais baixo; numa subida só vira para baixo com um fecho abaixo do último fundo mais alto.</li>
+      <li><b>Quebras:</b> só contam com o <b>fecho do corpo</b> claramente para lá do nível (pelo menos 0,3× o ATR) e com a vela seguinte a aceitar. Viragem = <b>CHoCH</b> (contra a tendência); continuação = <b>BOS</b> (a favor). Uma wick que passa e fecha para dentro é um <b>sweep</b> de liquidez (✕ roxo no gráfico).</li>
+      <li><b>Displacement</b> (movimento recente): a quebra só conta com vela forte (corpo ≥ 1× o ATR e ≥ 60% da vela), um FVG relevante no mesmo sentido, ou continuação nas 3 velas seguintes. Cada quebra aceite mostra <b>porquê</b> (vela forte, FVG, continuação); se não passar, fica no gráfico como linha cinzenta “sem displacement”. Na tendência principal é opcional (Definições → Avançado).</li>
+      <li><b>Quebra falhada:</b> mesmo depois de aceite, se nas velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a “sweep (quebra falhada)”. Um fecho semanal ou mensal pesa mais do que um de 15m (número de velas por timeframe nas Definições). Enquanto espera aparece <b>⏳ a confirmar</b>.</li>
+      <li><b>⚖ Em disputa</b> (movimento recente): o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. A app mostra os dois preços que decidem: um fecho para lá do extremo da perna confirma a quebra; um fecho para lá do outro lado confirma o sweep. Podes também decidir tu (“⚖ Decidir disputa”).</li>
+    </ul>
+
+    <h3 class="helphead">3 · Tabela — tendência principal (onde estamos)</h3>
+    <ul>
+      <li><b>Estrutura:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem (CHoCH) ainda não fez um BOS na nova direção.</li>
+      <li><b>Fase e Correção:</b> <b>Em correção</b> + quanto o preço já recuou da perna atual. A cor diz a profundidade: <span class="ph-b0">&lt; 50%</span> (fora da zona), <span class="ph-b50">50–65%</span>, <span class="ph-b65">65–91,8%</span>, <span class="ph-b92">&gt; 91,8%</span> (muito perto do limite). Um recuo pequeno (ex.: 3%) = o preço está colado ao topo/fundo da perna, mais perto de continuar do que de reverter. <b>A testar o limite</b> = passou o limite sem fecho a confirmar.</li>
+      <li><b>Range:</b> os dois extremos da perna atual — o <b>limite</b> (o nível cujo fecho inverte a estrutura) e o <b>topo/fundo da perna</b> — com o preço e a distância a cada um; por baixo, a amarelo suave, o nível dos <b>50%</b> (onde começa a zona). Etiquetas no limite: <span class="badge near">perto</span> = a menos de 1× o ATR; <span class="warn">💧 varrido</span> = um pavio já passou o limite e fechou dentro; <span class="badge disp" style="padding:0 5px">⚖ em disputa</span> = fechou para lá sem confirmar.</li>
+    </ul>
+
+    <h3 class="helphead">4 · Tabela — movimento recente (quebra e entrada)</h3>
+    <ul>
+      <li><b>Estado:</b> ⚡ <b>Quebrou para cima/baixo</b> = quebra fresca, o preço ainda não recuou 50% da perna nova — esperar. 🎯 <b>Zona de Long/Short</b> = depois dessa viragem o preço recuou 50% ou mais e ainda não fechou para lá da origem: zona de entrada. ▲ <b>Subida</b> / ▼ <b>Descida</b> = viragem já confirmada por um novo topo/fundo. A entrada só falha com um fecho para lá da origem da perna.</li>
+      <li><b>Correção da perna:</b> quanto o preço recuou da perna nova (acima de 100% = já passou a origem, só falta o fecho para confirmar).</li>
+      <li><b>Última quebra:</b> ▲/▼ BOS ou CHoCH · há quantas velas · FVG ✔ se a quebra deixou FVG · 💧 se houve sweep do lado oposto nas 20 velas antes. Passa o rato por cima para ver o nível e o que a validou.</li>
+      <li><b>Div.:</b> divergência RSI viva (ver Gráfico).</li>
+      <li><b>Range:</b> o teu range manual e os automáticos — dia e semana anteriores (início do dia nas Definições: meia-noite de Nova Iorque por defeito), Ásia e Londres (só 1H e abaixo). Numa linha o estado e por baixo a caixa com os preços (no teu range também o EQ). Estados: <b>quebrou · Nv</b> (ficou fora mais do que a tolerância do timeframe), <b>⚖ 1/2</b> (fecho fora, ainda dentro da tolerância), <b>⚠ a tocar</b> (a vela atual está no limite), <b>💧 sweep</b> (o pavio passou e voltou para dentro; indica a killzone, se for o caso), <b>▭ X%</b> (dentro: 0% = fundo, 100% = topo). Só informação: não muda a estrutura nem os setups.</li>
+      <li><b>Volume da quebra:</b> “sim” quando a vela da quebra teve ≥ 1,5× o volume médio das 20 anteriores. <b>Vela da quebra:</b> <b>forte</b> = corpo ≥ 1× o ATR e ≥ 60% da vela; <b>fraca</b> = corpo &lt; 0,5× o ATR; por baixo, a que distância do nível fechou (“fecho 0,8 ATR além”) — <span class="warn">fecho colado</span> = menos de 0,3 ATR: quebra suspeita, mesmo com vela forte. São sinais de qualidade, não condições do setup.</li>
+      <li><b>Liquidez (por varrer):</b> o topo e o fundo do movimento recente mais próximos do preço que <b>ainda não foram varridos</b> — onde estão os stops à espera (“—” = não há nenhum desse lado). Distância em %; <span class="badge near">perto</span> = a menos de 1× o ATR; <b>topos/fundos iguais</b> = dois ou mais swings praticamente ao mesmo preço: liquidez óbvia, alvo provável de um sweep. Escolhe em que timeframes aparece nas Definições.</li>
+    </ul>
+
+    <h3 class="helphead">5 · Setups e favoritos</h3>
+    <ul>
+      <li><b>Setups</b> (painel no topo): cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Sentido</b> = a direção da tendência principal do timeframe de zona: ▲ <b>Long</b> ou ▼ <b>Short</b>.</li>
+      <li><b>Checklist:</b> <b>Contexto</b> (só informação) — <b>✔ A favor</b> se o timeframe de contexto vai no mesmo sentido, ou <b>Contra (X%)</b> com o recuo atual dele (abaixo de 50% ainda há espaço até à zona dele); <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem ⚡ recente no movimento recente do timeframe de baixo (“ainda contra” = vai ao contrário; “já confirmada” = já está a favor mas sem viragem nova); <b>FVG na quebra</b>. <b>💧 sweep antes</b> = extra, torna o setup mais forte.</li>
+      <li><b>Estado:</b> <b>Em formação</b> (cinzento = fora da zona; amarelo = zona cumprida), com “falta: …”; <b>✔ Pronto</b> = Zona, Quebra e FVG cumpridos, com a nota “a favor” ou “contra” o timeframe de contexto. Avisos: “topo/fundo por varrer perto” (liquidez do lado contrário que o preço ainda pode ir buscar) e “✋ … em modo manual — não atualiza”. Entrada, stop e alvos são contigo.</li>
+      <li><b>Liquidez do dia / semana anteriores</b> (barra por baixo dos setups): máximos e mínimos e se já foram varridos. Só informação.</li>
+      <li><b>★ Favoritos:</b> a estrela ☆ ao lado do ativo põe-no (ou tira-o) da lista; “★ Favoritos” mostra cada ativo com o resumo de cada setup (“fora da zona”, “falta: …”, “✔ Pronto”, e “contra X%” quando for o caso), ordenada pelo que está mais pronto. Toca num ativo para o abrir; 📈 abre o gráfico em ecrã inteiro.</li>
+    </ul>
+
+    <h3 class="helphead">6 · Gráfico</h3>
+    <ul>
+      <li><b>Camada:</b> o gráfico mostra uma camada de cada vez — a do botão a amarelo (“Tendência principal” ou “Movimento recente”).</li>
+      <li><b>Escala:</b> ao mudar de timeframe a escala dos preços volta ao ajuste automático. Se as velas ficarem pequenas ou fora do ecrã: <b>duplo clique</b> ou <b>clique direito</b> na escala dos preços (à direita). Duplo clique na escala do tempo repõe o zoom horizontal.</li>
+      <li><b>Botões (2.ª linha):</b> <b>▭ Dia/Sem ant.</b> — caixas do dia e da semana anteriores (as da Ásia e de Londres aparecem sempre no 1H e abaixo); <b>EMA 8/21</b>, <b>SMA 50/100/200</b>, <b>Keltner ±3ATR</b> (EMA 20 ± 3 × ATR de 10); <b>POC D / POC S</b> — preço com mais volume de cada dia / semana; <b>⏱ Killzones</b> (1H e abaixo). Tudo só visual. <b>⤢ Gráfico maior</b> abre em ecrã inteiro; o <b>✕ Fechar</b> fica no fim da 1.ª linha, à direita.</li>
+      <li><b>Divergências RSI</b> (painel do RSI): como o “RSI Divergence” do TradingView. <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa. Cheia enquanto viva; esbatida depois.</li>
+      <li><b>FVG da perna nova:</b> só os FVGs que nenhuma vela atravessou com o fecho. Se houver vários, o que está na zona ≥ 50%; senão o mais próximo, marcado “antes dos 50%”. <b>Por mitigar</b> / <b>já tocado</b>.</li>
+    </ul>
+
+    <h3 class="helphead">7 · Editar estrutura</h3>
+    <ul>
+      <li><b>✎ Editar estrutura</b> abre o gráfico em ecrã inteiro e limpo (só velas e estrutura). Editas a camada do botão a amarelo; cada camada e cada timeframe têm as suas próprias marcas. <b>✕ Fechar</b> (último à direita) sai da edição.
+<br>• <b>Onde clicar:</b> em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, início, continuar ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Num <b>sinal</b> (HH, LL…) para o ignorar ou remover; numa <b>linha de quebra</b> (“não é quebra, é sweep”); numa <b>linha cinzenta</b> (“é quebra”); num <b>FVG</b> (ignorar); numa <b>linha de range</b>. Espaço vazio não faz nada.
 <br>• <b>HH / LL</b> — este topo/fundo quebrou a estrutura. <b>LH / HL</b> — não houve quebra.
-<br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe. O gráfico fica sem estrutura até marcares o ponto de partida.
-<br>• <b>▶ Início manual / ▶ Início automático</b> (no bloco de topo ou de fundo da vela) — a estrutura começa aqui; o que está para trás deixa de contar. <b>Manual</b>: só contam as tuas marcas, a app não acrescenta nada. <b>Automático</b>: a app marca sozinha e tu corriges. Depois do início, numa vela mais à frente: <b>⏩ Continuar automático</b> (a app passa a marcar sozinha a partir daí) ou <b>✋ Continuar manual</b> (apaga o que está marcado dessa vela para a frente — nunca para trás — e a partir daí só contam as tuas marcas). Linhas verticais tracejadas mostram onde começa cada troço. <b>⤓ Importar da principal</b> (movimento recente): acrescenta como topo/fundo os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL. <b>Mover o automático</b>: arrasta a linha azul tracejada do automático para a direita (ou, no menu de uma vela, <b>⏩ Mover o automático para aqui</b>). Os pontos que a app marcou entre a linha antiga e a nova ficam como marcas tuas (✎), esse troço fica como está, e a app só marca sozinha daí para a frente. A linha fica como referência da última vez que reviste o gráfico. <b>Em modo edição</b> o gráfico fica limpo: só velas e estrutura.
-<br>• Também podes: clicar num swing para o ignorar ou remover, numa linha de quebra (“não é quebra, é sweep”), numa linha cinzenta (“é quebra”) ou num FVG para o ignorar.
-<br>• <b>▭ Range</b> (movimento recente): clica numa vela e escolhe “Começar range neste topo/fundo”, depois clica no outro extremo. Só há um range por timeframe; para o apagar, clica na linha da caixa. É informação extra: não muda a estrutura nem os setups.
-<br>• <b>★ Favoritos</b>: a estrela ☆ ao lado do par põe-no (ou tira-o) dos favoritos; o botão “★ Favoritos” mostra a lista com o checklist de cada setup em cada ativo, ordenada pelo que está mais pronto. Toca num ativo para o abrir.
-<br>• <b>💾 Gravar</b> — em modo edição as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só são gravadas no aparelho e na conta quando carregas em Gravar. Ao sair da edição com alterações por gravar, a app pergunta: Gravar / Descartar / Continuar a editar.<br>• <b>↶ Desfazer / ↷ Refazer</b> — anula a última alteração (marca, início, apagar, repor…), um passo de cada vez, e Refazer volta a pô-la. Só guarda o que fizeste desde a última gravação: ao abrir a app e depois de gravar começa vazio.<br>• <b>Onde clicar no modo edição:</b> o gráfico mostra só a camada que estás a editar (o botão a amarelo). Clica em cima de uma <b>vela</b> (corpo ou pavio) para HH/LH/HL/LL, início manual/automático, continuar manual/automático ou range — perto da máxima aparecem primeiro as opções de topo, perto da mínima as de fundo; a marca fica sempre nessa vela. Clica num <b>sinal</b> (HH, LL…) para o ignorar ou remover, numa <b>linha de quebra</b> (“não é quebra, é sweep”), numa <b>linha cinzenta</b> (“é quebra”), num <b>FVG</b> (ignorar) ou numa <b>linha de range</b>. Clicar em espaço vazio não faz nada.<br>• <b>Ignorar</b> apaga o ponto e nunca o passa para a vela ao lado: se era um HL/LH criado por uma quebra, essa quebra deixa de contar; se era um HH/LL, a quebra que o criou passa a sweep e esse nível deixa de poder ser quebrado nessa perna. Na linha cinzenta que fica, “É quebra” desfaz. Tudo é recalculado logo (e gravado quando carregas em 💾 Gravar).
-<br>As marcas são gravadas logo (por par e timeframe) neste navegador e, com sessão iniciada, na tua conta — aparecem nos outros aparelhos. Ficam até carregares em “↺ Repor análise do scanner”.</li>
-      <li><b>⚖ Em disputa (movimento recente):</b> o preço fechou para lá de um nível mas voltou para trás, sem a quebra ser aceite. Em vez de fingir que nada aconteceu, a app mostra os dois preços que decidem: um fecho para lá do extremo da perna que quebrou confirma a quebra (e ela passa a contar desde a vela original); um fecho para lá do extremo do outro lado confirma que era sweep. As duas linhas aparecem a amarelo no gráfico.</li>
-      <li><b>Tendência principal:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem ainda não fez novo topo/fundo a confirmar.</li>
-      <li><b>Regras de cada camada:</b> a tendência principal só muda quando o preço fecha para lá do <b>nível protegido</b> (o fundo de onde partiu a subida, ou o topo de onde partiu a descida). O movimento recente segue sempre os <b>swings mais recentes</b>: numa descida, só vira para cima com um fecho acima do último topo mais baixo; numa subida, só vira para baixo com um fecho abaixo do último fundo mais alto.</li>
-      <li><b>Quebras:</b> só contam com o <b>fecho do corpo</b> para lá do nível. Uma wick que passa e fecha para dentro é um <b>sweep</b> de liquidez (✕ roxo no gráfico). Viragem (CHoCH) = quebra contra a tendência; Continuação (BOS) = quebra a favor.</li>
-      <li><b>Fase e correção:</b> <b>Em correção</b> + a percentagem do recuo da perna atual; a cor diz a profundidade: <span class="ph-b0">&lt; 50%</span> (ainda fora da zona), <span class="ph-b50">50–65%</span>, <span class="ph-b65">65–91,8%</span>, <span class="ph-b92">&gt; 91,8%</span> (muito perto do limite). Um recuo pequeno (ex.: 3%) quer dizer que o preço está colado ao topo/fundo da perna. <b>A testar o limite</b> = o preço passou o limite sem fecho a confirmar.</li>
-      <li><b>vs. nível quebrado:</b> distância do preço ao último nível quebrado. <b>Range</b> (tendência principal): o limite (o nível cujo fecho inverte a estrutura) e o topo/fundo da perna, com a distância do preço a cada um, e por baixo o nível dos 50% (onde começa a zona).</li>
-      <li><b>FVG:</b> se a quebra deixou um fair value gap no mesmo sentido (velas da quebra ±1). <b>Volume:</b> vela da quebra com volume ≥ 1,5× a média das 20 anteriores. <b>Vela:</b> forte = corpo ≥ 1× o ATR e pelo menos 60% da vela (displacement); fraca = corpo &lt; 0,5× o ATR.</li>
-      <li><b>Cartões no topo:</b> “Zona” lista os timeframes cuja tendência principal está em correção ≥ 50%; “Gatilho” lista os timeframes cujo movimento recente quebrou no mesmo sentido nas últimas velas. Quando há as duas coisas, o cartão acende.</li>
-      <li>A estrutura é calculada só com velas <b>fechadas</b>; as percentagens usam o preço atual. Dados: Binance (pares spot, ex.: BTCUSDT, ETHUSDT). Horas no fuso do teu computador.</li>
+<br>• <b>Ignorar</b> apaga o ponto e nunca o passa para a vela ao lado: se era um HL/LH criado por uma quebra, essa quebra deixa de contar; se era um HH/LL, a quebra que o criou passa a sweep e esse nível deixa de poder ser quebrado nessa perna. Na linha cinzenta que fica, “É quebra” desfaz.
+<br>• <b>▶ Início manual / automático</b> — a estrutura começa aqui; o que está para trás deixa de contar. A direção vem do início: num fundo começa em subida, num topo em descida. <b>Manual</b>: só contam as tuas marcas. <b>Automático</b>: a app marca sozinha e tu corriges. Numa vela mais à frente: <b>⏩ Continuar automático</b> ou <b>✋ Continuar manual</b> (apaga o que está marcado dessa vela para a frente — nunca para trás). As linhas verticais tracejadas mostram onde começa cada troço. Um gráfico que acaba em manual fica congelado (não acompanha as velas novas) — a tabela e os setups avisam.
+<br>• <b>Mover o automático:</b> arrasta a linha azul tracejada. <b>Para a frente</b>: os pontos entre a linha antiga e a nova ficam como marcas tuas (✎), esse troço fica exatamente como está e a app só marca sozinha daí para a frente — a linha fica como referência da última vez que reviste o gráfico. <b>Para trás</b>: as tuas marcas entre a posição nova e a antiga são apagadas e a app volta a marcar esse troço sozinha (as correções feitas depois da linha antiga ficam). No menu de uma vela: <b>⏩ Mover o automático para aqui</b> / <b>⏪ Automático a partir daqui</b>.
+<br>• <b>⤓ Importar da principal</b> (movimento recente): acrescenta os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL.
+<br>• <b>▭ Range</b> (movimento recente): “Começar range neste topo/fundo” numa vela e depois clica no outro extremo. Um range por timeframe; para o apagar, clica na linha da caixa. A linha do meio é o EQ (50%).
+<br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe, até marcares o ponto de partida.
+<br>• <b>💾 Gravar</b> — as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só vão para o aparelho e para a conta quando carregas em Gravar. Ao fechar com alterações por gravar: Gravar / Descartar / Continuar a editar.
+<br>• <b>↶ Desfazer / ↷ Refazer</b> — um passo de cada vez; só desde a última gravação (ao abrir a app e depois de gravar começa vazio).
+<br>• <b>↺ Repor análise do scanner</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha.</li>
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="maxBtn" class="lyr" style="margin-left:0">⤢ Gráfico maior</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -381,44 +431,51 @@
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
   <button id="setX" class="dlgclose" title="Fechar">✕</button><h2>Definições</h2>
-  <div class="field"><div>Fechos para confirmar uma quebra<small>1 = basta um fecho do corpo; 2 = dois fechos seguidos</small></div><select id="setConfirm"><option value="1">1</option><option value="2">2</option></select></div>
-  <div class="field"><div>Velas para fixar o topo/fundo da perna<small>quantas velas sem novo extremo até o recuo contar</small></div><input id="setLock" type="number" min="1" max="10"></div>
-  <div class="field"><div>Tamanho mínimo de um swing da <b>tendência principal</b><small>recuo mínimo, em múltiplos do ATR (volatilidade média)</small></div><input id="setExt" type="number" min="0" max="10" step="0.5"></div>
-  <div class="field"><div>Tamanho mínimo de um swing do <b>movimento recente</b><small>menor = mais sensível, mais swings</small></div><input id="setInt" type="number" min="0" max="10" step="0.5"></div>
-  <div class="field"><div>Exigir displacement no <b>movimento recente</b><small>a quebra só conta com vela forte, FVG relevante ou continuação</small></div><input id="setDispInt" type="checkbox"></div>
-  <div class="field"><div>Exigir displacement na <b>tendência principal</b></div><input id="setDispExt" type="checkbox"></div>
-  <div class="field"><div>Displacement: corpo mínimo da vela<small>em múltiplos do ATR (e pelo menos 60% da vela)</small></div><input id="setDispAtr" type="number" min="0.5" max="3" step="0.1"></div>
-  <div class="field"><div>Margem do fecho na quebra<small>o fecho tem de ficar pelo menos isto para lá do nível (× ATR); “logo acima” não conta</small></div><input id="setMargin" type="number" min="0" max="3" step="0.1"></div>
-  <div class="field"><div>Velas de aceitação<small>velas seguintes que também têm de fechar para lá do nível; se fechar de volta é sweep</small></div><input id="setAccept" type="number" min="0" max="5"></div>
-  <div class="field"><div>R:R mínimo para entrar<small>alvo final (liquidez externa) a pelo menos N vezes o risco</small></div><input id="setMinRR" type="number" min="1" max="20" step="0.5"></div>
-  <div class="field"><div>Folga do stop<small>abaixo do FVG / order block, em múltiplos do ATR</small></div><input id="setBuf" type="number" min="0" max="2" step="0.05"></div>
-  <div class="field"><div>Comissões por lado (%)<small>usadas no teste histórico</small></div><input id="setFee" type="number" min="0" max="1" step="0.01"></div>
-  <div class="field"><div>Quebra falhada: velas de vigilância (padrão)<small>usado nos timeframes que não estão na lista abaixo. se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a sweep (0 = desligado)</small></div><input id="setFail" type="number" min="0" max="20"></div>
-  <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
-  <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
-  <div class="field"><div>Divergências RSI: velas de cada lado<small>um fundo/topo do RSI tem de ser o mais baixo/alto das n velas antes e depois (TradingView usa 5). Mais baixo = mais divergências; mais alto = menos e mais fortes</small></div><input id="setDivPiv" type="number" min="2" max="15"></div>
-  <div class="field"><div>Swing: proporção da perna<small>um topo/fundo conta quando o preço recua pelo menos esta fração da perna que o formou (0.5 = metade). Fica sempre entre o mínimo abaixo e o ATR da camada. 0 = só ATR</small></div><input id="setLegRatio" type="number" step="0.1" min="0" max="1"></div>
-  <div class="field"><div>Swing: recuo mínimo (ATR)<small>nunca conta um swing com recuo menor do que isto, mesmo numa perna pequena</small></div><input id="setFloor" type="number" step="0.1" min="0.5" max="5"></div>
-  <div class="field"><div>FVG mínimo para contar como displacement<small>tamanho do gap em múltiplos do ATR</small></div><input id="setFvgMin" type="number" min="0" max="3" step="0.1"></div>
-  <div class="field"><div>Continuação: avanço mínimo<small>fecho para lá do nível, em múltiplos do ATR</small></div><input id="setContAtr" type="number" min="0.2" max="5" step="0.1"></div>
-  <div class="field"><div>Velas de espera por continuação<small>quando a vela da quebra não é forte</small></div><input id="setCont" type="number" min="1" max="10"></div>
-  <div class="field"><div>Volume “alto” na quebra<small>múltiplo da média das 20 velas anteriores</small></div><input id="setVol" type="number" min="1" max="5" step="0.1"></div>
-  <div class="field"><div>Quebra “recente”<small>até quantas velas atrás</small></div><input id="setRecent" type="number" min="1" max="50"></div>
-  <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
-  <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups</small></div><input id="setPrev" type="checkbox"></div>
+  <h3 class="sethead">Gráfico</h3>
   <div class="field"><div>Início do dia<small>meia-noite de Nova Iorque é a referência ICT; 00:00 UTC é a hora das velas diárias da Binance</small></div><select id="setDayStart"><option value="ny">00:00 Nova Iorque (ICT)</option><option value="utc">00:00 UTC</option></select></div>
-  <div class="field"><div>Ranges automáticos<small>caixas no gráfico e sinais na coluna Range (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label> <label class="chk"><input id="setRLondon" type="checkbox"> Londres (1H e abaixo)</label></span></div>
+  <div class="field"><div>Ranges automáticos<small>quais a app calcula: entram na coluna Range da tabela e, no gráfico, aparecem como caixas (as do dia e da semana anteriores só quando o botão “▭ Dia/Sem ant.” está ligado) (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label> <label class="chk"><input id="setRLondon" type="checkbox"> Londres (1H e abaixo)</label></span></div>
   <div class="field"><div>Horário das killzones<small>Cripto e ações: Ásia 01:00–05:00, Londres 07:00–10:00, NY 13:30–16:00 (hora UK). ICT clássico (forex/futuros): Ásia 01:00–05:00, Londres 07:00–10:00, NY 12:00–15:00, fecho de Londres 15:00–17:00. Seguem sempre a hora de Nova Iorque, por isso acertam-se sozinhas com a mudança de hora.</small></div><select id="setKzProf"><option value="cripto">Cripto e ações</option><option value="ict">ICT clássico</option></select></div>
   <div class="field"><div>Killzones no gráfico<small>faixas de fundo em 1H e abaixo; o botão “⏱ Killzones” na barra do gráfico liga e desliga todas</small></div><span><label class="chk"><input id="setKzA" type="checkbox"> Ásia</label> <label class="chk"><input id="setKzL" type="checkbox"> Londres</label> <label class="chk"><input id="setKzN" type="checkbox"> Nova Iorque</label></span></div>
   <div class="field"><div>Ajustar sessões à mão (opcional, hora de Nova Iorque)<small>Deixa vazio para usar o horário escolhido acima. Formato: asia:20-24, londres:2-5, ny:8.5-11 (8.5 = 8h30)</small></div><input id="setSess" type="text" style="width:240px"></div>
+  <div class="field"><div>Divergências RSI: velas de cada lado<small>um fundo/topo do RSI tem de ser o mais baixo/alto das n velas antes e depois (TradingView usa 5). Mais baixo = mais divergências; mais alto = menos e mais fortes</small></div><input id="setDivPiv" type="number" min="2" max="15"></div>
+  <h3 class="sethead">Tabela e setups</h3>
   <div>Setups <span class="muted small">(zona → quebra)</span></div>
   <div id="setSetups"></div>
   <div style="margin-top:10px">Timeframes visíveis</div>
   <div id="setTfs"></div>
   <div>Coluna “Liquidez próxima” nos timeframes <span class="muted small">(o aviso no cartão funciona sempre, em todos)</span></div>
   <div id="setLiq" class="settfs"></div>
+  <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups (só informação)</small></div><input id="setPrev" type="checkbox"></div>
+  <div class="field"><div>Quebra “recente”<small>até quantas velas atrás uma quebra do movimento recente ainda acende o gatilho ⚡ (caixa “Quebra” do checklist)</small></div><input id="setRecent" type="number" min="1" max="50"></div>
+  <h3 class="sethead">Conta e dados</h3>
+  <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
   <div class="field"><div>Cópias de segurança das marcações<small>a app guarda uma cópia por dia, antes de juntar com a conta (ao fazer login) e antes de repor uma cópia; ficam as 10 mais recentes, neste aparelho</small></div><span style="display:flex;gap:6px;flex-wrap:wrap"><select id="bakSel" style="max-width:260px"></select><button id="bakRestore" type="button">Repor</button></span></div>
   <div class="field"><div>Exportar velas<small>descarrega as velas do timeframe que estás a ver no gráfico (para afinar a app com o Claude)</small></div><button id="csvBtn" type="button">⬇ Exportar velas</button></div>
+  <details class="setadv"><summary><b>Avançado — como a app lê a estrutura</b> <span class="muted small">mexer aqui muda a estrutura em todos os gráficos</span></summary>
+  <h3 class="sethead sub">Quebras</h3>
+  <div class="field"><div>Fechos para confirmar uma quebra<small>1 = basta um fecho do corpo; 2 = dois fechos seguidos</small></div><select id="setConfirm"><option value="1">1</option><option value="2">2</option></select></div>
+  <div class="field"><div>Margem do fecho na quebra<small>o fecho tem de ficar pelo menos isto para lá do nível (× ATR); “logo acima” não conta</small></div><input id="setMargin" type="number" min="0" max="3" step="0.1"></div>
+  <div class="field"><div>Velas de aceitação<small>velas seguintes que também têm de fechar para lá do nível; se fechar de volta é sweep</small></div><input id="setAccept" type="number" min="0" max="5"></div>
+  <h3 class="sethead sub">Quebra falhada e sweeps</h3>
+  <div class="field"><div>Quebra falhada: velas de vigilância (padrão)<small>usado nos timeframes que não estão na lista abaixo. se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada e passa a sweep (0 = desligado)</small></div><input id="setFail" type="number" min="0" max="20"></div>
+  <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
+  <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
+  <h3 class="sethead sub">Tamanho dos swings</h3>
+  <div class="field"><div>Tamanho mínimo de um swing da <b>tendência principal</b><small>recuo mínimo, em múltiplos do ATR (volatilidade média)</small></div><input id="setExt" type="number" min="0" max="10" step="0.5"></div>
+  <div class="field"><div>Tamanho mínimo de um swing do <b>movimento recente</b><small>menor = mais sensível, mais swings</small></div><input id="setInt" type="number" min="0" max="10" step="0.5"></div>
+  <div class="field"><div>Swing: proporção da perna<small>um topo/fundo conta quando o preço recua pelo menos esta fração da perna que o formou (0.5 = metade). Fica sempre entre o mínimo abaixo e o ATR da camada. 0 = só ATR</small></div><input id="setLegRatio" type="number" step="0.1" min="0" max="1"></div>
+  <div class="field"><div>Swing: recuo mínimo (ATR)<small>nunca conta um swing com recuo menor do que isto, mesmo numa perna pequena</small></div><input id="setFloor" type="number" step="0.1" min="0.5" max="5"></div>
+  <div class="field"><div>Velas para fixar o topo/fundo da perna<small>quantas velas sem novo extremo até o recuo contar</small></div><input id="setLock" type="number" min="1" max="10"></div>
+  <h3 class="sethead sub">Displacement</h3>
+  <div class="field"><div>Exigir displacement no <b>movimento recente</b><small>a quebra só conta com vela forte, FVG relevante ou continuação</small></div><input id="setDispInt" type="checkbox"></div>
+  <div class="field"><div>Exigir displacement na <b>tendência principal</b></div><input id="setDispExt" type="checkbox"></div>
+  <div class="field"><div>Displacement: corpo mínimo da vela<small>em múltiplos do ATR (e pelo menos 60% da vela)</small></div><input id="setDispAtr" type="number" min="0.5" max="3" step="0.1"></div>
+  <div class="field"><div>FVG mínimo para contar como displacement<small>tamanho do gap em múltiplos do ATR</small></div><input id="setFvgMin" type="number" min="0" max="3" step="0.1"></div>
+  <div class="field"><div>Continuação: avanço mínimo<small>fecho para lá do nível, em múltiplos do ATR</small></div><input id="setContAtr" type="number" min="0.2" max="5" step="0.1"></div>
+  <div class="field"><div>Velas de espera por continuação<small>quando a vela da quebra não é forte</small></div><input id="setCont" type="number" min="1" max="10"></div>
+  <div class="field"><div>Volume “alto” na quebra<small>múltiplo da média das 20 velas anteriores</small></div><input id="setVol" type="number" min="1" max="5" step="0.1"></div>
+  </details>
+  <div style="display:none">  <div class="field"><div>R:R mínimo para entrar<small>alvo final (liquidez externa) a pelo menos N vezes o risco</small></div><input id="setMinRR" type="number" min="1" max="20" step="0.5"></div>  <div class="field"><div>Folga do stop<small>abaixo do FVG / order block, em múltiplos do ATR</small></div><input id="setBuf" type="number" min="0" max="2" step="0.05"></div>  <div class="field"><div>Comissões por lado (%)<small>usadas no teste histórico</small></div><input id="setFee" type="number" min="0" max="1" step="0.01"></div></div>
   <div class="actions"><button id="setCancel">Cancelar</button><button id="setSave" class="primary">Guardar</button></div>
 </div></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -838,6 +895,9 @@
       const body = Math.abs(c.c - c.o), range = c.h - c.l || 1e-12;
       b.bodyAtr = atr[i] ? body / atr[i] : null;
       b.candle = b.bodyAtr == null ? '—' : b.bodyAtr >= 1.0 && body / range >= 0.6 ? 'forte' : b.bodyAtr < 0.5 ? 'fraca' : 'normal';
+      // a que distância do nível quebrado fechou a vela da quebra (em ATR); abaixo da margem = fecho colado
+      b.closeAtr = atr[i] && b.level != null ? b.dir * (c.c - b.level) / atr[i] : null;
+      b.closeTight = b.closeAtr != null && b.closeAtr < (o.closeMarginAtr || 0.3);
     }
   }
 
@@ -1670,11 +1730,28 @@
   function phaseCell(s) { const c = s.phase === 'A testar o limite' ? 'ph-lim' : 'ph-' + band(s.pullback); return `<span class="${c}">${phaseTxt(s)}</span>`; }
   function pullCell(s) { return `<span class="pill ${band(s.pullback)}">${pct(s.pullback)}</span>`; }
   // range da tendência principal: limite, topo/fundo da perna (preço e distância) e, discreto, o nível dos 50%
-  function legRangeCell(x, price) {
-    const up = x.trend === 1, d = (p) => pct(Math.abs(p - price) / price * 100);
+  // vela da quebra: força do corpo e a que distância do nível fechou (fecho colado = quebra suspeita)
+  function candleCell(b) {
+    const k = b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`;
+    if (b.closeAtr == null) return k;
+    const ca = b.closeAtr.toFixed(1).replace('.', ',');
+    return k + (b.closeTight ? `<br><span class="warn small" title="o fecho ficou a ${ca} ATR do nível quebrado — muito perto: quebra suspeita">fecho colado</span>` : `<br><span class="muted small" title="distância do fecho ao nível quebrado">fecho ${ca} ATR além</span>`);
+  }
+  function legRangeCell(x, d) {
+    const price = d.price, up = x.trend === 1, dd = (p) => pct(Math.abs(p - price) / price * 100);
+    // etiquetas do limite: em disputa (fechou para lá sem confirmar) · perto (a menos de 1 ATR) · varrido (pavio passou, fechou dentro)
+    let tag = '';
+    const res = d.ext.res, atrA = res.atr || [], atr = atrA[atrA.length - 1] || 0, pi = res.state && res.state.prot ? res.state.prot.i : -1;
+    if (x.phase === 'A testar o limite') tag = '<span class="badge disp" style="padding:0 5px">⚖ em disputa</span>';
+    else {
+      const cs = d.candles; let swept = false;
+      for (let j = pi + 1; j >= 1 && j < cs.length; j++) { const c = cs[j]; if (up ? c.l < x.protected && c.c >= x.protected : c.h > x.protected && c.c <= x.protected) { swept = true; break; } }
+      if (atr && Math.abs(price - x.protected) <= atr) tag = '<span class="badge near">perto</span>';
+      if (swept) tag += ' <span class="warn">💧 varrido</span>';
+    }
     const hi = up ? { p: x.extreme, t: 'topo' } : { p: x.protected, t: 'limite' }, lo = up ? { p: x.protected, t: 'limite' } : { p: x.extreme, t: 'fundo' };
-    const line = (o, arr, cls) => `<span class="${cls}">${arr} ${fmt(o.p)}</span> <span class="muted">${d(o.p)}</span> <span class="muted small">${o.t}</span>`;
-    return line(hi, '↑', 'upc') + '<br>' + line(lo, '↓', 'dnc') + `<br><span class="muted small">50% · ${fmt(x.levels[50])}</span>`;
+    const line = (o, arr, cls) => `<span class="${cls}">${arr} ${fmt(o.p)}</span> <span class="muted">${dd(o.p)}</span> <span class="muted small">${o.t}</span>${o.t === 'limite' && tag ? ' ' + tag : ''}`;
+    return line(hi, '↑', 'upc') + '<br>' + line(lo, '↓', 'dnc') + `<br><span class="lvl50 small">50% · ${fmt(x.levels[50])}</span>`;
   }
   // ---------- estados ----------
   // Tendência principal: só a direção (e uma nota se a subida/descida nunca foi confirmada)
@@ -2001,16 +2078,16 @@
         <td class="gl">${extBadge(x)}${frozen(d, 'ext') ? frozenBadge : ''}</td>
         <td class="wr" style="max-width:92px">${phaseCell(x)}</td>
         <td class="num">${pullCell(x)}</td>
-        <td class="liq">${legRangeCell(x, d.price)}</td>`
+        <td class="liq">${legRangeCell(x, d)}</td>`
         : `<td class="gl muted" colspan="4">sem estrutura suficiente${frozen(d, 'ext') ? frozenBadge : ''}</td>`;
       const intCells = n.trend ? `
         <td class="gl">${recentBadge(n, tf.id)}${frozen(d, 'int') ? frozenBadge : ''}</td>
         <td class="num">${pullCell(n)}</td>
         <td>${brkCell(d, b)}${pendBadge(n)}</td>
-        <td class="num">${divCell(d)}</td>
-        <td class="small">${rangeCell(d, tf.id)}</td>
-        <td>${b ? (b.volume === 'sim' ? '<span class="yes">sim</span>' : '<span class="muted">não</span>') + (b.volRatio ? ` <span class="muted small">${b.volRatio.toFixed(1).replace('.', ',')}×</span>` : '') : '—'}</td>
-        <td>${b ? (b.candle === 'forte' ? '<span class="yes">forte</span>' : b.candle === 'fraca' ? '<span class="warn">fraca</span>' : `<span class="muted">${b.candle}</span>`) : '—'}</td>
+        <td class="num rc">${divCell(d)}</td>
+        <td class="small rc">${rangeCell(d, tf.id)}</td>
+        <td class="rc">${b ? (b.volume === 'sim' ? '<span class="yes">sim</span>' : '<span class="muted">não</span>') + (b.volRatio ? ` <span class="muted small">${b.volRatio.toFixed(1).replace('.', ',')}×</span>` : '') : '—'}</td>
+        <td class="rc">${b ? candleCell(b) : '—'}</td>
         <td class="liq">${(settings.liqTfs || []).includes(tf.id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
         : `<td class="gl muted" colspan="8">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
       rows.push(`<tr data-tf="${tf.id}" class="${tf.id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${tf.label}</td>${extCells}${intCells}</tr>`);
@@ -2029,7 +2106,7 @@
           <span><span class="lbl">Recente</span>${n.trend ? recentBadge(n, tf.id) + ' ' + pullCell(n) : '<span class="muted">—</span>'}</span></div>
         <div class="r2"><span>${n.trend ? brkCell(d, b).replace(/<br>/g, ' ') : ''}</span><span>${divCell(d)}</span><span>${rangeCell(d, tf.id).replace(/<br>/g, ' ')}</span>
           <button class="go" data-go="${tf.id}">Gráfico ›</button></div>
-        <div class="more">${x.trend ? `Fase: ${phaseCell(x)} · ${legRangeCell(x, d.price).replace(/<br>/g, ' · ')}<br>` : ''}${b ? `Volume na quebra: ${b.volume}${b.volRatio ? ' ' + b.volRatio.toFixed(1).replace('.', ',') + '×' : ''} · vela ${b.candle}<br>` : ''}${(settings.liqTfs || []).includes(tf.id) ? 'Liquidez: ' + liqCell(d).replace('<br>', ' · ') : ''}</div>
+        <div class="more">${x.trend ? `Fase: ${phaseCell(x)} · ${legRangeCell(x, d).replace(/<br>/g, ' · ')}<br>` : ''}${b ? `Volume na quebra: ${b.volume}${b.volRatio ? ' ' + b.volRatio.toFixed(1).replace('.', ',') + '×' : ''} · vela ${b.candle}${b.closeAtr != null ? (b.closeTight ? ' (fecho colado)' : ' (fecho ' + b.closeAtr.toFixed(1).replace('.', ',') + ' ATR além)') : ''}<br>` : ''}${(settings.liqTfs || []).includes(tf.id) ? 'Liquidez: ' + liqCell(d).replace('<br>', ' · ') : ''}</div>
       </div>`);
     }
     const mc = $('#mcards');
@@ -2570,7 +2647,7 @@
   function refreshTf(id) { data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
   function updateEditUi() {
     const nEd = editCount(selectedTf);
-    $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✕ Sair da edição' : '✎ Editar estrutura';
+    $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✕ Fechar' : '✎ Editar estrutura';
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
@@ -2615,8 +2692,28 @@
     const segs = d[L].res.segs || []; const last = segs[segs.length - 1];
     return last && last.mode === 'auto' ? { segs, cur: last } : null;
   }
+  // mover a linha para trás: as tuas marcas entre a posição nova e a antiga são apagadas e o automático começa na posição nova;
+  // as correções feitas depois da linha antiga (ignorar, não é quebra, ...) ficam
+  function moveAutoBack(L, k) {
+    const d = data[selectedTf], info = autoLineInfo(L); if (!d || !info || k < 0 || k >= info.cur.i) return false;
+    const { segs, cur } = info, cl = d.closed, T = (i) => cl[i].t, t0 = T(cur.i), tk = T(k);
+    pushUndo(selectedTf);
+    const x = getEdits(selectedTf, true)[L];
+    fixLegacy(x, segs);
+    if (x.start && x.start.t >= tk) return (undo[symbol + '|' + selectedTf].pop(), false);   // não passa para trás do início
+    const inGap = (t) => t >= tk && t < t0;
+    for (const t of [...x.add.keys()]) if (inGap(t)) x.add.delete(t);
+    for (const set of [x.ign, x.noBreak, x.yesBreak]) for (const t of [...set]) if (inGap(t)) set.delete(t);
+    if (x.noLvl) for (const v of [...x.noLvl]) if (inGap(+String(v).split('|')[0])) x.noLvl.delete(v);
+    x.modes = (x.modes || []).filter((m) => m.t < tk);
+    x.modes.push({ t: tk, mode: 'auto' });
+    saveEdits(); refreshTf(selectedTf);
+    return true;
+  }
   function moveAuto(L, k) {
-    const d = data[selectedTf], info = autoLineInfo(L); if (!d || !info || k <= info.cur.i || k >= d.closed.length) return false;
+    const d = data[selectedTf], info = autoLineInfo(L);
+    if (d && info && k >= 0 && k < info.cur.i) return moveAutoBack(L, k);
+    if (!d || !info || k <= info.cur.i || k >= d.closed.length) return false;
     const { segs, cur } = info, cl = d.closed, T = (i) => cl[i].t, res = d[L].res;
     pushUndo(selectedTf);
     const x = getEdits(selectedTf, true)[L];
@@ -2630,11 +2727,7 @@
     if (cur.i === segs[0].i && x.start) x.start.mode = 'man';
     x.modes = (x.modes || []).map((m) => (m.mode === 'auto' && m.t <= t0 && m.t > tPrev ? { t: m.t, mode: 'man' } : m)).filter((m) => m.t < T(k));
     x.modes.push({ t: T(k), mode: 'auto' });
-    const sig = (dd) => { const sn = dd[L].snap; return dd[L].res.swings.filter((s) => s.i < k).map((s) => s.type + s.i + ':' + s.p).join('|') + '#' + sn.protected + '#' + sn.extreme; };
-    const before = sig(d);
     saveEdits(); refreshTf(selectedTf);
-    const d2 = data[selectedTf];
-    if (d2 && sig(d2) !== before) setTimeout(() => alert('Atenção: ao mover a linha, a estrutura mudou em algum ponto. Se não estiver como querias, carrega em ↶ Desfazer.'), 50);
     return true;
   }
   // arrastar a linha azul do automático (só em modo edição): ao largar, chama moveAuto
@@ -2808,6 +2901,7 @@
         const cur = segs.filter((s) => s.i <= k).slice(-1)[0], tk = T(k);
         if (cur && cur.mode === 'man') items.push({ label: '⏩ Continuar automático', run: () => { const e = ed(); e[L].modes = (e[L].modes || []).filter((m) => m.t < tk).concat([{ t: tk, mode: 'auto' }]); fixLegacy(e[L], segs); done(); } });
         if (cur && cur.mode === 'auto' && cur === segs[segs.length - 1]) items.push({ label: '⏩ Mover o automático para aqui', nav: true, run: () => moveAuto(L, k) });
+        { const inf = autoLineInfo(L); if (inf && k < inf.cur.i && cur && cur.mode === 'man' ) items.push({ label: '⏪ Automático a partir daqui (apaga as tuas marcas até à linha)', nav: true, run: () => moveAuto(L, k) }); }
         if (cur && cur.mode === 'auto') items.push({ label: '✋ Continuar manual', run: () => {
           const e = ed(), x = e[L];
           for (const t of [...x.add.keys()]) if (t >= tk) x.add.delete(t);
