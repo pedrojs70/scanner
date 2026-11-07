@@ -139,6 +139,8 @@
   .actions { display:flex; justify-content:flex-end; gap:8px; margin-top:14px; }
   .alst { padding:8px 10px; border:1px solid var(--line); border-radius:8px; margin-bottom:10px; font-size:13px; }
   .albig { font-weight:600; font-size:14px; }
+  .alnt { display:inline-flex; align-items:center; gap:3px; margin:2px 14px 2px 0; white-space:nowrap; } .alnt input[type=number] { width:56px; padding:2px 4px; }
+  header h1.homebtn { cursor:pointer; } header h1.homebtn:hover { color:#f5c518; }
   #alerts .alline { white-space:normal; display:block; padding-left:22px; text-indent:-22px; } #alerts .alline input { margin-right:6px; }
   .alrow { margin:6px 0 4px 22px; line-height:1.9; }
   #alSetups { margin-top:4px; }
@@ -391,6 +393,7 @@
       <li><b>2 · FVG no pullback:</b> depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
       <li><b>3 · Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
       <li><b>4 · Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
+      <li><b>5 · Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
       <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
     </ul>
 
@@ -416,11 +419,11 @@
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe, até marcares o ponto de partida.
 <br>• <b>💾 Gravar</b> — as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só vão para o aparelho e para a conta quando carregas em Gravar. Ao fechar com alterações por gravar: Gravar / Descartar / Continuar a editar.
 <br>• <b>↶ Desfazer / ↷ Refazer</b> — um passo de cada vez; só desde a última gravação (ao abrir a app e depois de gravar começa vazio).
-<br>• <b>↺ Repor análise do scanner</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha.</li>
+<br>• <b>↺ Voltar ao automático</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha (pede confirmação e faz cópia de segurança). Para apagar as marcas de um ativo em <b>todos</b> os timeframes: nos favoritos, abre o ativo e carrega em <b>⟲ Recriar tudo em automático</b>.</li>
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0">↺ Repor análise do scanner</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
     <div class="legend">
@@ -479,6 +482,11 @@
   <label class="chk alline"><input id="alWk" type="checkbox"> topo/fundo da <b>semana</b> anterior</label>
   <label class="chk alline"><input id="alDy" type="checkbox"> topo/fundo do <b>dia</b> anterior <span class="muted small">(dá mais alertas; se for apanhado dentro de uma killzone, só chega o aviso do ponto 3)</span></label>
   <div class="alrow"><span class="muted small">Tipo:</span> <label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
+
+  <h3 class="sethead">5 · Perto da quebra da tendência principal</h3>
+  <label class="chk alline"><input id="alNear" type="checkbox"> Avisar quando o preço se aproxima do nível de quebra da tendência principal (um aviso por nível)</label>
+  <div class="alrow"><span class="muted small">Timeframes e distância ao nível (% do preço):</span><br><span id="alNearTfs"></span></div>
+  <div class="alrow"><label class="chk"><input id="alNearI" type="checkbox"> inversão <span class="muted small">(perto do limite — fechar além = CHoCH)</span></label><br><label class="chk"><input id="alNearC" type="checkbox"> continuação <span class="muted small">(perto do topo/fundo da perna — fechar além = BOS)</span></label></div>
 
   <h3 class="sethead">Ligar o Telegram</h3>
   <ol class="alsteps">
@@ -2747,7 +2755,7 @@
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
     const dirty = !!(draft && draft.dirty); $('#saveBtn').disabled = !dirty; $('#saveBtn').classList.toggle('dirty', dirty); $('#saveBtn').textContent = dirty ? '💾 Gravar *' : '💾 Gravado';
     $('#saveBtn').style.display = $('#redoBtn').style.display = editMode ? '' : 'none';
-    $('#resetBtn').textContent = nEd ? `↺ Repor análise do scanner (${nEd})` : '↺ Repor análise do scanner';
+    $('#resetBtn').textContent = nEd ? `↺ Voltar ao automático (${nEd} marcas)` : '↺ Voltar ao automático';
   }
   function closeMenu() { const m = $('#editMenu'); m.style.display = 'none'; m.innerHTML = ''; }
   function openMenu(x, y, items) {
@@ -3007,7 +3015,31 @@
     a.download = `${symbol}_${selectedTf}_${new Date().toISOString().slice(0, 10)}.csv`;
     document.body.appendChild(a); a.click(); a.remove();
   }
-  function resetEdits() { pushUndo(selectedTf); delete edits[symbol + '|' + selectedTf]; saveEdits(); closeMenu(); refreshTf(selectedTf); }
+  function resetEdits() {
+    const k = symbol + '|' + selectedTf; if (!edits[k]) return;
+    if (!confirm(`Voltar ao automático no ${tfLabel(selectedTf)} de ${symbol}?\n\nApaga as tuas marcas deste timeframe (tendência principal, movimento recente, FVG escondidos e range). Os outros timeframes ficam como estão.\n\nAntes de apagar fica uma cópia de segurança (Definições → Cópias de segurança).`)) return;
+    if (!draft) makeBackup(`antes de voltar ao automático: ${symbol} ${tfLabel(selectedTf)}`);
+    pushUndo(selectedTf); delete edits[k]; saveEdits(); closeMenu(); refreshTf(selectedTf);
+  }
+  // favoritos: apaga todas as marcas de um ativo (todos os timeframes, as duas camadas, FVG escondidos e ranges)
+  function recreateAuto(sym) {
+    const keys = Object.keys(edits).filter((k) => k.startsWith(sym + '|'));
+    if (!keys.length) { alert(`${sym} já está todo em automático (não tens marcas neste ativo).`); return; }
+    if (editMode) { alert('Fecha primeiro a edição do gráfico (✕ Fechar) e depois tenta outra vez.'); return; }
+    if (!confirm('Tens a certeza que queres apagar toda a estrutura anterior deste ativo?')) return;
+    wipeMarks(sym, `antes de recriar ${sym} em automático`);
+  }
+  // apaga as marcas de um ativo (todos os timeframes), com cópia de segurança antes
+  function wipeMarks(sym, why) {
+    const keys = Object.keys(edits).filter((k) => k.startsWith(sym + '|'));
+    if (!keys.length) return;
+    makeBackup(why);
+    keys.forEach((k) => { delete edits[k]; delete undo[k]; delete redo[k]; });
+    persistEdits();
+    if (symbol === sym) { for (const id in data) if (data[id] && data[id].candles) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
+    const f = favData[sym]; if (f && f.tfs) for (const id in f.tfs) if (f.tfs[id] && f.tfs[id].candles) f.tfs[id] = computeTf(f.tfs[id].candles, id, sym);
+    renderFavList();
+  }
   // modo edição: gráfico em ecrã inteiro, só velas (sem RSI nem divergências) e só os botões da edição
   let maxBeforeEdit = false;
   function setEdit(on, keepRange) {
@@ -3130,9 +3162,10 @@
       detailWrap = document.createElement('div'); detailWrap.className = 'favdetail';
       anchors = detailNodes().map((n) => { const c = document.createComment('slot'); n.parentNode.insertBefore(c, n); return [n, c]; });
     }
-    detailWrap.innerHTML = `<div class="favdethead"><b>${favOpen}</b><button class="lyr favclose" style="margin-left:auto">✕ Fechar</button></div>`;
+    detailWrap.innerHTML = `<div class="favdethead"><b>${favOpen}</b><button class="lyr favreauto" style="margin-left:auto" title="Apaga todas as tuas marcas deste ativo, em todos os timeframes, e volta a criar a estrutura em automático (pede confirmação e faz cópia de segurança)">⟲ Recriar tudo em automático</button><button class="lyr favclose">✕ Fechar</button></div>`;
     anchors.forEach(([n]) => detailWrap.appendChild(n));
     detailWrap.querySelector('.favclose').addEventListener('click', (ev) => { ev.stopPropagation(); closeFav(); });
+    detailWrap.querySelector('.favreauto').addEventListener('click', (ev) => { ev.stopPropagation(); recreateAuto(favOpen); });
     slot.appendChild(detailWrap);
     setTimeout(() => renderChart(true), 30);
   }
@@ -3176,7 +3209,7 @@
     box.innerHTML = (rows.length ? `<div class="favgrid favh" style="${cols}"><span>Ativo</span><span>Preço</span>${setups.map((st) => `<span>${st.name}<br><span class="muted small">${ctxOf(st) ? tfLabel(ctxOf(st)) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></span>`).join('')}<span></span></div>` : '')
       + (rows.length ? rows.map((r) => `${favOpen === r.s ? '<div class="favopenwrap">' : ''}<div class="favgrid favrow ${r.rank === 4 ? 'ready' : ''} ${favOpen === r.s ? 'open' : ''}" style="${cols}" data-s="${r.s}"><span class="favsym">${favOpen === r.s ? '▾ ' : ''}${r.s}<button class="favchart" data-c="${r.s}" title="Abrir o gráfico">📈</button>${!isCrypto(r.s) && yMap[r.s] && yMap[r.s] !== r.s ? `<br><span class="muted small">${yMap[r.s]}</span>` : ''}</span><span class="favpx">${r.price != null ? fmt(r.price) : ''}</span>${r.cells.map((c) => `<span>${c}</span>`).join('')}<button class="favx" data-x="${r.s}" title="Tirar dos favoritos">✕</button></div>${favOpen === r.s ? '<div class="favslot"></div></div>' : ''}`).join('')
         : '<div class="muted small" style="padding:10px">Ainda não tens favoritos. Escreve um nome ou ticker (ex.: apple, ETHUSDT) ou importa a tua watchlist do TradingView.</div>');
-    box.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); if (favOpen === b.dataset.x) { favOpen = null; unmountDetail(); } settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavList(); updateStar(); }));
+    box.querySelectorAll('.favx').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); if (!removeFavOk(b.dataset.x)) return; if (favOpen === b.dataset.x) { favOpen = null; unmountDetail(); } settings.favs = (settings.favs || []).filter((x) => x !== b.dataset.x); delete favData[b.dataset.x]; save('mss_settings4', settings); renderFavList(); updateStar(); }));
     box.querySelectorAll('.favrow').forEach((r) => r.addEventListener('click', () => toggleFav(r.dataset.s)));
     box.querySelectorAll('.favchart').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); openFavChart(b.dataset.c); }));
     const slot = box.querySelector('.favslot'); if (slot && favOpen) mountDetail(slot);
@@ -3218,11 +3251,25 @@
     { symbol: 'SI=F', name: 'Prata (silver) · futuro', exch: 'COMEX', keys: ['silver', 'prata', 'xag', 'si=f'] },
     { symbol: 'PL=F', name: 'Platina (platinum) · futuro', exch: 'NYMEX', keys: ['platinum', 'platina', 'xpt', 'pl=f'] },
     { symbol: 'PA=F', name: 'Paládio (palladium) · futuro', exch: 'NYMEX', keys: ['palladium', 'paladio', 'paládio', 'xpd', 'pa=f'] },
+    { symbol: 'CL=F', name: 'Petróleo WTI (crude oil) · futuro', exch: 'NYMEX', keys: ['wti', 'petroleo', 'petróleo', 'oil', 'crude', 'cl=f'] },
+    { symbol: 'BZ=F', name: 'Petróleo Brent · futuro', exch: 'ICE', keys: ['brent', 'petroleo', 'petróleo', 'oil', 'bz=f'] },
+    { symbol: 'HG=F', name: 'Cobre (copper) · futuro', exch: 'COMEX', keys: ['cobre', 'copper', 'hg=f'] },
+    { symbol: 'CC=F', name: 'Cacau (cocoa) · futuro', exch: 'ICE US', keys: ['cacau', 'cocoa', 'cc=f'] },
   ];
   function metalHits(q) {
     const v = String(q || '').trim().toLowerCase(); if (v.length < 2) return [];
-    if (/^(metais|metals|metal)/.test(v)) return METALS.slice();
+    if (/^(metais|metals|metal|materias|matérias|commodit)/.test(v)) return METALS.slice();
     return METALS.filter((m) => m.keys.some((k) => k.startsWith(v) || v.startsWith(k)));
+  }
+  // ticker curto (ex.: INRG): a versão da Bolsa de Londres (ETFs da Hargreaves) aparece sempre primeiro
+  function lseFirst(q, opts) {
+    const t = String(q || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{2,6}$/.test(t) || /USDT$/.test(t)) return opts;
+    const sym = t + '.L', i = opts.findIndex((o) => o.symbol === sym);
+    if (i < 0 && opts.some((o) => o.symbol === t || o.symbol === t + 'USDT')) return opts;   // ex.: AAPL, BTC — sem palpite de Londres
+    const o = i >= 0 ? opts.splice(i, 1)[0] : { symbol: sym, name: '', exch: '' };
+    o.exch = 'Londres (LSE / Hargreaves)' + (i >= 0 ? '' : ' — se existir');
+    opts.unshift(o); return opts;
   }
   async function searchAssets(q) {
     const up = normSym(q), opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch }));
@@ -3234,7 +3281,7 @@
         else if (['EQUITY', 'ETF', 'INDEX', 'MUTUALFUND'].includes(x.type) && !/=F$/.test(x.symbol)) opts.push(x);
       }
     } catch (e) { opts.push({ err: 'pesquisa indisponível (' + (e.message || e) + ')' }); }
-    return opts;
+    return lseFirst(q, opts);
   }
   function showSug(box, opts, pick) {
     box.innerHTML = opts.map((o) => o.err ? `<div class="muted small">${o.err}</div>` : `<button type="button" class="sugi" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button>`).join('') || '<div class="muted small">sem resultados</div>';
@@ -3254,6 +3301,7 @@
         else if (['EQUITY', 'ETF', 'INDEX', 'MUTUALFUND'].includes(x.type) && !/=F$/.test(x.symbol)) opts.push(x);
       }
     } catch (e) { opts.push({ err: 'pesquisa indisponível (' + (e.message || e) + ')' }); }
+    lseFirst(q, opts);
     if (pickFirst && opts.length === 1 && !opts[0].err) { addFavs([opts[0].symbol]); box.innerHTML = ''; return; }
     box.innerHTML = opts.map((o) => o.err ? `<div class="muted small">${o.err}</div>` : `<button class="sugi" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button>`).join('') || '<div class="muted small">sem resultados</div>';
     box.querySelectorAll('.sugi').forEach((b) => b.addEventListener('click', () => { addFavs([b.dataset.s]); $('#favIn').value = ''; box.innerHTML = ''; }));
@@ -3281,14 +3329,30 @@
     if (window.innerWidth <= 760) setMTab('resumo'); else { document.body.dataset.favs = ''; window.scrollTo(0, 0); }
   }
   function updateStar() { const b = $('#starBtn'); if (b) { const on = (settings.favs || []).includes(symbol); b.textContent = on ? '★' : '☆'; b.title = on ? 'Tirar dos favoritos' : 'Pôr nos favoritos'; } }
+  // tirar dos favoritos: pede confirmação e apaga as marcas desse ativo (com cópia de segurança)
+  function removeFavOk(sym) {
+    if (editMode && symbol === sym) { alert('Fecha primeiro a edição do gráfico (✕ Fechar) e depois tenta outra vez.'); return false; }
+    if (!confirm(`Tirar ${sym} dos favoritos?\n\nAs marcas deste ativo também são apagadas.`)) return false;
+    wipeMarks(sym, `antes de tirar ${sym} dos favoritos`);
+    return true;
+  }
   function favsInit() {
-    $('#starBtn').addEventListener('click', () => { const on = (settings.favs || []).includes(symbol); if (on) { settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); renderFavs(); updateStar(); } else addFavs([symbol]); });
+    $('#starBtn').addEventListener('click', () => { const on = (settings.favs || []).includes(symbol); if (on) { if (!removeFavOk(symbol)) return; settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); renderFavs(); updateStar(); } else addFavs([symbol]); });
     $('#favBtn').addEventListener('click', () => { const open = document.body.dataset.favs === '1'; if (open) { if (favOpen) { favOpen = null; unmountDetail(); } document.body.dataset.favs = ''; renderFavList(); } else { document.body.dataset.favs = '1'; renderFavs(); scanFavs(false); } window.scrollTo(0, 0); });
     updateStar(); renderFavs();
     if (window.innerWidth > 760) { document.body.dataset.favs = '1'; setTimeout(() => scanFavs(false), 1500); }
     favTimer = setInterval(() => { if (document.body.dataset.favs === '1' || document.body.dataset.mtab === 'favs') scanFavs(false); }, 60e3);
   }
 
+  // título "Scanner de Estrutura": volta ao ecrã de entrada (favoritos), sem perder edições por gravar
+  function goHome() {
+    if (editMode) { requestExitEdit(); if (editMode) return; }
+    document.querySelectorAll('.modal.open').forEach((m) => m.classList.remove('open'));
+    if ($('.chartbox').classList.contains('max')) { chartFromFav = false; toggleMax(false); }
+    if (favOpen) closeFav();
+    if (window.innerWidth <= 760) setMTab('favs'); else { document.body.dataset.favs = '1'; renderFavs(); }
+    window.scrollTo(0, 0);
+  }
   function setMTab(t) {
     document.body.dataset.mtab = t; save('mss_mtab', t);
     document.querySelectorAll('#mtabs button').forEach((b) => b.classList.toggle('on', b.dataset.t === t));
@@ -3343,10 +3407,10 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true };
-  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alWkS: 'weekSweep', alWkC: 'weekClose' };
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false };
+  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
-  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}) });
+  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
   function alChatUi() { $('#alChatSt').innerHTML = alDraft.tgChat ? `<span class="yes">✔ ligado (chat ${alDraft.tgChat})</span>` : '<span class="warn">ainda não ligado</span>'; }
   function alertCode() {
@@ -3397,6 +3461,7 @@ function motor_() {
     alDraft = alCfg();
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
     $('#alMin').value = alDraft.minPull;
+    $('#alNearTfs').innerHTML = TFS.map((t) => `<span class="alnt"><label class="chk"><input type="checkbox" data-nt="${t.id}" ${alDraft.nearTfs.includes(t.id) ? 'checked' : ''}> ${tfLabel(t.id)}</label> <input type="number" data-np="${t.id}" min="0.1" max="30" step="0.1" value="${alDraft.nearPct[t.id] != null ? alDraft.nearPct[t.id] : 0.5}"><span class="muted small">%</span></span>`).join('');
     $('#alTok').value = alDraft.tgToken || ''; $('#alRelay').value = alDraft.relay || ''; $('#alRelayMsg').textContent = '';
     $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
@@ -3407,6 +3472,8 @@ function motor_() {
   function readAlerts() {
     for (const id in AL_CHK) alDraft[AL_CHK[id]] = $('#' + id).checked;
     alDraft.minPull = Math.max(0, Math.min(100, +$('#alMin').value || 50));
+    document.querySelectorAll('[data-np]').forEach((i) => { const v = +String(i.value).replace(',', '.'); if (v > 0) alDraft.nearPct[i.dataset.np] = Math.min(30, v); });
+    alDraft.nearTfs = [...document.querySelectorAll('[data-nt]')].filter((i) => i.checked).map((i) => i.dataset.nt);
     alDraft.tgToken = $('#alTok').value.trim();
     alDraft.relay = $('#alRelay').value.trim().replace(/\/+$/, '');
     if ($('#alChat').style.display !== 'none') alDraft.tgChat = $('#alChat').value.trim();
@@ -3583,6 +3650,7 @@ function motor_() {
     $('#gear').addEventListener('click', openSettings);
     cloudInit();
     document.querySelectorAll('#mtabs button').forEach((b) => b.addEventListener('click', () => setMTab(b.dataset.t)));
+    const h1 = document.querySelector('header h1'); if (h1) { h1.classList.add('homebtn'); h1.title = 'Voltar ao início'; h1.addEventListener('click', goHome); }
     favsInit(); alertsInit();
     setMTab('favs');
     // botão "voltar ao topo": aparece quando se desce na página (no telemóvel o gráfico ocupa o ecrã e prende o deslizar)

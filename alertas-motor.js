@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-06T22:09:05.056Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-07T20:03:06.405Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -675,6 +675,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     fvgOn: true,
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
     weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
+    nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
   };
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -766,6 +767,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); });
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
+    if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
     return [...s];
   }
 
@@ -918,7 +920,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         let j = -1; for (let k = 0; k < c5.length; k++) { const c = c5[k]; if (c.t < r.t1 || c.ct >= now) continue; if (side === 1 ? c.h > p : c.l < p) { j = k; break; } }
         if (j < 0) continue;
         const c = c5[j];
-        if (!inSess(nyParts(c.t).h, kz[1])) continue;   // apanhada fora desta killzone
+        const np = nyParts(c.t);
+        if (!inSess(np.h, kz[1])) continue;   // apanhada fora desta killzone
+        if (np.wd >= 5) continue;             // sábado e domingo: não há sessões de Londres / NY
         const key = `k|${sym}|${r.id}|${r.t1}|${side}`;
         if (st.seen[key]) continue;
         st.seen[key] = now;
@@ -968,17 +972,49 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
   }
 
+  // ---------- 5) perto da quebra da tendência principal (inversão = limite / continuação = topo-fundo da perna) ----------
+  function nearAlerts(sym, dm, A, st, now, out) {
+    if (!A.nearOn) return;
+    const P = Object.assign({}, A_DEF.nearPct, A.nearPct || {});
+    for (const id of A.nearTfs || []) {
+      const d = dm[id]; if (!d) continue;
+      const s = d.ext.snap; if (!s.trend) continue;
+      const up = s.trend === 1, price = d.price, thr = price * (P[id] != null ? +P[id] : 0.5) / 100;
+      const kinds = [];
+      if (A.nearInv && s.protected != null) kinds.push(['inv', s.protected]);
+      if (A.nearCont && s.extreme != null) kinds.push(['cont', s.extreme]);
+      for (const [kind, lvl] of kinds) {
+        const key = `n|${sym}|${id}|${kind}|${lvl}`;
+        // do lado certo do nível: inversão — acima do limite numa subida; continuação — abaixo do topo numa subida
+        const gap = kind === 'inv' ? (up ? price - lvl : lvl - price) : (up ? lvl - price : price - lvl);
+        if (gap < 0) continue;                                   // já passou (a quebra é avisada pela própria estrutura)
+        if (st.seen[key] && gap > 2 * thr) { delete st.seen[key]; continue; }   // afastou-se: volta a poder avisar
+        if (gap > thr || st.seen[key]) continue;
+        st.seen[key] = now;
+        if (st.silent) continue;
+        const inv = kind === 'inv';
+        out.push({ kind: 'near', sym, text: [
+          `${inv ? '⚠️' : '↗'} <b>Perto da ${inv ? 'inversão' : 'continuação'} · ${LBL[id]} · ${esc(sym)}</b>`,
+          `Tendência principal ${up ? 'em subida' : 'em descida'}: o preço (${fmt(price)}) está a ${pct(gap / price * 100)} ${inv ? 'do limite' : (up ? 'do topo da perna' : 'do fundo da perna')} ${fmt(lvl)}.`,
+          inv ? `Um fecho ${up ? 'abaixo' : 'acima'} = CHoCH: a tendência do ${LBL[id]} vira para ${up ? 'baixo' : 'cima'}.` : `Um fecho ${up ? 'acima' : 'abaixo'} = BOS: a tendência do ${LBL[id]} continua.`,
+        ].join('\n') });
+      }
+    }
+  }
+
   // ---------- um ativo: velas em bruto → mensagens ----------
   // raw: { tfId: [{t, ct, o, h, l, c, v}] } (já com 3M/6M/1Y agrupados); edits: { 'SYM|tf': ed }
   function evaluateAsset(sym, raw, S, A, edits, st, now) {
     const out = [], dm = {};
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
+    if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
+    nearAlerts(sym, dm, A, st, now, out);
     return out;
   }
   function pruneState(st, now) {
