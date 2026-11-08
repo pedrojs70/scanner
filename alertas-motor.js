@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-07T20:03:06.405Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-07T23:49:59.894Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -839,14 +839,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const vela = lb.candle === 'forte' ? 'vela forte' : lb.candle === 'fraca' ? 'vela fraca' : 'vela normal';
       const vol = lb.volRatio ? `vol ${lb.volRatio.toFixed(1).replace('.', ',')}×${lb.volume === 'sim' ? ' (alto)' : ''}` : '';
       const fecho = lb.closeAtr == null ? '' : lb.closeTight ? 'fecho colado ⚠' : `fecho ${lb.closeAtr.toFixed(1).replace('.', ',')} ATR além`;
-      const ctxTxt = !(cx && cx.trend) ? 'sem dados' : ctxFav ? 'a favor' : `contra (${pct(cx.pullback)})`;
+      const ctxTxt = !(cx && cx.trend) ? 'sem dados' : ctxFav ? (cx.pullback > 78.6 ? `a favor, mas fundo (${pct(cx.pullback)}) — perto de virar` : 'a favor') : `contra (${pct(cx.pullback)})`;
+      // 💧 a quebra veio depois de um sweep do lado oposto (até 20 velas antes), como na app
+      const swept = (dt.int.res.sweeps || []).some((sw) => !sw.invalid && sw.dir === -lb.dir && sw.i <= lb.i && lb.i - sw.i <= 20);
       const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price);
       const prot = t.protected;
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}`,
         `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
-        `Extra: ${[fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
+        `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
       ];
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);

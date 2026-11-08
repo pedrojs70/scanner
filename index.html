@@ -36,6 +36,7 @@
   .stg { font-weight:600; } .stg.s0 { color:var(--muted); font-weight:400; } .stg.s1 { color:#ffd54f; } .stg.s2 { color:#4fc3f7; } .stg.s3 { color:#fff; background:#2e7d32; padding:1px 8px; border-radius:6px; }
   .sd-ok .stg.s3 { background:#b71c1c; }
   .chip.rf-pos2 { background:rgba(46,125,50,.25); color:#a5e3a9; }
+  .chip.rf-deep { background:rgba(255,179,0,.18); color:#ffcc66; } .chip.rf-bad { background:rgba(239,83,80,.18); color:#ff8a80; }
   .nota { font-size:15px; margin-right:4px; } .nota.hi { color:#7ee08a; } .nota.lo { color:var(--muted); }
   .btblock { margin:12px 0 18px; } .btblock h3 { margin:0 0 6px; font-size:15px; }
   .btwarn { background:rgba(255,152,0,.12); color:#ffb74d; padding:6px 10px; border-radius:6px; margin:6px 0; font-size:12px; }
@@ -152,81 +153,109 @@
   #alerts code { background:rgba(127,127,127,.15); padding:0 4px; border-radius:4px; }
   @media (max-width:760px) { #alertBtn { padding:4px 8px; } }
 
-  /* ---------- novo layout (beta): jornal ---------- */
+  /* ---------- layout "jornal" (claro / escuro) ---------- */
   #np { display:none; }
-  body[data-np="1"] { background:#FAFAF7; color:#111; }
-  body[data-np="1"] #np { display:block; max-width:1400px; margin:0 auto; padding:18px 28px 60px; font-family:Inter, system-ui, sans-serif; color:#111; }
+  body[data-np="1"] { --np-bg:#FAFAF7; --np-ink:#111111; --np-mu:#5B5B57; --np-ln:#E2E0D8; --np-card:#FFFFFF; --np-hover:#F1EFE8; --np-on:#EFECE3; --np-red:#D9481C; --np-red2:#A3330F; --np-up:#0B7A4B; --np-dn:#B3261E; --np-text:#2E2E2B;
+    --sg-off:#ECEBE5; --sg-offfg:#8E8D86; --sg-zone:#D69A1E; --sg-zonefg:#9A6A00; --sg-broke:#E7A82A; --sg-brokefg:#2a1c00; --sg-ready:#0B7A4B; --sg-none:#C9C7BF;
+    background:var(--np-bg); color:var(--np-ink); }
+  body[data-np="1"][data-npdark="1"] { --np-bg:#121314; --np-ink:#ECEBE6; --np-mu:#A3A29C; --np-ln:#2C2D2F; --np-card:#191A1C; --np-hover:#1E2022; --np-on:#232528; --np-red:#FF7A50; --np-red2:#FF9A78; --np-up:#3CC98B; --np-dn:#FF6B6B; --np-text:#D6D5CF;
+    --sg-off:#2A2C2F; --sg-offfg:#8A8B8E; --sg-zone:#E3A93A; --sg-zonefg:#F2C46B; --sg-broke:#E7A82A; --sg-brokefg:#1E1500; --sg-ready:#2EAF77; --sg-none:#46484C; }
+  body[data-np="1"] #np { display:block; max-width:1440px; margin:0 auto; padding:18px 28px 60px; font-family:Inter, system-ui, sans-serif; color:var(--np-ink); }
+  body[data-np="1"][data-npv="asset"] #np { max-width:none; }
   body[data-np="1"] > header, body[data-np="1"] #mtabs, body[data-np="1"] main > #favs, body[data-np="1"] main > .sechead, body[data-np="1"] main > #confluence, body[data-np="1"] main > #msetups, body[data-np="1"] main > #mcards, body[data-np="1"] main > #prevbar, body[data-np="1"] main > .tablewrap, body[data-np="1"] main > .chartbox { display:none !important; }
   body[data-np="1"] main { padding:0; }
-  #np a { color:#D9481C; text-underline-offset:3px; } #np a:hover { color:#A3330F; }
-  .np-top { display:flex; align-items:center; gap:16px; flex-wrap:wrap; font-size:13px; color:#5B5B57; }
+  #np a { color:var(--np-red); text-underline-offset:3px; } #np a:hover { color:var(--np-red2); }
+  .np-top { display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px; color:var(--np-mu); }
   .np-vig { display:inline-flex; align-items:center; gap:6px; }
   .np-vig i { width:7px; height:7px; border-radius:50%; display:inline-block; }
-  .np-links { margin-left:auto; display:flex; gap:18px; flex-wrap:wrap; }
-  .np-links .np-old { font-weight:600; }
-  .np-mast { display:block; text-decoration:none !important; color:#111 !important; border-bottom:3px double #111; padding:10px 0 10px; }
+  .np-links { margin-left:auto; display:flex; gap:18px; flex-wrap:wrap; align-items:center; }
+  .np-mast { display:block; text-decoration:none !important; color:var(--np-ink) !important; border-bottom:3px double var(--np-ink); padding:10px 0 10px; }
   .np-mast h1 { margin:0; font-family:Newsreader, Georgia, serif; font-size:clamp(34px,6vw,64px); font-weight:700; letter-spacing:-.02em; line-height:1.02; }
-  .np-bar { display:flex; gap:10px; align-items:center; padding:12px 0; border-bottom:1px solid #111; flex-wrap:wrap; }
-  #npSearch input { height:36px; width:280px; border:1px solid #111; background:#fff; color:#111; padding:0 10px 0 30px; font:inherit; border-radius:0; }
-  .np-sic { position:absolute; left:10px; top:7px; color:#5B5B57; font-size:16px; }
-  #npSug { position:absolute; top:40px; left:0; z-index:50; background:#fff; border:1px solid #111; min-width:320px; flex-direction:column; display:none; }
-  #npSug .sugi { text-align:left; background:#fff; color:#111; border:0; border-bottom:1px solid #eee; padding:8px 10px; }
+  body[data-npv="asset"] .np-mast h1 { font-size:clamp(26px,3.4vw,38px); }
+  .np-bar { display:flex; gap:10px; align-items:center; padding:12px 0; border-bottom:1px solid var(--np-ink); flex-wrap:wrap; }
+  #npSearch input { height:36px; width:280px; border:1px solid var(--np-ink); background:var(--np-card); color:var(--np-ink); padding:0 10px 0 30px; font:inherit; border-radius:0; }
+  .np-sic { position:absolute; left:10px; top:7px; color:var(--np-mu); font-size:16px; }
+  #npSug { position:absolute; top:40px; left:0; z-index:50; background:var(--np-card); border:1px solid var(--np-ink); min-width:360px; display:none; flex-direction:column; }
+  #npSug .row { display:flex; align-items:center; border-bottom:1px solid var(--np-ln); }
+  #npSug .row button.o { flex:1; text-align:left; background:none; color:var(--np-ink); border:0; padding:8px 10px; }
+  #npSug .row button.o:hover, #npSug .row button.a:hover { background:var(--np-hover); }
+  #npSug .row button.a { background:none; border:0; border-left:1px solid var(--np-ln); color:var(--np-red); font-weight:700; padding:8px 12px; }
+  #npSug .muted { color:var(--np-mu); }
   .np-filters { display:flex; gap:8px; flex-wrap:wrap; }
-  .np-filters button { height:34px; padding:0 12px; border:1px solid #111; background:transparent; color:#111; border-radius:0; font-weight:500; }
-  .np-filters button.on { background:#111; color:#FAFAF7; }
+  .np-filters button { height:34px; padding:0 12px; border:1px solid var(--np-ink); background:transparent; color:var(--np-ink); border-radius:0; font-weight:500; }
+  .np-filters button.on { background:var(--np-ink); color:var(--np-bg); }
   .np-cols { display:flex; gap:36px; flex-wrap:wrap; align-items:flex-start; }
-  #npRail { flex:1 1 210px; max-width:250px; }
+  #npRail { flex:1 1 230px; max-width:270px; }
   #npCenter { flex:999 1 560px; min-width:0; }
   #npFocus { flex:1 1 290px; max-width:350px; }
-  body[data-npv="asset"] #npFocus, body[data-npv="asset"] #npFilters, body[data-npv="asset"] #npFeedWrap { display:none; }
-  body:not([data-npv="asset"]) #npAsset { display:none; }
+  body[data-npv="asset"] #npFocus, body[data-npv="asset"] #npFilters, body[data-npv="asset"] #npFeedWrap, body[data-npv="asset"] #npRail { display:none; }
+  body:not([data-npv="asset"]) #npAsset, body:not([data-npv="asset"]) #npStrip { display:none; }
   .np-h2 { font-family:Newsreader, Georgia, serif; font-size:24px; font-weight:600; margin:18px 0 6px; }
-  .np-legend { font-size:11.5px; color:#5B5B57; line-height:1.5; margin-bottom:8px; }
+  .np-legend { font-size:11.5px; color:var(--np-mu); line-height:1.5; margin-bottom:8px; }
   .np-legend .lg { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 8px; margin-top:6px; }
   .np-legend .lg span { display:flex; align-items:center; gap:5px; }
+  .np-sort { display:flex; gap:0; margin:6px 0 8px; }
+  .np-sort button { flex:1; height:28px; border:1px solid var(--np-ink); background:transparent; color:var(--np-ink); border-radius:0; font-size:12px; }
+  .np-sort button + button { border-left:0; }
+  .np-sort button.on { background:var(--np-ink); color:var(--np-bg); }
+  .np-grp { font-size:10.5px; font-weight:700; letter-spacing:.14em; color:var(--np-mu); padding:12px 4px 4px; text-transform:uppercase; }
   .np-rail { list-style:none; margin:0; padding:0; }
-  .np-rail li { display:flex; align-items:center; gap:8px; padding:9px 4px; border-top:1px solid #E2E0D8; cursor:pointer; }
-  .np-rail li:hover { background:#F1EFE8; }
-  .np-rail li.on { background:#EFECE3; box-shadow:inset 3px 0 0 #D9481C; }
+  .np-rail li { display:flex; align-items:center; gap:6px; padding:9px 4px; border-top:1px solid var(--np-ln); cursor:pointer; }
+  .np-rail li:hover { background:var(--np-hover); }
   .np-rail .s { font-weight:700; font-size:13.5px; display:flex; align-items:center; gap:5px; }
-  .np-rail .p { font:12px 'JetBrains Mono', monospace; color:#5B5B57; }
-  .np-x { border:0; background:none; color:#8a8a84; padding:2px 4px; font-size:13px; }
-  .np-x:hover { color:#111; }
-  .sig { display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; font-size:10px; line-height:1; border:1px solid transparent; box-sizing:border-box; }
-  .sig.off { background:#ECEBE5; color:#8E8D86; }
-  .sig.zone { background:#fff; border-color:#D69A1E; color:#9A6A00; }
-  .sig.broke { background:#E7A82A; color:#2a1c00; }
-  .sig.ready { background:#0B7A4B; color:#fff; }
-  .sig.none { background:transparent; border:1px dashed #C9C7BF; color:#B5B3AB; }
+  .np-rail .p { font:12px 'JetBrains Mono', monospace; color:var(--np-mu); }
+  .np-rail .ln { font-size:11.5px; color:var(--np-mu); margin-top:2px; line-height:1.3; }
+  .np-x { border:0; background:none; color:var(--np-mu); padding:2px 3px; font-size:13px; }
+  .np-x:hover { color:var(--np-ink); }
+  .sig { position:relative; display:inline-flex; align-items:center; justify-content:center; width:19px; height:19px; font-size:10px; line-height:1; border:1px solid transparent; box-sizing:border-box; cursor:help; }
+  .sig.off { background:var(--sg-off); color:var(--sg-offfg); }
+  .sig.zone { background:transparent; border-color:var(--sg-zone); color:var(--sg-zonefg); }
+  .sig.broke { background:var(--sg-broke); color:var(--sg-brokefg); }
+  .sig.ready { background:var(--sg-ready); color:#fff; }
+  .sig.none { background:transparent; border:1px dashed var(--sg-none); color:var(--sg-none); }
+  .sig .dr { position:absolute; right:-5px; top:-7px; font-size:9px; }
   .sigs { display:flex; gap:3px; }
-  .np-dot { width:7px; height:7px; border-radius:50%; background:#D9481C; display:inline-block; }
-  .np-ev { display:grid; grid-template-columns:70px minmax(0,1fr) 180px; gap:18px; padding:20px 0; border-top:1px solid #E2E0D8; }
-  .np-ev .t { font:13px 'JetBrains Mono', monospace; color:#5B5B57; }
+  .np-dot { width:7px; height:7px; border-radius:50%; background:var(--np-red); display:inline-block; }
+  #npTip { position:fixed; z-index:400; max-width:300px; background:var(--np-ink); color:var(--np-bg); font-size:12.5px; line-height:1.45; padding:8px 10px; display:none; pointer-events:none; }
+  #npStrip { display:flex; gap:6px; overflow-x:auto; padding:10px 0; border-bottom:1px solid var(--np-ln); -webkit-overflow-scrolling:touch; }
+  #npStrip .it { display:flex; align-items:center; gap:7px; padding:6px 10px; border:1px solid var(--np-ln); background:var(--np-card); cursor:pointer; white-space:nowrap; flex:none; }
+  #npStrip .it:hover { background:var(--np-hover); }
+  #npStrip .it.on { border-color:var(--np-ink); box-shadow:inset 0 -3px 0 var(--np-red); }
+  #npStrip .sig { width:15px; height:15px; font-size:8px; }
+  #npStrip .nm { font-weight:700; font-size:12.5px; }
+  .np-ev { display:grid; grid-template-columns:70px minmax(0,1fr) 180px; gap:18px; padding:20px 0; border-top:1px solid var(--np-ln); }
+  .np-ev .t { font:13px 'JetBrains Mono', monospace; color:var(--np-mu); }
   .np-ev .k { margin-top:6px; font-size:10.5px; font-weight:700; letter-spacing:.14em; }
   .np-ev .sym { font-size:12px; font-weight:700; letter-spacing:.06em; }
   .np-ev h3 { margin:3px 0 6px; font-family:Newsreader, Georgia, serif; font-size:24px; line-height:1.18; font-weight:600; }
-  .np-ev p { margin:0; color:#2E2E2B; font-size:14.5px; line-height:1.55; }
+  .np-ev p { margin:0; color:var(--np-text); font-size:14.5px; line-height:1.55; }
   .np-ev .acts { display:flex; gap:16px; margin-top:8px; font-size:13px; }
-  .np-empty { padding:24px 0; border-top:1px solid #E2E0D8; color:#5B5B57; line-height:1.6; }
-  .np-box { border:1px solid #111; padding:18px; margin-top:18px; background:#fff; }
-  .np-kick { font-size:11px; font-weight:700; letter-spacing:.14em; color:#D9481C; }
+  .np-empty { padding:24px 0; border-top:1px solid var(--np-ln); color:var(--np-mu); line-height:1.6; }
+  .np-box { border:1px solid var(--np-ink); padding:18px; margin-top:18px; background:var(--np-card); }
+  .np-kick { font-size:11px; font-weight:700; letter-spacing:.14em; color:var(--np-red); }
   .np-box h2 { font-family:Newsreader, Georgia, serif; font-size:30px; margin:4px 0 0; }
   .np-mono { font-family:'JetBrains Mono', monospace; }
   .np-why { font-size:14px; line-height:1.5; margin:10px 0; }
   .np-st { width:100%; min-width:0; border-collapse:collapse; margin-top:6px; }
-  .np-st td { border-top:1px solid #E2E0D8; border-bottom:0; padding:8px 2px; font-size:13.5px; white-space:nowrap; }
-  #npAssetHead { display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; padding:16px 0 12px; border-bottom:1px solid #111; margin-bottom:14px; }
+  .np-st td { border-top:1px solid var(--np-ln); border-bottom:0; padding:8px 2px; font-size:13.5px; white-space:nowrap; color:var(--np-ink); }
+  .np-also { margin-top:16px; border-top:1px solid var(--np-ink); padding-top:10px; }
+  .np-also a { display:block; padding:7px 0; border-bottom:1px solid var(--np-ln); text-decoration:none; font-size:13.5px; }
+  .np-also a b { color:var(--np-ink); }
+  #npAssetHead { display:flex; align-items:flex-end; gap:16px; flex-wrap:wrap; padding:14px 0 12px; border-bottom:1px solid var(--np-ink); margin-bottom:14px; }
   #npAssetHead h2 { margin:0; font-family:Newsreader, Georgia, serif; font-size:44px; line-height:1; }
   #npAssetHead .px { font:20px 'JetBrains Mono', monospace; }
+  #npAssetHead .st { font-size:12.5px; color:var(--np-mu); }
   #npAssetHead .acts { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
-  #npAssetHead button, .np-btn { height:34px; padding:0 12px; border:1px solid #111; background:#fff; color:#111; border-radius:0; font-weight:500; }
-  #npAssetHead button.dark { background:#111; color:#FAFAF7; }
+  #npAssetHead button, .np-btn { height:34px; padding:0 12px; border:1px solid var(--np-ink); background:var(--np-card); color:var(--np-ink); border-radius:0; font-weight:500; }
+  #npAssetHead button.dark { background:var(--np-ink); color:var(--np-bg); }
+  .np-lk { border:0; background:none; color:var(--np-red); padding:0; font:inherit; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   body[data-np="1"] #npSlot .sechead { margin-top:6px; }
   @media (max-width:760px) {
     body[data-np="1"] #np { padding:12px 14px 40px; }
     #npRail, #npFocus { max-width:none; flex-basis:100%; }
     .np-ev { grid-template-columns:56px minmax(0,1fr); } .np-ev .spk { display:none; }
     #npSearch input { width:200px; }
+    #npSug { min-width:280px; }
     body[data-np="1"] #npSlot .tablewrap, body[data-np="1"] #npSlot #confluence, body[data-np="1"] #npSlot .sechead { display:block !important; }
     body[data-np="1"] #npSlot .chartbox { display:block !important; }
     body[data-np="1"] #npSlot #mcards, body[data-np="1"] #npSlot #msetups { display:none !important; }
@@ -358,7 +387,7 @@
   body.light .pill.b50, body.light .chip.b50, body.light .badge.near { color:#8a6500; } body.light .pill.b65, body.light .chip.b65, body.light .ph-b65 { color:#b35600; }
   body.light .pill.b92, body.light .chip.b92, body.light .chip.bx, body.light .ph-b92 { color:#c62828; } body.light .pill.b0, body.light .ph-b0, body.light .chip.b0 { color:#0277bd; }
   body.light .pill.pc, body.light .ph-cont { color:#0f8073; } body.light .badge.rng { color:#4a5563; } body.light .badge.pend { color:#3d4652; }
-  body.light .chip.rf-pos2 { color:#1b5e20; } body.light .chip.rf-pos { color:#0277bd; } body.light .chip.rf-neg { color:#b35600; } body.light .btwarn { color:#a85a00; } body.light .nota.hi { color:#2e7d32; }
+  body.light .chip.rf-pos2 { color:#1b5e20; } body.light .chip.rf-deep { background:rgba(255,179,0,.2); color:#8a5a00; } body.light .chip.rf-bad { background:rgba(229,57,53,.13); color:#b71c1c; } body.light .chip.rf-pos { color:#0277bd; } body.light .chip.rf-neg { color:#b35600; } body.light .btwarn { color:#a85a00; } body.light .nota.hi { color:#2e7d32; }
   body.light #mtabs button.on { color:#a07800; border-top-color:#f5c518; }
   body.light .favrow:hover { background:#f0f3f7; } body.light .favrow.open { background:#fff7d6; box-shadow:0 4px 10px rgba(0,0,0,.12); }
   body.light .favdetail { background:#fafbfc; } body.light .favadd input, body.light .favimp textarea { background:#fff; color:var(--text); }
@@ -402,14 +431,15 @@
   <button id="themeBtn" title="Mudar para fundo branco">☀</button>
   <button id="alertBtn" title="Alertas no Telegram">🔔 Alertas</button>
   <button id="gear">Definições</button>
-  <button id="npBtn" title="Experimentar o novo layout (versão de teste)" style="border-color:#d9481c;color:#ff8a65">Novo layout (beta)</button>
 </header>
 <div id="np">
   <div class="np-top"><span id="npDate"></span><span id="npVigia" class="np-vig"></span>
-    <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="reload">Atualizar</a><a href="#" data-npl="old" class="np-old">Voltar ao layout antigo</a></nav></div>
+    <span id="npCloud"></span>
+    <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
   <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><div id="npSug" class="sug"></div></form>
-    <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button><button data-f="setup">Só setups</button><button data-f="kz">Só killzones</button><button data-f="all">Tudo</button></div></div>
+    <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button></div></div>
+  <div id="npStrip"></div>
   <div class="np-cols">
     <aside id="npRail"></aside>
     <section id="npCenter">
@@ -418,6 +448,7 @@
     </section>
     <aside id="npFocus"></aside>
   </div>
+  <div id="npTip" role="tooltip"></div>
 </div>
 <main>
   <div id="favs"></div>
@@ -483,6 +514,18 @@
       <li><b>Estado:</b> <b>Em formação</b> (cinzento = fora da zona; amarelo = zona cumprida), com “falta: …”; <b>✔ Pronto</b> = Zona, Quebra e FVG cumpridos, com a nota “a favor” ou “contra” o timeframe de contexto. Avisos: “topo/fundo por varrer perto” (liquidez do lado contrário que o preço ainda pode ir buscar) e “✋ … em modo manual — não atualiza”. Entrada, stop e alvos são contigo.</li>
       <li><b>Liquidez do dia / semana anteriores</b> (barra por baixo dos setups): máximos e mínimos e se já foram varridos. Só informação.</li>
       <li><b>★ Favoritos:</b> a estrela ☆ ao lado do ativo põe-no (ou tira-o) da lista; “★ Favoritos” mostra cada ativo com o resumo de cada setup (“fora da zona”, “falta: …”, “✔ Pronto”, e “contra X%” quando for o caso), ordenada pelo que está mais pronto. Toca num ativo para o abrir; 📈 abre o gráfico em ecrã inteiro.</li>
+    </ul>
+
+    <h3 class="helphead">📰 O jornal (página de entrada)</h3>
+    <ul>
+      <li><b>O que aconteceu hoje / esta semana:</b> os alertas que o vigia enviou para o Telegram, por hora, com mini-gráfico. “Abrir o ativo” abre a página completa; “Abrir o gráfico” abre logo o gráfico em grande.</li>
+      <li><b>Favoritos (coluna da esquerda):</b> um sinal por setup (Longo prazo · Swing · Day trade · Scalp). ▲ Long / ▼ Short. Cinzento = fora da zona; contorno âmbar = em zona, à espera da quebra; âmbar cheio = já quebrou, falta o FVG; verde = pronto. 💧 = a quebra veio depois de um sweep do lado oposto. ● vermelho = perto da inversão num timeframe grande (as distâncias do alerta 5). ✋ = timeframe em modo manual (não atualiza). ⚖ = disputa por decidir. Passa o rato (ou toca) num sinal para ver o texto completo. Por baixo do preço, a linha do setup mais avançado.</li>
+      <li><b>Ordem:</b> “Cripto primeiro” ou “Ações primeiro”, sempre A–Z dentro de cada grupo. 📈 abre o gráfico; ✕ tira dos favoritos (e apaga as marcas desse ativo).</li>
+      <li><b>Em foco:</b> o ativo mais perto de precisar de ti — primeiro um pronto, depois “falta FVG”, depois em zona com a correção mais funda; estar perto da inversão desempata. Em “Também a ver”, os dois seguintes.</li>
+      <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
+      <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar ao jornal” ou o título regressam à entrada.</li>
+      <li><b>Contexto:</b> verde = a favor; âmbar = a favor mas já corrigiu mais de 78,6% (perto de virar contra); vermelho = contra.</li>
+      <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
     </ul>
 
     <h3 class="helphead">🔔 Alertas no Telegram</h3>
@@ -2403,11 +2446,11 @@
       const sweep = brk ? sweepBeforeBreak(data[st.trig]) : false;
       // contexto: só informação — "A favor" ou "Contra (recuo do timeframe de contexto)", com a cor da profundidade
       const ctxChip = !(cx && cx.trend) ? `<span class="chip rf-neu" title="sem dados do timeframe de contexto">? Contexto</span>`
-        : cx.trend === r.dir ? `<span class="chip rf-pos2" title="${tfLabel(cid)} no mesmo sentido">Contexto: ✔ A favor</span>`
-        : `<span class="chip ${band(cx.pullback)}" title="${tfLabel(cid)} ${cx.trend === 1 ? 'em subida' : 'em descida'}: recuo de ${pct(cx.pullback)} — abaixo de 50% ainda há espaço até à zona dele (${fmt(cx.levels[50])})">Contexto: Contra (${pct(cx.pullback)})</span>`;
+        : cx.trend === r.dir ? (cx.pullback > 78.6 ? `<span class="chip rf-deep" title="${tfLabel(cid)} no mesmo sentido, mas já corrigiu ${pct(cx.pullback)} da última perna: perto do limite — se o quebrar, o contexto vira contra">Contexto: ✔ A favor · fundo ${pct(cx.pullback)}</span>` : `<span class="chip rf-pos2" title="${tfLabel(cid)} no mesmo sentido">Contexto: ✔ A favor</span>`)
+        : `<span class="chip rf-bad" title="${tfLabel(cid)} ${cx.trend === 1 ? 'em subida' : 'em descida'}: recuo de ${pct(cx.pullback)} — abaixo de 50% ainda há espaço até à zona dele (${fmt(cx.levels[50])})">Contexto: Contra (${pct(cx.pullback)})</span>`;
       // coluna do contexto: o timeframe, a direção e quanto recuou (como a coluna da zona)
       const ctxCell = !(cx && cx.trend) ? '<span class="muted small">sem dados</span>'
-        : `<span class="chip ${cx.trend === r.dir ? 'rf-pos2' : band(cx.pullback)}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
+        : `<span class="chip ${cx.trend === r.dir ? (cx.pullback > 78.6 ? 'rf-deep' : 'rf-pos2') : 'rf-bad'}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
       const chk = ctxChip + ' ' + items.filter((it) => !it[3]).map(([nm, ok, tip]) => `<span class="chip ${ok ? 'rf-pos2' : ok === false ? 'off' : 'rf-neu'}" title="${tip}">${ok ? '✔' : ok === false ? '✘' : '?'} ${nm}</span>`).join(' ')
         + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '');
       const missing = items.filter((it) => !it[3] && !it[1]).map(([nm]) => nm.toLowerCase());
@@ -2527,7 +2570,7 @@
   let rsiMarkers = null;
   // tema claro / escuro (botão ☀/☾ no cabeçalho)
   function applyTheme() {
-    const light = settings.theme === 'light' || document.body.dataset.np === '1';
+    const light = document.body.dataset.np === '1' ? settings.npTheme !== 'dark' : settings.theme === 'light';
     document.body.classList.toggle('light', light);
     SWCOL.week = light ? '84,96,112' : '236,239,241';
     const tb = $('#themeBtn'); if (tb) { tb.textContent = light ? '☾' : '☀'; tb.title = light ? 'Mudar para fundo escuro' : 'Mudar para fundo branco'; }
@@ -3631,20 +3674,26 @@ function motor_() {
   }
 
 
-  // =================== novo layout (beta): o "jornal" ===================
-  // entrada com o que aconteceu (histórico do vigia), favoritos à esquerda com sinais por setup, ativo em foco;
-  // ao abrir um ativo, a página completa de sempre (setups, tabela, gráfico) aparece no centro
+  // =================== layout "jornal" ===================
+  // entrada com o que aconteceu (histórico do vigia), favoritos à esquerda com sinais por setup e o ativo em foco;
+  // ao abrir um ativo, os favoritos passam para uma fita em cima e o ativo usa a largura toda
   let npFeed = null, npFilter = 'today', npView = 'feed', npTimer = null, npPxTimer = null;
-  const NP_KIND = { setup: ['SETUP', '#0B7A4B'], fvg: ['FVG', '#0B7A4B'], invalid: ['INVALIDADO', '#5B5B57'], kz: ['KILLZONE', '#111'], week: ['SEMANAL', '#B3261E'], day: ['DIÁRIO', '#B3261E'], near: ['PERTO', '#D9481C'], info: ['VIGIA', '#5B5B57'] };
-  const npEsc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const NP_KIND = { setup: ['SETUP', 'up'], fvg: ['FVG', 'up'], invalid: ['INVALIDADO', 'mu'], kz: ['KILLZONE', 'ink'], week: ['SEMANAL', 'dn'], day: ['DIÁRIO', 'dn'], near: ['PERTO', 'red'], info: ['VIGIA', 'mu'] };
+  const npEsc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
   const npStrip = (x) => String(x).replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+  const NPC = (k) => `var(--np-${k})`;
+  // estado de um setup em texto (o mesmo da página antiga dos favoritos)
+  function npSetupTxt(x) {
+    if (!x) return 'sem dados';
+    const st = x.rank === 4 ? 'Pronto' : 'falta: ' + x.missing.join(', ');
+    const ctx = x.ctx ? (x.ctx.fav ? (x.ctx.pull > 78.6 ? ` · contexto a favor mas fundo (${pct(x.ctx.pull)})` : ' · contexto a favor') : ` · contexto contra (${pct(x.ctx.pull)})`) : '';
+    return `${x.st.name} ${x.dir === 1 ? '▲ Long' : '▼ Short'}: ${st} · zona ${pct(x.z.pullback)}${ctx}${x.sweep ? ' · 💧 quebra depois de sweep' : ''}${x.disp ? ' · ⚖ disputa por decidir' : ''}`;
+  }
   // um sinal por setup: cinzento fora da zona · contorno âmbar em zona · âmbar cheio já quebrou (falta FVG) · verde pronto
   function npSig(x, st) {
-    if (!x) return `<span class="sig none" title="${st.name}: sem dados ou sem tendência definida">·</span>`;
+    if (!x) return `<span class="sig none" data-tip="${npEsc(st.name + ': sem dados ou sem tendência definida')}">·</span>`;
     const cls = x.rank === 4 ? 'ready' : x.rank === 3 ? 'broke' : x.rank === 2 ? 'zone' : 'off';
-    const what = x.rank === 4 ? 'Pronto' : x.rank === 3 ? 'em zona e já quebrou — falta o FVG' : x.rank === 2 ? 'em zona — à espera da quebra' : 'fora da zona';
-    const ctx = x.ctx ? (x.ctx.fav ? ' · contexto a favor' : ` · contexto contra (${pct(x.ctx.pull)})`) : '';
-    return `<span class="sig ${cls}" title="${st.name} ${x.dir === 1 ? 'Long' : 'Short'}: ${what} · zona ${pct(x.z.pullback)}${ctx}${x.disp ? ' · disputa por decidir' : ''}">${x.dir === 1 ? '▲' : '▼'}</span>`;
+    return `<span class="sig ${cls}" data-tip="${npEsc(npSetupTxt(x))}">${x.dir === 1 ? '▲' : '▼'}${x.sweep && x.rank >= 3 ? '<span class="dr">💧</span>' : ''}</span>`;
   }
   // perto da inversão num timeframe grande (as mesmas distâncias do alerta 5)
   function npNear(s) {
@@ -3657,20 +3706,53 @@ function motor_() {
     }
     return null;
   }
+  // timeframes dos setups em troço manual (não atualizam)
+  function npFrozen(s) {
+    const f = favData[s]; if (!f || !f.tfs) return [];
+    const out = new Set();
+    (settings.setups || []).filter((x) => x.on).forEach((st) => [[st.zone, 'ext'], [st.trig, 'int'], [ctxOf(st), 'ext']].forEach(([id, L]) => { if (id && frozen(f.tfs[id], L)) out.add(`${tfLabel(id)} (${L === 'ext' ? 'tendência principal' : 'movimento recente'})`); }));
+    return [...out];
+  }
+  function npInfo(s) {
+    const setups = (settings.setups || []).filter((x) => x.on), f = favData[s], ev = f ? favEvals(s) : [];
+    const near = f ? npNear(s) : null, fz = f ? npFrozen(s) : [], disp = ev.some((x) => x && x.disp);
+    const best = ev.filter(Boolean).sort((a, b) => b.rank - a.rank || b.z.pullback - a.z.pullback)[0];
+    const chg = f && f.tfs && f.tfs['1d'] && f.tfs['1d'].candles ? (() => { const c = f.tfs['1d'].candles, a = c[c.length - 2], b = c[c.length - 1]; return a ? (b.c / a.c - 1) * 100 : null; })() : null;
+    const marks = `${near ? `<span class="np-dot" data-tip="${npEsc(near)}"></span>` : ''}${disp ? '<span data-tip="disputa por decidir" style="font-size:11px">⚖</span>' : ''}${fz.length ? `<span data-tip="${npEsc('✋ em modo manual — não atualiza: ' + fz.join(', '))}" style="font-size:11px">✋</span>` : ''}`;
+    return { f, ev, setups, best, chg, marks, sigs: setups.map((st, k) => npSig(f ? ev[k] : null, st)).join('') };
+  }
+  const npGroup = (s) => (isCrypto(s) ? 'c' : 's');
+  function npSorted() {
+    const first = settings.npSort === 'stocks' ? 's' : 'c';
+    return (settings.favs || []).slice().sort((a, b) => (npGroup(a) === first ? 0 : 1) - (npGroup(b) === first ? 0 : 1) || a.localeCompare(b));
+  }
   function npRenderRail() {
     const box = $('#npRail'); if (!box) return;
-    const setups = (settings.setups || []).filter((x) => x.on), favs = (settings.favs || []).slice().sort();
-    const items = favs.map((s) => {
-      const f = favData[s], ev = f ? favEvals(s) : [], near = f ? npNear(s) : null, disp = ev.some((x) => x && x.disp);
-      const chg = f && f.tfs && f.tfs['1d'] && f.tfs['1d'].candles ? (() => { const c = f.tfs['1d'].candles, a = c[c.length - 2], b = c[c.length - 1]; return a ? (b.c / a.c - 1) * 100 : null; })() : null;
-      return `<li data-s="${s}" class="${npView === 'asset' && symbol === s ? 'on' : ''}"><div style="flex:1;min-width:0"><div class="s">${s}${near ? `<span class="np-dot" title="${near}"></span>` : ''}${disp ? '<span title="disputa por decidir" style="font-size:11px">⚖</span>' : ''}</div><div class="p">${f && f.price != null ? fmt(f.price) : 'a carregar…'}${chg != null ? ` <span style="color:${chg >= 0 ? '#0B7A4B' : '#B3261E'}">${chg >= 0 ? '+' : '−'}${Math.abs(chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div></div><div class="sigs">${setups.map((st, k) => npSig(f ? ev[k] : null, st)).join('')}</div><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
-    }).join('');
+    const setups = (settings.setups || []).filter((x) => x.on), favs = npSorted();
+    let lastG = null, items = '';
+    for (const s of favs) {
+      const g = npGroup(s); if (g !== lastG) { items += `<li class="np-grp" style="cursor:default;border:0">${g === 'c' ? 'Cripto' : 'Ações, ETFs e futuros'}</li>`; lastG = g; }
+      const i = npInfo(s), b = i.best;
+      const line = b && b.rank >= 2 ? `${b.st.name} ${b.dir === 1 ? '▲' : '▼'} ${b.rank === 4 ? 'pronto' : b.rank === 3 ? 'falta FVG' : 'falta quebra'}${b.ctx && !b.ctx.fav ? ` · contexto contra ${pct(b.ctx.pull)}` : b.ctx && b.ctx.pull > 78.6 ? ' · contexto fundo' : ''}${b.sweep && b.rank >= 3 ? ' 💧' : ''}` : '';
+      items += `<li data-s="${s}"><div style="flex:1;min-width:0"><div class="s">${s}${i.marks}</div><div class="p">${i.f && i.f.price != null ? fmt(i.f.price) : 'a carregar…'}${i.chg != null ? ` <span style="color:${i.chg >= 0 ? NPC('up') : NPC('dn')}">${i.chg >= 0 ? '+' : '−'}${Math.abs(i.chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div>${line ? `<div class="ln">${line}</div>` : ''}</div><div class="sigs">${i.sigs}</div><button class="np-x" data-c="${s}" aria-label="Abrir o gráfico de ${s}" title="Abrir o gráfico">📈</button><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
+    }
     box.innerHTML = `<h2 class="np-h2">Favoritos</h2>
-      <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}<br>
-      <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span><span class="np-dot"></span>perto da inversão</span></div></div>
-      <ul class="np-rail">${items || '<li style="cursor:default;color:#5B5B57">Ainda não tens favoritos: procura um ativo em cima e junta-o com a ☆.</li>'}</ul>`;
+      <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
+      <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span>💧 quebra após sweep</span><span><span class="np-dot"></span>perto da inversão</span><span>✋ manual · ⚖ disputa</span></div></div>
+      <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>
+      <ul class="np-rail">${items || '<li style="cursor:default;color:var(--np-mu)">Ainda não tens favoritos: procura um ativo em cima e junta-o com o ＋.</li>'}</ul>`;
     box.querySelectorAll('.np-rail li[data-s]').forEach((li) => li.addEventListener('click', () => npOpenAsset(li.dataset.s)));
-    box.querySelectorAll('.np-x').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); const x = b.dataset.x; if (!removeFavOk(x)) return; settings.favs = (settings.favs || []).filter((y) => y !== x); delete favData[x]; save('mss_settings4', settings); updateStar(); if (npView === 'asset' && symbol === x) npShowFeed(); else npRender(); }));
+    box.querySelectorAll('[data-o]').forEach((b) => b.addEventListener('click', () => { settings.npSort = b.dataset.o; save('mss_settings4', settings); npRender(); }));
+    box.querySelectorAll('[data-c]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npOpenChart(b.dataset.c); }));
+    box.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npRemove(b.dataset.x); }));
+  }
+  function npRemove(x) { if (!removeFavOk(x)) return; settings.favs = (settings.favs || []).filter((y) => y !== x); delete favData[x]; save('mss_settings4', settings); updateStar(); npRender(); }
+  // fita dos favoritos (ativo aberto): nome + sinais pequenos
+  function npRenderStrip() {
+    const box = $('#npStrip'); if (!box) return;
+    box.innerHTML = npSorted().map((s) => { const i = npInfo(s); return `<div class="it ${s === symbol ? 'on' : ''}" data-s="${s}"><span class="nm">${s}</span>${i.marks}<span class="sigs">${i.sigs}</span></div>`; }).join('') || '<span style="color:var(--np-mu);font-size:13px">sem favoritos</span>';
+    box.querySelectorAll('.it').forEach((el) => el.addEventListener('click', () => npOpenAsset(el.dataset.s)));
+    const on = box.querySelector('.it.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'nearest' });
   }
   // velas pequenas (SVG) com o limite e os 50% da tendência principal
   function npMiniChart(d, h) {
@@ -3680,91 +3762,105 @@ function motor_() {
     let lo = Math.min(...cs.map((c) => c.l), ...lv), hi = Math.max(...cs.map((c) => c.h), ...lv); const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
     const y = (v) => (H - (v - lo) / (hi - lo) * H).toFixed(1), sp = (W - 4) / cs.length;
     let svg = '';
-    if (sn && sn.protected != null && sn.extreme != null) { const m = (sn.protected + sn.extreme) / 2; svg += `<rect x="0" y="${Math.min(y(m), y(sn.protected))}" width="${W}" height="${Math.abs(y(m) - y(sn.protected))}" fill="rgba(217,72,28,.07)"/><line x1="0" x2="${W}" y1="${y(sn.protected)}" y2="${y(sn.protected)}" stroke="#B3261E" stroke-width="1.2"/><line x1="0" x2="${W}" y1="${y(m)}" y2="${y(m)}" stroke="#D9481C" stroke-dasharray="4 3" stroke-width="1"/>`; }
-    cs.forEach((c, i) => { const x = (i + 0.5) * sp, col = c.c >= c.o ? '#0B7A4B' : '#B3261E'; svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}" stroke-width="1"/><rect x="${(x - sp * 0.3).toFixed(1)}" y="${Math.min(y(c.o), y(c.c))}" width="${(sp * 0.6).toFixed(1)}" height="${Math.max(1, Math.abs(y(c.o) - y(c.c))).toFixed(1)}" fill="${col}"/>`; });
+    if (sn && sn.protected != null && sn.extreme != null) { const m = (sn.protected + sn.extreme) / 2; svg += `<rect x="0" y="${Math.min(y(m), y(sn.protected))}" width="${W}" height="${Math.abs(y(m) - y(sn.protected))}" fill="var(--np-red)" fill-opacity=".08"/><line x1="0" x2="${W}" y1="${y(sn.protected)}" y2="${y(sn.protected)}" stroke="var(--np-dn)" stroke-width="1.2"/><line x1="0" x2="${W}" y1="${y(m)}" y2="${y(m)}" stroke="var(--np-red)" stroke-dasharray="4 3" stroke-width="1"/>`; }
+    cs.forEach((c, i) => { const x = (i + 0.5) * sp, col = c.c >= c.o ? 'var(--np-up)' : 'var(--np-dn)'; svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}" stroke-width="1"/><rect x="${(x - sp * 0.3).toFixed(1)}" y="${Math.min(y(c.o), y(c.c))}" width="${(sp * 0.6).toFixed(1)}" height="${Math.max(1, Math.abs(y(c.o) - y(c.c))).toFixed(1)}" fill="${col}"/>`; });
     return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" aria-hidden="true" style="display:block">${svg}</svg>`;
   }
   function npSpark(sym, up) {
     const d = favData[sym] && favData[sym].tfs && (favData[sym].tfs['1h'] || favData[sym].tfs['4h']); if (!d || !d.candles) return '';
     const v = d.candles.slice(-48).map((c) => c.c), lo = Math.min(...v), hi = Math.max(...v), W = 180, H = 64;
     const pts = v.map((x, i) => `${(i * W / (v.length - 1)).toFixed(1)},${(H - 3 - (x - lo) / (hi - lo || 1) * (H - 6)).toFixed(1)}`).join(' ');
-    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${up == null ? '#111' : up ? '#0B7A4B' : '#B3261E'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
+    return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="${up == null ? 'var(--np-ink)' : up ? 'var(--np-up)' : 'var(--np-dn)'}" stroke-width="1.8" stroke-linejoin="round"/></svg>`;
   }
-  // o ativo em foco: primeiro um "Pronto", depois quebrou-falta-FVG, depois em zona com a correção mais funda; perto da inversão desempata
-  function npPickFocus() {
-    let best = null;
+  // em foco: primeiro um "Pronto", depois quebrou-falta-FVG, depois em zona com a correção mais funda; perto da inversão desempata
+  function npRanked() {
+    const all = [];
     for (const s of settings.favs || []) {
       if (!favData[s]) continue;
+      let best = null;
       favEvals(s).forEach((x) => { if (!x) return; const sc = x.rank * 1000 + (x.rank >= 2 ? x.z.pullback : 0) + (npNear(s) ? 50 : 0); if (!best || sc > best.sc) best = { s, x, sc }; });
+      if (best) all.push(best);
     }
-    return best;
+    return all.sort((a, b) => b.sc - a.sc);
   }
+  const npWhyShort = (x) => `${x.st.name} ${x.dir === 1 ? 'Long' : 'Short'} ${x.rank === 4 ? 'pronto' : x.rank === 3 ? '· falta FVG' : x.rank === 2 ? `em zona ${pct(x.z.pullback)}` : 'fora da zona'}`;
   function npRenderFocus() {
     const box = $('#npFocus'); if (!box) return;
-    const b = npPickFocus();
+    const list = npRanked(), b = list[0];
     if (!b) { box.innerHTML = `<div class="np-box"><div class="np-kick">EM FOCO</div><p class="np-why">${(settings.favs || []).length ? 'A carregar os favoritos…' : 'Junta ativos aos favoritos para a app escolher onde olhar primeiro.'}</p></div>`; return; }
     const { s, x } = b, f = favData[s], st = x.st, near = npNear(s);
-    const why = x.rank === 4 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'} pronto.</b> Zona no ${tfLabel(st.zone)} a ${pct(x.z.pullback)}, quebra no ${tfLabel(st.trig)} com FVG.`
-      : x.rank === 3 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> em zona (${pct(x.z.pullback)}) e o ${tfLabel(st.trig)} já quebrou — falta o FVG.`
+    const why = x.rank === 4 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'} pronto.</b> Zona no ${tfLabel(st.zone)} a ${pct(x.z.pullback)}, quebra no ${tfLabel(st.trig)} com FVG${x.sweep ? ', depois de um sweep 💧' : ''}.`
+      : x.rank === 3 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> em zona (${pct(x.z.pullback)}) e o ${tfLabel(st.trig)} já quebrou${x.sweep ? ' depois de um sweep 💧' : ''} — falta o FVG.`
       : x.rank === 2 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> o ${tfLabel(st.zone)} está em zona (${pct(x.z.pullback)}). À espera da quebra no ${tfLabel(st.trig)}.`
-      : `Nenhum setup em zona nos favoritos. ${near ? '' : 'O mais avançado é este.'}`;
-    const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? '#8a8a84' : e.dir === 1 ? '#0B7A4B' : '#B3261E'}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;font-weight:600;color:${e && e.rank === 4 ? '#0B7A4B' : '#111'}">${!e ? 'sem dados' : e.rank === 4 ? 'Pronto' : e.rank === 3 ? 'falta FVG' : e.rank === 2 ? 'em zona' : 'fora da zona'}</td></tr>`; }).join('');
-    box.innerHTML = `<div class="np-box"><div class="np-kick">EM FOCO</div><h2>${s}</h2><div class="np-mono" style="color:#5B5B57">${f.price != null ? fmt(f.price) : ''}</div>
-      <p class="np-why">${why}${near ? `<br><span style="color:#D9481C">● ${near}</span>` : ''}</p>
-      <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="font-size:11px;color:#5B5B57">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
+      : 'Nenhum setup em zona nos favoritos. O mais avançado é este.';
+    const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;font-weight:600;color:${e && e.rank === 4 ? NPC('up') : NPC('ink')}">${!e ? 'sem dados' : e.rank === 4 ? 'Pronto' : e.rank === 3 ? 'falta FVG' : e.rank === 2 ? 'em zona' : 'fora da zona'}${e && e.sweep && e.rank >= 3 ? ' 💧' : ''}</td></tr>`; }).join('');
+    const also = list.slice(1, 3).filter((y) => y.x.rank >= 2);
+    box.innerHTML = `<div class="np-box"><div class="np-kick">EM FOCO</div><h2>${s}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
+      <p class="np-why">${why}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
+      <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
       <table class="np-st"><tbody>${rows}</tbody></table>
-      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:14px"><a href="#" id="npFocusOpen">Abrir o ativo completo →</a></div></div>`;
-    $('#npFocusOpen').addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(s); });
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:14px"><a href="#" data-open="${s}">Abrir o ativo completo →</a></div>
+      ${also.length ? `<div class="np-also"><div class="np-kick" style="margin-bottom:4px">TAMBÉM A VER</div>${also.map((y) => `<a href="#" data-open="${y.s}"><b>${y.s}</b> · ${npWhyShort(y.x)}${npNear(y.s) ? ' · <span style="color:var(--np-red)">●</span>' : ''}</a>`).join('')}</div>` : ''}</div>`;
+    box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
   }
   async function npLoadFeed() {
     const vg = $('#npVigia');
-    if (!cloud.user || !cloud.db) { npFeed = null; if (vg) vg.innerHTML = '<i style="background:#8a8a84"></i>sem ligação à conta'; npRenderFeed(); return; }
+    if (!cloud.user || !cloud.db) { npFeed = { noUser: true, log: [] }; if (vg) vg.innerHTML = '<i style="background:var(--np-mu)"></i>sem ligação à conta'; npRenderFeed(); return; }
     try {
       const d = await cloud.db.collection('users').doc(cloud.user.uid).collection('meta').doc('alertlog').get();
       npFeed = d.exists && d.data().json ? JSON.parse(d.data().json) : { log: [] };
     } catch (e) { npFeed = { log: [], err: true }; }
-    if (vg) { const j = npFeed; const late = !j.lastRun || Date.now() - j.lastRun > 20 * 6e4; vg.innerHTML = !j.lastRun ? '<i style="background:#8a8a84"></i>vigia não instalado' : j.off ? `<i style="background:#D69A1E"></i>vigia parado: ${npEsc(j.off)}` : late ? `<i style="background:#B3261E"></i>o vigia não corre desde ${new Date(j.lastRun).toLocaleString('pt-PT')}` : `<i style="background:#0B7A4B"></i><span style="color:#0B7A4B">vigia ativo · última volta ${agoTxt(j.lastRun)}</span>`; }
+    if (vg) { const j = npFeed; const late = !j.lastRun || Date.now() - j.lastRun > 20 * 6e4; vg.innerHTML = !j.lastRun ? '<i style="background:var(--np-mu)"></i>vigia não instalado' : j.off ? `<i style="background:#D69A1E"></i>vigia parado: ${npEsc(j.off)}` : late ? `<i style="background:var(--np-dn)"></i>o vigia não corre desde ${new Date(j.lastRun).toLocaleString('pt-PT')}` : `<i style="background:var(--np-up)"></i><span style="color:var(--np-up)">vigia ativo · última volta ${agoTxt(j.lastRun)}</span>`; }
     npRenderFeed();
   }
-  function npRenderFeed() {
-    const box = $('#npFeed'); if (!box) return;
-    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-    const titles = { today: 'O que aconteceu hoje', week: 'O que aconteceu esta semana', setup: 'Setups e entradas', kz: 'Killzones', all: 'Todos os alertas' };
-    $('#npFeedTitle').textContent = titles[npFilter];
-    const log = (npFeed && npFeed.log) || [];
-    const list = log.filter((x) => npFilter === 'today' ? x.at >= +t0 : npFilter === 'week' ? x.at >= Date.now() - 7 * 864e5 : npFilter === 'setup' ? ['setup', 'fvg', 'invalid'].includes(x.kind) : npFilter === 'kz' ? x.kind === 'kz' : true);
-    if (!list.length) {
-      box.innerHTML = `<div class="np-empty">${!npFeed ? 'A ler o histórico do vigia…' : !npFeed.lastRun ? 'Ainda não há histórico: o vigia dos alertas ainda não correu. Vê a página <a href="#" data-npl="alerts">Alertas</a>.' : npFilter === 'today' ? 'Hoje ainda não aconteceu nada nos teus favoritos que mereça alerta. <a href="#" data-f2="week">Ver esta semana</a>.' : 'Nada neste filtro.'}</div>`;
-      box.querySelectorAll('[data-npl]').forEach(npLinkWire); box.querySelectorAll('[data-f2]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npSetFilter(a.dataset.f2); }));
-      return;
-    }
-    box.innerHTML = list.slice(0, 60).map((x, i) => {
-      const lines = String(x.text || '').split('\n'), head = npHead(x, npStrip(lines[0]));
-      const body = lines.slice(1).map((l) => npStrip(l)).filter((l) => !/^A seguir:/.test(l));
-      const [lab, col] = NP_KIND[x.kind] || ['ALERTA', '#111'], up = /LONG|▲|para cima|acima/.test(lines[0]) ? true : /SHORT|▼|para baixo|abaixo/.test(lines[0]) ? false : null;
-      const d = new Date(x.at), tm = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) + (npFilter !== 'today' ? `<br>${d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })}` : '');
-      return `<article class="np-ev"><div><div class="t">${tm}</div><div class="k" style="color:${col}">${lab}</div></div>
-        <div><div class="sym">${npEsc(x.sym || '')}</div><h3>${npEsc(head)}</h3><p>${body.map(npEsc).join('<br>')}</p>${x.sym ? `<div class="acts"><a href="#" data-open="${npEsc(x.sym)}">Abrir o ativo</a></div>` : ''}</div>
-        <div class="spk" style="align-self:center">${x.sym ? npSpark(x.sym, up) : ''}</div></article>`;
-    }).join('');
-    box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
-  }
   // título do acontecimento a partir da 1.ª linha da mensagem do Telegram
-  function npHead(x, l) {
+  function npHead(x, l, full) {
     const parts = l.replace(/^[^A-Za-zÀ-ÿ0-9]+/, '').split(' · ').map((p) => p.trim()).filter((p) => p && p !== x.sym);
     const dir = (p) => (p === 'LONG' ? 'Long' : p === 'SHORT' ? 'Short' : p);
-    if (x.kind === 'setup' && parts.length >= 2) return `${parts[1]} ${dir(parts[0])}: quebrou no gatilho`;
+    const drop = /depois de sweep/.test(full) ? ' 💧' : '';
+    if (x.kind === 'setup' && parts.length >= 2) return `${parts[1]} ${dir(parts[0])}: quebrou no gatilho${drop}`;
     if (x.kind === 'fvg' && parts.length >= 3) return `${parts[2]} ${dir(parts[1])}: o preço chegou ao FVG`;
     if (x.kind === 'invalid' && parts.length >= 3) return `${parts[2]} ${dir(parts[1])} invalidado`;
     return parts.join(' · ');
   }
+  function npRenderFeed() {
+    const box = $('#npFeed'); if (!box) return;
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0);
+    $('#npFeedTitle').textContent = npFilter === 'today' ? 'O que aconteceu hoje' : 'O que aconteceu esta semana';
+    const log = (npFeed && npFeed.log) || [];
+    const list = log.filter((x) => (npFilter === 'today' ? x.at >= +t0 : x.at >= Date.now() - 7 * 864e5));
+    if (!list.length) {
+      box.innerHTML = `<div class="np-empty">${!npFeed ? 'A ler o histórico do vigia…' : npFeed.noUser ? 'Sem ligação à conta: o histórico do vigia aparece depois do login.' : !npFeed.lastRun ? 'Ainda não há histórico: o vigia dos alertas ainda não correu. Vê a página <a href="#" data-npl="alerts">Alertas</a>.' : npFilter === 'today' ? 'Hoje ainda não aconteceu nada nos teus favoritos que mereça alerta. <a href="#" data-f2="week">Ver esta semana</a>.' : 'Nada esta semana.'}</div>`;
+      box.querySelectorAll('[data-npl]').forEach(npLinkWire); box.querySelectorAll('[data-f2]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npSetFilter(a.dataset.f2); }));
+      return;
+    }
+    box.innerHTML = list.slice(0, 60).map((x) => {
+      const lines = String(x.text || '').split('\n'), head = npHead(x, npStrip(lines[0]), x.text || '');
+      const body = lines.slice(1).map((l) => npStrip(l)).filter((l) => !/^A seguir:/.test(l));
+      const [lab, col] = NP_KIND[x.kind] || ['ALERTA', 'ink'], up = /LONG|▲|para cima|acima/.test(lines[0]) ? true : /SHORT|▼|para baixo|abaixo/.test(lines[0]) ? false : null;
+      const d = new Date(x.at), tm = d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) + (npFilter !== 'today' ? `<br>${d.toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit' })}` : '');
+      return `<article class="np-ev"><div><div class="t">${tm}</div><div class="k" style="color:${NPC(col)}">${lab}</div></div>
+        <div><div class="sym">${npEsc(x.sym || '')}</div><h3>${npEsc(head)}</h3><p>${body.map(npEsc).join('<br>')}</p>${x.sym ? `<div class="acts"><a href="#" data-open="${npEsc(x.sym)}">Abrir o ativo</a><a href="#" data-chart="${npEsc(x.sym)}">Abrir o gráfico</a></div>` : ''}</div>
+        <div class="spk" style="align-self:center">${x.sym ? npSpark(x.sym, up) : ''}</div></article>`;
+    }).join('');
+    box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
+    box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenChart(a.dataset.chart); }));
+  }
   function npSetFilter(f) { npFilter = f; document.querySelectorAll('#npFilters button').forEach((b) => b.classList.toggle('on', b.dataset.f === f)); npRenderFeed(); }
-  function npRender() { if (document.body.dataset.np !== '1') return; npRenderRail(); if (npView === 'feed') npRenderFocus(); else npRenderAssetHead(); }
-  // página de um ativo: as mesmas peças da app (setups, tabela, gráfico) no centro
+  function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else { npRenderStrip(); npRenderAssetHead(); } npSyncStatus(); }
+  // estado da conta e dos dados (os mesmos textos do cabeçalho antigo)
+  function npSyncStatus() {
+    if (cloud.user && cloud.db && (!npFeed || npFeed.noUser) && !npSyncStatus.busy) { npSyncStatus.busy = true; npLoadFeed().finally(() => { npSyncStatus.busy = false; }); }
+    const c = $('#npCloud'), src = $('#cloudSt'); if (c && src) { const t = src.textContent.trim(); c.textContent = t; c.style.color = /sem ligação|erro|só neste/.test(t) ? 'var(--np-dn)' : 'var(--np-mu)'; }
+    const lo = $('#npLogout'); if (lo) lo.style.display = cloud.user ? '' : 'none';
+    const tl = $('#npThemeLk'); if (tl) tl.textContent = document.body.dataset.npdark === '1' ? 'Tema claro' : 'Tema escuro';
+    if (npView === 'asset') { const p = document.querySelector('#npAssetHead .px'), dd = data[selectedTf]; if (p && dd) p.textContent = fmt(dd.price); const st = document.querySelector('#npAssetHead .st'), s2 = $('#status'); if (st && s2) st.textContent = s2.textContent; }
+  }
+  // página de um ativo: as mesmas peças da app (setups, tabela, gráfico) com a largura toda
   function npRenderAssetHead() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
-    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div class="px">${dd ? fmt(dd.price) : '…'}</div>
+    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
       <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
     $('#npBack').addEventListener('click', npShowFeed);
     $('#npStar').addEventListener('click', () => { if ((settings.favs || []).includes(symbol)) { if (!removeFavOk(symbol)) return; settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); updateStar(); } else addFavs([symbol]); npRender(); });
@@ -3776,47 +3872,54 @@ function motor_() {
     const slot = $('#npSlot'); anchors.forEach(([n]) => slot.appendChild(n));
     setTimeout(() => renderChart(true), 40);
   }
-  function npUnmountDetail() { if (anchors && $('#npSlot') && $('#npSlot').childNodes.length) anchors.forEach(([n, c]) => c.parentNode.insertBefore(n, c.nextSibling)); }
   function npOpenAsset(s) {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     if (symbol !== s) { symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); }
     npView = 'asset'; document.body.dataset.npv = 'asset';
     npMountDetail(); npRender(); window.scrollTo(0, 0);
-    clearInterval(npPxTimer); npPxTimer = setInterval(() => { if (npView === 'asset') { const p = document.querySelector('#npAssetHead .px'), dd = data[selectedTf]; if (p && dd) p.textContent = fmt(dd.price); } }, 3000);
+    clearInterval(npPxTimer); npPxTimer = setInterval(() => { if (npView === 'asset') npSyncStatus(); }, 2000);
   }
+  function npOpenChart(s) { npOpenAsset(s); setTimeout(() => { toggleMax(true); renderChart(true); }, 120); }
   function npShowFeed() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
-    npUnmountDetail(); npView = 'feed'; document.body.dataset.npv = 'feed'; clearInterval(npPxTimer);
+    npView = 'feed'; document.body.dataset.npv = 'feed'; clearInterval(npPxTimer);
     npRender(); npRenderFeed(); window.scrollTo(0, 0);
   }
   function npLinkWire(a) {
     a.addEventListener('click', (e) => {
       e.preventDefault(); const k = a.dataset.npl;
       if (k === 'alerts') openAlerts(); else if (k === 'settings') openSettings(); else if (k === 'help') { $('#help').classList.add('open'); $('#help').scrollIntoView({ behavior: 'smooth' }); }
-      else if (k === 'reload') { scanFavs(true); npLoadFeed(); if (npView === 'asset') loadAll(); } else if (k === 'old') npExit();
+      else if (k === 'theme') { const dark = document.body.dataset.npdark !== '1'; document.body.dataset.npdark = dark ? '1' : ''; settings.npTheme = dark ? 'dark' : 'light'; save('mss_settings4', settings); applyTheme(); renderChart(true); npRender(); }
+      else if (k === 'logout') { const b = $('#loginBtn'); if (b) b.click(); }
     });
   }
+  // sugestões da pesquisa: carregar no nome abre o ativo; "＋" junta logo aos favoritos
+  function npShowSug(box, opts, open) {
+    box.innerHTML = opts.map((o) => o.err ? `<div class="muted small" style="padding:8px 10px">${o.err}</div>` : `<div class="row"><button type="button" class="o" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button><button type="button" class="a" data-a="${o.symbol}" title="Juntar aos favoritos" aria-label="Juntar ${o.symbol} aos favoritos">＋</button></div>`).join('') || '<div class="muted small" style="padding:8px 10px">sem resultados</div>';
+    box.style.display = 'flex';
+    box.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('mousedown', (ev) => { ev.preventDefault(); open(b.dataset.s); }));
+    box.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('mousedown', (ev) => { ev.preventDefault(); addFavs([b.dataset.a]); b.textContent = '✓'; b.disabled = true; npRender(); }));
+  }
+  // dicas dos sinais: ao passar o rato e ao tocar (telemóvel)
+  function npTipInit() {
+    const tip = $('#npTip'); let hold = null;
+    const show = (el) => { const r = el.getBoundingClientRect(); tip.textContent = el.dataset.tip; tip.style.display = 'block'; const w = tip.offsetWidth; tip.style.left = Math.max(6, Math.min(window.innerWidth - w - 6, r.left + r.width / 2 - w / 2)) + 'px'; tip.style.top = (r.bottom + 8 + tip.offsetHeight > window.innerHeight ? r.top - tip.offsetHeight - 8 : r.bottom + 8) + 'px'; };
+    $('#np').addEventListener('mouseover', (e) => { const el = e.target.closest('[data-tip]'); if (el) show(el); });
+    $('#np').addEventListener('mouseout', (e) => { if (e.target.closest('[data-tip]') && !hold) tip.style.display = 'none'; });
+    $('#np').addEventListener('click', (e) => { const el = e.target.closest('[data-tip]'); if (!el) { if (hold) { hold = null; tip.style.display = 'none'; } return; } e.stopPropagation(); e.preventDefault(); hold = el; show(el); clearTimeout(npTipInit.t); npTipInit.t = setTimeout(() => { hold = null; tip.style.display = 'none'; }, 4000); }, true);
+  }
   function npEnter() {
-    if (editMode) { requestExitEdit(); if (editMode) return; }
     if (favOpen) closeFav();
-    const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
-    document.body.dataset.np = '1'; document.body.dataset.favs = ''; save('mss_np', 1);
+    document.body.dataset.np = '1'; document.body.dataset.favs = '';
+    document.body.dataset.npdark = settings.npTheme === 'dark' ? '1' : '';
     npView = 'feed'; document.body.dataset.npv = 'feed';
     $('#npDate').textContent = new Date().toLocaleDateString('pt-PT', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).replace(/^./, (c) => c.toUpperCase());
-    applyTheme(); npRender(); npLoadFeed(); scanFavs(false); window.scrollTo(0, 0);
-    clearInterval(npTimer); npTimer = setInterval(() => { if (document.body.dataset.np === '1') { npLoadFeed(); npRender(); } }, 60e3);
-  }
-  function npExit() {
-    if (editMode) { requestExitEdit(); if (editMode) return; }
-    npUnmountDetail(); clearInterval(npTimer); clearInterval(npPxTimer);
-    document.body.dataset.np = ''; document.body.dataset.npv = ''; save('mss_np', 0);
-    applyTheme();
-    if (window.innerWidth > 760) { document.body.dataset.favs = '1'; renderFavs(); } else setMTab('favs');
-    renderChart(true); window.scrollTo(0, 0);
+    applyTheme(); npRender(); npLoadFeed(); scanFavs(false);
+    clearInterval(npTimer); npTimer = setInterval(() => { npLoadFeed(); npRender(); }, 60e3);
+    clearInterval(npEnter.st); npEnter.st = setInterval(npSyncStatus, 2000);
   }
   function npInit() {
-    $('#npBtn').addEventListener('click', npEnter);
     document.querySelectorAll('#np [data-npl]').forEach(npLinkWire);
     $('#npHome').addEventListener('click', (e) => { e.preventDefault(); npShowFeed(); });
     document.querySelectorAll('#npFilters button').forEach((b) => b.addEventListener('click', () => npSetFilter(b.dataset.f)));
@@ -3826,11 +3929,12 @@ function motor_() {
     $('#npSearch').addEventListener('submit', async (e) => {
       e.preventDefault(); const v = q.value.trim(); if (!v) return;
       if (!metalHits(v).length && (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v) || /^[A-Z]{1,3}=F$/i.test(v))) return pick(v);
-      const opts = await searchAssets(v); if (opts.length === 1 && !opts[0].err) pick(opts[0].symbol); else showSug(sug, opts, pick);
+      const opts = await searchAssets(v); npShowSug(sug, opts, pick);
     });
-    q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => showSug(sug, await searchAssets(v), pick), 400); });
+    q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => npShowSug(sug, await searchAssets(v), pick), 400); });
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
-    if (load('mss_np', 0) === 1) npEnter();
+    npTipInit();
+    npEnter();   // a app abre sempre no jornal
   }
 
   // ---------- gravação online (Firebase): login com Google; marcas e definições guardadas na conta ----------
