@@ -437,6 +437,8 @@
   .sethead { font-size:14px; margin:16px 0 4px; padding-bottom:4px; border-bottom:1px solid var(--line); color:var(--text); } .sethead.sub { font-size:12px; color:var(--muted); margin-top:12px; }
   .setadv { margin-top:16px; border:1px solid var(--line); border-radius:8px; padding:8px 10px; } .setadv summary { cursor:pointer; }
   .helphead { font-size:14px; margin:16px 0 4px; padding-bottom:4px; border-bottom:1px solid var(--line); } #help .helphead:first-of-type { margin-top:4px; }
+  .algrp { margin:2px 0 4px; font-size:12px; color:var(--muted); display:flex; gap:12px; align-items:center; }
+  .algrp label { display:inline-flex; gap:4px; align-items:center; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -567,6 +569,18 @@
       <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
     </ul>
 
+    <h3 class="helphead">➗ Rácios (A ÷ B)</h3>
+    <ul>
+      <li><b>O que é:</b> um gráfico só, em que cada vela é o ativo A dividido pelo ativo B (como o GOLD/BTC do TradingView). Sobe quando A ganha a B.</li>
+      <li><b>Como abrir:</b> escreve na pesquisa <b>A/B</b> — por exemplo <code>GC=F/BTCUSDT</code> ou só <code>gold/btc</code> (também: silver, sp500, natgas, wti, brent, copper, eth). Escrevendo “gold”, “prata”, “s&amp;p”, “gás” ou “rácio” aparecem os rácios prontos; o <b>＋</b> junta aos favoritos.</li>
+      <li><b>Funciona como um ativo normal:</b> estrutura, setups, marcas manuais, favoritos e todos os alertas do Telegram. Nos favoritos ficam no grupo “Rácios”.</li>
+      <li><b>⇅ Inverter</b> (na página do ativo) abre o rácio ao contrário (BTC ÷ GOLD).</li>
+      <li><b>Horários:</b> só entram as velas em que os dois ativos têm vela — o BTC negoceia 24/7 e os futuros quase 24h de domingo a sexta, por isso nos TFs curtos há buracos ao fim de semana. O S&amp;P usa o futuro <code>ES=F</code> (quase 24h).</li>
+      <li><b>Volume:</b> num rácio não tem significado — os extras de volume e os POC ficam desligados.</li>
+      <li><b>Gás natural:</b> o <code>NG=F</code> muda de contrato todos os meses; nesse dia pode aparecer um salto no gráfico que não é movimento real.</li>
+      <li><b>Vigia:</b> cada ativo é descarregado uma só vez por volta, mesmo que esteja em vários rácios. Na página Alertas vês os “lugares”: downloads (máx. 12) e análises (máx. 18) para todos serem vistos de 5 em 5 minutos.</li>
+    </ul>
+
     <h3 class="helphead">🔔 Alertas no Telegram</h3>
     <ul>
       <li><b>🔔 Alertas</b> (botão no topo): escolhes o que queres receber, ligas o Telegram e instalas o <b>vigia</b> — um pequeno programa no Google Apps Script (grátis) que corre de 5 em 5 minutos, mesmo com o computador desligado. Só vigia os ★ favoritos e usa as tuas marcações.</li>
@@ -575,6 +589,8 @@
       <li><b>3 · Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
       <li><b>4 · Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
       <li><b>5 · Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
+      <li><b>6 · SMA 200:</b> avisa quando o preço chega à média das últimas 200 velas do timeframe (por defeito Semanal e Diário) — a descer 💰 (vinha de cima: possível zona de compra) ou a subir 🧱 (vinha de baixo: teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho; opcionalmente antes, a X% da média. Depois de avisar só volta a avisar quando o preço se afastar mais de 5% (ajustável) e voltar.</li>
+      <li><b>Vale para ativos / rácios:</b> em cada alerta escolhes se vale para os ativos normais, para os rácios (A÷B) ou para os dois. Por defeito as killzones e a SMA 200 ficam desligadas nos rácios.</li>
       <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
     </ul>
 
@@ -643,6 +659,7 @@
   <p class="muted small" style="margin:6px 0 0">Só para os ativos dos ★ favoritos. O vigia verifica de 5 em 5 minutos e avisa no fecho das velas.</p>
 
   <h3 class="sethead">1 · Setup <span class="muted small">(a base)</span></h3>
+  <div class="algrp" data-g="setup"></div>
   <label class="chk alline"><input id="alSetup" type="checkbox"> Avisar quando o TF da zona está em Zona de Long/Short e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido</label>
   <div id="alSetups" class="alrow"></div>
   <div class="field"><div>Correção mínima da zona<small>a zona só conta a partir desta correção (%)</small></div><input id="alMin" type="number" min="0" max="100" step="1"></div>
@@ -650,24 +667,35 @@
     <label class="chk"><input id="alFFvg" type="checkbox"> só com FVG</label> <label class="chk"><input id="alFStrong" type="checkbox"> só vela forte</label> <label class="chk"><input id="alFVol" type="checkbox"> só volume alto</label> <label class="chk"><input id="alFCtx" type="checkbox"> só contexto a favor</label></div>
 
   <h3 class="sethead">2 · FVG no pullback <span class="muted small">(depois do alerta de setup)</span></h3>
+  <div class="algrp" data-g="fvg"></div>
   <label class="chk alline"><input id="alFvg" type="checkbox"> Avisar logo que o preço toca num FVG do TF de gatilho para lá dos 50% da pernada da quebra; e quando o setup fica invalidado</label>
 
   <h3 class="sethead">3 · Killzones <span class="muted small">(só dentro das horas)</span></h3>
+  <div class="algrp" data-g="kz"></div>
   <label class="chk alline"><input id="alKz" type="checkbox"> Avisar quando a liquidez é apanhada dentro de uma killzone (velas de 5m)</label>
   <div class="alrow"><span class="muted small">Killzones:</span> <label class="chk"><input id="alKzL" type="checkbox"> Londres</label> <label class="chk"><input id="alKzN" type="checkbox"> Nova Iorque</label>
     <br><span class="muted small">Liquidez:</span> <label class="chk"><input id="alKzA" type="checkbox"> topo/fundo da Ásia</label> <label class="chk"><input id="alKzD" type="checkbox"> topo/fundo do dia anterior</label> <label class="chk"><input id="alKzLo" type="checkbox"> topo/fundo de Londres (na NY)</label>
     <br><span class="muted small">O horário é o das Definições (perfil das killzones).</span></div>
 
   <h3 class="sethead">4 · Liquidez da semana / do dia anteriores <span class="muted small">(a qualquer hora)</span></h3>
+  <div class="algrp" data-g="week"></div>
   <div class="small muted">Avisar quando o máximo ou o mínimo é apanhado (decidido pelo fecho da vela de 1H):</div>
   <label class="chk alline"><input id="alWk" type="checkbox"> topo/fundo da <b>semana</b> anterior</label>
   <label class="chk alline"><input id="alDy" type="checkbox"> topo/fundo do <b>dia</b> anterior <span class="muted small">(dá mais alertas; se for apanhado dentro de uma killzone, só chega o aviso do ponto 3)</span></label>
   <div class="alrow"><span class="muted small">Tipo:</span> <label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
 
   <h3 class="sethead">5 · Perto da quebra da tendência principal</h3>
+  <div class="algrp" data-g="near"></div>
   <label class="chk alline"><input id="alNear" type="checkbox"> Avisar quando o preço se aproxima do nível de quebra da tendência principal (um aviso por nível)</label>
   <div class="alrow"><span class="muted small">Timeframes e distância ao nível (% do preço):</span><br><span id="alNearTfs"></span></div>
   <div class="alrow"><label class="chk"><input id="alNearI" type="checkbox"> inversão <span class="muted small">(perto do limite — fechar além = CHoCH)</span></label><br><label class="chk"><input id="alNearC" type="checkbox"> continuação <span class="muted small">(perto do topo/fundo da perna — fechar além = BOS)</span></label></div>
+
+  <h3 class="sethead">6 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
+  <div class="algrp" data-g="sma"></div>
+  <label class="chk alline"><input id="alSma" type="checkbox"> Avisar quando o preço chega à SMA 200 — a descer 💰 (possível zona de compra) ou a subir 🧱 (teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho.</label>
+  <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alSmaTfs"></span>
+    <br><span class="muted small">Avisar antes, a</span> <input id="alSmaPre" type="number" min="0" max="20" step="0.1" style="width:64px"> <span class="muted small">% da média (0 = só quando toca)</span>
+    <br><span class="muted small">Volta a avisar depois de o preço se afastar mais de</span> <input id="alSmaRe" type="number" min="0.5" max="50" step="0.5" style="width:64px"> <span class="muted small">% da média</span></div>
 
   <h3 class="sethead">Ligar o Telegram</h3>
   <ol class="alsteps">
@@ -1927,6 +1955,65 @@
     return out;
   }
 
+  // ---------- rácios (A/B): cada vela = vela de A ÷ vela de B, só nos momentos em que os dois têm vela ----------
+  const isRatio = (s) => /^[^/\s]+\/[^/\s]+$/.test(String(s || ''));
+  const ratioLegs = (s) => String(s).split('/');
+  const R_BASE = { '1Y': '1M', '6M': '1M', '3M': '1M', '1M': '1M', '1w': '1w', '1d': '1d', '4h': '1h', '1h': '1h', '15m': '15m', '5m': '5m' };
+  // chave de emparelhamento: a Yahoo marca o dia/semana/mês dos futuros à hora de Nova Iorque, a Binance à meia-noite UTC
+  const R_KEY = {
+    '1M': (t) => { const d = new Date(t + 6 * 36e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); },
+    '1w': (t) => Math.floor((t - 2.5 * 864e5) / (7 * 864e5)),
+    '1d': (t) => Math.floor((t + 6 * 36e5) / 864e5),
+    '1h': (t) => Math.floor(t / 36e5), '15m': (t) => Math.floor(t / 9e5), '5m': (t) => Math.floor(t / 3e5),
+  };
+  function ratioJoin(a, b, key, timeFromA) {
+    const m = new Map(); for (const y of b) m.set(key(y.t), y);
+    const out = []; let lastK = null;
+    for (const x of a) {
+      const k = key(x.t), y = m.get(k);
+      if (!y || !(y.o > 0 && y.h > 0 && y.l > 0 && y.c > 0) || !(x.o > 0 && x.c > 0)) continue;
+      const o = x.o / y.o, c = x.c / y.c;
+      const r = { t: timeFromA ? x.t : y.t, ct: Math.max(x.ct, y.ct), o, c, h: Math.max(o, c, x.h / y.h), l: Math.min(o, c, x.l / y.l), v: 0 };
+      if (k === lastK) out[out.length - 1] = r; else out.push(r);
+      lastK = k;
+    }
+    return out.sort((p, q) => p.t - q.t);
+  }
+  async function legCandles(sym, ids, fav) {
+    if (!isCrypto(sym)) return stockCandles(sym, ids);
+    const out = {};
+    for (const id of ids) { const tf = TFS.find((t) => t.id === id); out[id] = await klines(sym, id, id === '1M' ? 1000 : fav ? Math.min(tf.total, 2000) : tf.total); }
+    return out;
+  }
+  async function ratioCandles(sym, tfIds, fav) {
+    const [A, B] = ratioLegs(sym), base = [...new Set(tfIds.map((id) => R_BASE[id]).filter(Boolean))];
+    const [ga, gb] = await Promise.all([legCandles(A, base, fav), legCandles(B, base, fav)]);
+    const fromA = isCrypto(A) || !isCrypto(B), r = {};
+    for (const id of base) if (ga[id] && gb[id]) r[id] = ratioJoin(ga[id], gb[id], R_KEY[id], fromA);
+    const out = {};
+    for (const id of tfIds) {
+      let cs = r[R_BASE[id]]; if (!cs) continue;
+      if (id === '4h') cs = aggregate(cs, 4, 36e5); else if (Y_MAGG[id]) cs = aggregateMonths(cs, Y_MAGG[id]);
+      if (cs.length > (Y_MAGG[id] ? 5 : 30)) out[id] = cs;
+    }
+    if (!Object.keys(out).length) throw new Error('sem velas em comum entre ' + A + ' e ' + B);
+    return out;
+  }
+  // rácios prontos na pesquisa
+  const RATIOS = [
+    { symbol: 'GC=F/BTCUSDT', name: 'Ouro ÷ Bitcoin · rácio', keys: ['gold', 'ouro', 'btc', 'bitcoin'] },
+    { symbol: 'SI=F/BTCUSDT', name: 'Prata ÷ Bitcoin · rácio', keys: ['silver', 'prata', 'btc', 'bitcoin'] },
+    { symbol: 'GC=F/SI=F', name: 'Ouro ÷ Prata · rácio', keys: ['gold', 'ouro', 'silver', 'prata'] },
+    { symbol: 'ES=F/BTCUSDT', name: 'S&P 500 ÷ Bitcoin · rácio', keys: ['s&p', 'sp500', 'spx', 'sp 500', 'btc', 'bitcoin'] },
+    { symbol: 'ES=F/GC=F', name: 'S&P 500 ÷ Ouro · rácio', keys: ['s&p', 'sp500', 'spx', 'sp 500', 'gold', 'ouro'] },
+    { symbol: 'NG=F/GC=F', name: 'Gás natural ÷ Ouro · rácio', keys: ['gas', 'gás', 'natgas', 'natural gas', 'gold', 'ouro'] },
+  ];
+  function ratioHits(q) {
+    const v = String(q || '').trim().toLowerCase(); if (v.length < 2) return [];
+    if (/^(r[aá]cio|ratio)/.test(v)) return RATIOS.map((r) => ({ symbol: r.symbol, name: r.name, exch: 'A ÷ B' }));
+    return RATIOS.filter((r) => r.keys.some((k) => k.startsWith(v) || v.startsWith(k))).map((r) => ({ symbol: r.symbol, name: r.name, exch: 'A ÷ B' }));
+  }
+
   // agrupa velas mensais em trimestres (3M), semestres (6M) e anos (1Y), alinhados ao calendário
   function aggregateMonths(cs, k) {
     const out = []; let key = null, cur = null;
@@ -1944,16 +2031,16 @@
     try {
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
       const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h');
-      if (!isCrypto(symbol)) {   // ação
-        const got = await stockCandles(symbol, need.map((t) => t.id));
+      if (!isCrypto(symbol)) {   // ação ou rácio
+        const got = isRatio(symbol) ? await ratioCandles(symbol, need.map((t) => t.id)) : await stockCandles(symbol, need.map((t) => t.id));
         if (token !== loadToken) return;
         Object.keys(data).forEach((k) => delete data[k]);
         for (const id in got) data[id] = computeTf(got[id], id);
         if (!data[selectedTf]) selectedTf = Object.keys(data).includes('1d') ? '1d' : Object.keys(data)[0];
         if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
         $('#price').textContent = fmt(data[selectedTf].price);
-        setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + ' · Yahoo');
-        renderTable(); renderConfluence(); renderPrev(); renderChart(true);
+        setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + (isRatio(symbol) ? ' · rácio ' + ratioLegs(symbol).join(' ÷ ') : ' · Yahoo'));
+        renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
         clearTimeout(timer); if (settings.refresh) timer = setTimeout(loadAll, 120000);
         return;
       }
@@ -1975,10 +2062,10 @@
       const last = data[selectedTf] || data[results[results.length - 1][0]];
       $('#price').textContent = fmt(last.price);
       setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT'));
-      renderTable(); renderConfluence(); renderPrev(); renderChart(true);
+      renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
     } catch (e) {
       if (token !== loadToken) return;
-      setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : 'Erro a obter dados da ação: ') + (e.message || e) + ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).', true);
+      setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : isRatio(symbol) ? 'Erro a obter dados do rácio: ' : 'Erro a obter dados da ação: ') + (e.message || e) + ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).', true);
     }
     clearTimeout(timer);
     if (settings.refresh) timer = setTimeout(loadAll, 60000);
@@ -2683,6 +2770,8 @@
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
     const range = keepRange && drawState && drawState.tf === selectedTf ? chart.timeScale().getVisibleLogicalRange() : null;
     const cs = d.candles;
+    { const lp = Math.abs(cs.length ? cs[cs.length - 1].c : 1), dp = lp >= 1000 ? 0 : lp >= 100 ? 1 : lp >= 1 ? 2 : lp >= 0.01 ? 4 : 6;   // casas decimais no eixo (rácios e moedas baratas)
+      const pf = dp > 2 ? { type: 'price', precision: dp, minMove: Math.pow(10, -dp) } : { type: 'price', precision: 2, minMove: 0.01 }; candleSeries.applyOptions({ priceFormat: pf }); }
     candleSeries.setData(cs.map((c) => ({ time: c.tt, open: c.o, high: c.h, low: c.l, close: c.c })));
     ensureRsi(!editMode);
     if (!d._rsi) d._rsi = rsiOf(cs);
@@ -2852,7 +2941,7 @@
       }
     }
     // POC diário / semanal: uma linha por cima das velas de cada dia / semana (só visual)
-    if ((settings.pocD || settings.pocW) && !editMode) {
+    if ((settings.pocD || settings.pocW) && !editMode && !isRatio(symbol)) {
       const tfMs = TF_MS0[drawState.tf] || 0, cs = d.candles, bwp = Math.max(2, ts.options().barSpacing || 6);
       const XC = (i) => ts.timeToCoordinate(cs[i].tt);
       // velas diárias/semanais abrem às 00:00 UTC (= véspera em Nova Iorque): usa o meio da vela para saber o dia/semana
@@ -2930,7 +3019,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -3283,7 +3372,10 @@
   // ---------- favoritos: visão geral de muitos ativos (crypto da Binance; ações em breve) ----------
   // Para cada ativo lê só os timeframes dos setups ativos (500 velas), aplica as tuas marcas desse ativo e mostra o checklist de cada setup.
   const favData = {}; let favBusy = false, favAgain = false, favTimer = null, favProg = '';
-  const normSym = (s) => String(s || '').trim().toUpperCase().replace(/^BINANCE:/, '').replace(/\.P$/, '');
+  const normOne = (s) => String(s || '').trim().toUpperCase().replace(/^BINANCE:/, '').replace(/\.P$/, '');
+  // nomes curtos dentro de um rácio (ex.: gold/btc → GC=F/BTCUSDT)
+  const R_ALIAS = { GOLD: 'GC=F', OURO: 'GC=F', XAU: 'GC=F', XAUUSD: 'GC=F', SILVER: 'SI=F', PRATA: 'SI=F', XAG: 'SI=F', XAGUSD: 'SI=F', BTC: 'BTCUSDT', BITCOIN: 'BTCUSDT', ETH: 'ETHUSDT', SP500: 'ES=F', SPX: 'ES=F', 'S&P': 'ES=F', 'S&P500': 'ES=F', NATGAS: 'NG=F', GAS: 'NG=F', 'GÁS': 'NG=F', NG: 'NG=F', WTI: 'CL=F', OIL: 'CL=F', BRENT: 'BZ=F', COPPER: 'HG=F', COBRE: 'HG=F' };
+  const normSym = (s) => { const v = String(s || ''); if (v.includes('/')) { const p = v.split('/').map(normOne); if (p.length === 2 && p[0] && p[1]) return p.map((x) => R_ALIAS[x] || x).join('/'); } return normOne(v); };
   const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   function favTfs() {
     const s = new Set();
@@ -3292,7 +3384,7 @@
   }
   async function loadFav(sym) {
     if (!isCrypto(sym)) {
-      const got = await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
+      const got = isRatio(sym) ? await ratioCandles(sym, favTfs().map((t) => t.id), true) : await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
       for (const id in got) out[id] = computeTf(got[id], id, sym);
       const any = out['1d'] || Object.values(out)[0];
       favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
@@ -3380,7 +3472,7 @@
       });
       return { s, rank, cells, price: f.price };
     }).sort((a, b) => {
-      const fs = settings.favSort || 'az', cls = (x) => (isCrypto(x.s) ? 0 : 1);
+      const fs = settings.favSort || 'az', cls = (x) => (isRatio(x.s) ? 2 : isCrypto(x.s) ? 0 : 1);
       if (fs === 'ready') return b.rank - a.rank || a.s.localeCompare(b.s);
       if (fs === 'crypto') return cls(a) - cls(b) || a.s.localeCompare(b.s);
       if (fs === 'stocks') return cls(b) - cls(a) || a.s.localeCompare(b.s);
@@ -3405,7 +3497,7 @@
         <div id="favImpBox" style="display:none" class="favimp"><div class="muted small">No TradingView: menu da watchlist → “Export list…”. Abre o ficheiro .txt e cola aqui o conteúdo (ex.: BINANCE:BTCUSDT,BINANCE:ETHUSDT,NASDAQ:AAPL).</div>
           <textarea id="favImpTxt" rows="3"></textarea><button id="favImpGo">Importar</button></div>
         <div id="favList"></div>`;
-      $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#favIn').value.trim(); if (!v) return; if (isCrypto(normSym(v)) || /:/.test(v)) { addFavs([v]); $('#favIn').value = ''; } else favSearch(v, true); });
+      $('#favAdd').addEventListener('submit', (e) => { e.preventDefault(); const v = $('#favIn').value.trim(); if (!v) return; if (isCrypto(normSym(v)) || /:|\//.test(v)) { addFavs([v]); $('#favIn').value = ''; } else favSearch(v, true); });
       let st0 = null;
       $('#favIn').addEventListener('input', () => { clearTimeout(st0); const v = $('#favIn').value.trim(); if (v.length >= 2) st0 = setTimeout(() => favSearch(v, false), 400); else $('#favSug').innerHTML = ''; });
       $('#favImp').addEventListener('click', () => { const b = $('#favImpBox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; });
@@ -3436,6 +3528,8 @@
     { symbol: 'BZ=F', name: 'Petróleo Brent · futuro', exch: 'ICE', keys: ['brent', 'petroleo', 'petróleo', 'oil', 'bz=f'] },
     { symbol: 'HG=F', name: 'Cobre (copper) · futuro', exch: 'COMEX', keys: ['cobre', 'copper', 'hg=f'] },
     { symbol: 'CC=F', name: 'Cacau (cocoa) · futuro', exch: 'ICE US', keys: ['cacau', 'cocoa', 'cc=f'] },
+    { symbol: 'NG=F', name: 'Gás natural (natural gas) · futuro', exch: 'NYMEX', keys: ['gas', 'gás', 'natgas', 'natural gas', 'ng=f'] },
+    { symbol: 'ES=F', name: 'S&P 500 · futuro (quase 24h)', exch: 'CME', keys: ['s&p', 'sp500', 'spx', 'sp 500', 'es=f'] },
   ];
   function metalHits(q) {
     const v = String(q || '').trim().toLowerCase(); if (v.length < 2) return [];
@@ -3453,7 +3547,7 @@
     opts.unshift(o); return opts;
   }
   async function searchAssets(q) {
-    const up = normSym(q), opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch }));
+    const up = normSym(q), opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })).concat(ratioHits(q));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance' });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3473,7 +3567,7 @@
   async function favSearch(q, pickFirst) {
     const box = $('#favSug'); if (!box) return;
     const up = normSym(q);
-    const opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch }));
+    const opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })).concat(ratioHits(q));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance', crypto: true });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3589,10 +3683,12 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false };
-  const AL_CHK = { alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
+    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false } };
+  const AL_CHK = { alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
-  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
+  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
   function alChatUi() { $('#alChatSt').innerHTML = alDraft.tgChat ? `<span class="yes">✔ ligado (chat ${alDraft.tgChat})</span>` : '<span class="warn">ainda não ligado</span>'; }
   function alertCode() {
@@ -3618,6 +3714,13 @@ function motor_() {
   }
   // texto de uma mensagem do Telegram mostrado na app (só negrito e itálico)
   const alHtml = (t) => String(t).replace(/&(?!amp;|lt;|gt;)/g, '&amp;').replace(/<(?!\/?[bi]>)/g, '&lt;').replace(/\n/g, '<br>');
+  // lugares do vigia: downloads (ativos diferentes; as pernas dos rácios contam uma vez) e análises (cada favorito)
+  const AL_MAXDL = 12, AL_MAXAN = 18;
+  function alSlots() {
+    const favs = settings.favs || [], dl = new Set(); favs.forEach((s) => (isRatio(s) ? ratioLegs(s) : [s]).forEach((x) => dl.add(x)));
+    const rounds = Math.max(1, Math.ceil(dl.size / AL_MAXDL), Math.ceil(favs.length / AL_MAXAN)), ok = rounds === 1;
+    return `<span class="${ok ? 'muted' : 'warn'} small">Lugares: downloads ${dl.size} de ${AL_MAXDL} · análises ${favs.length} de ${AL_MAXAN} — ${ok ? 'todos os favoritos vistos de 5 em 5 minutos' : `cada favorito é visto a cada ~${rounds * 5} minutos (vão à vez)`}${favs.some(isRatio) ? ' · cada ativo dos rácios é descarregado uma só vez' : ''}</span>`;
+  }
   async function alLoadStatus() {
     const st = $('#alSt'), lg = $('#alLog');
     if (!cloud.user || !cloud.db) { st.innerHTML = '<span class="warn">Sem ligação à conta — os alertas precisam do login.</span>'; lg.innerHTML = ''; return; }
@@ -3625,10 +3728,11 @@ function motor_() {
     try {
       const d = await cloud.db.collection('users').doc(cloud.user.uid).collection('meta').doc('alertlog').get();
       const j = d.exists && d.data().json ? JSON.parse(d.data().json) : null;
-      if (!j) { st.innerHTML = '⚪ <b>Vigia ainda não instalado</b> <span class="muted">— segue os passos de “Instalar o vigia” mais abaixo.</span>'; lg.innerHTML = '<span class="muted">Ainda não há alertas.</span>'; return; }
+      if (!j) { st.innerHTML = '⚪ <b>Vigia ainda não instalado</b> <span class="muted">— segue os passos de “Instalar o vigia” mais abaixo.</span><br>' + alSlots(); lg.innerHTML = '<span class="muted">Ainda não há alertas.</span>'; return; }
       const late = Date.now() - j.lastRun > 20 * 6e4;
       st.innerHTML = (j.off ? `🟡 <b>Vigia parado:</b> ${j.off}` : late ? `🔴 <b>O vigia não corre desde ${new Date(j.lastRun).toLocaleString('pt-PT')}</b> <span class="muted">— vê no Apps Script se o acionador “vigiar” ainda existe (ou executa “instalar” outra vez).</span>`
-        : `🟢 <b>Vigia ativo</b> · última volta ${agoTxt(j.lastRun)} · ${j.done ? j.done.length : 0} de ${j.favs} favoritos nesta volta${j.favs > (j.done || []).length ? ' <span class="muted">(os outros vão à vez nas voltas seguintes)</span>' : ''}`)
+        : `🟢 <b>Vigia ativo</b> · última volta ${agoTxt(j.lastRun)} · ${j.done ? j.done.length : 0} de ${j.favs} favoritos nesta volta${j.ms ? ` · a volta demorou ${Math.max(1, Math.round(j.ms / 1000))} s` : ''}${j.favs > (j.done || []).length ? ' <span class="muted">(os outros vão à vez nas voltas seguintes)</span>' : ''}`)
+        + '<br>' + alSlots()
         + (j.err && j.err.length ? `<br><span class="warn small">⚠ ${j.err.slice(0, 3).map((e) => String(e).replace(/</g, '&lt;')).join(' · ')}</span>` : '');
       lg.innerHTML = (j.log || []).length ? j.log.map((x) => `<div class="ali"><div class="t">${new Date(x.at).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>${alHtml(x.text)}</div>`).join('') : '<span class="muted">Ainda não há alertas.</span>';
     } catch (e) { st.innerHTML = `<span class="warn">Não consegui ler o estado do vigia (${(e && e.code) || e}).</span>`; }
@@ -3644,6 +3748,9 @@ function motor_() {
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
     $('#alMin').value = alDraft.minPull;
     $('#alNearTfs').innerHTML = TFS.map((t) => `<span class="alnt"><label class="chk"><input type="checkbox" data-nt="${t.id}" ${alDraft.nearTfs.includes(t.id) ? 'checked' : ''}> ${tfLabel(t.id)}</label> <input type="number" data-np="${t.id}" min="0.1" max="30" step="0.1" value="${alDraft.nearPct[t.id] != null ? alDraft.nearPct[t.id] : 0.5}"><span class="muted small">%</span></span>`).join('');
+    document.querySelectorAll('.algrp').forEach((b) => { const g = b.dataset.g; b.innerHTML = `<span>Vale para:</span><label><input type="checkbox" data-ga="${g}" ${alDraft.forA[g] !== false ? 'checked' : ''}> ativos</label><label><input type="checkbox" data-gr="${g}" ${alDraft.forR[g] !== false ? 'checked' : ''}> rácios (A÷B)</label>`; });
+    $('#alSmaTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-st="${id}" ${alDraft.smaTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
+    $('#alSmaPre').value = alDraft.smaPre; $('#alSmaRe').value = alDraft.smaRearm;
     $('#alTok').value = alDraft.tgToken || ''; $('#alRelay').value = alDraft.relay || ''; $('#alRelayMsg').textContent = '';
     $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
@@ -3656,6 +3763,11 @@ function motor_() {
     alDraft.minPull = Math.max(0, Math.min(100, +$('#alMin').value || 50));
     document.querySelectorAll('[data-np]').forEach((i) => { const v = +String(i.value).replace(',', '.'); if (v > 0) alDraft.nearPct[i.dataset.np] = Math.min(30, v); });
     alDraft.nearTfs = [...document.querySelectorAll('[data-nt]')].filter((i) => i.checked).map((i) => i.dataset.nt);
+    alDraft.smaTfs = [...document.querySelectorAll('[data-st]')].filter((i) => i.checked).map((i) => i.dataset.st);
+    alDraft.smaPre = Math.max(0, Math.min(20, +String($('#alSmaPre').value).replace(',', '.') || 0));
+    alDraft.smaRearm = Math.max(0.5, Math.min(50, +String($('#alSmaRe').value).replace(',', '.') || 5));
+    document.querySelectorAll('[data-ga]').forEach((i) => { alDraft.forA[i.dataset.ga] = i.checked; });
+    document.querySelectorAll('[data-gr]').forEach((i) => { alDraft.forR[i.dataset.gr] = i.checked; });
     alDraft.tgToken = $('#alTok').value.trim();
     alDraft.relay = $('#alRelay').value.trim().replace(/\/+$/, '');
     if ($('#alChat').style.display !== 'none') alDraft.tgChat = $('#alChat').value.trim();
@@ -3760,17 +3872,17 @@ function motor_() {
     const marks = `${near ? `<span class="np-dot" data-tip="${npEsc(near)}"></span>` : ''}${disp ? '<span data-tip="disputa por decidir" style="font-size:11px">⚖</span>' : ''}${fz.length ? `<span data-tip="${npEsc('✋ em modo manual — não atualiza: ' + fz.join(', '))}" style="font-size:11px">✋</span>` : ''}`;
     return { f, ev, setups, best, chg, marks, sigs: setups.map((st, k) => npSig(f ? ev[k] : null, st)).join('') };
   }
-  const npGroup = (s) => (isCrypto(s) ? 'c' : 's');
+  const npGroup = (s) => (isRatio(s) ? 'r' : isCrypto(s) ? 'c' : 's');
   function npSorted() {
-    const first = settings.npSort === 'stocks' ? 's' : 'c';
-    return (settings.favs || []).slice().sort((a, b) => (npGroup(a) === first ? 0 : 1) - (npGroup(b) === first ? 0 : 1) || a.localeCompare(b));
+    const first = settings.npSort === 'stocks' ? 's' : 'c', gr = (s) => { const g = npGroup(s); return g === 'r' ? 2 : g === first ? 0 : 1; };
+    return (settings.favs || []).slice().sort((a, b) => gr(a) - gr(b) || a.localeCompare(b));
   }
   function npRenderRail() {
     const box = $('#npRail'); if (!box) return;
     const setups = (settings.setups || []).filter((x) => x.on), favs = npSorted();
     let lastG = null, items = '';
     for (const s of favs) {
-      const g = npGroup(s); if (g !== lastG) { items += `<li class="np-grp" style="cursor:default;border:0">${g === 'c' ? 'Cripto' : 'Ações, ETFs e futuros'}</li>`; lastG = g; }
+      const g = npGroup(s); if (g !== lastG) { items += `<li class="np-grp" style="cursor:default;border:0">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</li>`; lastG = g; }
       const i = npInfo(s), b = i.best;
       const line = b && b.rank >= 2 ? `${b.st.name} ${b.dir === 1 ? '▲' : '▼'} ${b.rank === 4 ? 'pronto' : b.rank === 3 ? 'falta FVG' : 'falta quebra'}${b.ctx && !b.ctx.fav ? ` · contexto contra ${pct(b.ctx.pull)}` : b.ctx && b.ctx.pull > 78.6 ? ' · contexto fundo' : ''}${b.sweep && b.rank >= 3 ? ' 💧' : ''}` : '';
       items += `<li data-s="${s}"><div style="flex:1;min-width:0"><div class="s">${s}${i.marks}</div><div class="p">${i.f && i.f.price != null ? fmt(i.f.price) : 'a carregar…'}${i.chg != null ? ` <span style="color:${i.chg >= 0 ? NPC('up') : NPC('dn')}">${i.chg >= 0 ? '+' : '−'}${Math.abs(i.chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div>${line ? `<div class="ln">${line}</div>` : ''}</div><div class="sigs">${i.sigs}</div><button class="np-x" data-c="${s}" aria-label="Abrir o gráfico de ${s}" title="Abrir o gráfico">📈</button><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
@@ -3860,6 +3972,7 @@ function motor_() {
     if (x.kind === 'setup' && parts.length >= 2) return `${parts[1]} ${dir(parts[0])}: quebrou no gatilho${drop}`;
     if (x.kind === 'fvg' && parts.length >= 3) return `${parts[2]} ${dir(parts[1])}: o preço chegou ao FVG`;
     if (x.kind === 'invalid' && parts.length >= 3) return `${parts[2]} ${dir(parts[1])} invalidado`;
+    if (x.kind === 'sma' && parts.length >= 2) return `${parts[1]}: ${/desceu/.test(full) ? 'desceu até à SMA 200 💰' : 'subiu até à SMA 200'}`;
     return parts.join(' · ');
   }
   function npRenderFeed() {
@@ -3900,8 +4013,9 @@ function motor_() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
     h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
-      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
+      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
     $('#npBack').addEventListener('click', npShowFeed);
+    const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
     $('#npStar').addEventListener('click', () => { if ((settings.favs || []).includes(symbol)) { if (!removeFavOk(symbol)) return; settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); updateStar(); } else addFavs([symbol]); npRender(); });
     const ra = $('#npReauto'); if (ra) ra.addEventListener('click', () => recreateAuto(symbol));
   }
@@ -3967,6 +4081,7 @@ function motor_() {
     let tq = null;
     $('#npSearch').addEventListener('submit', async (e) => {
       e.preventDefault(); const v = q.value.trim(); if (!v) return;
+      if (v.includes('/')) return pick(v);
       if (!metalHits(v).length && (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v) || /^[A-Z]{1,3}=F$/i.test(v))) return pick(v);
       const opts = await searchAssets(v); npShowSug(sug, opts, pick);
     });
@@ -4085,6 +4200,7 @@ function motor_() {
     const openTyped = (v) => { const ns = normSym(v) || v.trim().toUpperCase(); symSug.style.display = 'none'; if ((settings.favs || []).includes(ns) || favOpen) return openSymbol(ns); symbol = ns; $('#symbol').value = symbol; save('mss_symbol', symbol); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); symSug.style.display = 'none'; };
     $('#symForm').addEventListener('submit', async (e) => {
       e.preventDefault(); const v = $('#symbol').value.trim(); if (!v) return;
+      if (v.includes('/')) return openTyped(v);
       if (!metalHits(v).length && (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v) || /^[A-Z]{1,3}=F$/i.test(v))) return openTyped(v);   // ticker exato (BTCUSDT, AAPL, ASML.AS, NASDAQ:MSFT)
       const opts = await searchAssets(v);
       if (opts.length === 1 && !opts[0].err) openTyped(opts[0].symbol); else showSug(symSug, opts, openTyped);

@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-07T23:49:59.894Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-08T21:28:28.200Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -676,7 +676,18 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
     weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
+    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
+    // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true },
+    forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false },
   };
+  const GRP_KEYS = { setup: ['setupOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'] };
+  // as escolhas de alertas que valem para este ativo (rácio ou não)
+  function effA(A, sym) {
+    const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? A.forR : A.forA) || {}), o = Object.assign({}, A);
+    for (const k in GRP_KEYS) if (g[k] === false) GRP_KEYS[k].forEach((x) => { o[x] = false; });
+    return o;
+  }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
   // ---------- hora de Nova Iorque (regras de mudança de hora dos EUA, sem depender do Intl) ----------
@@ -760,6 +771,43 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
     return out;
   }
+  // ---------- rácios (A/B) ----------
+  const isRatio = (s) => /^[^/\s]+\/[^/\s]+$/.test(String(s || ''));
+  const R_BASE = { '1Y': '1M', '6M': '1M', '3M': '1M', '1M': '1M', '1w': '1w', '1d': '1d', '4h': '1h', '1h': '1h', '15m': '15m', '5m': '5m' };
+  const R_KEY = {
+    '1M': (t) => { const d = new Date(t + 6 * 36e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); },
+    '1w': (t) => Math.floor((t - 2.5 * 864e5) / (7 * 864e5)),
+    '1d': (t) => Math.floor((t + 6 * 36e5) / 864e5),
+    '1h': (t) => Math.floor(t / 36e5), '15m': (t) => Math.floor(t / 9e5), '5m': (t) => Math.floor(t / 3e5),
+  };
+  function ratioJoin(a, b, key, timeFromA) {
+    const m = new Map(); for (const y of b) m.set(key(y.t), y);
+    const out = []; let lastK = null;
+    for (const x of a) {
+      const k = key(x.t), y = m.get(k);
+      if (!y || !(y.o > 0 && y.h > 0 && y.l > 0 && y.c > 0) || !(x.o > 0 && x.c > 0)) continue;
+      const o = x.o / y.o, c = x.c / y.c;
+      const r = { t: timeFromA ? x.t : y.t, ct: Math.max(x.ct, y.ct), o, c, h: Math.max(o, c, x.h / y.h), l: Math.min(o, c, x.l / y.l), v: 0 };
+      if (k === lastK) out[out.length - 1] = r; else out.push(r);
+      lastK = k;
+    }
+    return out.sort((p, q) => p.t - q.t);
+  }
+  function agg4h(cs) {
+    const g = new Map(), k = 4 * 36e5;
+    for (const c of cs) { const key = Math.floor(c.t / k) * k, x = g.get(key); if (!x) g.set(key, { t: key, ct: key + k - 1, o: c.o, h: c.h, l: c.l, c: c.c, v: 0 }); else { x.h = Math.max(x.h, c.h); x.l = Math.min(x.l, c.l); x.c = c.c; } }
+    return [...g.values()];
+  }
+  // velas do rácio por timeframe, a partir das velas base (1M, 1w, 1d, 1h, 15m, 5m) de cada perna
+  function ratioRaw(ga, gb, tfs, timeFromA) {
+    if (ga._err || gb._err) return { _err: ga._err || gb._err };
+    const r = {}, out = {};
+    for (const id of tfs) { const b = R_BASE[id]; if (!b || r[b] || !ga[b] || !gb[b]) continue; r[b] = ratioJoin(ga[b], gb[b], R_KEY[b], timeFromA); }
+    for (const b in r) out[b] = r[b];
+    for (const id of tfs) { const cs = r[R_BASE[id]]; if (!cs) continue; out[id] = id === '4h' ? agg4h(cs) : MAGG[id] ? aggregateMonths(cs, MAGG[id]) : cs; }
+    return out;
+  }
+  const baseTfs = (tfs) => [...new Set(tfs.map((id) => R_BASE[id]).filter(Boolean))];
   const ctxOf = (su) => su.ctx || CTX_DEFAULT[su.zone] || null;
   // timeframes de que os alertas precisam
   function neededTfs(S, A) {
@@ -768,6 +816,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
     if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
+    if (A.smaOn) (A.smaTfs || []).forEach((id) => s.add(id));
     return [...s];
   }
 
@@ -1004,10 +1053,39 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
   }
 
+  // ---------- 6: o preço chega à SMA 200 (a descer: possível compra; a subir: teste à média) ----------
+  // fica "armado" quando o preço está a mais de smaRearm% da média; avisa uma vez quando um pavio chega à média (ou a smaPre% dela)
+  function smaAlerts(sym, raw, dm, A, st, now, out) {
+    if (!A.smaOn) return;
+    st.sma = st.sma || {};
+    const pre = Math.max(0, +A.smaPre || 0) / 100, rearm = Math.max(0.5, +A.smaRearm || 5) / 100;
+    for (const id of A.smaTfs || []) {
+      const cs = raw[id]; if (!cs || cs.length < 200) continue;
+      let sum = 0; for (let i = cs.length - 200; i < cs.length; i++) sum += cs[i].c;
+      const sma = sum / 200, price = cs[cs.length - 1].c, dist = (price - sma) / sma, key = sym + '|' + id;
+      let rec = st.sma[key];
+      if (!rec) { st.sma[key] = { side: dist >= 0 ? 1 : -1, armed: Math.abs(dist) > rearm, at: now }; continue; }
+      if (!rec.armed) { if (Math.abs(dist) > rearm) { rec.side = dist >= 0 ? 1 : -1; rec.armed = true; rec.at = now; } continue; }
+      // velas mais finas desde que ficou armado: um pavio que chegou à média (ou à distância de aviso) conta
+      const fine = raw['5m'] || raw['1h'] || cs, lvl = rec.side === 1 ? sma * (1 + pre) : sma * (1 - pre);
+      const hit = fine.some((c) => c.ct > rec.at && (rec.side === 1 ? c.l <= lvl : c.h >= lvl)) || (rec.side === 1 ? price <= lvl : price >= lvl);
+      if (!hit) { if ((dist >= 0 ? 1 : -1) !== rec.side) { rec.side = dist >= 0 ? 1 : -1; rec.at = now; } continue; }   // mudou de lado sem pavio na média (salto): passa a contar do lado novo
+      rec.armed = false; rec.at = now;
+      if (st.silent) continue;
+      const down = rec.side === 1, d = dm[id], sn = d && d.ext && d.ext.snap;
+      const tr = sn && sn.trend ? `Tendência principal do ${LBL[id]}: ${sn.trend === 1 ? '▲ subida' : '▼ descida'}${sn.pullback != null ? ` · correção ${pct(sn.pullback)}` : ''}` : '';
+      out.push({ kind: 'sma', sym, text: [
+        `${down ? '💰' : '🧱'} <b>SMA 200 · ${LBL[id]} · ${esc(sym)}</b>`,
+        down ? `O preço desceu até à SMA 200 (${fmt(sma)}) — está a ${pct(Math.abs(dist) * 100)} dela. Possível zona de compra.` : `O preço subiu até à SMA 200 (${fmt(sma)}) — está a ${pct(Math.abs(dist) * 100)} dela. Teste à média: resistência ou recuperação.`,
+        tr,
+      ].filter(Boolean).join('\n') });
+    }
+  }
+
   // ---------- um ativo: velas em bruto → mensagens ----------
   // raw: { tfId: [{t, ct, o, h, l, c, v}] } (já com 3M/6M/1Y agrupados); edits: { 'SYM|tf': ed }
-  function evaluateAsset(sym, raw, S, A, edits, st, now) {
-    const out = [], dm = {};
+  function evaluateAsset(sym, raw, S, A0, edits, st, now) {
+    const A = effA(A0, sym), out = [], dm = {};
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
@@ -1017,6 +1095,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
+    smaAlerts(sym, raw, dm, A, st, now, out);
     return out;
   }
   function pruneState(st, now) {
@@ -1024,7 +1103,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
+  root.MSS_ALERT_CORE = { effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Vigia (Google Apps Script): lê as definições e marcações da conta, vai buscar as velas, corre os alertas e manda para o Telegram.
@@ -1037,7 +1116,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const BINANCE = 'https://data-api.binance.vision';
   const STOCK_API = 'https://scanner-data.pedrojs70.workers.dev';
   const BUDGET = 45;            // pedidos de velas por volta: 288 voltas × ~50 pedidos cabe na quota diária do Google (20 000)
-  const MAX_ASSETS = 12;        // ativos analisados por volta (tempo de execução diário do Google: 90 min)
+  const MAX_ASSETS = 12;        // ativos diferentes descarregados por volta (as pernas dos rácios contam uma vez)
+  const MAX_AN = 18;            // análises por volta (cada favorito, rácio ou não) — tempo de execução diário do Google: 90 min
   const TIME_MAX = 240e3;       // não começa ativos novos depois de 4 minutos (máximo do Google: 6)
   const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   const API_IV = { '1M': '1M', '1w': '1w', '1d': '1d', '4h': '4h', '1h': '1h', '15m': '15m', '5m': '5m' };
@@ -1214,20 +1294,34 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     catch (e) { hb.err.push(String(e.message || e)); }
     const tfs = C.neededTfs(S, A);
     const relay = String(A.relay || '').trim();
-    const costOf = (s) => (isCrypto(s) && !relay ? new Set(tfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
+    // cada favorito é uma análise; cada ativo diferente (as pernas dos rácios incluídas) é um download, feito uma só vez por volta
+    const legsOf = (s) => (C.isRatio(s) ? s.split('/') : [s]);
+    const anyRatio = favs.some(C.isRatio), ftfs = anyRatio ? [...new Set(tfs.concat(C.baseTfs(tfs)))] : tfs;
+    const costOf = (s) => (isCrypto(s) && !relay ? new Set(ftfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
     // primeiro os ativos com setups a seguir (o toque no FVG não pode esperar), depois os outros à vez
-    const order = [...new Set(st.trk.map((x) => x.sym))];
+    const order = [...new Set(st.trk.map((x) => x.sym))].filter((s) => favs.indexOf(s) >= 0);
     for (let k = 0; k < favs.length; k++) { const s = favs[(st.cur + k) % favs.length]; if (order.indexOf(s) < 0) order.push(s); }
-    const batch = []; let used = 0;
-    for (const s of order) { const c = costOf(s); if (batch.length && (used + c > BUDGET || batch.length >= MAX_ASSETS)) break; batch.push(s); used += c; }
+    const batch = [], dl = new Set(); let used = 0;
+    for (const s of order) {
+      const nw = legsOf(s).filter((x) => !dl.has(x)), c = nw.reduce((n, x) => n + costOf(x), 0);
+      if (batch.length && (used + c > BUDGET || dl.size + nw.length > MAX_ASSETS || batch.length >= MAX_AN)) break;
+      batch.push(s); nw.forEach((x) => dl.add(x)); used += c;
+    }
     const rotated = batch.filter((s) => !st.trk.some((x) => x.sym === s)).length;
     st.cur = favs.length ? (st.cur + Math.max(1, rotated)) % favs.length : 0;
-    const crypto = batch.filter(isCrypto), cdata = crypto.length ? (relay ? relayCandles(relay, crypto, tfs, edits) : cryptoCandles(crypto, tfs, edits)) : {};
+    hb.dl = dl.size; hb.an = batch.length; hb.maxDl = MAX_ASSETS; hb.maxAn = MAX_AN;
+    hb.needDl = new Set([].concat(...favs.map(legsOf))).size;
+    const legs = [...dl], crypto = legs.filter(isCrypto);
+    const cdata = crypto.length ? (relay ? relayCandles(relay, crypto, ftfs, edits) : cryptoCandles(crypto, ftfs, edits)) : {};
+    const sdata = {};
+    const legData = (x) => { if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
     const msgs = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }
       try {
-        const raw = isCrypto(s) ? (cdata[s] || {}) : stockCandles(s, tfs);
+        let raw;
+        if (C.isRatio(s)) { const [A1, B1] = s.split('/'); raw = C.ratioRaw(legData(A1), legData(B1), tfs, isCrypto(A1) || !isCrypto(B1)); }
+        else raw = legData(s);
         if (raw._err) { hb.err.push(s + ': ' + raw._err); continue; }
         st.silent = first || !st.known[s];
         const out = C.evaluateAsset(s, raw, S, A, edits, st, now);
@@ -1245,6 +1339,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.log = st.log.slice(0, 80);
     C.pruneState(st, now);
     for (const k of Object.keys(st.known)) if (favs.indexOf(k) < 0) delete st.known[k];
+    if (st.sma) for (const k of Object.keys(st.sma)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.sma[k];
     saveState(st);
     hb.ms = Date.now() - t0;
     const e = fsSet(a, 'meta/alertlog', JSON.stringify(Object.assign(hb, { log: st.log })));
