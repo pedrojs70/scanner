@@ -250,6 +250,45 @@
   #npAssetHead button.dark { background:var(--np-ink); color:var(--np-bg); }
   .np-lk { border:0; background:none; color:var(--np-red); padding:0; font:inherit; text-decoration:underline; text-underline-offset:3px; cursor:pointer; }
   body[data-np="1"] #npSlot .sechead { margin-top:6px; }
+
+  /* ---------- página do ativo no estilo do jornal (só aspeto: nada muda no conteúdo nem no gráfico) ---------- */
+  body[data-np="1"] #npSlot { --line:var(--np-ln); --panel:var(--np-card); --text:var(--np-ink); --muted:var(--np-mu); color:var(--np-ink); }
+  body[data-np="1"] #npSlot .sechead { font-family:Newsreader, Georgia, serif; font-size:26px; font-weight:600; margin:22px 0 8px; color:var(--np-ink); }
+  body[data-np="1"] #npSlot .sechead .muted { font-family:Inter, system-ui, sans-serif; font-size:13px; font-weight:400; color:var(--np-mu); }
+  body[data-np="1"] #npSlot .chip { border-radius:2px; }
+  body[data-np="1"] #npSlot button.lyr, body[data-np="1"] #npSlot .tfbtn { border-radius:0; border:1px solid var(--np-ln); background:var(--np-card); color:var(--np-ink); font-family:Inter, system-ui, sans-serif; }
+  body[data-np="1"] #npSlot button.lyr:hover, body[data-np="1"] #npSlot .tfbtn:hover { border-color:var(--np-ink); }
+  body[data-np="1"] #npSlot button.lyr.on, body[data-np="1"] #npSlot .tfbtn.on { background:var(--np-ink); color:var(--np-bg); border-color:var(--np-ink); }
+  body[data-np="1"] #npSlot button.lyr.editing { background:#E7A82A !important; color:#1E1500 !important; border-color:#E7A82A !important; }
+  /* setups */
+  body[data-np="1"] #npSlot .setups { background:transparent; border:0; border-top:1px solid var(--np-ink); border-bottom:1px solid var(--np-ink); border-radius:0; overflow-x:visible; }
+  body[data-np="1"] #npSlot .setups table { min-width:0; }
+  body[data-np="1"] #npSlot .setups th { font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--np-mu); font-weight:600; border-bottom:1px solid var(--np-ink); }
+  body[data-np="1"] #npSlot .setups td { border-bottom:1px solid var(--np-ln); white-space:normal; }
+  body[data-np="1"] #npSlot .setups td:last-child { min-width:150px; line-height:1.4; }
+  body[data-np="1"] #npSlot .setups td:nth-child(6) { line-height:2; }
+  body[data-np="1"] #npSlot .setups td.tf { font-family:Newsreader, Georgia, serif; font-size:17px; }
+  /* liquidez do dia / semana */
+  body[data-np="1"] #npSlot .prevbar { padding:10px 0; margin:6px 0 4px; border-bottom:1px solid var(--np-ln); font-size:13px; }
+  /* tabela dos timeframes: sem scroll lateral (os textos passam para a linha de baixo) */
+  body[data-np="1"] #npSlot .tablewrap { background:transparent; border:0; border-top:1px solid var(--np-ink); border-radius:0; margin-top:10px; }
+  body[data-np="1"] #npSlot .tablewrap table { min-width:0; width:100%; font-size:12.5px; }
+  body[data-np="1"] #npSlot .tablewrap th { font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--np-mu); font-weight:600; white-space:normal; padding:6px 5px; }
+  body[data-np="1"] #npSlot .tablewrap tr.grp th { font-family:Newsreader, Georgia, serif; font-size:17px; letter-spacing:0; text-transform:none; color:var(--np-ink); padding-top:12px; }
+  body[data-np="1"] #npSlot .tablewrap tr.grp th .muted { font-family:Inter, system-ui, sans-serif; font-size:12px; }
+  body[data-np="1"] #npSlot .tablewrap td { padding:7px 5px; white-space:normal; border-bottom:1px solid var(--np-ln); }
+  body[data-np="1"] #npSlot .tablewrap td.tf { font-family:Newsreader, Georgia, serif; font-size:16px; white-space:nowrap; }
+  body[data-np="1"] #npSlot .tablewrap td.num { white-space:nowrap; }
+  body[data-np="1"] #npSlot .tablewrap td.rngc { min-width:0; max-width:none; }
+  body[data-np="1"] #npSlot .tablewrap td .chip { white-space:nowrap; }
+  /* gráfico: só a moldura e a barra (o quadro do gráfico não muda de tamanho) */
+  body[data-np="1"] #npSlot .chartbox { border-radius:0; border:1px solid var(--np-ink); background:var(--np-card); margin-top:22px; }
+  body[data-np="1"] #npSlot .chartbox.max { border:0; }
+  body[data-np="1"] #npSlot .chartbar { background:var(--np-bg); border-bottom:1px solid var(--np-ink); gap:5px; }
+  body[data-np="1"] #npSlot #chartTitle { font-family:Newsreader, Georgia, serif; font-size:18px; font-weight:600; margin-right:6px; }
+  body[data-np="1"] #npSlot #tfbar { display:inline-flex; gap:0; }
+  body[data-np="1"] #npSlot #tfbar .tfbtn + .tfbtn { border-left:0; }
+  body[data-np="1"] #npSlot .chartbar .cbreak { border-top:1px dashed var(--np-ln); height:0; margin:2px 0; }
   @media (max-width:760px) {
     body[data-np="1"] #np { padding:12px 14px 40px; }
     #npRail, #npFocus { max-width:none; flex-basis:100%; }
