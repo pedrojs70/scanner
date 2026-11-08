@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-08T21:28:28.200Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-08T23:42:32.575Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1106,11 +1106,130 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   root.MSS_ALERT_CORE = { effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
+// Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
+// Histórico: CSV exportados do TradingView (gravados na conta em meta/sd_<tf>).
+// Daqui para a frente: pontos de 5 em 5 minutos gravados pelo vigia a partir da CoinGecko (meta/sd_live),
+// acertados à escala do TradingView no ponto em que se juntam.
+// Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
+(function (root) {
+  'use strict';
+  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'] } };
+  const isSynth = (s) => Object.prototype.hasOwnProperty.call(SYN, s);
+  const HIST_TFS = ['1M', '1w', '1d', '4h', '1h', '15m'];   // timeframes guardados (o 15m só pela consolidação do vigia)
+  const BASE_TFS = ['1M', '1w', '1d', '4h', '1h', '15m', '5m'];
+  const MSI = { '5m': 3e5, '15m': 9e5, '1h': 36e5, '4h': 144e5 };
+  const MAGG = { '3M': 3, '6M': 6, '1Y': 12 };
+  const KEEP = { '1h': 6000, '15m': 4000, '4h': 4000 };      // velas máximas guardadas por timeframe (o resto, tudo)
+
+  function bucket(tf, t) {
+    if (MSI[tf]) return Math.floor(t / MSI[tf]) * MSI[tf];
+    const d = new Date(t), day = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    if (tf === '1d') return day;
+    if (tf === '1w') return day - ((d.getUTCDay() + 6) % 7) * 864e5;   // semana a começar à segunda (como o TradingView)
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  }
+  function bucketEnd(tf, b) {
+    if (MSI[tf]) return b + MSI[tf] - 1;
+    if (tf === '1d') return b + 864e5 - 1;
+    if (tf === '1w') return b + 7 * 864e5 - 1;
+    const d = new Date(b); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1) - 1;
+  }
+  // CSV do TradingView ("Exportar dados do gráfico") → { tf, rows: [[t(ms), o, h, l, c]] }
+  function parseCsv(text) {
+    const lines = String(text || '').replace(/\r/g, '').split('\n').filter((l) => l.trim());
+    if (lines.length < 3) throw new Error('ficheiro vazio ou sem velas');
+    const head = lines[0].split(',').map((x) => x.trim().toLowerCase().replace(/"/g, ''));
+    const ix = (n) => head.indexOf(n);
+    const iT = ix('time'), iO = ix('open'), iH = ix('high'), iL = ix('low'), iC = ix('close');
+    if ([iT, iO, iH, iL, iC].some((i) => i < 0)) throw new Error('não encontrei as colunas time, open, high, low, close');
+    const rows = [];
+    for (let k = 1; k < lines.length; k++) {
+      const c = lines[k].split(',');
+      const tv = c[iT].trim().replace(/"/g, '');
+      let t = /^\d+(\.\d+)?$/.test(tv) ? +tv : Date.parse(tv);
+      if (!isFinite(t)) continue;
+      if (t < 1e12) t *= 1000;
+      const r = [t, +c[iO], +c[iH], +c[iL], +c[iC]];
+      if (r.slice(1).some((x) => !isFinite(x))) continue;
+      rows.push(r.map((x, j) => (j ? Math.round(x * 1e6) / 1e6 : x)));
+    }
+    rows.sort((a, b) => a[0] - b[0]);
+    const out = rows.filter((r, k) => !k || r[0] !== rows[k - 1][0]);
+    if (out.length < 3) throw new Error('poucas velas no ficheiro');
+    const gaps = out.slice(1).map((r, k) => r[0] - out[k][0]).sort((a, b) => a - b), med = gaps[gaps.length >> 1];
+    let tf = null;
+    if (med >= 27 * 864e5 && med <= 32 * 864e5) tf = '1M';
+    else { const opts = [['5m', 3e5], ['15m', 9e5], ['1h', 36e5], ['4h', 144e5], ['1d', 864e5], ['1w', 6048e5]]; for (const [id, ms] of opts) if (Math.abs(med - ms) / ms < 0.05) tf = id; }
+    if (!tf) throw new Error('não reconheci o timeframe (intervalo entre velas: ' + Math.round(med / 6e4) + ' min)');
+    return { tf, rows: out };
+  }
+  // fator de escala: o valor do TradingView no fim do histórico ÷ o valor da CoinGecko nesse momento
+  function finest(hist) { return HIST_TFS.slice().reverse().find((tf) => hist[tf] && hist[tf].length) || null; }
+  function factorOf(hist, live) {
+    const fin = finest(hist); if (!fin || !live || !live.length) return 1;
+    const last = hist[fin][hist[fin].length - 1], end = bucketEnd(fin, last[0]);
+    let p = null;
+    for (const q of live) if (q[0] >= last[0] && q[0] <= end) p = q;   // o último ponto dentro da última vela do histórico
+    if (!p) p = live.find((q) => q[0] > end);                            // senão, o primeiro depois dela
+    return p && p[1] > 0 && last[4] > 0 ? last[4] / p[1] : 1;
+  }
+  function aggMonths(cs, k) {
+    const out = []; let key = null, cur = null;
+    for (const c of cs) {
+      const d = new Date(c.t), kk = d.getUTCFullYear() * 12 + Math.floor(d.getUTCMonth() / k) * k;
+      if (kk !== key) { key = kk; cur = { t: c.t, ct: c.ct, o: c.o, h: c.h, l: c.l, c: c.c, v: 0 }; out.push(cur); }
+      else { cur.h = Math.max(cur.h, c.h); cur.l = Math.min(cur.l, c.l); cur.c = c.c; cur.ct = c.ct; }
+    }
+    if (out.length) { const last = out[out.length - 1], d = new Date(last.t); last.ct = Math.max(last.ct, Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / k) * k + k, 1) - 1); }
+    return out;
+  }
+  // velas por timeframe: histórico + pontos novos (já na escala do TradingView)
+  function buildBase(hist, live) {
+    const f = factorOf(hist, live), fin = finest(hist);
+    const from = fin ? hist[fin][hist[fin].length - 1][0] : 0;
+    const pts = (live || []).filter((q) => q[1] > 0).map((q) => [q[0], q[1] * f]);
+    const base = {};
+    for (const tf of BASE_TFS) {
+      const out = (hist[tf] || []).map((r) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: 0 }));
+      const min = out.length ? from : -Infinity;   // num TF com histórico, só os pontos depois do fim do histórico mais fino
+      for (const [t, v] of pts) {
+        if (t < min) continue;
+        const b = bucket(tf, t), last = out[out.length - 1];
+        if (last && b < last.t) continue;
+        if (last && b === last.t) { last.h = Math.max(last.h, v); last.l = Math.min(last.l, v); last.c = v; }
+        else { const o = last ? last.c : v; out.push({ t: b, o, h: Math.max(o, v), l: Math.min(o, v), c: v, v: 0 }); }
+      }
+      out.forEach((c) => { c.ct = bucketEnd(tf, c.t); });
+      base[tf] = out;
+    }
+    return { base, factor: f };
+  }
+  function build(hist, live, tfIds) {
+    const { base } = buildBase(hist, live), out = {};
+    for (const id of tfIds) out[id] = MAGG[id] ? aggMonths(base['1M'] || [], MAGG[id]) : base[id] || [];
+    return out;
+  }
+  // consolidação (vigia): passa os pontos com mais de 3 dias para o histórico, para o ficheiro de pontos não crescer
+  function consolidate(hist, live, now) {
+    const { base } = buildBase(hist, live), nh = {};
+    for (const tf of HIST_TFS) { let cs = base[tf] || []; if (KEEP[tf] && cs.length > KEEP[tf]) cs = cs.slice(-KEEP[tf]); nh[tf] = cs.map((c) => [c.t, ...[c.o, c.h, c.l, c.c].map((x) => Math.round(x * 1e6) / 1e6)]); }
+    const keepFrom = now - 3 * 864e5;
+    return { hist: nh, live: live.filter((q) => q[0] >= keepFrom) };
+  }
+  // valor atual a partir da resposta /global da CoinGecko
+  function cgValue(sym, j) {
+    const p = j && j.data && j.data.market_cap_percentage; if (!p) return null;
+    let v = 0; for (const k of SYN[sym].cg) { if (!(p[k] > 0)) return null; v += p[k]; }
+    return Math.round(v * 1e5) / 1e5;
+  }
+  root.MSS_SYNTH = { SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+})(typeof window !== 'undefined' ? window : globalThis);
+
 // Vigia (Google Apps Script): lê as definições e marcações da conta, vai buscar as velas, corre os alertas e manda para o Telegram.
 // Este ficheiro é descarregado do site da app em cada volta (alertas-motor.js), por isso as melhorias chegam sem mexer no Apps Script.
 (function (root) {
   'use strict';
-  const C = root.MSS_ALERT_CORE, DEF = root.MSS_DEFAULTS;
+  const C = root.MSS_ALERT_CORE, DEF = root.MSS_DEFAULTS, SYN = root.MSS_SYNTH;
   const API_KEY = 'AIzaSyAKXOPF_s_ffOQLIqFS7K-FqEq9G1djRJA', PROJECT = 'scanner-estrutura';
   const FS = 'https://firestore.googleapis.com/v1/projects/' + PROJECT + '/databases/(default)/documents';
   const BINANCE = 'https://data-api.binance.vision';
@@ -1271,6 +1390,29 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     return out;
   }
 
+  // ---------- ativos sintéticos (STABLE.D): um ponto da CoinGecko por volta; histórico na conta ----------
+  function synthHist(a) {
+    const h = {};
+    for (const tf of SYN.HIST_TFS) { const j = fsGet(a, 'meta/sd_' + tf); if (j) { try { h[tf] = JSON.parse(j); } catch (e) {} } }
+    return h;
+  }
+  function synthRecord(a, A, hb, now) {
+    const r = http('https://api.coingecko.com/api/v3/global' + (A.cgKey ? '?x_cg_demo_api_key=' + encodeURIComponent(A.cgKey) : ''));
+    let live = []; try { live = JSON.parse(fsGet(a, 'meta/sd_live') || '[]'); } catch (e) {}
+    if (r.code !== 200) hb.err.push('CoinGecko ' + r.code + (A.cgKey ? '' : ' — põe a chave grátis na página Alertas'));
+    else { const v = SYN.cgValue('STABLE.D', JSON.parse(r.text)); if (v == null) hb.err.push('CoinGecko sem domínio USDT/USDC'); else live.push([now, v]); }
+    let hist = null;
+    // uma vez por dia: os pontos com mais de 3 dias passam para o histórico (o ficheiro de pontos fica pequeno)
+    if (live.length && now - live[0][0] > 4 * 864e5) {
+      hist = synthHist(a);
+      const c = SYN.consolidate(hist, live, now);
+      for (const tf of SYN.HIST_TFS) if (c.hist[tf] && c.hist[tf].length) { const e = fsSet(a, 'meta/sd_' + tf, JSON.stringify(c.hist[tf])); if (e) hb.err.push(e); }
+      hist = c.hist; live = c.live;
+    }
+    const e = fsSet(a, 'meta/sd_live', JSON.stringify(live)); if (e) hb.err.push(e);
+    return { live, hist };
+  }
+
   // ---------- uma volta ----------
   function vigiar(cfg) {
     const t0 = Date.now(), now = t0;
@@ -1296,6 +1438,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const relay = String(A.relay || '').trim();
     // cada favorito é uma análise; cada ativo diferente (as pernas dos rácios incluídas) é um download, feito uma só vez por volta
     const legsOf = (s) => (C.isRatio(s) ? s.split('/') : [s]);
+    const syn = favs.some(SYN.isSynth) ? synthRecord(a, A, hb, now) : null;
     const anyRatio = favs.some(C.isRatio), ftfs = anyRatio ? [...new Set(tfs.concat(C.baseTfs(tfs)))] : tfs;
     const costOf = (s) => (isCrypto(s) && !relay ? new Set(ftfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
     // primeiro os ativos com setups a seguir (o toque no FVG não pode esperar), depois os outros à vez
@@ -1312,9 +1455,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     hb.dl = dl.size; hb.an = batch.length; hb.maxDl = MAX_ASSETS; hb.maxAn = MAX_AN;
     hb.needDl = new Set([].concat(...favs.map(legsOf))).size;
     const legs = [...dl], crypto = legs.filter(isCrypto);
+    let synH = syn && syn.hist;
     const cdata = crypto.length ? (relay ? relayCandles(relay, crypto, ftfs, edits) : cryptoCandles(crypto, ftfs, edits)) : {};
     const sdata = {};
-    const legData = (x) => { if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
+    const legData = (x) => { if (SYN.isSynth(x)) { if (!syn) return { _err: 'sem dados' }; if (!synH) synH = synthHist(a); if (!Object.keys(synH).length && !syn.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH, syn.live, ftfs); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
     const msgs = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }

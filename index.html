@@ -208,6 +208,7 @@
   .np-h { cursor:grab; touch-action:none; user-select:none; color:var(--np-mu); font-size:14px; padding:0 6px 0 0; margin-left:-2px; line-height:1; align-self:center; }
   .np-h:active { cursor:grabbing; }
   .np-dragging { opacity:.55; outline:1px dashed var(--np-ink); }
+  .np-syninfo { flex-basis:100%; font-size:12px; color:var(--np-mu); margin-top:8px; line-height:1.5; }
   .np-az { font-size:11.5px; color:var(--np-mu); margin:-2px 0 6px; } .np-az a { color:var(--np-red); }
   body[data-np="1"][data-npv="board"] #np { max-width:none; }
   .np-h2 a.np-blk { color:inherit; text-decoration:none; border-bottom:1px solid var(--np-red); }
@@ -639,6 +640,15 @@
       <li><b>Vigia:</b> cada ativo é descarregado uma só vez por volta, mesmo que esteja em vários rácios. Na página Alertas vês os “lugares”: downloads (máx. 12) e análises (máx. 18) para todos serem vistos de 5 em 5 minutos.</li>
     </ul>
 
+    <h3 class="helphead">💵 STABLE.D (USDT.D + USDC.D)</h3>
+    <ul>
+      <li><b>O que é:</b> o domínio das stablecoins — a parte do mercado cripto que está em USDT e USDC (o mesmo que <code>USDT.D+USDC.D</code> no TradingView). Pesquisa “usdt”, “stable” ou “dominância”.</li>
+      <li><b>Histórico:</b> na página do STABLE.D, <b>📥 Importar histórico (CSV)</b> e escolhe os ficheiros exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H — vários de uma vez). Fica guardado na conta. Para atualizar ou corrigir, importa de novo.</li>
+      <li><b>Daqui para a frente:</b> com o STABLE.D nos favoritos, o vigia grava de 5 em 5 minutos o valor atual (CoinGecko) e a app acrescenta as velas. O 5m e o 15m nascem destes pontos (o 5m fica utilizável em ~1 dia). Põe a chave grátis da CoinGecko na página Alertas.</li>
+      <li><b>Escala:</b> a CoinGecko e o TradingView medem o mercado total de forma um pouco diferente; a app acerta a escala no ponto em que o histórico e os pontos novos se juntam (o fator aparece na página do ativo).</li>
+      <li><b>Sem volume:</b> é um índice — os extras de volume não se aplicam. Estrutura, setups, marcas e todos os alertas funcionam como num ativo normal.</li>
+    </ul>
+
     <h3 class="helphead">🔔 Alertas no Telegram</h3>
     <ul>
       <li><b>🔔 Alertas</b> (botão no topo): escolhes o que queres receber, ligas o Telegram e instalas o <b>vigia</b> — um pequeno programa no Google Apps Script (grátis) que corre de 5 em 5 minutos, mesmo com o computador desligado. Só vigia os ★ favoritos e usa as tuas marcações.</li>
@@ -767,6 +777,11 @@
   <h3 class="sethead">Intermediário das velas <span class="muted small">(Vercel, em Dublin — a Binance recusa os servidores do Google)</span></h3>
   <div class="small">Endereço do teu projeto no Vercel: <input id="alRelay" type="text" spellcheck="false" autocomplete="off" style="width:100%;margin-top:4px" placeholder="https://o-teu-projeto.vercel.app"></div>
   <div style="margin-top:6px"><button id="alRelayTest" class="lyr">🧪 Testar</button> <span id="alRelayMsg" class="small"></span></div>
+
+  <h3 class="sethead">CoinGecko <span class="muted small">(só para o STABLE.D — domínio USDT + USDC)</span></h3>
+  <div class="small">Chave grátis da CoinGecko (“Demo API key”, em coingecko.com → Developers): <input id="alCg" type="text" spellcheck="false" autocomplete="off" style="width:100%;margin-top:4px" placeholder="CG-…"></div>
+  <div style="margin-top:6px"><button id="alCgTest" class="lyr">🧪 Testar</button> <span id="alCgMsg" class="small"></span></div>
+  <div class="muted small" style="margin-top:4px">Com o STABLE.D nos favoritos, o vigia grava de 5 em 5 minutos o domínio atual e a app junta-o ao histórico importado do TradingView.</div>
 
   <h3 class="sethead">Instalar o vigia <span class="muted small">(Google Apps Script, grátis — só uma vez)</span></h3>
   <div id="alMotor" class="small" style="margin:4px 0"></div>
@@ -1712,6 +1727,125 @@
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.SetupScore = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
+<script>// Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
+// Histórico: CSV exportados do TradingView (gravados na conta em meta/sd_<tf>).
+// Daqui para a frente: pontos de 5 em 5 minutos gravados pelo vigia a partir da CoinGecko (meta/sd_live),
+// acertados à escala do TradingView no ponto em que se juntam.
+// Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
+(function (root) {
+  'use strict';
+  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'] } };
+  const isSynth = (s) => Object.prototype.hasOwnProperty.call(SYN, s);
+  const HIST_TFS = ['1M', '1w', '1d', '4h', '1h', '15m'];   // timeframes guardados (o 15m só pela consolidação do vigia)
+  const BASE_TFS = ['1M', '1w', '1d', '4h', '1h', '15m', '5m'];
+  const MSI = { '5m': 3e5, '15m': 9e5, '1h': 36e5, '4h': 144e5 };
+  const MAGG = { '3M': 3, '6M': 6, '1Y': 12 };
+  const KEEP = { '1h': 6000, '15m': 4000, '4h': 4000 };      // velas máximas guardadas por timeframe (o resto, tudo)
+
+  function bucket(tf, t) {
+    if (MSI[tf]) return Math.floor(t / MSI[tf]) * MSI[tf];
+    const d = new Date(t), day = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    if (tf === '1d') return day;
+    if (tf === '1w') return day - ((d.getUTCDay() + 6) % 7) * 864e5;   // semana a começar à segunda (como o TradingView)
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  }
+  function bucketEnd(tf, b) {
+    if (MSI[tf]) return b + MSI[tf] - 1;
+    if (tf === '1d') return b + 864e5 - 1;
+    if (tf === '1w') return b + 7 * 864e5 - 1;
+    const d = new Date(b); return Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 1) - 1;
+  }
+  // CSV do TradingView ("Exportar dados do gráfico") → { tf, rows: [[t(ms), o, h, l, c]] }
+  function parseCsv(text) {
+    const lines = String(text || '').replace(/\r/g, '').split('\n').filter((l) => l.trim());
+    if (lines.length < 3) throw new Error('ficheiro vazio ou sem velas');
+    const head = lines[0].split(',').map((x) => x.trim().toLowerCase().replace(/"/g, ''));
+    const ix = (n) => head.indexOf(n);
+    const iT = ix('time'), iO = ix('open'), iH = ix('high'), iL = ix('low'), iC = ix('close');
+    if ([iT, iO, iH, iL, iC].some((i) => i < 0)) throw new Error('não encontrei as colunas time, open, high, low, close');
+    const rows = [];
+    for (let k = 1; k < lines.length; k++) {
+      const c = lines[k].split(',');
+      const tv = c[iT].trim().replace(/"/g, '');
+      let t = /^\d+(\.\d+)?$/.test(tv) ? +tv : Date.parse(tv);
+      if (!isFinite(t)) continue;
+      if (t < 1e12) t *= 1000;
+      const r = [t, +c[iO], +c[iH], +c[iL], +c[iC]];
+      if (r.slice(1).some((x) => !isFinite(x))) continue;
+      rows.push(r.map((x, j) => (j ? Math.round(x * 1e6) / 1e6 : x)));
+    }
+    rows.sort((a, b) => a[0] - b[0]);
+    const out = rows.filter((r, k) => !k || r[0] !== rows[k - 1][0]);
+    if (out.length < 3) throw new Error('poucas velas no ficheiro');
+    const gaps = out.slice(1).map((r, k) => r[0] - out[k][0]).sort((a, b) => a - b), med = gaps[gaps.length >> 1];
+    let tf = null;
+    if (med >= 27 * 864e5 && med <= 32 * 864e5) tf = '1M';
+    else { const opts = [['5m', 3e5], ['15m', 9e5], ['1h', 36e5], ['4h', 144e5], ['1d', 864e5], ['1w', 6048e5]]; for (const [id, ms] of opts) if (Math.abs(med - ms) / ms < 0.05) tf = id; }
+    if (!tf) throw new Error('não reconheci o timeframe (intervalo entre velas: ' + Math.round(med / 6e4) + ' min)');
+    return { tf, rows: out };
+  }
+  // fator de escala: o valor do TradingView no fim do histórico ÷ o valor da CoinGecko nesse momento
+  function finest(hist) { return HIST_TFS.slice().reverse().find((tf) => hist[tf] && hist[tf].length) || null; }
+  function factorOf(hist, live) {
+    const fin = finest(hist); if (!fin || !live || !live.length) return 1;
+    const last = hist[fin][hist[fin].length - 1], end = bucketEnd(fin, last[0]);
+    let p = null;
+    for (const q of live) if (q[0] >= last[0] && q[0] <= end) p = q;   // o último ponto dentro da última vela do histórico
+    if (!p) p = live.find((q) => q[0] > end);                            // senão, o primeiro depois dela
+    return p && p[1] > 0 && last[4] > 0 ? last[4] / p[1] : 1;
+  }
+  function aggMonths(cs, k) {
+    const out = []; let key = null, cur = null;
+    for (const c of cs) {
+      const d = new Date(c.t), kk = d.getUTCFullYear() * 12 + Math.floor(d.getUTCMonth() / k) * k;
+      if (kk !== key) { key = kk; cur = { t: c.t, ct: c.ct, o: c.o, h: c.h, l: c.l, c: c.c, v: 0 }; out.push(cur); }
+      else { cur.h = Math.max(cur.h, c.h); cur.l = Math.min(cur.l, c.l); cur.c = c.c; cur.ct = c.ct; }
+    }
+    if (out.length) { const last = out[out.length - 1], d = new Date(last.t); last.ct = Math.max(last.ct, Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / k) * k + k, 1) - 1); }
+    return out;
+  }
+  // velas por timeframe: histórico + pontos novos (já na escala do TradingView)
+  function buildBase(hist, live) {
+    const f = factorOf(hist, live), fin = finest(hist);
+    const from = fin ? hist[fin][hist[fin].length - 1][0] : 0;
+    const pts = (live || []).filter((q) => q[1] > 0).map((q) => [q[0], q[1] * f]);
+    const base = {};
+    for (const tf of BASE_TFS) {
+      const out = (hist[tf] || []).map((r) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: 0 }));
+      const min = out.length ? from : -Infinity;   // num TF com histórico, só os pontos depois do fim do histórico mais fino
+      for (const [t, v] of pts) {
+        if (t < min) continue;
+        const b = bucket(tf, t), last = out[out.length - 1];
+        if (last && b < last.t) continue;
+        if (last && b === last.t) { last.h = Math.max(last.h, v); last.l = Math.min(last.l, v); last.c = v; }
+        else { const o = last ? last.c : v; out.push({ t: b, o, h: Math.max(o, v), l: Math.min(o, v), c: v, v: 0 }); }
+      }
+      out.forEach((c) => { c.ct = bucketEnd(tf, c.t); });
+      base[tf] = out;
+    }
+    return { base, factor: f };
+  }
+  function build(hist, live, tfIds) {
+    const { base } = buildBase(hist, live), out = {};
+    for (const id of tfIds) out[id] = MAGG[id] ? aggMonths(base['1M'] || [], MAGG[id]) : base[id] || [];
+    return out;
+  }
+  // consolidação (vigia): passa os pontos com mais de 3 dias para o histórico, para o ficheiro de pontos não crescer
+  function consolidate(hist, live, now) {
+    const { base } = buildBase(hist, live), nh = {};
+    for (const tf of HIST_TFS) { let cs = base[tf] || []; if (KEEP[tf] && cs.length > KEEP[tf]) cs = cs.slice(-KEEP[tf]); nh[tf] = cs.map((c) => [c.t, ...[c.o, c.h, c.l, c.c].map((x) => Math.round(x * 1e6) / 1e6)]); }
+    const keepFrom = now - 3 * 864e5;
+    return { hist: nh, live: live.filter((q) => q[0] >= keepFrom) };
+  }
+  // valor atual a partir da resposta /global da CoinGecko
+  function cgValue(sym, j) {
+    const p = j && j.data && j.data.market_cap_percentage; if (!p) return null;
+    let v = 0; for (const k of SYN[sym].cg) { if (!(p[k] > 0)) return null; v += p[k]; }
+    return Math.round(v * 1e5) / 1e5;
+  }
+  root.MSS_SYNTH = { SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 <script>(function () {
   const LWC = window.LightweightCharts, E = window.StructureEngine;
   const TFS = [
@@ -2038,6 +2172,7 @@
     return out.sort((p, q) => p.t - q.t);
   }
   async function legCandles(sym, ids, fav) {
+    if (isSynth(sym)) return synthCandles(sym, ids);
     if (!isCrypto(sym)) return stockCandles(sym, ids);
     const out = {};
     for (const id of ids) { const tf = TFS.find((t) => t.id === id); out[id] = await klines(sym, id, id === '1M' ? 1000 : fav ? Math.min(tf.total, 2000) : tf.total); }
@@ -2072,6 +2207,61 @@
     return RATIOS.filter((r) => r.keys.some((k) => k.startsWith(v) || v.startsWith(k))).map((r) => ({ symbol: r.symbol, name: r.name, exch: 'A ÷ B' }));
   }
 
+  // ---------- ativos sintéticos (STABLE.D = USDT.D + USDC.D): histórico importado do TradingView + pontos da CoinGecko ----------
+  const SY = window.MSS_SYNTH, isSynth = (s) => !!(SY && SY.isSynth(s));
+  const synthCache = {};
+  async function synthData(sym, force) {
+    const c = synthCache[sym];
+    if (c && !force && Date.now() - c.at < 120e3) return c;
+    for (let i = 0; i < 25 && !(cloud.user && cloud.db); i++) await new Promise((r) => setTimeout(r, 200));   // espera pelo login
+    if (!cloud.user || !cloud.db) throw new Error('entra na conta: o histórico do ' + sym + ' está guardado na conta');
+    const col = cloud.db.collection('users').doc(cloud.user.uid).collection('meta');
+    const ids = SY.HIST_TFS.map((tf) => 'sd_' + tf).concat('sd_live');
+    const docs = await Promise.all(ids.map((id) => col.doc(id).get()));
+    const hist = {}; let live = [];
+    docs.forEach((d, k) => { if (!d.exists) return; let j; try { j = JSON.parse(d.data().json); } catch (e) { return; } if (ids[k] === 'sd_live') live = j; else hist[SY.HIST_TFS[k]] = j; });
+    const r = { hist, live, at: Date.now() }; synthCache[sym] = r; return r;
+  }
+  async function synthCandles(sym, tfIds) {
+    const d = await synthData(sym);
+    if (!Object.keys(d.hist).length && !d.live.length) throw new Error('ainda sem dados — importa o histórico (CSV do TradingView) com o botão 📥 na página do ' + sym);
+    const got = SY.build(d.hist, d.live, tfIds), out = {};
+    for (const id of tfIds) if (got[id] && got[id].length > (Y_MAGG[id] ? 5 : 30)) out[id] = got[id];
+    if (!Object.keys(out).length) throw new Error('poucas velas para analisar — importa o histórico (CSV do TradingView)');
+    return out;
+  }
+  function synthInfo(sym) {
+    const d = synthCache[sym]; if (!d) return '';
+    const tfs = SY.HIST_TFS.filter((tf) => d.hist[tf] && d.hist[tf].length);
+    const lastT = (tf) => d.hist[tf][d.hist[tf].length - 1][0], dt = (t) => new Date(t).toLocaleString('pt-PT', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' });
+    const lv = d.live.length ? `${d.live.length} pontos da CoinGecko, o último ${agoTxt(d.live[d.live.length - 1][0])}` : 'ainda sem pontos da CoinGecko (o vigia grava-os de 5 em 5 minutos)';
+    return `Histórico importado: ${tfs.length ? tfs.map((tf) => `${tfLabel(tf)} (${d.hist[tf].length} velas, até ${dt(lastT(tf))})`).join(' · ') : 'nenhum'}. Daqui para a frente: ${lv}.${d.live.length && tfs.length ? ` Escala TradingView/CoinGecko: ×${SY.factorOf(d.hist, d.live).toFixed(3).replace('.', ',')}.` : ''}`;
+  }
+  async function synthImport(sym, files) {
+    if (!cloud.user || !cloud.db) { alert('Entra na conta primeiro: o histórico fica guardado na conta (e serve também o telemóvel e o vigia).'); return; }
+    const ok = [], bad = [];
+    for (const f of files) {
+      try { const r = SY.parseCsv(await f.text()); if (!SY.HIST_TFS.includes(r.tf)) throw new Error('timeframe ' + r.tf + ' não é guardado (usa Mensal, Semanal, Diário, 4H, 1H ou 15m)'); ok.push(r); }
+      catch (e) { bad.push(f.name + ': ' + (e.message || e)); }
+    }
+    const dt = (t) => new Date(t).toLocaleDateString('pt-PT');
+    const txt = ok.map((r) => `• ${tfLabel(r.tf)}: ${r.rows.length} velas, de ${dt(r.rows[0][0])} a ${dt(r.rows[r.rows.length - 1][0])}`).join('\n');
+    if (!ok.length) { alert('Nenhum ficheiro importado.\n' + bad.join('\n')); return; }
+    if (!confirm(`Importar para o ${sym}:\n${txt}${bad.length ? '\n\nIgnorados:\n' + bad.join('\n') : ''}\n\nSubstitui o histórico destes timeframes na conta.`)) return;
+    const col = cloud.db.collection('users').doc(cloud.user.uid).collection('meta');
+    try {
+      for (const r of ok) { let rows = r.rows, j = JSON.stringify(rows); while (j.length > 900000) { rows = rows.slice(Math.floor(rows.length / 4)); j = JSON.stringify(rows); } await col.doc('sd_' + r.tf).set({ json: j, at: Date.now() }); }
+      if (!ok.some((r) => r.tf === '15m')) await col.doc('sd_15m').delete();   // o 15m consolidado pelo vigia podia não bater com o histórico novo
+    } catch (e) { alert('Não consegui gravar na conta: ' + (e.message || e)); return; }
+    delete synthCache[sym]; delete favData[sym];
+    if (symbol === sym) { Object.keys(data).forEach((k) => delete data[k]); loadAll(); }
+    scanFavs(false); npRender();
+  }
+  function synthHits(q) {
+    const v = String(q || '').trim().toLowerCase(); if (v.length < 3) return [];
+    return /^(usdt|usdc|stable|domin|tether)/.test(v) ? [{ symbol: 'STABLE.D', name: 'USDT.D + USDC.D · domínio das stablecoins', exch: 'TradingView + CoinGecko' }] : [];
+  }
+
   // agrupa velas mensais em trimestres (3M), semestres (6M) e anos (1Y), alinhados ao calendário
   function aggregateMonths(cs, k) {
     const out = []; let key = null, cur = null;
@@ -2090,14 +2280,14 @@
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
       const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h');
       if (!isCrypto(symbol)) {   // ação ou rácio
-        const got = isRatio(symbol) ? await ratioCandles(symbol, need.map((t) => t.id)) : await stockCandles(symbol, need.map((t) => t.id));
+        const got = isSynth(symbol) ? await synthCandles(symbol, need.map((t) => t.id)) : isRatio(symbol) ? await ratioCandles(symbol, need.map((t) => t.id)) : await stockCandles(symbol, need.map((t) => t.id));
         if (token !== loadToken) return;
         Object.keys(data).forEach((k) => delete data[k]);
         for (const id in got) data[id] = computeTf(got[id], id);
         if (!data[selectedTf]) selectedTf = Object.keys(data).includes('1d') ? '1d' : Object.keys(data)[0];
         if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
         $('#price').textContent = fmt(data[selectedTf].price);
-        setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + (isRatio(symbol) ? ' · rácio ' + ratioLegs(symbol).join(' ÷ ') : ' · Yahoo'));
+        setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + (isSynth(symbol) ? ' · TradingView + CoinGecko' : isRatio(symbol) ? ' · rácio ' + ratioLegs(symbol).join(' ÷ ') : ' · Yahoo'));
         renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
         clearTimeout(timer); if (settings.refresh) timer = setTimeout(loadAll, 120000);
         return;
@@ -2123,7 +2313,7 @@
       renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
     } catch (e) {
       if (token !== loadToken) return;
-      setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : isRatio(symbol) ? 'Erro a obter dados do rácio: ' : 'Erro a obter dados da ação: ') + (e.message || e) + ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).', true);
+      setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : isSynth(symbol) ? 'Sem dados do ' + symbol + ': ' : isRatio(symbol) ? 'Erro a obter dados do rácio: ' : 'Erro a obter dados da ação: ') + (e.message || e) + (isSynth(symbol) ? '' : ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).'), true);
     }
     clearTimeout(timer);
     if (settings.refresh) timer = setTimeout(loadAll, 60000);
@@ -3433,7 +3623,7 @@
   const normOne = (s) => String(s || '').trim().toUpperCase().replace(/^BINANCE:/, '').replace(/\.P$/, '');
   // nomes curtos dentro de um rácio (ex.: gold/btc → GC=F/BTCUSDT)
   const R_ALIAS = { GOLD: 'GC=F', OURO: 'GC=F', XAU: 'GC=F', XAUUSD: 'GC=F', SILVER: 'SI=F', PRATA: 'SI=F', XAG: 'SI=F', XAGUSD: 'SI=F', BTC: 'BTCUSDT', BITCOIN: 'BTCUSDT', ETH: 'ETHUSDT', SP500: 'ES=F', SPX: 'ES=F', 'S&P': 'ES=F', 'S&P500': 'ES=F', NATGAS: 'NG=F', GAS: 'NG=F', 'GÁS': 'NG=F', NG: 'NG=F', WTI: 'CL=F', OIL: 'CL=F', BRENT: 'BZ=F', COPPER: 'HG=F', COBRE: 'HG=F' };
-  const normSym = (s) => { const v = String(s || ''); if (v.includes('/')) { const p = v.split('/').map(normOne); if (p.length === 2 && p[0] && p[1]) return p.map((x) => R_ALIAS[x] || x).join('/'); } return normOne(v); };
+  const normSym = (s) => { const v = String(s || ''); if (/USDT\.D\s*\+\s*(CRYPTOCAP:)?USDC\.D/i.test(v)) return 'STABLE.D'; if (v.includes('/')) { const p = v.split('/').map(normOne); if (p.length === 2 && p[0] && p[1]) return p.map((x) => R_ALIAS[x] || x).join('/'); } return normOne(v); };
   const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   function favTfs() {
     const s = new Set();
@@ -3442,7 +3632,7 @@
   }
   async function loadFav(sym) {
     if (!isCrypto(sym)) {
-      const got = isRatio(sym) ? await ratioCandles(sym, favTfs().map((t) => t.id), true) : await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
+      const got = isSynth(sym) ? await synthCandles(sym, favTfs().map((t) => t.id)) : isRatio(sym) ? await ratioCandles(sym, favTfs().map((t) => t.id), true) : await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
       for (const id in got) out[id] = computeTf(got[id], id, sym);
       const any = out['1d'] || Object.values(out)[0];
       favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
@@ -3605,7 +3795,7 @@
     opts.unshift(o); return opts;
   }
   async function searchAssets(q) {
-    const up = normSym(q), opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })).concat(ratioHits(q));
+    const up = normSym(q), opts = synthHits(q).concat(metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })), ratioHits(q));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance' });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3625,7 +3815,7 @@
   async function favSearch(q, pickFirst) {
     const box = $('#favSug'); if (!box) return;
     const up = normSym(q);
-    const opts = metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })).concat(ratioHits(q));
+    const opts = synthHits(q).concat(metalHits(q).map((m) => ({ symbol: m.symbol, name: m.name, exch: m.exch })), ratioHits(q));
     if (/USDT$/.test(up)) opts.push({ symbol: up, name: 'Crypto na Binance', exch: 'Binance', crypto: true });
     try {
       const r = await stockJSON('/search?q=' + encodeURIComponent(q));
@@ -3741,7 +3931,7 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false } };
   const AL_CHK = { alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
@@ -3809,6 +3999,7 @@ function motor_() {
     document.querySelectorAll('.algrp').forEach((b) => { const g = b.dataset.g; b.innerHTML = `<span>Vale para:</span><label><input type="checkbox" data-ga="${g}" ${alDraft.forA[g] !== false ? 'checked' : ''}> ativos</label><label><input type="checkbox" data-gr="${g}" ${alDraft.forR[g] !== false ? 'checked' : ''}> rácios (A÷B)</label>`; });
     $('#alSmaTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-st="${id}" ${alDraft.smaTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alSmaPre').value = alDraft.smaPre; $('#alSmaRe').value = alDraft.smaRearm;
+    $('#alCg').value = alDraft.cgKey || ''; $('#alCgMsg').textContent = '';
     $('#alTok').value = alDraft.tgToken || ''; $('#alRelay').value = alDraft.relay || ''; $('#alRelayMsg').textContent = '';
     $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
@@ -3827,6 +4018,7 @@ function motor_() {
     document.querySelectorAll('[data-ga]').forEach((i) => { alDraft.forA[i.dataset.ga] = i.checked; });
     document.querySelectorAll('[data-gr]').forEach((i) => { alDraft.forR[i.dataset.gr] = i.checked; });
     alDraft.tgToken = $('#alTok').value.trim();
+    alDraft.cgKey = $('#alCg').value.trim();
     alDraft.relay = $('#alRelay').value.trim().replace(/\/+$/, '');
     if ($('#alChat').style.display !== 'none') alDraft.tgChat = $('#alChat').value.trim();
     (settings.setups || []).forEach((x, k) => { const i = document.querySelector(`[data-al="${k}"]`); if (i) alDraft.setups[x.name] = i.checked; });
@@ -3858,6 +4050,13 @@ function motor_() {
     $('#alX').addEventListener('click', () => $('#alerts').classList.remove('open'));
     $('#alCancel').addEventListener('click', () => $('#alerts').classList.remove('open'));
     $('#alSave').addEventListener('click', saveAlerts);
+    $('#alCgTest').addEventListener('click', async () => {
+      const m = $('#alCgMsg'), k = $('#alCg').value.trim(); m.className = 'small'; m.textContent = 'a perguntar à CoinGecko…';
+      try { const r = await fetch('https://api.coingecko.com/api/v3/global' + (k ? '?x_cg_demo_api_key=' + encodeURIComponent(k) : '')); if (!r.ok) throw new Error('resposta ' + r.status + (r.status === 401 ? ' — a chave não foi aceite' : ''));
+        const v = SY.cgValue('STABLE.D', await r.json()); if (v == null) throw new Error('a resposta não trouxe o domínio do USDT/USDC');
+        m.className = 'small yes'; m.textContent = `✔ USDT.D + USDC.D agora: ${v.toFixed(2).replace('.', ',')}% (CoinGecko)${k ? '' : ' — funciona sem chave, mas com chave é mais fiável no vigia'}`; }
+      catch (e) { m.className = 'small warn'; m.textContent = '✖ ' + (e.message || e); }
+    });
     $('#alLink').addEventListener('click', linkTelegram);
     $('#alRelayTest').addEventListener('click', async () => {
       const m = $('#alRelayMsg'), say = (t, ok) => { m.textContent = t; m.className = 'small ' + (ok ? 'yes' : 'warn'); };
@@ -3930,7 +4129,7 @@ function motor_() {
     const marks = `${near ? `<span class="np-dot" data-tip="${npEsc(near)}"></span>` : ''}${disp ? '<span data-tip="disputa por decidir" style="font-size:11px">⚖</span>' : ''}${fz.length ? `<span data-tip="${npEsc('✋ em modo manual — não atualiza: ' + fz.join(', '))}" style="font-size:11px">✋</span>` : ''}`;
     return { f, ev, setups, best, chg, marks, sigs: setups.map((st, k) => npSig(f ? ev[k] : null, st)).join('') };
   }
-  const npGroup = (s) => (isRatio(s) ? 'r' : isCrypto(s) ? 'c' : 's');
+  const npGroup = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
   function npSorted() {
     const first = settings.npSort === 'stocks' ? 's' : 'c', gr = (s) => { const g = npGroup(s); return g === 'r' ? 2 : g === first ? 0 : 1; };
     const fv = settings.favs || [], idx = (x) => fv.indexOf(x);
@@ -4214,9 +4413,16 @@ function motor_() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
     h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
-      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
+      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''} ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
     $('#npBack').addEventListener('click', npShowFeed);
     const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
+    if (isSynth(symbol)) {
+      const sym = symbol, fi = $('#npImpF');
+      $('#npImp').addEventListener('click', () => fi.click());
+      fi.addEventListener('change', () => { const fl = [...fi.files]; fi.value = ''; if (fl.length) synthImport(sym, fl); });
+      const inf = document.createElement('div'); inf.className = 'np-syninfo'; inf.textContent = synthInfo(sym) || 'A ler o histórico guardado na conta…'; h.appendChild(inf);
+      if (!synthCache[sym]) synthData(sym).then(() => { if (symbol === sym && npView === 'asset') inf.textContent = synthInfo(sym); }).catch((e) => { inf.textContent = e.message || String(e); });
+    }
     $('#npStar').addEventListener('click', () => { if ((settings.favs || []).includes(symbol)) { if (!removeFavOk(symbol)) return; settings.favs = settings.favs.filter((x) => x !== symbol); save('mss_settings4', settings); updateStar(); } else addFavs([symbol]); npRender(); });
     const ra = $('#npReauto'); if (ra) ra.addEventListener('click', () => recreateAuto(symbol));
   }
