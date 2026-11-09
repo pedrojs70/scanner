@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T22:22:59.334Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T22:47:27.052Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -740,6 +740,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     tgtOn: true, tgtPct: 1, lineOn: true,
+    fibOn: false, fibTfs: ['1w', '1d'], fib786: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
     forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
@@ -753,7 +754,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
     const p = A.per && A.per[sym];
     if (p) {
-      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' };
+      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn' };
       for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
       if (p.week === false) { o.weekOn = false; o.dayOn = false; }   // ligado: semana/dia conforme os Ajustes
       const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
@@ -765,7 +766,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function anyOn(A, sym, S) {
     const e = effA(A, sym), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
     const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
-    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || ln);
+    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -899,6 +900,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.weekOn || A.dayOn) s.add('1h');
     if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
     if (A.smaOn) (A.smaTfs || []).forEach((id) => s.add(id));
+    const anyP = (k) => Object.values(A.per || {}).some((p) => p && p[k] === true);
+    if (A.fibOn || anyP('fibz')) (A.fibTfs || A_DEF.fibTfs).forEach((id) => s.add(id));
+    if (A.kcAlOn || anyP('kc')) (A.kcTfs || A_DEF.kcTfs).forEach((id) => s.add(id));
     return [...s];
   }
 
@@ -1180,6 +1184,54 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
 
   // ---------- um ativo: velas em bruto → mensagens ----------
   // raw: { tfId: [{t, ct, o, h, l, c, v}] } (já com 3M/6M/1Y agrupados); edits: { 'SYM|tf': ed }
+  // ---------- 9: o preço entra na zona de entrada (Fibonacci 0,618–0,65; opcional 0,786) da perna atual ----------
+  function fibAlerts(sym, dm, A, st, now, out) {
+    if (!A.fibOn || !FB) return;
+    st.fibz = st.fibz || {};
+    for (const id of A.fibTfs || []) {
+      const d = dm[id], f = d && d.fibs && d.fibs[0]; if (!f || !d.price) continue;
+      const up = f.dir === 1, p = d.price, leg = `${sym}|${id}|${f.A.toPrecision(6)}|${f.B.toPrecision(6)}`;
+      if (up ? p < f.A : p > f.A) continue;   // já passou a origem: perna invalidada
+      const lv = [['e', up ? f.entry.hi : f.entry.lo, 'entrada ótima (0,618–0,65)', `${fmt(f.entry.lo)} – ${fmt(f.entry.hi)}`]];
+      if (A.fib786) lv.push(['d', f.deep, 'zona profunda (0,786)', fmt(f.deep)]);
+      for (const [k, lvl, nmz, val] of lv) {
+        const key = leg + '|' + k; if (st.fibz[key]) continue;
+        if (!(up ? p <= lvl : p >= lvl)) continue;
+        st.fibz[key] = now;
+        if (st.silent) continue;
+        const r = FB.retrOf(f, p) * 100, lo = FB.NEXT[id], dl = lo && dm[lo], star = dl ? FB.confluence(f, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        out.push({ kind: 'fibz', sym, text: [
+          `${up ? '🟢' : '🔴'} <b>Zona de entrada · ${LBL[id]} · ${esc(sym)}</b>`,
+          `O preço (${fmt(p)}) entrou na ${nmz} da ${up ? 'subida' : 'descida'} (1 = ${fmt(f.A)} → 0 = ${fmt(f.B)}): ${val} · retração ${pct(r)}. Possível ${up ? 'compra' : 'venda'} — espera a quebra no timeframe de baixo.`,
+          star ? `⭐ ${star.tgt} do ${LBL[lo]} (${fmt(star.lo)} – ${fmt(star.hi)}) cai nesta zona` : '',
+          `Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(f.A)}`,
+        ].filter(Boolean).join('\n') });
+      }
+    }
+    for (const k of Object.keys(st.fibz)) if (now - st.fibz[k] > 400 * 864e5) delete st.fibz[k];
+  }
+  // ---------- 10: uma vela fecha fora do Keltner (EMA 20 ± 3 ATR 10) — só Diário, Semanal e Mensal ----------
+  function kcAlerts(sym, raw, A, st, now, out) {
+    if (!A.kcAlOn) return;
+    st.kc = st.kc || {};
+    for (const id of (A.kcTfs || []).filter((x) => ['1d', '1w', '1M'].includes(x))) {
+      const cs = (raw[id] || []).filter((c) => c.ct < now); if (cs.length < 40) continue;
+      const key = sym + '|' + id, rec = st.kc[key] || (st.kc[key] = { armed: true, done: cs[cs.length - 2].t });
+      // vê cada vela fechada desde a última vista (no máximo 5)
+      const from = Math.max(30, cs.findIndex((c) => c.t > rec.done), cs.length - 5);
+      if (from < 0 || cs[cs.length - 1].t <= rec.done) continue;
+      for (let n = from; n < cs.length; n++) {
+        const sub = cs.slice(0, n + 1), cl = sub.map((c) => c.c), mid = emaLast(cl, 20), a = atrLast(sub, 10), lc = cs[n];
+        rec.done = lc.t; if (mid == null || !a) continue;
+        const upB = mid + 3 * a, dnB = mid - 3 * a, side = lc.c > upB ? 1 : lc.c < dnB ? -1 : 0;
+        if (!rec.armed && ((rec.side === 1 && lc.c <= mid) || (rec.side === -1 && lc.c >= mid))) rec.armed = true;   // voltou ao meio
+        if (!side || (!rec.armed && side === rec.side)) continue;
+        rec.armed = false; rec.side = side;
+        if (st.silent || n < cs.length - 1) continue;   // só avisa a vela que acabou de fechar
+        out.push({ kind: 'kc', sym, text: `📏 <b>Keltner · ${LBL[id]} · ${esc(sym)}</b>\nA vela fechou ${side === 1 ? 'acima da banda de cima' : 'abaixo da banda de baixo'} do Keltner (±3 ATR): fecho ${fmt(lc.c)}, banda ${fmt(side === 1 ? upB : dnB)}. Preço muito esticado — possível exaustão ${side === 1 ? 'da subida' : 'da descida'}.` });
+      }
+    }
+  }
   // ---------- 7: perto de um alvo de um setup avisado ----------
   function targetAlerts(sym, raw, A, st, now, out) {
     if (!st.tgw || !st.tgw.length) return;
@@ -1229,6 +1281,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
+    if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
@@ -1238,6 +1291,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     nearAlerts(sym, dm, A, st, now, out);
     smaAlerts(sym, raw, dm, A, st, now, out);
     targetAlerts(sym, raw, A, st, now, out);
+    fibAlerts(sym, dm, A, st, now, out);
+    kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
     return out;
   }
@@ -1246,7 +1301,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
+  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -1644,6 +1699,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (st.sma) for (const k of Object.keys(st.sma)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.sma[k];
     if (st.ln) for (const k of Object.keys(st.ln)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.ln[k];
     if (st.tgw) st.tgw = st.tgw.filter((x) => favs.indexOf(x.sym) >= 0);
+    for (const o of [st.fibz, st.kc]) if (o) for (const k of Object.keys(o)) if (favs.indexOf(k.split('|')[0]) < 0) delete o[k];
     saveState(st);
     hb.ms = Date.now() - t0;
     const e = fsSet(a, 'meta/alertlog', JSON.stringify(Object.assign(hb, { log: st.log })));
