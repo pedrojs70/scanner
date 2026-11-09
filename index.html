@@ -209,6 +209,10 @@
   .np-h:active { cursor:grabbing; }
   .np-dragging { opacity:.55; outline:1px dashed var(--np-ink); }
   .np-syninfo { flex-basis:100%; font-size:12px; color:var(--np-mu); margin-top:8px; line-height:1.5; }
+  .linehint { display:none; position:absolute; left:8px; top:8px; z-index:6; background:#f5c518; color:#111; font-size:12.5px; padding:5px 9px; border-radius:3px; pointer-events:auto; }
+  .linehint a { color:#111; }
+  .linemenu { display:none; position:absolute; z-index:6; gap:4px; background:var(--panel, #fff); border:1px solid #1e88e5; border-radius:4px; padding:3px; }
+  .linemenu button { border:0; background:transparent; cursor:pointer; font-size:15px; padding:2px 6px; opacity:.55; } .linemenu button.on, .linemenu [data-mdel] { opacity:1; }
   #linePanel { display:none; padding:8px 10px; border-top:1px solid var(--line, #2a313b); font-size:13px; }
   #linePanel.open { display:block; }
   #linePanel .lphead button { margin:0 !important; }
@@ -216,6 +220,35 @@
   #linePanel .lphint { background:#f5c51822; border:1px solid #f5c518; padding:5px 8px; margin:4px 0 8px; }
   #linePanel .lprow { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:4px 0; border-bottom:1px solid var(--line, #2a313b); }
   #linePanel .lprow span { flex:1; min-width:220px; }
+  #npStrip { display:none !important; }
+  .np-prevnext { display:flex; gap:8px; align-items:center; margin-top:8px; font-size:12.5px; color:var(--np-mu); }
+  .np-prevnext button { height:28px; padding:0 10px; border:1px solid var(--np-ink); background:transparent; color:var(--np-ink); border-radius:0; font:inherit; font-size:12.5px; cursor:pointer; }
+  #npBoard td.bx { width:30px; text-align:right; }
+  .np-bx { border:0; background:transparent; color:var(--np-mu); font-size:15px; cursor:pointer; padding:2px 6px; }
+  .np-bx:hover { color:var(--np-red); }
+  .np-multi { display:inline-block; margin:6px 0 0 4px; font-size:12.5px; color:var(--np-red); }
+  #mlPrev table { width:100%; min-width:0; border-collapse:collapse; } #mlPrev td { padding:3px 6px; border-bottom:1px solid #8883; white-space:nowrap; }
+  #mlPrev .ok { color:#2e7d32; } #mlPrev .bad { color:#c62828; } #mlPrev .mu { color:#888; }
+  #fibInfo:empty { display:none; } #fibInfo { padding:4px 10px; color:var(--muted); } #fibInfo select { margin-left:6px; font-size:12px; }
+  .altabs { display:flex; gap:0; margin:6px 0 12px; border-bottom:1px solid var(--line, #8884); }
+  .altabs button { border:0; background:transparent; padding:8px 14px; font:inherit; font-size:14px; cursor:pointer; color:var(--muted); border-bottom:2px solid transparent; margin:0; }
+  .altabs button.on { color:var(--text); border-bottom-color:currentColor; font-weight:600; }
+  .algrp { display:none !important; }
+  .alpa { display:grid; grid-template-columns:minmax(200px, 1fr) 1.3fr; gap:18px; }
+  .alpa .lst { max-height:52vh; overflow:auto; border:1px solid var(--line, #8884); padding:6px; }
+  .alpa .lst label { display:flex; gap:6px; align-items:center; padding:3px 2px; font-size:13px; }
+  .alpa .lst .gh { font-weight:600; font-size:12px; color:var(--muted); margin:8px 0 2px; text-transform:uppercase; letter-spacing:.05em; }
+  .alpa .qk { display:flex; flex-wrap:wrap; gap:4px; margin-bottom:6px; }
+  .alpa .ks label { display:flex; gap:8px; align-items:center; padding:5px 0; font-size:14px; border-bottom:1px solid var(--line, #8882); }
+  .alpa .ks .sub { padding-left:22px; }
+  .algd { max-height:60vh; overflow:auto; }
+  .algd table { min-width:0; width:100%; border-collapse:collapse; font-size:12.5px; }
+  .algd th { font-size:10.5px; text-transform:uppercase; letter-spacing:.04em; padding:6px 4px; position:sticky; top:0; background:var(--panel, #fff); text-align:center; white-space:normal; }
+  .algd td { padding:4px; border-bottom:1px solid var(--line, #8882); text-align:center; white-space:nowrap; }
+  .algd td.n { text-align:left; cursor:pointer; text-decoration:underline dotted; }
+  .algd td.c { cursor:pointer; font-size:14px; } .algd td.c.on { color:#2e7d32; } .algd td.c.off { color:#bbb; }
+  .algd tr.new td { background:#f5c51818; }
+  @media (max-width:760px) { .alpa { grid-template-columns:1fr; } }
   .np-az { font-size:11.5px; color:var(--np-mu); margin:-2px 0 6px; } .np-az a { color:var(--np-red); }
   body[data-np="1"][data-npv="board"] #np { max-width:none; }
   .np-h2 a.np-blk { color:inherit; text-decoration:none; border-bottom:1px solid var(--np-red); }
@@ -539,7 +572,7 @@
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
-  <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><div id="npSug" class="sug"></div></form>
+  <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><div id="npSug" class="sug"></div></form><a href="#" id="npMulti" class="np-multi" title="Colar ou importar a lista do TradingView e juntar todos de uma vez">＋ Juntar vários</a>
     <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button></div></div>
   <div id="npStrip"></div>
   <div class="np-cols">
@@ -629,6 +662,9 @@
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Mudar a ordem:</b> arrasta pela pega <b>⠿</b> (na coluna dos favoritos ou no quadro, quando ordenado por grupo). Só dentro do mesmo grupo — cripto, ações/futuros ou rácios. A ordem fica gravada na conta; “repor A–Z” volta à ordem alfabética.</li>
+      <li><b>Juntar vários:</b> por baixo da pesquisa, “＋ Juntar vários” — cola a lista do TradingView (ou o .txt de “Exportar lista”); a app traduz os nomes (GOLD→GC=F, ES1!→ES=F, XCUUSD→HG=F, NICKEL→NICK.L, LSE:…→.L) e mostra antes de juntar.</li>
+      <li><b>Na página do ativo:</b> ◀ ▶ (ou as setas ← → do teclado) passam ao ativo anterior/seguinte da tua ordem; “← Voltar” regressa à página de onde vieste (jornal, quadro dos favoritos ou Em foco).</li>
+      <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
       <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (abre em Prontos + Falta FVG).</li>
       <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar ao jornal” ou o título regressam à entrada.</li>
       <li><b>Contexto:</b> verde = a favor; âmbar = a favor mas já corrigiu mais de 78,6% (perto de virar contra); vermelho = contra.</li>
@@ -713,9 +749,10 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools" hidden><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
-    <div id="chart"><div id="editMenu" class="editmenu"></div></div>
+    <div id="fibInfo" class="small"></div>
+    <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar (Delete)">🗑</button></div></div>
     <div id="linePanel"></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
@@ -746,8 +783,21 @@
   <p class="muted small">Tens alterações à estrutura que ainda não foram gravadas.</p>
   <div class="actions" style="flex-wrap:wrap;gap:8px"><button id="sdStay">Continuar a editar</button><button id="sdDiscard">Descartar</button><button id="sdSave" class="primary">💾 Gravar</button></div>
 </div></div>
-<div id="alerts" class="modal"><div class="dialog" style="width:min(680px,96vw)">
+<div id="multiDlg" class="modal"><div class="dialog" style="width:min(720px,96vw)">
+  <button id="mlX" class="dlgclose" title="Fechar">✕</button><h2>＋ Juntar vários aos favoritos</h2>
+  <p class="small">Cola aqui a lista do TradingView (um por linha ou separados por vírgulas — ex.: <code>GOLD/SILVER</code>, <code>PLATINUM/ES1!</code>, <code>LSE:NUCG</code>) ou carrega o ficheiro .txt de “Exportar lista”. A app traduz os nomes para os dela.</p>
+  <textarea id="mlTxt" rows="7" style="width:100%;font-family:JetBrains Mono, monospace;font-size:12.5px" spellcheck="false" placeholder="GOLD/SILVER&#10;PLATINUM/GOLD&#10;BTCUSDT/BRN1!"></textarea>
+  <div style="margin:6px 0"><input type="file" id="mlFile" accept=".txt,.csv,text/plain"> </div>
+  <div id="mlPrev" class="small" style="max-height:300px;overflow:auto"></div>
+  <div class="actions"><button id="mlCancel">Cancelar</button><button id="mlOk" class="primary">Juntar</button></div>
+</div></div>
+<div id="alerts" class="modal"><div class="dialog" style="width:min(1000px,97vw)">
   <button id="alX" class="dlgclose" title="Fechar">✕</button><h2>🔔 Alertas no Telegram</h2>
+  <div class="altabs"><button data-at="a" class="on">Por ativo</button><button data-at="g">Quadro</button><button data-at="s">Ajustes</button></div>
+  <div id="alTabA" class="altab"></div>
+  <div id="alTabG" class="altab" hidden></div>
+  <div id="alTabS" class="altab" hidden>
+  <p class="small muted" style="margin-top:0">Aqui ficam o Telegram, o vigia e os números de cada alerta (timeframes, percentagens…), iguais para todos os ativos. <b>Que alertas cada ativo recebe</b> escolhe-se em “Por ativo” ou no “Quadro”; as caixas de ligar/desligar abaixo só valem para ativos sem escolhas próprias.</p>
   <div id="alSt" class="alst"></div>
   <label class="chk albig alline"><input id="alOn" type="checkbox"> Alertas ligados <span class="muted small">(desliga tudo de uma vez, sem perder as escolhas)</span></label>
   <p class="muted small" style="margin:6px 0 0">Só para os ativos dos ★ favoritos. O vigia verifica de 5 em 5 minutos e avisa no fecho das velas.</p>
@@ -833,6 +883,7 @@
 
   <h3 class="sethead">Histórico <span class="muted small">(últimos alertas enviados)</span> <button id="alRefresh" class="lyr" style="margin-left:6px">↻</button></h3>
   <div id="alLog" class="allog"></div>
+  </div>
   <div class="actions"><button id="alCancel">Cancelar</button><button id="alSave" class="primary">Guardar</button></div>
 </div></div>
 <div id="settings" class="modal"><div class="dialog">
@@ -3182,11 +3233,7 @@
       add(x.extreme, '#9aa4b1', x.trend === 1 ? 'topo da perna' : 'fundo da perna', 2);
       add(x.levels[50], '#ffd54f', '50%', 2); if (!settings.fibOn) add(x.levels[65], '#ff9800', '65%', 2); add(x.levels[918], '#ff5252', '91,8%', 2);
     }
-    if (settings.fibOn && !editMode) (d.fibs || []).forEach((f) => {
-      const ant = f.role === 'anterior';
-      if (!ant) { add(f.entry.lo, '#26a69a', 'entrada ótima', 0, 1); add(f.entry.hi, '#26a69a', '', 0, 1); add(f.deep, '#ff9800', '78,6%', 2, 1); }
-      f.targets.forEach((t) => { const c = t.hit ? '#7d8794' : ant ? '#9575cd' : '#42a5f5'; add(t.lo, c, `${t.name}${ant ? ' (ant.)' : ''}${t.hit ? ' ✔' : ''}`, ant ? 3 : 2, 1); add(t.hi, c, '', ant ? 3 : 2, 1); });
-    });
+
     if (vI() && n.trend) add(n.protected, '#ce93d8', 'limite (movimento recente)', 1, 1);
     if (vI() && n.dispute) { const dn = n.dispute.dir === -1;
       add(n.dispute.confirm, '#f5c518', `em disputa: quebra ${dn ? '▼' : '▲'} confirma se fechar ${dn ? 'abaixo' : 'acima'}`, 2, 1);
@@ -3210,6 +3257,7 @@
     const g = ctx2d; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
     const ts = chart.timeScale(), paneW = ts.width(); let paneH = h - ts.height(); try { paneH = chart.panes()[0].getHeight(); } catch (e) {}
     g.save(); g.beginPath(); g.rect(0, 0, paneW, paneH); g.clip();
+    try { drawFibs(g, paneW); } catch (e) {}
     try { drawUserLines(g, paneW); } catch (e) {}
     const { d } = drawState, cl = d.closed;
     const X = (i) => (i >= cl.length ? paneW : ts.timeToCoordinate(cl[i].tt));
@@ -3388,7 +3436,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', !!lineMode); renderLinePanel(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', $('#linePanel').classList.contains('open')); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -3493,10 +3541,51 @@
     window.addEventListener('mousemove', move, true); window.addEventListener('touchmove', move, { capture: true, passive: false });
     window.addEventListener('mouseup', end, true); window.addEventListener('touchend', end, true);
   }
+  // ---------- Fibonacci desenhadas como no TradingView: perna 1 → 0 e níveis só a partir do ponto 1 ----------
+  const fibList = (d) => (d && d.fibs || []).filter((f) => (settings.fibShow || 'cur') === 'both' || (settings.fibShow || 'cur') === (f.role === 'atual' ? 'cur' : 'prev'));
+  function drawFibs(g, paneW) {
+    if (!settings.fibOn || editMode) return;
+    const d = data[selectedTf]; if (!d) return;
+    const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (i) => ts.logicalToCoordinate(i);
+    g.font = '10.5px Inter, system-ui, sans-serif'; g.textBaseline = 'bottom';
+    for (const f of fibList(d)) {
+      const ant = f.role === 'anterior', xA = X(f.Ai), xB = X(f.Bi), yA = Y(f.A), yB = Y(f.B);
+      if (xA == null || yA == null || yB == null) continue;
+      const x0 = Math.max(0, xA), col = ant ? '#9575cd' : '#8a93a0';
+      const band = (lo, hi, fill) => { const y1 = Y(lo), y2 = Y(hi); if (y1 == null || y2 == null) return; g.fillStyle = fill; g.fillRect(x0, Math.min(y1, y2), paneW - x0, Math.max(1, Math.abs(y2 - y1))); };
+      const line = (p, c, dash, lab) => { const y = Y(p); if (y == null) return; g.strokeStyle = c; g.lineWidth = 1; g.setLineDash(dash || []); g.beginPath(); g.moveTo(x0, y); g.lineTo(paneW, y); g.stroke(); g.setLineDash([]); if (lab) { g.fillStyle = c; g.fillText(lab, x0 + 4, y - 2); } };
+      // perna 1 → 0
+      if (xB != null) { g.strokeStyle = col; g.lineWidth = 1.2; g.setLineDash([5, 4]); g.beginPath(); g.moveTo(xA, yA); g.lineTo(xB, yB); g.stroke(); g.setLineDash([]); g.fillStyle = col; g.font = 'bold 11px Inter, system-ui, sans-serif'; g.fillText('1', xA + 3, yA + (f.dir === 1 ? 14 : -2)); g.fillText('0', xB + 3, yB + (f.dir === 1 ? -2 : 14)); g.font = '10.5px Inter, system-ui, sans-serif'; }
+      line(f.A, col, [2, 3], ant ? '' : `1 · ${fmt(f.A)}`); line(f.B, col, [2, 3], `0 · ${fmt(f.B)}${ant ? ' (anterior)' : ''}`);
+      if (!ant) {
+        band(f.entry.lo, f.entry.hi, 'rgba(38,166,154,0.16)'); line(f.entry.hi, '#26a69a', [], `0,618–0,65 entrada ótima · ${fmt(f.entry.lo)}–${fmt(f.entry.hi)}`);
+        line(f.mid, '#c9a227', [4, 4], `0,5 · ${fmt(f.mid)}`); line(f.deep, '#ff9800', [4, 4], `0,786 · ${fmt(f.deep)}`);
+      }
+      for (const t of f.targets) { const c = t.hit ? '#9aa3ad' : ant ? '#9575cd' : '#42a5f5'; band(t.lo, t.hi, t.hit ? 'rgba(154,163,173,0.12)' : ant ? 'rgba(149,117,205,0.14)' : 'rgba(66,165,245,0.14)'); line(t.near, c, [], `${t.name}${t.hit ? ' ✔' : ''} · ${String(t.f).replace('.', ',')} · ${fmt(t.lo)}–${fmt(t.hi)}`); }
+    }
+  }
+  function renderFibInfo() {
+    const el = $('#fibInfo'); if (!el) return;
+    const d = data[selectedTf];
+    if (!settings.fibOn || !d) { el.innerHTML = ''; return; }
+    const dt = (i) => { const c = d.closed[i]; return c ? new Date(c.t).toLocaleDateString('pt-PT', { day: '2-digit', month: '2-digit', year: '2-digit' }) : '?'; };
+    const fs = d.fibs || [], txt = fs.map((f) => `${f.role === 'atual' ? 'atual' : 'anterior'}: 1 = ${fmt(f.A)} (${dt(f.Ai)}) → 0 = ${fmt(f.B)} (${dt(f.Bi)})`).join(' · ');
+    const sh = settings.fibShow || 'cur';
+    el.innerHTML = `<b>ϕ ${tfLabel(selectedTf)}</b> ${txt || 'sem perna para traçar'} <select id="fibSel"><option value="cur" ${sh === 'cur' ? 'selected' : ''}>Atual</option><option value="prev" ${sh === 'prev' ? 'selected' : ''}>Anterior</option><option value="both" ${sh === 'both' ? 'selected' : ''}>Ambas</option></select>`;
+    $('#fibSel').addEventListener('change', (e) => { settings.fibShow = e.target.value; save('mss_settings4', settings); });
+  }
   // ---------- linhas diagonais e canais paralelos (desenhados por ti; gravados na conta, por ativo e timeframe) ----------
-  let lineMode = null, linePts = [];
+  let lineMode = null, linePts = [], lineHover = null, lineSel = null, lineDrag = null;
+  const lineUndo = {};   // símbolo → cópias anteriores das linhas (↶ Desfazer)
   const scheduleDraw = () => {};   // o desenho corre sempre (requestAnimationFrame)
   const userLines = (sym) => ((settings.lines || {})[sym || symbol] || []);
+  function setLines(ls, undoable) {
+    settings.lines = settings.lines || {};
+    if (undoable !== false) (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines()));
+    if (lineUndo[symbol] && lineUndo[symbol].length > 40) lineUndo[symbol].shift();
+    settings.lines[symbol] = ls; save('mss_settings4', settings); renderLinePanel();
+  }
+  function lineUndoDo() { const st = lineUndo[symbol]; if (!st || !st.length) return; settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); }
   function idxOfT(t) {
     const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
     if (t >= cs[n - 1].t) return n - 1 + (t - cs[n - 1].t) / tf;
@@ -3512,47 +3601,151 @@
   }
   const lnF = (l) => (l.p1 > 0 && l.p2 > 0 ? [Math.log, Math.exp] : [(v) => v, (v) => v]);
   function lnVal(l, t, off) { const [F, FI] = lnF(l); return FI(F(l.p1) + (F(l.p2) - F(l.p1)) * (t - l.t1) / ((l.t2 - l.t1) || 1) + (off || 0)); }
-  function drawUserLines(g, paneW) {
-    const ls = userLines().filter((l) => l.tf === selectedTf); if (!ls.length && !linePts.length) return;
-    const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => ts.logicalToCoordinate(idxOfT(t));
-    const tEnd = tOfIdx(ts.coordinateToLogical(paneW));
-    for (const l of ls) {
-      const offs = l.type === 'chan' ? [0, l.off || 0] : [0];
-      const pts = offs.map((o) => [X(l.t1), Y(lnVal(l, l.t1, o)), X(tEnd), Y(lnVal(l, tEnd, o))]);
-      if (pts.some((p) => p.some((v) => v == null))) continue;
-      g.strokeStyle = l.alert ? '#f5c518' : '#64b5f6'; g.lineWidth = 1.5; g.setLineDash([]);
-      if (l.type === 'chan') { g.fillStyle = 'rgba(100,181,246,0.07)'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[0][2], pts[0][3]); g.lineTo(pts[1][2], pts[1][3]); g.lineTo(pts[1][0], pts[1][1]); g.closePath(); g.fill(); }
-      pts.forEach((p) => { g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(p[2], p[3]); g.stroke(); });
-      if (l.alert) { g.fillStyle = '#f5c518'; g.font = '11px Inter, sans-serif'; g.fillText('🔔', pts[0][0] + 4, pts[0][1] - 4); }
-    }
-    g.fillStyle = '#f5c518'; linePts.forEach((p) => { const x = X(p.t), y = Y(p.p); if (x != null && y != null) { g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); } });
+  // coordenadas do rato → {t, p}; com o íman 🧲 cola ao máximo/mínimo da vela mais perto
+  function ptAt(x, y) {
+    const ts = chart.timeScale(), lg = ts.coordinateToLogical(x); if (lg == null) return null;
+    let t = tOfIdx(lg), p = candleSeries.coordinateToPrice(y); if (p == null || !isFinite(t)) return null;
+    if (settings.lineMag) { const cs = data[selectedTf].candles, i = Math.round(lg); const c = cs[Math.max(0, Math.min(cs.length - 1, i))]; if (c && i >= 0 && i < cs.length) { const yh = candleSeries.priceToCoordinate(c.h), yl = candleSeries.priceToCoordinate(c.l); const best = Math.abs(yh - y) < Math.abs(yl - y) ? [c.h, yh] : [c.l, yl]; if (Math.abs(best[1] - y) < 28) { p = best[0]; t = c.t; } } }
+    return { t, p };
   }
-  const LINE_HINT = { line: ['Linha diagonal: carrega no 1.º ponto', 'Linha diagonal: carrega no 2.º ponto'], chan: ['Canal: carrega no 1.º ponto da linha de base', 'Canal: carrega no 2.º ponto da linha de base', 'Canal: carrega num ponto da linha paralela (o outro lado do canal)'], del: ['Apagar: carrega em cima de uma linha'] };
-  function setLineMode(m) { lineMode = m; linePts = []; if (m && editMode) { requestExitEdit(); } renderLinePanel(); updateEditUi(); scheduleDraw(); }
-  function lineClick(param) {
-    if (!param.point || (param.paneIndex != null && param.paneIndex !== 0) || !data[selectedTf]) return;
-    const ts = chart.timeScale(), t = tOfIdx(ts.coordinateToLogical(param.point.x)), p = candleSeries.coordinateToPrice(param.point.y);
-    if (p == null || !isFinite(t)) return;
-    const ls = (settings.lines = settings.lines || {})[symbol] = userLines().slice();
-    if (lineMode === 'del') {
-      const Y = (v) => candleSeries.priceToCoordinate(v);
-      const hit = ls.filter((l) => l.tf === selectedTf).find((l) => (l.type === 'chan' ? [0, l.off || 0] : [0]).some((o) => Math.abs(Y(lnVal(l, t, o)) - param.point.y) < 9));
-      if (!hit) return;
-      if (!confirm('Apagar esta ' + (hit.type === 'chan' ? 'canal' : 'linha') + '?')) return;
-      settings.lines[symbol] = ls.filter((l) => l !== hit); save('mss_settings4', settings); setLineMode(null); return;
+  function lineGeom(l) {   // segmentos no ecrã de uma linha/canal (do 1.º ponto até à direita)
+    const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => ts.logicalToCoordinate(idxOfT(t));
+    const W = ts.width(), tEnd = tOfIdx(ts.coordinateToLogical(W));
+    const offs = l.type === 'chan' ? [0, l.off || 0] : [0];
+    const segs = offs.map((o) => [X(l.t1), Y(lnVal(l, l.t1, o)), X(tEnd), Y(lnVal(l, tEnd, o))]);
+    const h1 = [X(l.t1), Y(l.p1)], h2 = [X(l.t2), Y(l.p2)], tm = (l.t1 + l.t2) / 2, h3 = l.type === 'chan' ? [X(tm), Y(lnVal(l, tm, l.off || 0))] : null;
+    return { segs, h1, h2, h3 };
+  }
+  function drawUserLines(g) {
+    if (!data[selectedTf]) return;
+    const ls = userLines().filter((l) => l.tf === selectedTf);
+    const pv = linePreview(); if (pv) ls.push(pv);
+    for (const l of ls) {
+      const G = lineGeom(l); if (G.segs.some((p) => p.some((v) => v == null))) continue;
+      const sel = lineSel === l.id || l === pv, pts = G.segs;
+      g.strokeStyle = l.alert ? '#f5c518' : '#64b5f6'; g.lineWidth = sel ? 2.2 : 1.5; g.setLineDash(l === pv ? [6, 4] : []);
+      if (l.type === 'chan') { g.fillStyle = 'rgba(100,181,246,0.08)'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[0][2], pts[0][3]); g.lineTo(pts[1][2], pts[1][3]); g.lineTo(pts[1][0], pts[1][1]); g.closePath(); g.fill(); }
+      pts.forEach((p) => { g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(p[2], p[3]); g.stroke(); }); g.setLineDash([]);
+      if (l.alert && !sel) { g.font = '11px Inter, sans-serif'; g.fillText('🔔', pts[0][0] + 4, pts[0][1] - 4); }
+      if (sel && l !== pv) [G.h1, G.h2, G.h3].filter(Boolean).forEach((h) => { g.fillStyle = '#fff'; g.strokeStyle = '#1e88e5'; g.lineWidth = 2; g.beginPath(); g.arc(h[0], h[1], 6, 0, 7); g.fill(); g.stroke(); });
     }
-    linePts.push({ t, p });
+    const Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => chart.timeScale().logicalToCoordinate(idxOfT(t));
+    g.fillStyle = '#f5c518'; linePts.forEach((p) => { const x = X(p.t), y = Y(p.p); if (x != null && y != null) { g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); } });
+    positionLineMenu();
+  }
+  // a linha "de borracha" que segue o rato enquanto se desenha
+  function linePreview() {
+    if (!lineMode || lineMode === 'del' || !lineHover || !linePts.length) return null;
+    const a = linePts[0];
+    if (linePts.length === 1) { if (lineHover.t === a.t) return null; return { id: '_pv', type: 'line', tf: selectedTf, t1: a.t, p1: a.p, t2: lineHover.t, p2: lineHover.p }; }
+    const b = linePts[1], l = { id: '_pv', type: 'chan', tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p }; const [F] = lnF(l); l.off = F(lineHover.p) - F(lnVal(l, lineHover.t, 0)); return l;
+  }
+  const LINE_HINT = { line: ['Diagonal: carrega no 1.º ponto', 'Diagonal: mexe o rato e carrega no 2.º ponto'], chan: ['Canal: carrega no 1.º ponto da linha de base', 'Canal: carrega no 2.º ponto da linha de base', 'Canal: mexe o rato até ao outro lado do canal e carrega'] };
+  function lineHintUi() {
+    const el = $('#lineHint'); if (!el) return;
+    const sel = lineSel && userLines().find((l) => l.id === lineSel);
+    el.innerHTML = lineMode ? `${LINE_HINT[lineMode][Math.min(linePts.length, LINE_HINT[lineMode].length - 1)]} · <a href="#" data-lc="1">cancelar (Esc)</a>` : sel ? 'Arrasta as bolinhas para ajustar · arrasta a linha para a mover · Delete apaga' : '';
+    el.style.display = el.innerHTML ? 'block' : 'none';
+    const c = el.querySelector('[data-lc]'); if (c) c.addEventListener('click', (e) => { e.preventDefault(); setLineMode(null); });
+  }
+  function setLineMode(m) {
+    lineMode = m || null; linePts = []; lineHover = null; if (m) lineSel = null;
+    if (m && editMode) requestExitEdit();
+    try { chart.applyOptions({ handleScroll: !m, handleScale: !m }); } catch (e) {}
+    lineToolsUi(); lineHintUi(); renderLinePanel();
+  }
+  function lineToolsUi() {
+    const tb = $('#lineTools'); if (!tb) return;
+    tb.querySelectorAll('[data-lm]').forEach((b) => b.classList.toggle('on', b.dataset.lm === lineMode));
+    const mg = tb.querySelector('[data-mag]'); if (mg) mg.classList.toggle('on', !!settings.lineMag);
+    const un = tb.querySelector('[data-und]'); if (un) un.disabled = !(lineUndo[symbol] && lineUndo[symbol].length);
+  }
+  function lineClick(param) {
+    if (!param.point || !data[selectedTf]) return;
+    const q = ptAt(param.point.x, param.point.y); if (!q) return;
+    linePts.push(q);
     const need = lineMode === 'chan' ? 3 : 2;
-    if (linePts.length < need) { renderLinePanel(); scheduleDraw(); return; }
-    const [a, b, c] = linePts, l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
-    if (b.t === a.t) { linePts = []; renderLinePanel(); return; }
+    if (linePts.length < need) { lineHintUi(); return; }
+    const [a, b, c] = linePts;
+    if (b.t === a.t) { linePts = [a]; return; }
+    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
     if (lineMode === 'chan') { const [F] = lnF(l); l.off = F(c.p) - F(lnVal(l, c.t, 0)); }
-    ls.push(l); settings.lines[symbol] = ls; save('mss_settings4', settings); setLineMode(null);
+    setLines(userLines().concat(l)); lineSel = l.id; setLineMode(null); lineSel = l.id; lineHintUi();
+  }
+  // selecionar / arrastar pegas / mover linhas desenhadas
+  function lineHit(x, y) {
+    const ls = userLines().filter((l) => l.tf === selectedTf);
+    for (const l of ls.slice().reverse()) {
+      const G = lineGeom(l);
+      if (lineSel === l.id) { for (const [k, h] of [['p1', G.h1], ['p2', G.h2], ['off', G.h3]]) if (h && h[0] != null && Math.hypot(h[0] - x, h[1] - y) < 11) return { l, part: k }; }
+      for (const s of G.segs) { if (s.some((v) => v == null)) continue; const [x1, y1, x2, y2] = s; if (x < Math.min(x1, x2) - 4 || x > Math.max(x1, x2) + 4) continue; const yy = y1 + (y2 - y1) * (x - x1) / ((x2 - x1) || 1); if (Math.abs(yy - y) < 7) return { l, part: 'move' }; }
+    }
+    return null;
+  }
+  function positionLineMenu() {
+    const m = $('#lineMenu'); if (!m) return;
+    const l = lineSel && !lineMode && userLines().find((x) => x.id === lineSel && x.tf === selectedTf);
+    if (!l || lineDrag) { m.style.display = 'none'; return; }
+    const G = lineGeom(l); if (G.h2[0] == null || G.h2[1] == null) { m.style.display = 'none'; return; }
+    m.style.display = 'flex'; m.style.left = Math.max(4, Math.min(chart.timeScale().width() - 150, G.h2[0] + 10)) + 'px'; m.style.top = Math.max(4, G.h2[1] - 40) + 'px';
+    m.querySelector('[data-mal]').classList.toggle('on', !!l.alert);
+  }
+  function initLines() {
+    const el = $('#chart');
+    const pos = (ev) => { const r = el.getBoundingClientRect(); return { x: ev.clientX - r.left, y: ev.clientY - r.top }; };
+    el.addEventListener('pointermove', (ev) => {
+      if (!data[selectedTf]) return;
+      const p = pos(ev);
+      if (lineMode) { lineHover = ptAt(p.x, p.y); return; }
+      if (lineDrag) {
+        const q = ptAt(p.x, p.y); if (!q) return;
+        const l = lineDrag.l, o = lineDrag.orig;
+        if (lineDrag.part === 'p1') { l.t1 = q.t; l.p1 = q.p; }
+        else if (lineDrag.part === 'p2') { l.t2 = q.t; l.p2 = q.p; }
+        else if (lineDrag.part === 'off') { const [F] = lnF(l); l.off = F(q.p) - F(lnVal(l, q.t, 0)); }
+        else { const s0 = lineDrag.start, dt = q.t - s0.t, [F, FI] = lnF(o), dp = F(q.p) - F(s0.p); l.t1 = o.t1 + dt; l.t2 = o.t2 + dt; l.p1 = FI(F(o.p1) + dp); l.p2 = FI(F(o.p2) + dp); }
+        ev.preventDefault();
+      } else el.style.cursor = lineHit(p.x, p.y) ? 'pointer' : '';
+    });
+    el.addEventListener('pointerdown', (ev) => {
+      if (lineMode || editMode || !data[selectedTf] || ev.button > 0 || ev.target.closest('#lineMenu, #lineHint, #editMenu')) return;
+      const p = pos(ev), h = lineHit(p.x, p.y);
+      if (!h) { if (lineSel) { lineSel = null; lineHintUi(); } return; }
+      ev.stopPropagation(); ev.preventDefault();
+      lineSel = h.l.id; lineHintUi();
+      const ls = userLines().map((x) => Object.assign({}, x)), l = ls.find((x) => x.id === h.l.id);
+      lineDrag = { l, part: h.part, orig: Object.assign({}, l), start: ptAt(p.x, p.y), ls, before: JSON.stringify(userLines()), moved: false };
+      try { chart.applyOptions({ handleScroll: false, handleScale: false }); } catch (e) {}
+      settings.lines[symbol] = ls;   // trabalha numa cópia; grava ao largar
+    }, true);
+    window.addEventListener('pointerup', () => {
+      if (!lineDrag) return;
+      const d = lineDrag; lineDrag = null;
+      try { chart.applyOptions({ handleScroll: true, handleScale: true }); } catch (e) {}
+      if (JSON.stringify(d.ls) !== d.before) { settings.lines[symbol] = JSON.parse(d.before); setLines(d.ls); suppressClick = true; setTimeout(() => { suppressClick = false; }, 300); }
+      else settings.lines[symbol] = JSON.parse(d.before);
+    });
+    el.addEventListener('click', (ev) => {   // cliques ao desenhar (cada clique conta, mesmo rápidos)
+      if (!lineMode) return; const p = pos(ev);
+      let ph = el.clientHeight; try { ph = chart.panes()[0].getHeight(); } catch (e) {} if (p.y > ph || p.x > chart.timeScale().width()) return;
+      lineClick({ point: p });
+    });
+    document.addEventListener('keydown', (e) => {
+      if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
+      if (e.key === 'Escape' && (lineMode || lineSel)) { setLineMode(null); lineSel = null; lineHintUi(); }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode) { e.preventDefault(); setLines(userLines().filter((l) => l.id !== lineSel)); lineSel = null; lineHintUi(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !editMode && lineUndo[symbol] && lineUndo[symbol].length && (lineSel || $('#linePanel').classList.contains('open'))) { e.preventDefault(); lineUndoDo(); }
+    });
+    const m = $('#lineMenu');
+    m.querySelector('[data-mal]').addEventListener('click', () => { setLines(userLines().map((l) => (l.id === lineSel ? Object.assign({}, l, { alert: !l.alert }) : l))); });
+    m.querySelector('[data-mdel]').addEventListener('click', () => { setLines(userLines().filter((l) => l.id !== lineSel)); lineSel = null; lineHintUi(); });
+    $('#lineTools').querySelectorAll('[data-lm]').forEach((b) => b.addEventListener('click', () => setLineMode(b.dataset.lm === lineMode ? null : b.dataset.lm)));
+    $('#lineTools').querySelector('[data-mag]').addEventListener('click', () => { settings.lineMag = !settings.lineMag; save('mss_settings4', settings); lineToolsUi(); });
+    $('#lineTools').querySelector('[data-und]').addEventListener('click', lineUndoDo);
   }
   function renderLinePanel() {
-    const box = $('#linePanel'); if (!box) return;
+    const box = $('#linePanel'); if (!box) return; lineToolsUi();
     const ls = userLines(), d = data[selectedTf], price = d && d.price;
-    const hint = lineMode ? `<div class="lphint">${LINE_HINT[lineMode][Math.min(linePts.length, LINE_HINT[lineMode].length - 1)]} <button class="lyr" data-lm="">Cancelar</button></div>` : '';
     const rows = ls.map((l) => {
       const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dist = (x) => price && l.tf === selectedTf ? ` (${pct((price - x) / x * 100, true)})` : '';
       return `<div class="lprow"><span>${l.type === 'chan' ? 'Canal' : 'Diagonal'} · ${tfLabel(l.tf)} · agora ${fmt(v)}${dist(v)}${v2 != null ? ` / ${fmt(v2)}${dist(v2)}` : ''}</span>
@@ -3560,12 +3753,11 @@
         <label title="Distância para o aviso, em %">a <input type="number" step="0.1" min="0.1" max="20" data-lp="${l.id}" value="${l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)}" style="width:56px">%</label>
         <button class="lyr" data-ld="${l.id}" title="Apagar">🗑</button></div>`;
     }).join('');
-    box.innerHTML = `<div class="lphead"><b>📐 Linhas</b> <button class="lyr ${lineMode === 'line' ? 'on' : ''}" data-lm="line">／ Diagonal</button><button class="lyr ${lineMode === 'chan' ? 'on' : ''}" data-lm="chan">▱ Canal paralelo</button>${ls.length ? `<button class="lyr ${lineMode === 'del' ? 'on' : ''}" data-lm="del">✕ Apagar no gráfico</button>` : ''}</div>${hint}${rows || '<div class="muted small">Ainda sem linhas neste ativo. Liga 🔔 só nas principais — o vigia avisa quando o preço chega perto (e quando fecha fora de um canal).</div>'}`;
-    box.querySelectorAll('[data-lm]').forEach((b) => b.addEventListener('click', () => setLineMode(b.dataset.lm && b.dataset.lm !== lineMode ? b.dataset.lm : null)));
-    const upd = (id, fn) => { const ls2 = userLines().map((l) => (l.id === id ? fn(Object.assign({}, l)) : l)); settings.lines[symbol] = ls2; save('mss_settings4', settings); scheduleDraw(); };
+    box.innerHTML = `<div class="lphead"><b>📐 As tuas linhas neste ativo</b></div>${rows || '<div class="muted small">Ainda sem linhas. Usa ／ Diagonal ou ▱ Canal na barra do gráfico. Liga 🔔 só nas principais — o vigia avisa quando o preço chega perto (e quando fecha fora de um canal).</div>'}`;
+    const upd = (id, fn) => setLines(userLines().map((l) => (l.id === id ? fn(Object.assign({}, l)) : l)));
     box.querySelectorAll('[data-la]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.la, (l) => { l.alert = i.checked; return l; })));
     box.querySelectorAll('[data-lp]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.lp, (l) => { l.pct = Math.max(0.1, Math.min(20, +String(i.value).replace(',', '.') || 1)); return l; })));
-    box.querySelectorAll('[data-ld]').forEach((b) => b.addEventListener('click', () => { if (!confirm('Apagar esta linha?')) return; settings.lines[symbol] = userLines().filter((l) => l.id !== b.dataset.ld); save('mss_settings4', settings); renderLinePanel(); scheduleDraw(); }));
+    box.querySelectorAll('[data-ld]').forEach((b) => b.addEventListener('click', () => { setLines(userLines().filter((l) => l.id !== b.dataset.ld)); if (lineSel === b.dataset.ld) lineSel = null; }));
   }
   function onChartClick(param) {
     if (lineMode) return;   // a desenhar linhas: os cliques são tratados no próprio elemento (abaixo)
@@ -4028,7 +4220,8 @@
   }
   function addFavs(list) {
     const cur = new Set(settings.favs || []); let n = 0;
-    for (const x of list) { const s = normSym(x); if (s && !cur.has(s) && cur.size < 150) { cur.add(s); n++; } }
+    const pn = (settings.alerts || {}).perNew;
+    for (const x of list) { const s = normSym(x); if (s && !cur.has(s) && cur.size < 150) { cur.add(s); n++; if (pn) { settings.alerts.per = settings.alerts.per || {}; settings.alerts.per[s] = Object.assign({}, pn); } } }
     settings.favs = [...cur]; save('mss_settings4', settings); renderFavs(); updateStar(); if (n) scanFavs(false);
   }
   async function scanFavs(force) {
@@ -4133,8 +4326,8 @@
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true } };
   const AL_CHK = { alTgt: 'tgtOn', alLine: 'lineOn', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
-  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
-  const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
+  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
+  const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : (Math.floor(m / 1440) === 1 ? 'há 1 dia' : `há ${Math.floor(m / 1440)} dias`); };
   function alChatUi() { $('#alChatSt').innerHTML = alDraft.tgChat ? `<span class="yes">✔ ligado (chat ${alDraft.tgChat})</span>` : '<span class="warn">ainda não ligado</span>'; }
   function alertCode() {
     const u = cloud.user, chave = u && u.refreshToken;
@@ -4162,9 +4355,9 @@ function motor_() {
   // lugares do vigia: downloads (ativos diferentes; as pernas dos rácios contam uma vez) e análises (cada favorito)
   const AL_MAXDL = 12, AL_MAXAN = 18;
   function alSlots() {
-    const favs = settings.favs || [], dl = new Set(); favs.forEach((s) => (isRatio(s) ? ratioLegs(s) : [s]).forEach((x) => dl.add(x)));
+    const A0 = alCfg(), favs = (settings.favs || []).filter((s) => Object.values(alEff(A0, s)).some(Boolean)), dl = new Set(); favs.forEach((s) => (isRatio(s) ? ratioLegs(s) : [s]).forEach((x) => dl.add(x)));
     const rounds = Math.max(1, Math.ceil(dl.size / AL_MAXDL), Math.ceil(favs.length / AL_MAXAN)), ok = rounds === 1;
-    return `<span class="${ok ? 'muted' : 'warn'} small">Lugares: downloads ${dl.size} de ${AL_MAXDL} · análises ${favs.length} de ${AL_MAXAN} — ${ok ? 'todos os favoritos vistos de 5 em 5 minutos' : `cada favorito é visto a cada ~${rounds * 5} minutos (vão à vez)`}${favs.some(isRatio) ? ' · cada ativo dos rácios é descarregado uma só vez' : ''}</span>`;
+    return `<span class="${ok ? 'muted' : 'warn'} small">${favs.length} de ${(settings.favs || []).length} favoritos com alertas · Lugares: downloads ${dl.size} de ${AL_MAXDL} · análises ${favs.length} de ${AL_MAXAN} — ${ok ? 'todos os favoritos vistos de 5 em 5 minutos' : `cada favorito é visto a cada ~${rounds * 5} minutos (vão à vez)`}${favs.some(isRatio) ? ' · cada ativo dos rácios é descarregado uma só vez' : ''}</span>`;
   }
   async function alLoadStatus() {
     const st = $('#alSt'), lg = $('#alLog');
@@ -4188,6 +4381,58 @@ function motor_() {
     try { const r = await fetch('alertas-motor.js?t=' + Date.now(), { method: 'HEAD', cache: 'no-store' }); m.innerHTML = r.ok ? '<span class="yes">✔ alertas-motor.js encontrado no site</span>' : '<span class="warn">⚠ falta o ficheiro alertas-motor.js no site: põe-no no GitHub ao lado do index.html</span>'; }
     catch (e) { m.innerHTML = ''; }
   }
+  // ---------- alertas por ativo ----------
+  const AK_FIX = [['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais']];
+  const alKeys = () => (settings.setups || []).filter((x) => x.on).map((x) => ['su:' + x.name, 'Setup · ' + x.name]).concat(AK_FIX);
+  // o que vale hoje para um ativo (escolhas por ativo, senão as gerais)
+  function alEff(A, sym) {
+    const p = (A.per || {})[sym] || {}, r = isRatio(sym), g = Object.assign({}, r ? AL_DEF.forR : AL_DEF.forA, (r ? A.forR : A.forA) || {}), out = {};
+    for (const [k] of alKeys()) {
+      if (p[k] != null) { out[k] = !!p[k]; continue; }
+      if (k.indexOf('su:') === 0) out[k] = !!A.setupOn && g.setup !== false && (A.setups || {})[k.slice(3)] !== false;
+      else out[k] = !!A[{ fvg: 'fvgOn', kz: 'kzOn', week: 'weekOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' }[k]] && g[k] !== false;
+    }
+    return out;
+  }
+  let alSel = new Set(), alTab = 'a';
+  function alSetTab(t) { alTab = t; document.querySelectorAll('.altabs [data-at]').forEach((b) => b.classList.toggle('on', b.dataset.at === t)); $('#alTabA').hidden = t !== 'a'; $('#alTabG').hidden = t !== 'g'; $('#alTabS').hidden = t !== 's'; if (t === 'a') alRenderA(); if (t === 'g') alRenderG(); }
+  function alRenderA() {
+    const favs = npSorted(), keys = alKeys(), box = $('#alTabA');
+    const grpName = { c: 'Cripto', s: 'Ações, ETFs e futuros', r: 'Rácios (A ÷ B)' };
+    let lst = '', lg = null;
+    for (const s of favs) { const g = npGroup(s); if (g !== lg) { lst += `<div class="gh">${grpName[g]}</div>`; lg = g; } lst += `<label><input type="checkbox" data-as="${s}" ${alSel.has(s) ? 'checked' : ''}> ${s}</label>`; }
+    const sel = [...alSel].filter((s) => favs.includes(s)), effs = sel.map((s) => alEff(alDraft, s));
+    const ks = keys.map(([k, t]) => { const on = effs.filter((e) => e[k]).length, st = !sel.length ? '' : on === sel.length ? 'checked' : on ? 'data-mixed="1"' : '';
+      return `<label class="${k.indexOf('su:') === 0 ? '' : ''}"><input type="checkbox" data-ak="${k}" ${st} ${sel.length ? '' : 'disabled'}> ${t}</label>`; }).join('');
+    box.innerHTML = `<div class="alpa"><div><div class="qk"><button class="lyr" data-q="all">Todos</button><button class="lyr" data-q="c">Cripto</button><button class="lyr" data-q="s">Ações/futuros</button><button class="lyr" data-q="r">Rácios</button><button class="lyr" data-q="none">Nenhum</button></div><div class="lst">${lst || '<span class="muted small">sem favoritos</span>'}</div></div>
+      <div><div class="small muted" style="margin-bottom:6px">${sel.length ? `${sel.length} selecionado${sel.length > 1 ? 's' : ''}: ${sel.slice(0, 6).join(', ')}${sel.length > 6 ? '…' : ''}${sel.length > 1 ? ' · caixa a meio (—) = escolhas diferentes entre eles' : ''}` : 'Seleciona um ou mais ativos à esquerda.'}</div>
+      <div class="ks">${ks}</div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button class="primary" id="alApply" ${sel.length ? '' : 'disabled'}>Gravar nos selecionados</button><button id="alOffSel" ${sel.length ? '' : 'disabled'}>Desligar tudo nos selecionados</button></div>
+      <div class="small muted" style="margin-top:8px">Os números (timeframes, percentagens, Telegram…) estão em <a href="#" data-gotab="s">Ajustes</a> e valem para todos. Ativos sem nenhum alerta não são analisados pelo vigia (ficam só na app).</div></div></div>`;
+    box.querySelectorAll('[data-mixed]').forEach((i) => { i.indeterminate = true; });
+    box.querySelectorAll('[data-as]').forEach((i) => i.addEventListener('change', () => { if (i.checked) alSel.add(i.dataset.as); else alSel.delete(i.dataset.as); alRenderA(); }));
+    box.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => { const q = b.dataset.q; alSel = new Set(q === 'none' ? [] : favs.filter((s) => q === 'all' || npGroup(s) === q)); alRenderA(); }));
+    box.querySelector('[data-gotab]').addEventListener('click', (e) => { e.preventDefault(); alSetTab('s'); });
+    const apply = (all) => { alDraft.per = Object.assign({}, alDraft.per || {}); for (const s of sel) { const p = Object.assign({}, alDraft.per[s] || {}); box.querySelectorAll('[data-ak]').forEach((i) => { if (all === false) p[i.dataset.ak] = false; else if (!i.indeterminate) p[i.dataset.ak] = i.checked; }); alDraft.per[s] = p; } alRenderA(); };
+    const ap = $('#alApply'); if (ap) ap.addEventListener('click', () => apply(true));
+    const of = $('#alOffSel'); if (of) of.addEventListener('click', () => { if (confirm('Desligar todos os alertas de ' + sel.length + ' ativo(s)?')) apply(false); });
+  }
+  function alRenderG() {
+    const favs = npSorted(), keys = alKeys(), box = $('#alTabG');
+    const nw = alDraft.perNew || null, nwEff = nw || alEff(Object.assign({}, alDraft, { per: {} }), '__novo__');
+    const cell = (s, k, on) => `<td class="c ${on ? 'on' : 'off'}" data-cs="${s}" data-ck="${k}" title="${on ? 'ligado — carrega para desligar' : 'desligado — carrega para ligar'}">${on ? '✔' : '·'}</td>`;
+    const rows = favs.map((s) => { const e = alEff(alDraft, s); return `<tr><td class="n" data-go="${s}">${s}</td>${keys.map(([k]) => cell(s, k, e[k])).join('')}</tr>`; }).join('');
+    box.innerHTML = `<div class="small muted" style="margin-bottom:6px">Carrega numa célula para ligar/desligar · carrega no nome para o editar em “Por ativo”. A linha amarela decide os alertas de cada ativo que juntares aos favoritos daqui para a frente.</div>
+      <div class="algd"><table><thead><tr><th style="text-align:left">Ativo</th>${keys.map(([, t]) => `<th>${t.replace('Setup · ', '')}</th>`).join('')}</tr></thead><tbody>
+      <tr class="new"><td class="n" style="text-decoration:none;cursor:default"><b>Novos favoritos</b></td>${keys.map(([k]) => cell('__novo__', k, nwEff[k])).join('')}</tr>${rows}</tbody></table></div>`;
+    box.querySelectorAll('[data-cs]').forEach((td) => td.addEventListener('click', () => {
+      const s = td.dataset.cs, k = td.dataset.ck;
+      if (s === '__novo__') { alDraft.perNew = Object.assign({}, nwEff, { [k]: !nwEff[k] }); }
+      else { alDraft.per = Object.assign({}, alDraft.per || {}); const cur = alEff(alDraft, s); alDraft.per[s] = Object.assign({}, cur, alDraft.per[s] || {}, { [k]: !cur[k] }); }
+      alRenderG();
+    }));
+    box.querySelectorAll('[data-go]').forEach((td) => td.addEventListener('click', () => { alSel = new Set([td.dataset.go]); alSetTab('a'); }));
+  }
   function openAlerts() {
     alDraft = alCfg();
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
@@ -4202,7 +4447,8 @@ function motor_() {
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
     $('#alLinkMsg').textContent = ''; $('#alCopyMsg').textContent = '';
     alChatUi(); alLoadStatus(); alCheckMotor();
-    $('#alerts').classList.add('open');
+    $('#alerts').classList.add('open'); alSetTab(alTab || 'a');
+    if (!openAlerts.w) { openAlerts.w = 1; document.querySelectorAll('.altabs [data-at]').forEach((b) => b.addEventListener('click', () => alSetTab(b.dataset.at))); }
   }
   function readAlerts() {
     for (const id in AL_CHK) alDraft[AL_CHK[id]] = $('#' + id).checked;
@@ -4522,7 +4768,12 @@ function motor_() {
     box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenChart(a.dataset.chart); }));
   }
   function npSetFilter(f) { npFilter = f; document.querySelectorAll('#npFilters button').forEach((b) => b.classList.toggle('on', b.dataset.f === f)); npRenderFeed(); }
-  function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else { npRenderStrip(); npRenderAssetHead(); } npSyncStatus(); }
+  function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else npRenderAssetHead(); npSyncStatus(); }
+  function npBack() {
+    if (npFrom === 'board') { npShowBoard(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
+    else if (npFrom === 'focus') { npShowFocusAll(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
+    else npShowFeed();
+  }
   // ---------- 📋 Copiar para IA: resumo do ativo aberto (e dos rácios em que entra) para colar numa conversa com o Claude ----------
   function aiTfLine(id, d) {
     const x = d.ext.snap, n = d.int.snap, f = d.fibs && d.fibs[0];
@@ -4625,17 +4876,18 @@ function motor_() {
     else { const ord = npSorted(); list = rows.sort((a, b) => ord.indexOf(a.s) - ord.indexOf(b.s)); }
     let body = '', lastG = null;
     for (const r of list) {
-      if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="7">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
+      if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="8">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
       body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}${r.s}</div><div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
-        <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td></tr>`;
+        <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
-      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}</tr></thead><tbody>${body || '<tr><td colspan="7" class="mu">Ainda não tens favoritos.</td></tr>'}</tbody></table>
+      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || '<tr><td colspan="7" class="mu">Ainda não tens favoritos.</td></tr>'}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     $('#npBoardBack').addEventListener('click', npShowFeed);
     $('#npBoardSel').addEventListener('change', (e) => { settings.npBoardSort = e.target.value; save('mss_settings4', settings); npRenderBoard(); });
     box.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => { settings.npBoardSort = th.dataset.k; save('mss_settings4', settings); npRenderBoard(); }));
     npAZWire(box); if (!cmp) npDrag(box, 'tr.row');
+    box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
     box.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tip]') && window.matchMedia('(hover:none)').matches) return; npOpenAsset(tr.dataset.s); }));
   }
   // estado da conta e dos dados (os mesmos textos do cabeçalho antigo)
@@ -4651,8 +4903,12 @@ function motor_() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
     h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
-      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
-    $('#npBack').addEventListener('click', npShowFeed);
+      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ${npFrom === 'board' ? 'aos favoritos' : npFrom === 'focus' ? 'ao Em foco' : 'ao jornal'}</button></div>`;
+    $('#npBack').addEventListener('click', npBack);
+    { const ord = npSorted(), k = ord.indexOf(symbol);
+      if (k >= 0 && ord.length > 1) { const nv = document.createElement('div'); nv.className = 'np-prevnext';
+        nv.innerHTML = `<button data-go="${ord[(k - 1 + ord.length) % ord.length]}" title="Ativo anterior (tecla ←)">◀ ${ord[(k - 1 + ord.length) % ord.length]}</button><span>${k + 1} de ${ord.length}</span><button data-go="${ord[(k + 1) % ord.length]}" title="Ativo seguinte (tecla →)">${ord[(k + 1) % ord.length]} ▶</button>`;
+        h.firstElementChild.appendChild(nv); nv.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => npOpenAsset(b.dataset.go))); } }
     $('#npAI').addEventListener('click', aiCopy);
     const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
     if (isSynth(symbol)) {
@@ -4671,8 +4927,10 @@ function motor_() {
     const slot = $('#npSlot'); anchors.forEach(([n]) => slot.appendChild(n));
     setTimeout(() => renderChart(true), 40);
   }
+  let npFrom = 'feed', npBoardY = 0;   // de onde se abriu o ativo (jornal, quadro dos favoritos ou Em foco)
   function npOpenAsset(s) {
     if (editMode) { requestExitEdit(); if (editMode) return; }
+    if (npView !== 'asset') { npFrom = npView; if (npView === 'board' || npView === 'focus') npBoardY = window.scrollY; }
     if (symbol !== s) { symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); }
     npView = 'asset'; document.body.dataset.npv = 'asset';
     npMountDetail(); npRender(); window.scrollTo(0, 0);
@@ -4695,7 +4953,7 @@ function motor_() {
   }
   // sugestões da pesquisa: carregar no nome abre o ativo; "＋" junta logo aos favoritos
   function npShowSug(box, opts, open) {
-    box.innerHTML = opts.map((o) => o.err ? `<div class="muted small" style="padding:8px 10px">${o.err}</div>` : `<div class="row"><button type="button" class="o" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button><button type="button" class="a" data-a="${o.symbol}" title="Juntar aos favoritos" aria-label="Juntar ${o.symbol} aos favoritos">＋</button></div>`).join('') || '<div class="muted small" style="padding:8px 10px">sem resultados</div>';
+    box.innerHTML = opts.map((o) => o.err ? `<div class="muted small" style="padding:8px 10px">${o.err}</div>` : `<div class="row"><button type="button" class="o" data-s="${o.symbol}"><b>${o.symbol}</b> <span class="muted">${o.name || ''} · ${o.exch || ''}</span></button>${(settings.favs || []).includes(normSym(o.symbol)) ? `<button type="button" class="a" disabled title="Já está nos favoritos">✔</button>` : `<button type="button" class="a" data-a="${o.symbol}" title="Juntar aos favoritos" aria-label="Juntar ${o.symbol} aos favoritos">＋</button>`}</div>`).join('') || '<div class="muted small" style="padding:8px 10px">sem resultados</div>';
     box.style.display = 'flex';
     box.querySelectorAll('[data-s]').forEach((b) => b.addEventListener('mousedown', (ev) => { ev.preventDefault(); open(b.dataset.s); }));
     box.querySelectorAll('[data-a]').forEach((b) => b.addEventListener('mousedown', (ev) => { ev.preventDefault(); addFavs([b.dataset.a]); b.textContent = '✓'; b.disabled = true; npRender(); }));
@@ -4708,6 +4966,47 @@ function motor_() {
     $('#np').addEventListener('mouseout', (e) => { if (e.target.closest('[data-tip]') && !hold) tip.style.display = 'none'; });
     $('#np').addEventListener('click', (e) => { const el = e.target.closest('[data-tip]'); if (!el) { if (hold) { hold = null; tip.style.display = 'none'; } return; } e.stopPropagation(); e.preventDefault(); hold = el; show(el); clearTimeout(npTipInit.t); npTipInit.t = setTimeout(() => { hold = null; tip.style.display = 'none'; }, 4000); }, true);
   }
+  // ---------- ＋ Juntar vários: lista do TradingView → favoritos ----------
+  const TV_MAP = { GOLD: 'GC=F', XAUUSD: 'GC=F', 'GC1!': 'GC=F', SILVER: 'SI=F', XAGUSD: 'SI=F', 'SI1!': 'SI=F', PLATINUM: 'PL=F', XPTUSD: 'PL=F', 'PL1!': 'PL=F', PALLADIUM: 'PA=F', XPDUSD: 'PA=F', 'PA1!': 'PA=F',
+    'BRN1!': 'BZ=F', BRENT: 'BZ=F', UKOIL: 'BZ=F', 'CL1!': 'CL=F', USOIL: 'CL=F', WTI: 'CL=F', 'ES1!': 'ES=F', SP500: 'ES=F', SPX: 'ES=F', NATURALGAS: 'NG=F', 'NG1!': 'NG=F', COCOA: 'CC=F', 'CC1!': 'CC=F',
+    XCUUSD: 'HG=F', COPPER: 'HG=F', 'HG1!': 'HG=F', NICKEL: 'NICK.L', BTCUSD: 'BTCUSDT', BTCUSDT: 'BTCUSDT', ETHUSD: 'ETHUSDT', 'USDT.D+USDC.D': 'STABLE.D' };
+  const LSE_KNOWN = ['DAGB', 'NUCG', 'ARKK', 'WWH', 'BIOG', 'AGAP', 'COCO', 'NICK'];
+  function tvOne(tok) {
+    let t = String(tok || '').trim().toUpperCase().replace(/^"|"$/g, ''), ex = '';
+    const m = t.match(/^([A-Z0-9_]+):(.+)$/); if (m) { ex = m[1]; t = m[2]; }
+    if (!t) return null;
+    if (TV_MAP[t]) return TV_MAP[t];
+    if (ex === 'LSE' || LSE_KNOWN.includes(t)) return t.replace(/\.L$/, '') + '.L';
+    if (ex === 'BINANCE' || /USDT(\.P)?$/.test(t)) return t.replace(/\.P$/, '');
+    if (/[.=]/.test(t)) return t;                          // já no formato da app (GC=F, NUCG.L…)
+    return ex && /^[A-Z.\-]{1,10}$/.test(t) ? t : null;    // ex.: NASDAQ:AAPL → AAPL
+  }
+  function tvSym(raw) { const p = String(raw).split('/'); if (p.length === 2) { const a = tvOne(p[0]), b = tvOne(p[1]); return a && b ? a + '/' + b : null; } return p.length === 1 ? tvOne(raw) : null; }
+  function mlParse() {
+    const toks = $('#mlTxt').value.split(/[\n,;]+/).map((x) => x.trim()).filter((x) => x && !x.startsWith('###'));
+    const seen = new Set(), favs = new Set(settings.favs || []);
+    return toks.map((t) => { const s = tvSym(t); const st = !s ? 'bad' : favs.has(s) ? 'have' : seen.has(s) ? 'dup' : 'new'; if (s) seen.add(s); return { t, s, st }; });
+  }
+  function mlRender() {
+    const rows = mlParse(), n = rows.filter((r) => r.st === 'new').length;
+    $('#mlPrev').innerHTML = rows.length ? `<table>${rows.map((r) => `<tr><td>${npEsc(r.t)}</td><td>→</td><td><b>${r.s || '?'}</b></td><td class="${r.st === 'new' ? 'ok' : r.st === 'bad' ? 'bad' : 'mu'}">${r.st === 'new' ? '✔ novo' : r.st === 'have' ? 'já nos favoritos' : r.st === 'dup' ? 'repetido' : '✖ não reconhecido — escreve-o no formato da app (ex.: GC=F, NUCG.L)'}</td></tr>`).join('')}</table>` : '';
+    $('#mlOk').textContent = n ? `Juntar ${n}` : 'Juntar'; $('#mlOk').disabled = !n;
+  }
+  function mlInit() {
+    const dlg = $('#multiDlg'); if (!dlg) return;
+    const close = () => dlg.classList.remove('open');
+    $('#npMulti').addEventListener('click', (e) => { e.preventDefault(); dlg.classList.add('open'); mlRender(); setTimeout(() => $('#mlTxt').focus(), 50); });
+    $('#mlX').addEventListener('click', close); $('#mlCancel').addEventListener('click', close);
+    $('#mlTxt').addEventListener('input', mlRender);
+    $('#mlFile').addEventListener('change', async (e) => { const f = e.target.files[0]; if (!f) return; $('#mlTxt').value = (await f.text()); e.target.value = ''; mlRender(); });
+    $('#mlOk').addEventListener('click', () => { const add = mlParse().filter((r) => r.st === 'new').map((r) => r.s); if (!add.length) return; addFavs(add); close(); $('#mlTxt').value = ''; npRender(); });
+  }
+  document.addEventListener('keydown', (e) => {
+    if (npView !== 'asset' || document.body.dataset.np !== '1' || e.altKey || e.ctrlKey || e.metaKey || editMode || lineMode) return;
+    if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '') || document.querySelector('.modal.open')) return;
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const b = document.querySelectorAll('.np-prevnext [data-go]')[e.key === 'ArrowLeft' ? 0 : 1]; if (b) { e.preventDefault(); b.click(); }
+  });
   function npEnter() {
     if (favOpen) closeFav();
     document.body.dataset.np = '1'; document.body.dataset.favs = '';
@@ -4733,7 +5032,7 @@ function motor_() {
     });
     q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => npShowSug(sug, await searchAssets(v), pick), 400); });
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
-    npTipInit();
+    npTipInit(); mlInit();
     npEnter();   // a app abre sempre no jornal
   }
 
@@ -4886,7 +5185,8 @@ function motor_() {
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
     $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
-    $('#lineBtn').addEventListener('click', () => { const pnl = $('#linePanel'); pnl.classList.toggle('open'); if (!pnl.classList.contains('open')) setLineMode(null); else renderLinePanel(); });
+    $('#lineBtn').addEventListener('click', () => { const pnl = $('#linePanel'), tb = $('#lineTools'); const op = !pnl.classList.contains('open'); pnl.classList.toggle('open', op); tb.hidden = !op; if (!op) setLineMode(null); else renderLinePanel(); updateEditUi(); });
+    initLines();
     for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn'], ['#fibBtn', 'fibOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });

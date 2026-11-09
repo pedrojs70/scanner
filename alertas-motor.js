@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T14:24:52.594Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T20:34:16.868Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -750,7 +750,22 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function effA(A, sym) {
     const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? A.forR : A.forA) || {}), o = Object.assign({}, A);
     for (const k in GRP_KEYS) if (g[k] === false) GRP_KEYS[k].forEach((x) => { o[x] = false; });
+    // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
+    const p = A.per && A.per[sym];
+    if (p) {
+      const M = { fvg: 'fvgOn', kz: 'kzOn', week: 'weekOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' };
+      for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
+      if (p.week === false) o.dayOn = false;
+      const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
+      if (sus.length) { o.setups = Object.assign({}, o.setups); sus.forEach((k) => { o.setups[k.slice(3)] = !!p[k]; }); o.setupOn = sus.some((k) => p[k]); }
+    }
     return o;
+  }
+  // este ativo tem algum alerta ligado? (senão o vigia nem o analisa)
+  function anyOn(A, sym, S) {
+    const e = effA(A, sym), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
+    const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
+    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -1231,7 +1246,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
+  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -1570,8 +1585,11 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const anyRatio = favs.some(C.isRatio), ftfs = anyRatio ? [...new Set(tfs.concat(C.baseTfs(tfs)))] : tfs;
     const costOf = (s) => (isCrypto(s) && !relay ? new Set(ftfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
     // primeiro os ativos com setups a seguir (o toque no FVG não pode esperar), depois os outros à vez
-    const order = [...new Set(st.trk.map((x) => x.sym))].filter((s) => favs.indexOf(s) >= 0);
-    for (let k = 0; k < favs.length; k++) { const s = favs[(st.cur + k) % favs.length]; if (order.indexOf(s) < 0) order.push(s); }
+    // só os favoritos com algum alerta ligado são analisados (os outros ficam só na app)
+    const act = favs.filter((s) => C.anyOn(A, s, S) || st.trk.some((x) => x.sym === s) || (st.tgw || []).some((x) => x.sym === s));
+    hb.act = act.length;
+    const order = [...new Set(st.trk.map((x) => x.sym))].filter((s) => act.indexOf(s) >= 0);
+    for (let k = 0; k < act.length; k++) { const s = act[(st.cur + k) % act.length]; if (order.indexOf(s) < 0) order.push(s); }
     const batch = [], dl = new Set(); let used = 0;
     for (const s of order) {
       const nw = legsOf(s).filter((x) => !dl.has(x)), c = nw.reduce((n, x) => n + costOf(x), 0);
@@ -1579,9 +1597,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       batch.push(s); nw.forEach((x) => dl.add(x)); used += c;
     }
     const rotated = batch.filter((s) => !st.trk.some((x) => x.sym === s)).length;
-    st.cur = favs.length ? (st.cur + Math.max(1, rotated)) % favs.length : 0;
+    st.cur = act.length ? (st.cur + Math.max(1, rotated)) % act.length : 0;
     hb.dl = dl.size; hb.an = batch.length; hb.maxDl = MAX_ASSETS; hb.maxAn = MAX_AN;
-    hb.needDl = new Set([].concat(...favs.map(legsOf))).size;
+    hb.needDl = new Set([].concat(...act.map(legsOf))).size;
     const legs = [...dl], crypto = legs.filter(isCrypto);
     let synH = syn && syn.hist;
     const cdata = crypto.length ? (relay ? relayCandles(relay, crypto, ftfs, edits) : cryptoCandles(crypto, ftfs, edits)) : {};
