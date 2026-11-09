@@ -249,6 +249,10 @@
   .algd td.c { cursor:pointer; font-size:14px; } .algd td.c.on { color:#2e7d32; } .algd td.c.off { color:#bbb; }
   .algd tr.new td { background:#f5c51818; }
   @media (max-width:760px) { .alpa { grid-template-columns:1fr; } }
+  .tk { display:block; font-family:JetBrains Mono, monospace; font-size:10.5px; font-weight:400; color:var(--np-mu); letter-spacing:0; margin-top:1px; }
+  .tk.big { font-size:13px; margin-top:4px; }
+  .np-ren { border:0; background:transparent; color:var(--np-mu); font-size:16px; cursor:pointer; vertical-align:middle; padding:0 4px; }
+  .np-bc { border:0; background:transparent; cursor:pointer; font-size:14px; padding:0 2px; }
   .np-az { font-size:11.5px; color:var(--np-mu); margin:-2px 0 6px; } .np-az a { color:var(--np-red); }
   body[data-np="1"][data-npv="board"] #np { max-width:none; }
   .np-h2 a.np-blk { color:inherit; text-decoration:none; border-bottom:1px solid var(--np-red); }
@@ -1932,7 +1936,10 @@
     let v = 0; for (const k of SYN[sym].cg) { if (!(p[k] > 0)) return null; v += p[k]; }
     return Math.round(v * 1e5) / 1e5;
   }
-  root.MSS_SYNTH = { SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  // nomes legíveis dos ativos mais comuns (a app e o vigia usam os mesmos)
+  const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'COCO.L': 'Cacau (ETC)' };
+  function nameOf(sym, own) { const one = (x) => (own && own[x]) || NAMES[x] || x; if (own && own[sym]) return own[sym]; return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(one).join(' ÷ ') : one(sym); }
+  root.MSS_SYNTH = { NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>// Fibonacci automáticas (em escala log), a partir da estrutura de cada timeframe.
@@ -2359,6 +2366,33 @@
 
   // ---------- ativos sintéticos (STABLE.D = USDT.D + USDC.D): histórico importado do TradingView + pontos da CoinGecko ----------
   const SY = window.MSS_SYNTH, isSynth = (s) => !!(SY && SY.isSynth(s));
+  // ---------- nomes legíveis (o teu nome ✎ → o da app → o da Yahoo → o ticker) ----------
+  const ownNames = () => Object.assign({}, settings.autoNames || {}, settings.names || {});
+  const nm = (s) => SY.nameOf(s, ownNames());
+  const nmHtml = (s, big) => { const n = nm(s); return n === s ? `${s}` : `${npEsc(n)}<span class="tk${big ? ' big' : ''}">${s}</span>`; };
+  let autoNameBusy = false;
+  async function fillAutoNames() {   // vai buscar à Yahoo o nome dos ETFs/ações sem nome conhecido (uma vez)
+    if (autoNameBusy) return; autoNameBusy = true;
+    try {
+      const legs = new Set(); (settings.favs || []).forEach((s) => (isRatio(s) ? ratioLegs(s) : [s]).forEach((x) => legs.add(x)));
+      const miss = [...legs].filter((x) => !isCrypto(x) && !isSynth(x) && !SY.NAMES[x] && !(settings.autoNames || {})[x] && !(settings.names || {})[x]);
+      let got = 0;
+      for (const x of miss.slice(0, 12)) {
+        try { const r = await stockJSON('/search?q=' + encodeURIComponent(x.replace(/\.L$/, ''))); const q = ((r && r.quotes) || []).find((o) => String(o.symbol).toUpperCase() === x.toUpperCase());
+          let n = q && (q.shortname || q.longname); if (!n) continue;
+          n = n.replace(/\b(UCITS|ETF|ETC|ETP|Acc|Dist|USD|GBP|EUR|plc|PLC|Shares|Class [A-Z])\b/g, '').replace(/[-–·,]+\s*$/g, '').replace(/\s{2,}/g, ' ').trim();
+          if (n) { settings.autoNames = Object.assign({}, settings.autoNames, { [x]: n.length > 32 ? n.slice(0, 30) + '…' : n }); got++; } } catch (e) {}
+      }
+      if (got) { save('mss_settings4', settings); npRender(); }
+    } finally { autoNameBusy = false; }
+  }
+  function renameAsset(s) {
+    const cur = (settings.names || {})[s] || '', v = prompt(`Nome para ${s} (fica só para mostrar; a pesquisa e os alertas continuam pelo ticker). Deixa vazio para voltar ao nome automático (${SY.nameOf(s, settings.autoNames || {})}).`, cur || nm(s));
+    if (v == null) return;
+    settings.names = Object.assign({}, settings.names || {}); const t = v.trim();
+    if (!t || t === SY.nameOf(s, settings.autoNames || {})) delete settings.names[s]; else settings.names[s] = t.slice(0, 40);
+    save('mss_settings4', settings); npRender();
+  }
   const synthCache = {};
   async function synthData(sym, force) {
     const c = synthCache[sym];
@@ -3982,6 +4016,7 @@
     const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
     box.classList.toggle('max', on); $('#maxBtn').textContent = on ? '✕ Fechar' : '⤢ Gráfico maior';
     setTimeout(() => { try { if (rsiOn && chart.panes()[1]) chart.panes()[1].setHeight(Math.max(110, Math.round($('#chart').clientHeight * 0.2))); } catch (e) {} }, 150);   // RSI com ~20% da altura
+    if (!on && typeof npChartDirect !== 'undefined' && npChartDirect) { npChartDirect = false; setTimeout(() => npBack(), 0); }
     if (!on && chartFromFav) { chartFromFav = false; setTimeout(() => { const s = favOpen; closeFav(); const row = s && document.querySelector(`.favrow[data-s="${CSS.escape(s)}"]`); if (row) row.scrollIntoView({ block: 'center' }); }, 0); }
     document.body.style.overflow = on ? 'hidden' : '';
   }
@@ -4587,7 +4622,7 @@ function motor_() {
       const g = npGroup(s); if (g !== lastG) { items += `<li class="np-grp" style="cursor:default;border:0">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</li>`; lastG = g; }
       const i = npInfo(s), b = i.best;
       const line = b && b.rank >= 2 ? `${b.st.name} ${b.dir === 1 ? '▲' : '▼'} ${b.rank === 4 ? 'pronto' : b.rank === 3 ? 'falta FVG' : 'falta quebra'}${b.ctx && !b.ctx.fav ? ` · contexto contra ${pct(b.ctx.pull)}` : b.ctx && b.ctx.pull > 78.6 ? ' · contexto fundo' : ''}${b.sweep && b.rank >= 3 ? ' 💧' : ''}` : '';
-      items += `<li data-s="${s}" data-g="${g}"><span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)" aria-label="Arrastar ${s}">⠿</span><div style="flex:1;min-width:0"><div class="s">${s}${i.marks}</div><div class="p">${i.f && i.f.price != null ? fmt(i.f.price) : 'a carregar…'}${i.chg != null ? ` <span style="color:${i.chg >= 0 ? NPC('up') : NPC('dn')}">${i.chg >= 0 ? '+' : '−'}${Math.abs(i.chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div>${line ? `<div class="ln">${line}</div>` : ''}</div><div class="sigs">${i.sigs}</div><button class="np-x" data-c="${s}" aria-label="Abrir o gráfico de ${s}" title="Abrir o gráfico">📈</button><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
+      items += `<li data-s="${s}" data-g="${g}"><span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)" aria-label="Arrastar ${s}">⠿</span><div style="flex:1;min-width:0"><div class="s">${nmHtml(s)}${i.marks}</div><div class="p">${i.f && i.f.price != null ? fmt(i.f.price) : 'a carregar…'}${i.chg != null ? ` <span style="color:${i.chg >= 0 ? NPC('up') : NPC('dn')}">${i.chg >= 0 ? '+' : '−'}${Math.abs(i.chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div>${line ? `<div class="ln">${line}</div>` : ''}</div><div class="sigs">${i.sigs}</div><button class="np-x" data-c="${s}" aria-label="Abrir o gráfico de ${s}" title="Abrir o gráfico">📈</button><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
     }
     box.innerHTML = `<h2 class="np-h2"><a href="#" class="np-blk" id="npBoardLk" title="Abrir o quadro com todos os favoritos e mais informação">Favoritos<small>quadro →</small></a></h2>
       <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
@@ -4679,7 +4714,7 @@ function motor_() {
       : x.rank === 2 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> o ${tfLabel(st.zone)} está em zona (${pct(x.z.pullback)}). À espera da quebra no ${tfLabel(st.trig)}.`
       : near ? 'Nenhum setup em zona — mas o preço está perto da inversão da tendência principal.' : 'Nenhum setup em zona nos favoritos. O mais avançado é este.';
     const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;${e && e.rank === 4 ? `color:${NPC('up')};font-weight:700` : ''}">${!e ? 'sem dados' : e.rank === 4 ? 'Pronto' + (e.sweep ? ' 💧' : '') : e.rank === 3 ? 'falta FVG' + (e.sweep ? ' 💧' : '') : e.rank === 2 ? `em zona ${pct(e.z.pullback)}` : 'fora da zona'}</td></tr>`; }).join('');
-    return `<div class="np-kick">${kick}</div><h2>${s}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
+    return `<div class="np-kick">${kick}</div><h2>${nmHtml(s, true)}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
       <p class="np-why">${why}${x.star ? `<br><span>${x.star.txt}</span>` : ''}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
       <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
       <table class="np-st"><tbody>${rows}</tbody></table>
@@ -4786,7 +4821,7 @@ function motor_() {
   }
   function aiSummary() {
     const out = [`Analisa ${symbol} com base nestes dados do meu scanner de estrutura de mercado (ICT). Correções e Fibonacci em escala log. Diz-me: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Usa só estes números e cita-os. Responde em português de Portugal.`, ''];
-    const d0 = data[selectedTf]; out.push(`${symbol} — preço ${d0 ? fmt(d0.price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
+    const d0 = data[selectedTf]; out.push(`${nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol} — preço ${d0 ? fmt(d0.price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
     TFS.forEach((t) => { if (data[t.id]) out.push(aiTfLine(t.id, data[t.id])); });
     const ev = (settings.setups || []).filter((x) => x.on).map((st) => { const r = evalSetup(st); if (!r) return null; const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
       const est = r.zDeep ? 'perto da invalidação' : r.zoneOk && r.trig && r.trig.ok && fvg ? 'pronto' : r.zoneOk && r.trig && r.trig.ok ? 'falta FVG' : r.zoneOk ? 'em zona, falta quebra' : 'fora da zona';
@@ -4877,7 +4912,7 @@ function motor_() {
     let body = '', lastG = null;
     for (const r of list) {
       if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="8">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
-      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}${r.s}</div><div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
+      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}</div><div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
         <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
@@ -4888,6 +4923,7 @@ function motor_() {
     box.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => { settings.npBoardSort = th.dataset.k; save('mss_settings4', settings); npRenderBoard(); }));
     npAZWire(box); if (!cmp) npDrag(box, 'tr.row');
     box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
+    box.querySelectorAll('.np-bc').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npOpenChart(b.dataset.c); }));
     box.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tip]') && window.matchMedia('(hover:none)').matches) return; npOpenAsset(tr.dataset.s); }));
   }
   // estado da conta e dos dados (os mesmos textos do cabeçalho antigo)
@@ -4902,14 +4938,16 @@ function motor_() {
   function npRenderAssetHead() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
-    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
+    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${nmHtml(symbol, true)} <button class="np-ren" id="npRen" title="Mudar o nome que aparece (o ticker não muda)">✎</button></h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
       <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ${npFrom === 'board' ? 'aos favoritos' : npFrom === 'focus' ? 'ao Em foco' : 'ao jornal'}</button></div>`;
     $('#npBack').addEventListener('click', npBack);
     { const ord = npSorted(), k = ord.indexOf(symbol);
       if (k >= 0 && ord.length > 1) { const nv = document.createElement('div'); nv.className = 'np-prevnext';
-        nv.innerHTML = `<button data-go="${ord[(k - 1 + ord.length) % ord.length]}" title="Ativo anterior (tecla ←)">◀ ${ord[(k - 1 + ord.length) % ord.length]}</button><span>${k + 1} de ${ord.length}</span><button data-go="${ord[(k + 1) % ord.length]}" title="Ativo seguinte (tecla →)">${ord[(k + 1) % ord.length]} ▶</button>`;
+        const pv = ord[(k - 1 + ord.length) % ord.length], nx = ord[(k + 1) % ord.length];
+        nv.innerHTML = `<button data-go="${pv}" title="Ativo anterior (tecla ←)">◀ ${npEsc(nm(pv))}</button><span>${k + 1} de ${ord.length}</span><button data-go="${nx}" title="Ativo seguinte (tecla →)">${npEsc(nm(nx))} ▶</button>`;
         h.firstElementChild.appendChild(nv); nv.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => npOpenAsset(b.dataset.go))); } }
     $('#npAI').addEventListener('click', aiCopy);
+    $('#npRen').addEventListener('click', () => renameAsset(symbol));
     const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
     if (isSynth(symbol)) {
       const sym = symbol, fi = $('#npImpF');
@@ -4936,7 +4974,8 @@ function motor_() {
     npMountDetail(); npRender(); window.scrollTo(0, 0);
     clearInterval(npPxTimer); npPxTimer = setInterval(() => { if (npView === 'asset') npSyncStatus(); }, 2000);
   }
-  function npOpenChart(s) { npOpenAsset(s); setTimeout(() => { toggleMax(true); renderChart(true); }, 120); }
+  let npChartDirect = false;
+  function npOpenChart(s) { npOpenAsset(s); npChartDirect = true; setTimeout(() => { toggleMax(true); renderChart(true); }, 120); }
   function npShowFeed() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
@@ -5030,9 +5069,10 @@ function motor_() {
       if (!metalHits(v).length && (isCrypto(normSym(v)) || /:|\./.test(v) || /^[A-Z]{1,5}$/.test(v) || /^[A-Z]{1,3}=F$/i.test(v))) return pick(v);
       const opts = await searchAssets(v); npShowSug(sug, opts, pick);
     });
-    q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => npShowSug(sug, await searchAssets(v), pick), 400); });
+    const favHits = (v) => { const t = v.toLowerCase(); return (settings.favs || []).filter((s) => nm(s) !== s && nm(s).toLowerCase().includes(t)).slice(0, 6).map((s) => ({ symbol: s, name: nm(s), exch: 'nos favoritos' })); };
+    q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => { const fh = favHits(v), r = await searchAssets(v); npShowSug(sug, fh.concat(r.filter((o) => !fh.some((x) => x.symbol === o.symbol))), pick); }, 400); });
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
-    npTipInit(); mlInit();
+    npTipInit(); mlInit(); setTimeout(fillAutoNames, 4000);
     npEnter();   // a app abre sempre no jornal
   }
 
