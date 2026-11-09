@@ -2295,12 +2295,23 @@
   }
   const yRows = (rows, iv) => rows.map((r, k) => ({ t: r[0], ct: (rows[k + 1] ? rows[k + 1][0] : r[0] + Y_MS[iv]) - 1, o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
   // velas de vários timeframes de uma ação: { tfId: candles }
+  // cada ativo é descarregado uma só vez por atualização, mesmo que entre em vários rácios: guarda a resposta ~4 min e junta pedidos iguais em curso
+  const stockMem = new Map();
+  async function stockFetch(y, ivs) {
+    const now = Date.now(), c = stockMem.get(y);
+    if (c && now - c.at < 240e3 && ivs.every((iv) => c.ivs.has(iv))) return c.p;
+    const all = new Set([...(c && now - c.at < 240e3 ? c.ivs : []), ...ivs, ...Object.values(Y_IV)]);   // pede logo todos os intervalos: serve o ativo e todos os rácios onde ele entra
+    const p = stockJSON(`/candles?s=${encodeURIComponent(y)}&i=${[...all].join(',')}`);
+    stockMem.set(y, { at: now, ivs: all, p });
+    p.catch(() => { if (stockMem.get(y) && stockMem.get(y).p === p) stockMem.delete(y); });
+    return p;
+  }
   async function stockCandles(sym, tfIds) {
     const y = await yahooSym(sym);
     const ivs = new Set();
     tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); if (Y_MAGG[id]) ivs.add('1mo'); });
     if (!ivs.size) return {};
-    const r = await stockJSON(`/candles?s=${encodeURIComponent(y)}&i=${[...ivs].join(',')}`);
+    const r = await stockFetch(y, [...ivs]);
     const got = r[y] || {}, out = {};
     for (const id of tfIds) {
       const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : Y_MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
