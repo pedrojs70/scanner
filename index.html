@@ -4016,7 +4016,12 @@
     const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
     box.classList.toggle('max', on); $('#maxBtn').textContent = on ? '✕ Fechar' : '⤢ Gráfico maior';
     setTimeout(() => { try { if (rsiOn && chart.panes()[1]) chart.panes()[1].setHeight(Math.max(110, Math.round($('#chart').clientHeight * 0.2))); } catch (e) {} }, 150);   // RSI com ~20% da altura
-    if (!on && typeof npChartDirect !== 'undefined' && npChartDirect) { npChartDirect = false; setTimeout(() => npBack(), 0); }
+    let navOk = false; try { navOk = !navPop && document.body.dataset.np === '1'; } catch (e) {}
+    if (navOk) {
+      if (on) navPush({ v: 'max', s: symbol });
+      else if (history.state && (history.state.v === 'max' || history.state.v === 'chart')) { const direct = history.state.v === 'chart'; npChartDirect = false; if (direct) history.back(); else { navSkip++; history.back(); } }
+      else if (npChartDirect) { npChartDirect = false; setTimeout(() => npBack(), 0); }
+    }
     if (!on && chartFromFav) { chartFromFav = false; setTimeout(() => { const s = favOpen; closeFav(); const row = s && document.querySelector(`.favrow[data-s="${CSS.escape(s)}"]`); if (row) row.scrollIntoView({ block: 'center' }); }, 0); }
     document.body.style.overflow = on ? 'hidden' : '';
   }
@@ -4746,7 +4751,7 @@ function motor_() {
   function npShowFocusAll() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     npView = 'focus'; document.body.dataset.npv = 'focus'; clearInterval(npPxTimer);
-    npRender(); window.scrollTo(0, 0); scanFavs(false);
+    npRender(); window.scrollTo(0, 0); scanFavs(false); navPush({ v: 'focus' });
   }
   function npRenderFocusAll() {
     const box = $('#npFocusAll'); if (!box) return;
@@ -4861,7 +4866,7 @@ function motor_() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
     npView = 'board'; document.body.dataset.npv = 'board'; clearInterval(npPxTimer);
-    npRender(); window.scrollTo(0, 0); scanFavs(false);
+    npRender(); window.scrollTo(0, 0); scanFavs(false); navPush({ v: 'board' });
   }
   const smaOfTf = (d, n) => { const cs = d && d.candles; if (!cs || cs.length < n) return null; let t = 0; for (let i = cs.length - n; i < cs.length; i++) t += cs[i].c; return t / n; };
   // liquidez do dia / semana anteriores a partir das velas de 1H de um favorito
@@ -4973,6 +4978,46 @@ function motor_() {
     const slot = $('#npSlot'); anchors.forEach(([n]) => slot.appendChild(n));
     setTimeout(() => renderChart(true), 40);
   }
+  // ---------- botão "recuar" do browser/telemóvel: cada ecrã fica no histórico ----------
+  let navPop = false, navSkip = 0, navDepth = 0;
+  function navPush(st) {
+    if (navPop || document.body.dataset.np !== '1') return;
+    if (history.state && JSON.stringify(history.state) === JSON.stringify(st)) return;
+    history.pushState(st, ''); navDepth++;
+  }
+  function navBackOr(fn) { if (navDepth > 0) history.back(); else fn(); }
+  window.addEventListener('popstate', (e) => {
+    if (navSkip) { navSkip--; navDepth = Math.max(0, navDepth - 1); return; }
+    navDepth = Math.max(0, navDepth - 1);
+    if (document.body.dataset.np !== '1') return;
+    const st = e.state || { v: 'feed' };
+    navPop = true;
+    try {
+      if (st.v !== 'modal') { document.querySelectorAll('.modal.open').forEach((m) => m.classList.remove('open')); const hp = $('#help'); if (hp) hp.classList.remove('open'); }
+      if (editMode) { requestExitEdit(); if (editMode) return; }
+      const box = $('.chartbox');
+      if (box && box.classList.contains('max') && st.v !== 'max' && st.v !== 'chart') { npChartDirect = false; chartFromFav = false; toggleMax(false); }
+      if (st.v === 'feed') { if (npView !== 'feed') npShowFeed(); }
+      else if (st.v === 'board') { if (npView !== 'board') npShowBoard(); }
+      else if (st.v === 'focus') { if (npView !== 'focus') npShowFocusAll(); }
+      else if (st.s) {
+        if (npView !== 'asset' || symbol !== st.s) npOpenAsset(st.s);
+        if ((st.v === 'max' || st.v === 'chart') && box && !box.classList.contains('max')) { npChartDirect = st.v === 'chart'; setTimeout(() => { toggleMax(true); renderChart(true); }, 120); }
+      }
+    } finally { navPop = false; }
+  });
+  // janelas (Alertas, Definições, Ajuda, Adicionar rácios): abrir = um passo no histórico; recuar fecha
+  function navWatchModals() {
+    ['#alerts', '#settings', '#multiDlg', '#help', '#btModal'].forEach((id) => {
+      const el = $(id); if (!el) return; let was = el.classList.contains('open');
+      new MutationObserver(() => {
+        const now = el.classList.contains('open'); if (now === was) return; was = now;
+        if (navPop) return;
+        if (now) navPush({ v: 'modal', m: id });
+        else if (history.state && history.state.v === 'modal' && history.state.m === id) { navSkip++; history.back(); }
+      }).observe(el, { attributes: true, attributeFilter: ['class'] });
+    });
+  }
   let npFrom = 'feed', npBoardY = 0;   // de onde se abriu o ativo (jornal, quadro dos favoritos ou Em foco)
   function npOpenAsset(s) {
     if (editMode) { requestExitEdit(); if (editMode) return; }
@@ -4981,14 +5026,16 @@ function motor_() {
     npView = 'asset'; document.body.dataset.npv = 'asset';
     npMountDetail(); npRender(); window.scrollTo(0, 0);
     clearInterval(npPxTimer); npPxTimer = setInterval(() => { if (npView === 'asset') npSyncStatus(); }, 2000);
+    navPush({ v: 'asset', s });
   }
   let npChartDirect = false;
-  function npOpenChart(s) { npOpenAsset(s); npChartDirect = true; setTimeout(() => { toggleMax(true); renderChart(true); }, 120); }
+  function npOpenChart(s) { const f = navPop; navPop = true; npOpenAsset(s); navPop = f; npChartDirect = true; navPush({ v: 'chart', s }); setTimeout(() => { const g = navPop; navPop = true; toggleMax(true); navPop = g; renderChart(true); }, 120); }
   function npShowFeed() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
     npView = 'feed'; document.body.dataset.npv = 'feed'; clearInterval(npPxTimer);
     npRender(); npRenderFeed(); window.scrollTo(0, 0);
+    navPush({ v: 'feed' });
   }
   function npLinkWire(a) {
     a.addEventListener('click', (e) => {
@@ -5080,7 +5127,7 @@ function motor_() {
     const favHits = (v) => { const t = v.toLowerCase(); return (settings.favs || []).filter((s) => nm(s) !== s && nm(s).toLowerCase().includes(t)).slice(0, 6).map((s) => ({ symbol: s, name: nm(s), exch: 'nos favoritos' })); };
     q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => { const fh = favHits(v), r = await searchAssets(v); npShowSug(sug, fh.concat(r.filter((o) => !fh.some((x) => x.symbol === o.symbol))), pick); }, 400); });
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
-    npTipInit(); mlInit(); setTimeout(fillAutoNames, 4000);
+    npTipInit(); mlInit(); navWatchModals(); try { history.replaceState({ v: 'feed' }, ''); } catch (e) {} setTimeout(fillAutoNames, 4000);
     npEnter();   // a app abre sempre no jornal
   }
 
