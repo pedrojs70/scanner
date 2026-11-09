@@ -2283,6 +2283,7 @@
     if (out.length) { const last = out[out.length - 1], d = new Date(last.t), end = Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / k) * k + k, 1) - 1; last.ct = Math.max(last.ct, end); }   // o período em curso só fecha no fim do trimestre/semestre/ano
     return out;
   }
+  let dataSym = null;   // ativo a que pertencem os dados no ecrã
   async function loadAll() {
     const token = ++loadToken;
     setStatus('A carregar dados…');
@@ -2298,7 +2299,7 @@
         if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
         $('#price').textContent = fmt(data[selectedTf].price);
         setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT') + (isSynth(symbol) ? ' · TradingView + CoinGecko' : isRatio(symbol) ? ' · rácio ' + ratioLegs(symbol).join(' ÷ ') : ' · Yahoo'));
-        renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
+        dataSym = symbol; renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
         clearTimeout(timer); if (settings.refresh) timer = setTimeout(loadAll, 120000);
         return;
       }
@@ -2320,10 +2321,12 @@
       const last = data[selectedTf] || data[results[results.length - 1][0]];
       $('#price').textContent = fmt(last.price);
       setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT'));
-      renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
+      dataSym = symbol; renderTable(); renderConfluence(); renderPrev(); renderChart(true); updateEditUi();
     } catch (e) {
       if (token !== loadToken) return;
       setStatus((isCrypto(symbol) ? 'Erro a obter dados da Binance: ' : isSynth(symbol) ? 'Sem dados do ' + symbol + ': ' : isRatio(symbol) ? 'Erro a obter dados do rácio: ' : 'Erro a obter dados da ação: ') + (e.message || e) + (isSynth(symbol) ? '' : ' — confirma o símbolo (ex.: BTCUSDT, AAPL, NASDAQ:AAPL).'), true);
+      // não deixar no ecrã a análise do ativo anterior
+      if (dataSym !== symbol) { Object.keys(data).forEach((k) => delete data[k]); $('#price').textContent = '—'; try { renderTable(); renderConfluence(); renderPrev(); renderChart(true); } catch (er) {} }
     }
     clearTimeout(timer);
     if (settings.refresh) timer = setTimeout(loadAll, 60000);
