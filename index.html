@@ -249,6 +249,7 @@
   .algd td.c { cursor:pointer; font-size:14px; } .algd td.c.on { color:#2e7d32; } .algd td.c.off { color:#bbb; }
   .algd tr.new td { background:#f5c51818; }
   @media (max-width:760px) { .alpa { grid-template-columns:1fr; } }
+  #npRail li .s { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .tk { display:block; font-family:JetBrains Mono, monospace; font-size:10.5px; font-weight:400; color:var(--np-mu); letter-spacing:0; margin-top:1px; }
   .tk.big { font-size:13px; margin-top:4px; }
   .np-ren { border:0; background:transparent; color:var(--np-mu); font-size:16px; cursor:pointer; vertical-align:middle; padding:0 4px; }
@@ -1938,7 +1939,14 @@
   }
   // nomes legíveis dos ativos mais comuns (a app e o vigia usam os mesmos)
   const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'COCO.L': 'Cacau (ETC)' };
-  function nameOf(sym, own) { const one = (x) => (own && own[x]) || NAMES[x] || x; if (own && own[sym]) return own[sym]; return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(one).join(' ÷ ') : one(sym); }
+  // nomes curtos para os rácios (cabem numa linha: Ouro/Bitcoin, AGAP/BTC…)
+  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'COCO.L': 'Cacau ETC' };
+  function nameOf(sym, own) {
+    const one = (x) => (own && own[x]) || NAMES[x] || x;
+    const sh = (x) => (own && own[x] && own[x].length <= 12 ? own[x] : SHORT[x] || String(x).replace(/\.L$/, '').replace(/USDT$/, ''));
+    if (own && own[sym]) return own[sym];
+    return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(sh).join('/') : one(sym);
+  }
   root.MSS_SYNTH = { NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>

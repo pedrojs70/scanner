@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T21:34:34.147Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T22:22:59.334Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1367,7 +1367,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // nomes legíveis dos ativos mais comuns (a app e o vigia usam os mesmos)
   const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'COCO.L': 'Cacau (ETC)' };
-  function nameOf(sym, own) { const one = (x) => (own && own[x]) || NAMES[x] || x; if (own && own[sym]) return own[sym]; return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(one).join(' ÷ ') : one(sym); }
+  // nomes curtos para os rácios (cabem numa linha: Ouro/Bitcoin, AGAP/BTC…)
+  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'COCO.L': 'Cacau ETC' };
+  function nameOf(sym, own) {
+    const one = (x) => (own && own[x]) || NAMES[x] || x;
+    const sh = (x) => (own && own[x] && own[x].length <= 12 ? own[x] : SHORT[x] || String(x).replace(/\.L$/, '').replace(/USDT$/, ''));
+    if (own && own[sym]) return own[sym];
+    return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(sh).join('/') : one(sym);
+  }
   root.MSS_SYNTH = { NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 
