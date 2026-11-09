@@ -209,6 +209,13 @@
   .np-h:active { cursor:grabbing; }
   .np-dragging { opacity:.55; outline:1px dashed var(--np-ink); }
   .np-syninfo { flex-basis:100%; font-size:12px; color:var(--np-mu); margin-top:8px; line-height:1.5; }
+  #linePanel { display:none; padding:8px 10px; border-top:1px solid var(--line, #2a313b); font-size:13px; }
+  #linePanel.open { display:block; }
+  #linePanel .lphead button { margin:0 !important; }
+  #linePanel .lphead { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:6px; }
+  #linePanel .lphint { background:#f5c51822; border:1px solid #f5c518; padding:5px 8px; margin:4px 0 8px; }
+  #linePanel .lprow { display:flex; gap:10px; align-items:center; flex-wrap:wrap; padding:4px 0; border-bottom:1px solid var(--line, #2a313b); }
+  #linePanel .lprow span { flex:1; min-width:220px; }
   .np-az { font-size:11.5px; color:var(--np-mu); margin:-2px 0 6px; } .np-az a { color:var(--np-red); }
   body[data-np="1"][data-npv="board"] #np { max-width:none; }
   .np-h2 a.np-blk { color:inherit; text-decoration:none; border-bottom:1px solid var(--np-red); }
@@ -628,6 +635,15 @@
       <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
     </ul>
 
+    <h3 class="helphead">ϕ Fibonacci, alvos, linhas e IA</h3>
+    <ul>
+      <li><b>Fibonacci automáticas:</b> a app traça sozinha, em cada timeframe, a Fibonacci da perna em curso (limite → topo/fundo), em log. Botão <b>ϕ Fibonacci</b> no gráfico para as ver: entrada ótima (61,8–65%), 78,6% e os alvos −0,236/−0,268 · −0,618/−0,65 · −1/−1,032. A roxo, a Fibonacci anterior (do mesmo limite ao topo/fundo anterior, já ultrapassado) — só alvos; cinzento ✔ = alvo atingido.</li>
+      <li><b>Quando morre:</b> depois de chegar a um alvo, inverter e voltar ao nível anterior (ou à linha do 0), ou se fechar para lá da origem (1). No máximo 2 por timeframe.</li>
+      <li><b>Nos setups:</b> chip “✔ Entrada ótima” (61,8–65%) ou “Profunda” (78,6–91,8%). Acima de 91,8% o setup passa a “Perto da invalidação” (não conta como pronto). <b>⭐</b> quando um alvo do timeframe de baixo (a caminhar contra o de cima) cai na zona do de cima (61,8–78,6%) — aparece no setup, no Em foco (sobe na ordem) e no Telegram.</li>
+      <li><b>📐 Linhas:</b> diagonais (2 cliques) e canais paralelos (2 cliques na linha de base + 1 no outro lado). Ficam no timeframe onde as desenhaste e gravadas na conta. 🔔 Alertar: o vigia avisa à distância escolhida e quando uma vela fecha fora de um canal.</li>
+      <li><b>📋 Copiar para IA:</b> na página do ativo — copia um resumo completo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que o ativo entra). Cola numa conversa com o Claude; junta uma imagem do gráfico se quiseres.</li>
+    </ul>
+
     <h3 class="helphead">📐 Escala logarítmica</h3>
     <ul>
       <li>O gráfico está em <b>escala log</b> (como no TradingView) e as <b>correções</b> são medidas em log, como as Fibonacci “baseadas na escala logarítmica”: os 50%, 61,8%, 65%, 78,6% e 91,8%, a % de correção, as zonas, os setups e os alertas.</li>
@@ -665,6 +681,8 @@
       <li><b>4 · Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
       <li><b>5 · Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
       <li><b>6 · SMA 200:</b> avisa quando o preço chega à média das últimas 200 velas do timeframe (por defeito Semanal e Diário) — a descer 💰 (vinha de cima: possível zona de compra) ou a subir 🧱 (vinha de baixo: teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho; opcionalmente antes, a X% da média. Depois de avisar só volta a avisar quando o preço se afastar mais de 5% (ajustável) e voltar.</li>
+      <li><b>7 · Perto do alvo:</b> depois de um alerta de setup, a app segue os alvos do timeframe da zona — o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 (log) — e avisa quando o preço chega a 1% (ajustável) de cada um.</li>
+      <li><b>8 · Linhas e canais:</b> só as linhas que desenhaste com 🔔 ligado. Avisa uma vez quando o preço chega à distância escolhida (volta a avisar depois de se afastar 3× essa distância) e, num canal, quando uma vela do timeframe da linha fecha fora.</li>
       <li><b>Vale para ativos / rácios:</b> em cada alerta escolhes se vale para os ativos normais, para os rácios (A÷B) ou para os dois. Por defeito as killzones e a SMA 200 ficam desligadas nos rácios.</li>
       <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
     </ul>
@@ -695,9 +713,10 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div></div>
+    <div id="linePanel"></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
       <span><i class="sw" style="background:#ce93d8"></i>limite do movimento recente</span>
@@ -771,6 +790,15 @@
   <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alSmaTfs"></span>
     <br><span class="muted small">Avisar antes, a</span> <input id="alSmaPre" type="number" min="0" max="20" step="0.1" style="width:64px"> <span class="muted small">% da média (0 = só quando toca)</span>
     <br><span class="muted small">Volta a avisar depois de o preço se afastar mais de</span> <input id="alSmaRe" type="number" min="0.5" max="50" step="0.5" style="width:64px"> <span class="muted small">% da média</span></div>
+
+  <h3 class="sethead">7 · Perto do alvo <span class="muted small">(depois de um alerta de setup)</span></h3>
+  <div class="algrp" data-g="tgt"></div>
+  <label class="chk alline"><input id="alTgt" type="checkbox"> Avisar quando o preço chega perto de um alvo de um setup avisado: o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 do timeframe da zona (escala log)</label>
+  <div class="alrow"><span class="muted small">Avisar a</span> <input id="alTgtPct" type="number" min="0.1" max="10" step="0.1" style="width:64px"> <span class="muted small">% do alvo · cada alvo avisa uma vez; deixa de seguir se o preço passar a origem da perna</span></div>
+
+  <h3 class="sethead">8 · Linhas e canais <span class="muted small">(os que desenhaste com 🔔)</span></h3>
+  <div class="algrp" data-g="line"></div>
+  <label class="chk alline"><input id="alLine" type="checkbox"> Avisar quando o preço chega perto de uma linha diagonal ou de um lado de um canal (a distância escolhe-se em cada linha), e quando uma vela fecha fora de um canal</label>
 
   <h3 class="sethead">Ligar o Telegram</h3>
   <ol class="alsteps">
@@ -1856,6 +1884,65 @@
   root.MSS_SYNTH = { SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
+<script>// Fibonacci automáticas (em escala log), a partir da estrutura de cada timeframe.
+// Fibonacci atual = da perna em curso (limite → topo/fundo): retrações (entradas) e alvos (extensões).
+// Fibonacci anterior = do mesmo limite até ao topo/fundo anterior já ultrapassado: só alvos, enquanto viva.
+// Morre quando o preço chega a um alvo, inverte e volta ao nível anterior (ou à linha do 0), ou fecha para lá da origem (1).
+// Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
+(function (root) {
+  'use strict';
+  const ENTRY = [0.618, 0.65], DEEP = 0.786, INVAL = 0.918;
+  const TGT = [[-0.236, -0.268, 'Alvo 1'], [-0.618, -0.65, 'Alvo 2'], [-1, -1.032, 'Alvo 3']];
+  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '1h': '15m', '15m': '5m' };
+  // nível f de uma Fibonacci com 1 em A e 0 em B (negativos = para lá de B)
+  const lv = (A, B, f) => (A > 0 && B > 0 ? Math.exp(Math.log(B) + f * (Math.log(A) - Math.log(B))) : B + f * (A - B));
+  function make(A, B, dir, role) {
+    const t = TGT.map(([f1, f2, name], k) => { const a = lv(A, B, f1), b = lv(A, B, f2); return { k, name, f: f1, lo: Math.min(a, b), hi: Math.max(a, b), near: a }; });
+    return { dir, role, A, B, entry: { lo: Math.min(lv(A, B, ENTRY[0]), lv(A, B, ENTRY[1])), hi: Math.max(lv(A, B, ENTRY[0]), lv(A, B, ENTRY[1])) }, deep: lv(A, B, DEEP), inval: lv(A, B, INVAL), mid: lv(A, B, 0.5), targets: t };
+  }
+  // percorre as velas depois de B: alvos atingidos e se a Fibonacci morreu (regra do Richy)
+  function life(f, cs, fromI) {
+    const up = f.dir === 1; let hit = -1, hitJ = -1, dead = false;
+    for (let j = fromI + 1; j < cs.length; j++) {
+      const c = cs[j];
+      if (up ? c.c < f.A : c.c > f.A) { dead = true; break; }   // fechou para lá da origem (1)
+      if (hit >= 0 && j > hitJ) { const back = hit > 0 ? f.targets[hit - 1].near : f.B; if (up ? c.l <= back : c.h >= back) { dead = true; break; } }   // inverteu no alvo e voltou ao nível anterior / ao 0
+      for (let k = f.targets.length - 1; k > hit; k--) if (up ? c.h >= f.targets[k].near : c.l <= f.targets[k].near) { hit = k; hitJ = j; break; }
+    }
+    f.targets.forEach((t) => { t.hit = t.k <= hit; });
+    f.dead = dead; return f;
+  }
+  // as Fibonacci vivas de uma análise (res = resultado do motor; cs = velas fechadas; price = preço atual)
+  function fibsOf(res, cs, price) {
+    const s = res && res.state; if (!s || !s.trend || !cs || !cs.length) return [];
+    const d = s.trend, A = s.prot, ext = s.ext, out = [];
+    const cur = make(A.p, ext.p, d, 'atual'); cur.Ai = A.i; cur.Bi = ext.i;
+    life(cur, cs, ext.i); out.push(cur);
+    // topo/fundo anterior (já ultrapassado) depois do limite: Fibonacci só de alvos
+    const sw = (res.swings || []).filter((x) => x.type === (d === 1 ? 'H' : 'L') && !x.provisional && x.i > A.i && x.i < ext.i && (d === 1 ? x.p < ext.p : x.p > ext.p)).sort((a, b) => b.i - a.i)[0];
+    if (sw) { const pv = make(A.p, sw.p, d, 'anterior'); pv.Ai = A.i; pv.Bi = sw.i; life(pv, cs, sw.i); if (!pv.dead) out.push(pv); }
+    return out;
+  }
+  // retração (log) de um preço numa Fibonacci: 0 em B, 1 em A
+  const retrOf = (f, p) => (f.A > 0 && f.B > 0 && p > 0 ? (Math.log(f.B) - Math.log(p)) / (Math.log(f.B) - Math.log(f.A)) : (f.B - p) / (f.B - f.A));
+  // ⭐ confluência: um alvo (por atingir) do timeframe de baixo, a andar contra a tendência do de cima, cai na zona de entrada do de cima (61,8%–78,6%)
+  function confluence(hiFib, loFibs) {
+    if (!hiFib) return null;
+    const zLo = Math.min(lv(hiFib.A, hiFib.B, ENTRY[0]), hiFib.deep), zHi = Math.max(lv(hiFib.A, hiFib.B, ENTRY[0]), hiFib.deep);
+    let best = null;
+    for (const f of loFibs || []) {
+      if (f.dir === hiFib.dir) continue;   // o de baixo tem de estar a caminhar para a zona do de cima
+      for (const t of f.targets) {
+        if (t.hit) continue;
+        const lo = Math.max(t.lo, zLo), hi = Math.min(t.hi, zHi);
+        if (lo <= hi) { const p = (lo + hi) / 2, r = retrOf(hiFib, p) * 100; if (!best || Math.abs(r - 63.4) < Math.abs(best.retr - 63.4)) best = { tgt: t.name, f: t.f, lo: t.lo, hi: t.hi, p, retr: r, role: f.role }; }
+      }
+    }
+    return best;
+  }
+  root.MSS_FIB = { ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 <script>(function () {
   const LWC = window.LightweightCharts, E = window.StructureEngine;
   const TFS = [
@@ -2096,7 +2183,9 @@
       const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null }));
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
-    return { candles: cs, closed, price, ext: layer(E.analyze, settings.extAtr, settings.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, settings.intAtr, settings.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    const out = { candles: cs, closed, price, ext: layer(E.analyze, settings.extAtr, settings.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, settings.intAtr, settings.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    try { out.fibs = FB.fibsOf(out.ext.res, closed, price); out.fibsI = FB.fibsOf(out.int.res, closed, price); } catch (e) { out.fibs = []; out.fibsI = []; }
+    return out;
   }
 
 
@@ -2751,6 +2840,17 @@
     return TFS.slice(ci, ti).map((t) => t.id).reverse();
   }
   const tfLabel = (id) => (TFS.find((t) => t.id === id) || { label: id }).label;
+  // ---------- Fibonacci automáticas (alerts/fib.js) ----------
+  const FB = window.MSS_FIB;
+  const DEEP_MAX = 91.8;   // acima disto a zona está perto da invalidação: não conta como setup
+  const zoneChip = (p) => (p >= 61.8 && p <= 65 ? ' <span class="chip rf-pos2" title="Correção entre 61,8% e 65% (escala log): a zona de entrada ótima">✔ Entrada ótima</span>' : p > 78.6 && p <= DEEP_MAX ? ' <span class="chip rf-deep" title="Correção acima de 78,6%: entrada profunda, mais perto do limite">Profunda</span>' : '');
+  // ⭐ um alvo do timeframe de baixo cai na zona do timeframe da zona (dm = dados por TF)
+  function starOf(dm, zoneTf) {
+    const dz = dm[zoneTf], lo = FB.NEXT[zoneTf], dl = lo && dm[lo];
+    if (!dz || !dl || !dz.fibs || !dz.fibs[0]) return null;
+    const c = FB.confluence(dz.fibs[0], [...(dl.fibs || []), ...(dl.fibsI || [])]);
+    return c ? Object.assign(c, { lo: c.lo, hi: c.hi, tf: lo, zone: zoneTf, txt: `⭐ ${c.tgt} do ${tfLabel(lo)} (${fmt(c.lo)} – ${fmt(c.hi)}) na zona do ${tfLabel(zoneTf)} (retração ${pct(c.retr)})` }) : null;
+  }
   function evalSetup(st) {
     const dz = data[st.zone], dt = data[st.trig];
     if (!dz || !dt) return null;
@@ -2758,7 +2858,7 @@
     if (!z.trend) return null;
     // sentido: o da tendência principal do TF de zona
     const dir = z.trend;
-    const zoneOk = z.pullback >= 50;
+    const zoneOk = z.pullback >= 50 && z.pullback <= DEEP_MAX, zDeep = z.pullback > DEEP_MAX;
     const rs = recentState(t);
     let trig = null, entry = null;
     if (t.pending && t.pending.dir === dir) trig = { txt: `⏳ a confirmar · faltam ${Math.max(0, t.pending.left)} velas`, ok: false };
@@ -2806,7 +2906,7 @@
     });
     const warn = trig && trig.ok ? liqWarn(dt, dir) : null;
     const stage = zoneOk && entry ? 3 : zoneOk && trig && trig.ok ? 2 : zoneOk ? 1 : 0;
-    return { st, dir, z, t, zoneOk, trig, entry, plan, tgt, rrOk, touched, gr, warn, stage };
+    return { st, dir, z, t, zoneOk, zDeep, star: starOf(data, st.zone), trig, entry, plan, tgt, rrOk, touched, gr, warn, stage };
   }
   function renderConfluence() {
     const on = (settings.setups || []).filter((x) => x.on);
@@ -2839,11 +2939,12 @@
       const ctxCell = !(cx && cx.trend) ? '<span class="muted small">sem dados</span>'
         : `<span class="chip ${cx.trend === r.dir ? (cx.pullback > 78.6 ? 'rf-deep' : 'rf-pos2') : 'rf-bad'}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
       const chk = ctxChip + ' ' + items.filter((it) => !it[3]).map(([nm, ok, tip]) => `<span class="chip ${ok ? 'rf-pos2' : ok === false ? 'off' : 'rf-neu'}" title="${tip}">${ok ? '✔' : ok === false ? '✘' : '?'} ${nm}</span>`).join(' ')
-        + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '');
+        + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '') + zoneChip(r.z.pullback)
+        + (r.star ? ` <span class="chip rf-pos2" title="${r.star.txt}">⭐ ${r.star.tgt} do ${tfLabel(r.star.tf)} em ${fmt(r.star.p)}</span>` : '');
       const missing = items.filter((it) => !it[3] && !it[1]).map(([nm]) => nm.toLowerCase());
       const ready = !missing.length;
       const ctxNote = cx && cx.trend && cx.trend !== r.dir ? ` <span class="muted small">· contra o ${tfLabel(cid)} (${pct(cx.pullback)})</span>` : cx && cx.trend ? ` <span class="muted small">· a favor do ${tfLabel(cid)}</span>` : '';
-      const estado = ready ? `<span class="stg s3">✔ Pronto</span>${ctxNote}` : `<span class="stg s${r.zoneOk ? 1 : 0}">Em formação</span><br><span class="muted small">falta: ${missing.join(', ')}</span>`;
+      const estado = r.zDeep ? `<span class="stg s1">Perto da invalidação</span><br><span class="muted small">a zona já corrigiu ${pct(r.z.pullback)} (acima de 91,8%)</span>` : ready ? `<span class="stg s3">✔ Pronto</span>${ctxNote}` : `<span class="stg s${r.zoneOk ? 1 : 0}">Em formação</span><br><span class="muted small">falta: ${missing.join(', ')}</span>`;
       return `<tr class="${ready ? (up ? 'su-ok' : 'sd-ok') : ''} ${!r.zoneOk ? 'dim' : ''}">
         <td class="tf">${st.name} <span class="muted small">${cid ? tfLabel(cid) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></td>
         <td><span class="${up ? 'upc' : 'dnc'}">${up ? '▲ Long' : '▼ Short'}</span></td>
@@ -3079,8 +3180,13 @@
     if (vE() && x.trend) {
       add(x.protected, '#ff3b3b', 'limite (tendência principal)', 0, 2);
       add(x.extreme, '#9aa4b1', x.trend === 1 ? 'topo da perna' : 'fundo da perna', 2);
-      add(x.levels[50], '#ffd54f', '50%', 2); add(x.levels[65], '#ff9800', '65%', 2); add(x.levels[918], '#ff5252', '91,8%', 2);
+      add(x.levels[50], '#ffd54f', '50%', 2); if (!settings.fibOn) add(x.levels[65], '#ff9800', '65%', 2); add(x.levels[918], '#ff5252', '91,8%', 2);
     }
+    if (settings.fibOn && !editMode) (d.fibs || []).forEach((f) => {
+      const ant = f.role === 'anterior';
+      if (!ant) { add(f.entry.lo, '#26a69a', 'entrada ótima', 0, 1); add(f.entry.hi, '#26a69a', '', 0, 1); add(f.deep, '#ff9800', '78,6%', 2, 1); }
+      f.targets.forEach((t) => { const c = t.hit ? '#7d8794' : ant ? '#9575cd' : '#42a5f5'; add(t.lo, c, `${t.name}${ant ? ' (ant.)' : ''}${t.hit ? ' ✔' : ''}`, ant ? 3 : 2, 1); add(t.hi, c, '', ant ? 3 : 2, 1); });
+    });
     if (vI() && n.trend) add(n.protected, '#ce93d8', 'limite (movimento recente)', 1, 1);
     if (vI() && n.dispute) { const dn = n.dispute.dir === -1;
       add(n.dispute.confirm, '#f5c518', `em disputa: quebra ${dn ? '▼' : '▲'} confirma se fechar ${dn ? 'abaixo' : 'acima'}`, 2, 1);
@@ -3104,6 +3210,7 @@
     const g = ctx2d; g.setTransform(dpr, 0, 0, dpr, 0, 0); g.clearRect(0, 0, w, h);
     const ts = chart.timeScale(), paneW = ts.width(); let paneH = h - ts.height(); try { paneH = chart.panes()[0].getHeight(); } catch (e) {}
     g.save(); g.beginPath(); g.rect(0, 0, paneW, paneH); g.clip();
+    try { drawUserLines(g, paneW); } catch (e) {}
     const { d } = drawState, cl = d.closed;
     const X = (i) => (i >= cl.length ? paneW : ts.timeToCoordinate(cl[i].tt));
     const Y = (p) => candleSeries.priceToCoordinate(p);
@@ -3281,7 +3388,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', !!lineMode); renderLinePanel(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -3386,7 +3493,82 @@
     window.addEventListener('mousemove', move, true); window.addEventListener('touchmove', move, { capture: true, passive: false });
     window.addEventListener('mouseup', end, true); window.addEventListener('touchend', end, true);
   }
+  // ---------- linhas diagonais e canais paralelos (desenhados por ti; gravados na conta, por ativo e timeframe) ----------
+  let lineMode = null, linePts = [];
+  const scheduleDraw = () => {};   // o desenho corre sempre (requestAnimationFrame)
+  const userLines = (sym) => ((settings.lines || {})[sym || symbol] || []);
+  function idxOfT(t) {
+    const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
+    if (t >= cs[n - 1].t) return n - 1 + (t - cs[n - 1].t) / tf;
+    if (t <= cs[0].t) return (t - cs[0].t) / tf;
+    let lo = 0, hi = n - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (cs[m].t <= t) lo = m; else hi = m - 1; }
+    return lo + (t - cs[lo].t) / ((cs[lo + 1].t - cs[lo].t) || tf);
+  }
+  function tOfIdx(x) {
+    const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
+    if (x >= n - 1) return cs[n - 1].t + (x - (n - 1)) * tf;
+    if (x <= 0) return cs[0].t + x * tf;
+    const i = Math.floor(x); return cs[i].t + (x - i) * (cs[i + 1].t - cs[i].t);
+  }
+  const lnF = (l) => (l.p1 > 0 && l.p2 > 0 ? [Math.log, Math.exp] : [(v) => v, (v) => v]);
+  function lnVal(l, t, off) { const [F, FI] = lnF(l); return FI(F(l.p1) + (F(l.p2) - F(l.p1)) * (t - l.t1) / ((l.t2 - l.t1) || 1) + (off || 0)); }
+  function drawUserLines(g, paneW) {
+    const ls = userLines().filter((l) => l.tf === selectedTf); if (!ls.length && !linePts.length) return;
+    const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => ts.logicalToCoordinate(idxOfT(t));
+    const tEnd = tOfIdx(ts.coordinateToLogical(paneW));
+    for (const l of ls) {
+      const offs = l.type === 'chan' ? [0, l.off || 0] : [0];
+      const pts = offs.map((o) => [X(l.t1), Y(lnVal(l, l.t1, o)), X(tEnd), Y(lnVal(l, tEnd, o))]);
+      if (pts.some((p) => p.some((v) => v == null))) continue;
+      g.strokeStyle = l.alert ? '#f5c518' : '#64b5f6'; g.lineWidth = 1.5; g.setLineDash([]);
+      if (l.type === 'chan') { g.fillStyle = 'rgba(100,181,246,0.07)'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[0][2], pts[0][3]); g.lineTo(pts[1][2], pts[1][3]); g.lineTo(pts[1][0], pts[1][1]); g.closePath(); g.fill(); }
+      pts.forEach((p) => { g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(p[2], p[3]); g.stroke(); });
+      if (l.alert) { g.fillStyle = '#f5c518'; g.font = '11px Inter, sans-serif'; g.fillText('🔔', pts[0][0] + 4, pts[0][1] - 4); }
+    }
+    g.fillStyle = '#f5c518'; linePts.forEach((p) => { const x = X(p.t), y = Y(p.p); if (x != null && y != null) { g.beginPath(); g.arc(x, y, 4, 0, 7); g.fill(); } });
+  }
+  const LINE_HINT = { line: ['Linha diagonal: carrega no 1.º ponto', 'Linha diagonal: carrega no 2.º ponto'], chan: ['Canal: carrega no 1.º ponto da linha de base', 'Canal: carrega no 2.º ponto da linha de base', 'Canal: carrega num ponto da linha paralela (o outro lado do canal)'], del: ['Apagar: carrega em cima de uma linha'] };
+  function setLineMode(m) { lineMode = m; linePts = []; if (m && editMode) { requestExitEdit(); } renderLinePanel(); updateEditUi(); scheduleDraw(); }
+  function lineClick(param) {
+    if (!param.point || (param.paneIndex != null && param.paneIndex !== 0) || !data[selectedTf]) return;
+    const ts = chart.timeScale(), t = tOfIdx(ts.coordinateToLogical(param.point.x)), p = candleSeries.coordinateToPrice(param.point.y);
+    if (p == null || !isFinite(t)) return;
+    const ls = (settings.lines = settings.lines || {})[symbol] = userLines().slice();
+    if (lineMode === 'del') {
+      const Y = (v) => candleSeries.priceToCoordinate(v);
+      const hit = ls.filter((l) => l.tf === selectedTf).find((l) => (l.type === 'chan' ? [0, l.off || 0] : [0]).some((o) => Math.abs(Y(lnVal(l, t, o)) - param.point.y) < 9));
+      if (!hit) return;
+      if (!confirm('Apagar esta ' + (hit.type === 'chan' ? 'canal' : 'linha') + '?')) return;
+      settings.lines[symbol] = ls.filter((l) => l !== hit); save('mss_settings4', settings); setLineMode(null); return;
+    }
+    linePts.push({ t, p });
+    const need = lineMode === 'chan' ? 3 : 2;
+    if (linePts.length < need) { renderLinePanel(); scheduleDraw(); return; }
+    const [a, b, c] = linePts, l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
+    if (b.t === a.t) { linePts = []; renderLinePanel(); return; }
+    if (lineMode === 'chan') { const [F] = lnF(l); l.off = F(c.p) - F(lnVal(l, c.t, 0)); }
+    ls.push(l); settings.lines[symbol] = ls; save('mss_settings4', settings); setLineMode(null);
+  }
+  function renderLinePanel() {
+    const box = $('#linePanel'); if (!box) return;
+    const ls = userLines(), d = data[selectedTf], price = d && d.price;
+    const hint = lineMode ? `<div class="lphint">${LINE_HINT[lineMode][Math.min(linePts.length, LINE_HINT[lineMode].length - 1)]} <button class="lyr" data-lm="">Cancelar</button></div>` : '';
+    const rows = ls.map((l) => {
+      const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dist = (x) => price && l.tf === selectedTf ? ` (${pct((price - x) / x * 100, true)})` : '';
+      return `<div class="lprow"><span>${l.type === 'chan' ? 'Canal' : 'Diagonal'} · ${tfLabel(l.tf)} · agora ${fmt(v)}${dist(v)}${v2 != null ? ` / ${fmt(v2)}${dist(v2)}` : ''}</span>
+        <label title="Avisar no Telegram quando o preço se aproximar (e, num canal, quando fechar fora)"><input type="checkbox" data-la="${l.id}" ${l.alert ? 'checked' : ''}> 🔔 Alertar</label>
+        <label title="Distância para o aviso, em %">a <input type="number" step="0.1" min="0.1" max="20" data-lp="${l.id}" value="${l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)}" style="width:56px">%</label>
+        <button class="lyr" data-ld="${l.id}" title="Apagar">🗑</button></div>`;
+    }).join('');
+    box.innerHTML = `<div class="lphead"><b>📐 Linhas</b> <button class="lyr ${lineMode === 'line' ? 'on' : ''}" data-lm="line">／ Diagonal</button><button class="lyr ${lineMode === 'chan' ? 'on' : ''}" data-lm="chan">▱ Canal paralelo</button>${ls.length ? `<button class="lyr ${lineMode === 'del' ? 'on' : ''}" data-lm="del">✕ Apagar no gráfico</button>` : ''}</div>${hint}${rows || '<div class="muted small">Ainda sem linhas neste ativo. Liga 🔔 só nas principais — o vigia avisa quando o preço chega perto (e quando fecha fora de um canal).</div>'}`;
+    box.querySelectorAll('[data-lm]').forEach((b) => b.addEventListener('click', () => setLineMode(b.dataset.lm && b.dataset.lm !== lineMode ? b.dataset.lm : null)));
+    const upd = (id, fn) => { const ls2 = userLines().map((l) => (l.id === id ? fn(Object.assign({}, l)) : l)); settings.lines[symbol] = ls2; save('mss_settings4', settings); scheduleDraw(); };
+    box.querySelectorAll('[data-la]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.la, (l) => { l.alert = i.checked; return l; })));
+    box.querySelectorAll('[data-lp]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.lp, (l) => { l.pct = Math.max(0.1, Math.min(20, +String(i.value).replace(',', '.') || 1)); return l; })));
+    box.querySelectorAll('[data-ld]').forEach((b) => b.addEventListener('click', () => { if (!confirm('Apagar esta linha?')) return; settings.lines[symbol] = userLines().filter((l) => l.id !== b.dataset.ld); save('mss_settings4', settings); renderLinePanel(); scheduleDraw(); }));
+  }
   function onChartClick(param) {
+    if (lineMode) return;   // a desenhar linhas: os cliques são tratados no próprio elemento (abaixo)
     if (suppressClick) return;
     if (!param.point || !drawState || (param.paneIndex != null && param.paneIndex !== 0)) return;
     const id = selectedTf, d = data[id], cl = d.closed, ts = chart.timeScale();
@@ -3680,12 +3862,13 @@
     const z = dz.ext.snap, t = dt.int.snap, dir = z.trend, rs = recentState(t);
     const trigOk = !!(rs && t.trend === dir && (rs.key === 'broke' || rs.key === 'entry'));
     const cid = ctxOf(st), cx = cid && dm[cid] && dm[cid].ext.snap;
-    const items = [['zona', z.pullback >= 50], ['quebra', trigOk], ['FVG', trigOk ? t.lastBreak && t.lastBreak.fvg === 'sim' : false]];   // o contexto é só informação
+    const zOk = z.pullback >= 50 && z.pullback <= DEEP_MAX;
+    const items = [['zona', zOk], ['quebra', trigOk], ['FVG', trigOk ? t.lastBreak && t.lastBreak.fvg === 'sim' : false]];   // o contexto é só informação
     const missing = items.filter(([, ok]) => !ok).map(([n]) => n);
     const disp = [st.zone, st.trig].some((id) => dm[id] && dm[id].int.snap.dispute);
-    const rank = !missing.length ? 4 : z.pullback >= 50 && trigOk ? 3 : z.pullback >= 50 ? 2 : 1;
+    const rank = !missing.length ? 4 : zOk && trigOk ? 3 : zOk ? 2 : 1;
     const ctx = cx && cx.trend ? { fav: cx.trend === dir, pull: cx.pullback } : null;
-    return { st, dir, z, missing, rank, disp, ctx, sweep: trigOk && sweepBeforeBreak(dt) };
+    return { st, dir, z, missing, rank, disp, ctx, sweep: trigOk && sweepBeforeBreak(dt), deep: z.pullback > DEEP_MAX, star: zOk ? starOf(dm, st.zone) : null };
   }
   // ---- página dos favoritos: lista sempre visível; o ativo aberto mostra-se por baixo da sua linha ----
   let favOpen = null;            // ativo aberto na lista
@@ -3946,9 +4129,9 @@
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
   const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
-    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false } };
-  const AL_CHK = { alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true,
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true } };
+  const AL_CHK = { alTgt: 'tgtOn', alLine: 'lineOn', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : `há ${Math.floor(m / 1440)} dias`; };
@@ -4012,7 +4195,7 @@ function motor_() {
     $('#alNearTfs').innerHTML = TFS.map((t) => `<span class="alnt"><label class="chk"><input type="checkbox" data-nt="${t.id}" ${alDraft.nearTfs.includes(t.id) ? 'checked' : ''}> ${tfLabel(t.id)}</label> <input type="number" data-np="${t.id}" min="0.1" max="30" step="0.1" value="${alDraft.nearPct[t.id] != null ? alDraft.nearPct[t.id] : 0.5}"><span class="muted small">%</span></span>`).join('');
     document.querySelectorAll('.algrp').forEach((b) => { const g = b.dataset.g; b.innerHTML = `<span>Vale para:</span><label><input type="checkbox" data-ga="${g}" ${alDraft.forA[g] !== false ? 'checked' : ''}> ativos</label><label><input type="checkbox" data-gr="${g}" ${alDraft.forR[g] !== false ? 'checked' : ''}> rácios (A÷B)</label>`; });
     $('#alSmaTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-st="${id}" ${alDraft.smaTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
-    $('#alSmaPre').value = alDraft.smaPre; $('#alSmaRe').value = alDraft.smaRearm;
+    $('#alSmaPre').value = alDraft.smaPre; $('#alTgtPct').value = alDraft.tgtPct; $('#alSmaRe').value = alDraft.smaRearm;
     $('#alCg').value = alDraft.cgKey || ''; $('#alCgMsg').textContent = '';
     $('#alTok').value = alDraft.tgToken || ''; $('#alRelay').value = alDraft.relay || ''; $('#alRelayMsg').textContent = '';
     $('#alChat').value = alDraft.tgChat || ''; $('#alChat').style.display = 'none';
@@ -4029,6 +4212,7 @@ function motor_() {
     alDraft.smaTfs = [...document.querySelectorAll('[data-st]')].filter((i) => i.checked).map((i) => i.dataset.st);
     alDraft.smaPre = Math.max(0, Math.min(20, +String($('#alSmaPre').value).replace(',', '.') || 0));
     alDraft.smaRearm = Math.max(0.5, Math.min(50, +String($('#alSmaRe').value).replace(',', '.') || 5));
+    alDraft.tgtPct = Math.max(0.1, Math.min(10, +String($('#alTgtPct').value).replace(',', '.') || 1));
     document.querySelectorAll('[data-ga]').forEach((i) => { alDraft.forA[i.dataset.ga] = i.checked; });
     document.querySelectorAll('[data-gr]').forEach((i) => { alDraft.forR[i.dataset.gr] = i.checked; });
     alDraft.tgToken = $('#alTok').value.trim();
@@ -4107,9 +4291,9 @@ function motor_() {
   // estado de um setup em texto (o mesmo da página antiga dos favoritos)
   function npSetupTxt(x) {
     if (!x) return 'sem dados';
-    const st = x.rank === 4 ? 'Pronto' : 'falta: ' + x.missing.join(', ');
+    const st = x.deep ? `perto da invalidação (zona a ${pct(x.z.pullback)})` : x.rank === 4 ? 'Pronto' : 'falta: ' + x.missing.join(', ');
     const ctx = x.ctx ? (x.ctx.fav ? (x.ctx.pull > 78.6 ? ` · contexto a favor mas fundo (${pct(x.ctx.pull)})` : ' · contexto a favor') : ` · contexto contra (${pct(x.ctx.pull)})`) : '';
-    return `${x.st.name} ${x.dir === 1 ? '▲ Long' : '▼ Short'}: ${st} · zona ${pct(x.z.pullback)}${ctx}${x.sweep ? ' · 💧 quebra depois de sweep' : ''}${x.disp ? ' · ⚖ disputa por decidir' : ''}`;
+    return `${x.st.name} ${x.dir === 1 ? '▲ Long' : '▼ Short'}: ${st} · zona ${pct(x.z.pullback)}${ctx}${x.sweep ? ' · 💧 quebra depois de sweep' : ''}${x.disp ? ' · ⚖ disputa por decidir' : ''}${x.star ? ' · ' + x.star.txt : ''}`;
   }
   // um sinal por setup: cinzento fora da zona · contorno âmbar em zona · âmbar cheio já quebrou (falta FVG) · verde pronto
   function npSig(x, st) {
@@ -4235,7 +4419,7 @@ function motor_() {
     for (const s of settings.favs || []) {
       if (!favData[s]) continue;
       let best = null;
-      favEvals(s).forEach((x) => { if (!x) return; const sc = x.rank * 1000 + (x.rank >= 2 ? x.z.pullback : 0) + (npNear(s) ? 50 : 0); if (!best || sc > best.sc) best = { s, x, sc }; });
+      favEvals(s).forEach((x) => { if (!x) return; const sc = x.rank * 1000 + (x.rank >= 2 ? x.z.pullback : 0) + (npNear(s) ? 50 : 0) + (x.star ? 120 : 0); if (!best || sc > best.sc) best = { s, x, sc }; });
       if (best) all.push(best);
     }
     return all.sort((a, b) => b.sc - a.sc);
@@ -4250,7 +4434,7 @@ function motor_() {
       : near ? 'Nenhum setup em zona — mas o preço está perto da inversão da tendência principal.' : 'Nenhum setup em zona nos favoritos. O mais avançado é este.';
     const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;${e && e.rank === 4 ? `color:${NPC('up')};font-weight:700` : ''}">${!e ? 'sem dados' : e.rank === 4 ? 'Pronto' + (e.sweep ? ' 💧' : '') : e.rank === 3 ? 'falta FVG' + (e.sweep ? ' 💧' : '') : e.rank === 2 ? `em zona ${pct(e.z.pullback)}` : 'fora da zona'}</td></tr>`; }).join('');
     return `<div class="np-kick">${kick}</div><h2>${s}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
-      <p class="np-why">${why}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
+      <p class="np-why">${why}${x.star ? `<br><span>${x.star.txt}</span>` : ''}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
       <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
       <table class="np-st"><tbody>${rows}</tbody></table>
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:14px"><a href="#" data-open="${s}">Abrir o ativo completo →</a></div>`;
@@ -4339,6 +4523,45 @@ function motor_() {
   }
   function npSetFilter(f) { npFilter = f; document.querySelectorAll('#npFilters button').forEach((b) => b.classList.toggle('on', b.dataset.f === f)); npRenderFeed(); }
   function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else { npRenderStrip(); npRenderAssetHead(); } npSyncStatus(); }
+  // ---------- 📋 Copiar para IA: resumo do ativo aberto (e dos rácios em que entra) para colar numa conversa com o Claude ----------
+  function aiTfLine(id, d) {
+    const x = d.ext.snap, n = d.int.snap, f = d.fibs && d.fibs[0];
+    const tr = (sn) => (!sn || !sn.trend ? 'sem estrutura' : `${sn.label}${sn.phase ? ' (' + sn.phase.toLowerCase() + ')' : ''}, correção ${pct(sn.pullback)}, limite ${fmt(sn.protected)}, ${sn.trend === 1 ? 'topo' : 'fundo'} da perna ${fmt(sn.extreme)}`);
+    const lb = n && n.lastBreak ? `; última quebra ${n.lastBreak.type} ${n.lastBreak.dir === 1 ? '▲' : '▼'} em ${fmt(n.lastBreak.level)} há ${n.lastBreak.barsAgo} velas (FVG ${n.lastBreak.fvg || '—'})` : '';
+    const disp = n && n.dispute ? `; disputa ${n.dispute.dir === 1 ? '▲' : '▼'}: confirma se fechar além de ${fmt(n.dispute.confirm)}` : '';
+    const fib = f ? `; Fibonacci (log): entrada ótima ${fmt(f.entry.lo)}–${fmt(f.entry.hi)}, 78,6% ${fmt(f.deep)}, alvos ${f.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${fmt(t.lo)}–${fmt(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
+    const sma = smaOfTf(d, 200);
+    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${sma ? `; SMA 200 ${fmt(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}`;
+  }
+  function aiSummary() {
+    const out = [`Analisa ${symbol} com base nestes dados do meu scanner de estrutura de mercado (ICT). Correções e Fibonacci em escala log. Diz-me: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Usa só estes números e cita-os. Responde em português de Portugal.`, ''];
+    const d0 = data[selectedTf]; out.push(`${symbol} — preço ${d0 ? fmt(d0.price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
+    TFS.forEach((t) => { if (data[t.id]) out.push(aiTfLine(t.id, data[t.id])); });
+    const ev = (settings.setups || []).filter((x) => x.on).map((st) => { const r = evalSetup(st); if (!r) return null; const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
+      const est = r.zDeep ? 'perto da invalidação' : r.zoneOk && r.trig && r.trig.ok && fvg ? 'pronto' : r.zoneOk && r.trig && r.trig.ok ? 'falta FVG' : r.zoneOk ? 'em zona, falta quebra' : 'fora da zona';
+      return `- ${st.name} (${tfLabel(st.zone)} → ${tfLabel(st.trig)}): ${r.dir === 1 ? 'Long' : 'Short'}, zona ${pct(r.z.pullback)}, ${est}${r.star ? '; ' + r.star.txt : ''}`; }).filter(Boolean);
+    if (ev.length) out.push('', 'Setups:', ...ev);
+    const lq = liqFrom(data['1h']).filter((x) => !x.taken);
+    if (lq.length && d0) out.push('', 'Liquidez por varrer: ' + lq.map((x) => `${x.n} ${fmt(x.p)} (${pct((x.p - d0.price) / d0.price * 100, true)})`).join('; '));
+    const ls = userLines(); if (ls.length) out.push('', 'As minhas linhas: ' + ls.map((l) => `${l.type === 'chan' ? 'canal' : 'diagonal'} ${tfLabel(l.tf)} agora em ${fmt(lnVal(l, Date.now(), 0))}${l.type === 'chan' ? ' / ' + fmt(lnVal(l, Date.now(), l.off || 0)) : ''}`).join('; '));
+    const rs = (settings.favs || []).filter((r) => isRatio(r) && ratioLegs(r).includes(symbol));
+    if (rs.length) {
+      out.push('', `Rácios com ${symbol} (A ÷ B: sobe quando A ganha a B):`);
+      rs.forEach((r) => { const f = favData[r]; if (!f || !f.tfs) { out.push(`- ${r}: sem dados carregados`); return; }
+        const tfs = ['1M', '1w', '1d', '4h'].filter((id) => f.tfs[id]).map((id) => { const sn = f.tfs[id].ext.snap; return sn && sn.trend ? `${tfLabel(id)} ${sn.trend === 1 ? '▲' : '▼'} ${pct(sn.pullback)}` : `${tfLabel(id)} —`; }).join(', ');
+        const best = favEvals(r).filter(Boolean).sort((a, b) => b.rank - a.rank)[0];
+        out.push(`- ${r} (${fmt(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}`); });
+    }
+    return out.join('\n');
+  }
+  async function aiCopy() {
+    if (!data[selectedTf]) { alert('Espera que o ativo acabe de carregar.'); return; }
+    const txt = aiSummary();
+    let ok = false; try { await navigator.clipboard.writeText(txt); ok = true; } catch (e) {}
+    if (!ok) { const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) {} ta.remove(); }
+    alert(ok ? 'Copiado ✔\n\nAbre uma conversa com o Claude, cola (Ctrl+V / manter o dedo → Colar) e envia. Se quiseres, junta também uma imagem do gráfico.' : 'Não consegui copiar automaticamente. Tenta outra vez.');
+  }
+
   // ---------- quadro dos favoritos: leitura geral de todos os ativos ----------
   function npShowBoard() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
@@ -4361,7 +4584,7 @@ function motor_() {
     return out;
   }
   const BOARD_TFS = [['1M', 'M'], ['1w', 'S'], ['1d', 'D'], ['4h', '4H']];
-  const ALK = { setup: 'Setup', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
+  const ALK = { tgt: 'Perto do alvo', line: 'Linha / canal', setup: 'Setup', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
   function npBoardRow(s) {
     const i = npInfo(s), f = i.f, T = (f && f.tfs) || {}, price = f && f.price, A = alCfg();
     const r = { s, price, chg: i.chg, rank: i.best ? i.best.rank * 1000 + (i.best.z.pullback || 0) : -1 };
@@ -4371,7 +4594,7 @@ function motor_() {
     // setups
     r.setups = i.setups.map((st, k) => { const x = i.ev[k]; if (!x) return `<div class="su"><span class="k">${npEsc(st.name)}</span> <span class="mu">sem dados</span></div>`;
       const t = x.rank === 4 ? 'pronto' : x.rank === 3 ? 'falta FVG' : x.rank === 2 ? 'falta quebra' : 'fora da zona';
-      return `<div class="su" data-tip="${npEsc(npSetupTxt(x))}"><span class="k">${npEsc(st.name)}</span> <span class="r${x.rank}">${x.dir === 1 ? '▲ Long' : '▼ Short'} · ${t}${x.sweep && x.rank >= 3 ? ' 💧' : ''}</span></div>`; }).join('');
+      return `<div class="su" data-tip="${npEsc(npSetupTxt(x))}"><span class="k">${npEsc(st.name)}</span> <span class="r${x.rank}">${x.dir === 1 ? '▲ Long' : '▼ Short'} · ${x.deep ? 'perto da invalidação' : t}${x.sweep && x.rank >= 3 ? ' 💧' : ''}${x.star ? ' ⭐' : ''}</span></div>`; }).join('');
     // perto da inversão: o timeframe com o limite mais perto (a vermelho dentro da distância do alerta 5)
     let nb = null;
     for (const [id] of BOARD_TFS) { const d = T[id], sn = d && d.ext.snap; if (!sn || !sn.trend || sn.protected == null) continue; const gap = (sn.trend === 1 ? d.price - sn.protected : sn.protected - d.price) / d.price * 100; if (gap >= 0 && (!nb || gap < nb.gap)) nb = { id, gap, lvl: sn.protected, hot: gap <= (A.nearPct[id] != null ? A.nearPct[id] : 0.5) }; }
@@ -4428,8 +4651,9 @@ function motor_() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
     h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${symbol}</h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
-      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''} ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
+      <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar tudo em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ao jornal</button></div>`;
     $('#npBack').addEventListener('click', npShowFeed);
+    $('#npAI').addEventListener('click', aiCopy);
     const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
     if (isSynth(symbol)) {
       const sym = symbol, fi = $('#npImpF');
@@ -4662,7 +4886,8 @@ function motor_() {
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
     $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
-    for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
+    $('#lineBtn').addEventListener('click', () => { const pnl = $('#linePanel'); pnl.classList.toggle('open'); if (!pnl.classList.contains('open')) setLineMode(null); else renderLinePanel(); });
+    for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn'], ['#fibBtn', 'fibOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
@@ -4695,7 +4920,11 @@ function motor_() {
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); $('#alerts').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); applyTheme();
+    initChart(); chart.subscribeClick(onChartClick); $('#chart').addEventListener('click', (ev) => {   // cliques ao desenhar linhas (cada clique conta, mesmo rápidos)
+      if (!lineMode) return; const r = $('#chart').getBoundingClientRect(), x = ev.clientX - r.left, y = ev.clientY - r.top;
+      let ph = r.height; try { ph = chart.panes()[0].getHeight(); } catch (e) {} if (y > ph || x > chart.timeScale().width()) return;
+      lineClick({ point: { x, y }, paneIndex: 0 });
+    }); initAutoDrag(); applyTheme();
     // clique direito na escala dos preços (à direita): volta ao ajuste automático, como o duplo clique
     $('#chart').addEventListener('contextmenu', (ev) => {
       const r = $('#chart').getBoundingClientRect(); let w = r.width; try { w = chart.timeScale().width(); } catch (e) {}

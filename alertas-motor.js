@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T13:46:03.098Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T14:24:52.594Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -662,6 +662,65 @@
 })(typeof window !== 'undefined' ? window : globalThis);
 
 globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevLevels":true,"setups":[{"name":"Longo prazo","ctx":"1M","zone":"1w","trig":"4h","on":true},{"name":"Swing","ctx":"1w","zone":"1d","trig":"1h","on":true},{"name":"Day trade","ctx":"1d","zone":"4h","trig":"15m","on":true},{"name":"Scalp","ctx":"4h","zone":"1h","trig":"5m","on":true}],"btAssets":"BTCUSDT, ETHUSDT, SOLUSDT, BNBUSDT, XRPUSDT","minRR":3,"feePct":0.1,"stopBufAtr":0.1,"dispInt":true,"dispExt":false,"dispAtr":1,"contBars":3,"fvgMinAtr":0.3,"contAtr":1,"closeMarginAtr":0.3,"acceptBars":1,"failBars":4,"failByTf":"5m:6, 15m:6, 1h:6, 4h:5, 1d:2, 1w:1, 1M:1, 3M:1, 6M:1, 1Y:1","favs":[],"legRatio":0.5,"floorAtr":1.5,"dayStart":"ny","sessions":"","showDayR":true,"showWeekR":true,"showAsiaR":true,"kzOn":true,"kzAsia":true,"kzLondon":true,"kzNy":true,"liqTfs":["1M","1w","1d","4h","1h","15m"],"volMult":1.5,"recent":5,"refresh":true,"tfs":["1Y","6M","3M","1M","1w","1d","4h","1h","15m","5m"],"showExt":true,"showInt":true,"kzProfile":"cripto","showLondonR":true,"divPivot":5,"pocD":false,"pocW":false,"emaOn":false,"smaOn":false,"kcOn":false,"rangesDW":false,"theme":"dark","rangeTolByTf":"5m:3, 15m:2, 1h:1, 4h:1, 1d:1"};
+// Fibonacci automáticas (em escala log), a partir da estrutura de cada timeframe.
+// Fibonacci atual = da perna em curso (limite → topo/fundo): retrações (entradas) e alvos (extensões).
+// Fibonacci anterior = do mesmo limite até ao topo/fundo anterior já ultrapassado: só alvos, enquanto viva.
+// Morre quando o preço chega a um alvo, inverte e volta ao nível anterior (ou à linha do 0), ou fecha para lá da origem (1).
+// Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
+(function (root) {
+  'use strict';
+  const ENTRY = [0.618, 0.65], DEEP = 0.786, INVAL = 0.918;
+  const TGT = [[-0.236, -0.268, 'Alvo 1'], [-0.618, -0.65, 'Alvo 2'], [-1, -1.032, 'Alvo 3']];
+  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '1h': '15m', '15m': '5m' };
+  // nível f de uma Fibonacci com 1 em A e 0 em B (negativos = para lá de B)
+  const lv = (A, B, f) => (A > 0 && B > 0 ? Math.exp(Math.log(B) + f * (Math.log(A) - Math.log(B))) : B + f * (A - B));
+  function make(A, B, dir, role) {
+    const t = TGT.map(([f1, f2, name], k) => { const a = lv(A, B, f1), b = lv(A, B, f2); return { k, name, f: f1, lo: Math.min(a, b), hi: Math.max(a, b), near: a }; });
+    return { dir, role, A, B, entry: { lo: Math.min(lv(A, B, ENTRY[0]), lv(A, B, ENTRY[1])), hi: Math.max(lv(A, B, ENTRY[0]), lv(A, B, ENTRY[1])) }, deep: lv(A, B, DEEP), inval: lv(A, B, INVAL), mid: lv(A, B, 0.5), targets: t };
+  }
+  // percorre as velas depois de B: alvos atingidos e se a Fibonacci morreu (regra do Richy)
+  function life(f, cs, fromI) {
+    const up = f.dir === 1; let hit = -1, hitJ = -1, dead = false;
+    for (let j = fromI + 1; j < cs.length; j++) {
+      const c = cs[j];
+      if (up ? c.c < f.A : c.c > f.A) { dead = true; break; }   // fechou para lá da origem (1)
+      if (hit >= 0 && j > hitJ) { const back = hit > 0 ? f.targets[hit - 1].near : f.B; if (up ? c.l <= back : c.h >= back) { dead = true; break; } }   // inverteu no alvo e voltou ao nível anterior / ao 0
+      for (let k = f.targets.length - 1; k > hit; k--) if (up ? c.h >= f.targets[k].near : c.l <= f.targets[k].near) { hit = k; hitJ = j; break; }
+    }
+    f.targets.forEach((t) => { t.hit = t.k <= hit; });
+    f.dead = dead; return f;
+  }
+  // as Fibonacci vivas de uma análise (res = resultado do motor; cs = velas fechadas; price = preço atual)
+  function fibsOf(res, cs, price) {
+    const s = res && res.state; if (!s || !s.trend || !cs || !cs.length) return [];
+    const d = s.trend, A = s.prot, ext = s.ext, out = [];
+    const cur = make(A.p, ext.p, d, 'atual'); cur.Ai = A.i; cur.Bi = ext.i;
+    life(cur, cs, ext.i); out.push(cur);
+    // topo/fundo anterior (já ultrapassado) depois do limite: Fibonacci só de alvos
+    const sw = (res.swings || []).filter((x) => x.type === (d === 1 ? 'H' : 'L') && !x.provisional && x.i > A.i && x.i < ext.i && (d === 1 ? x.p < ext.p : x.p > ext.p)).sort((a, b) => b.i - a.i)[0];
+    if (sw) { const pv = make(A.p, sw.p, d, 'anterior'); pv.Ai = A.i; pv.Bi = sw.i; life(pv, cs, sw.i); if (!pv.dead) out.push(pv); }
+    return out;
+  }
+  // retração (log) de um preço numa Fibonacci: 0 em B, 1 em A
+  const retrOf = (f, p) => (f.A > 0 && f.B > 0 && p > 0 ? (Math.log(f.B) - Math.log(p)) / (Math.log(f.B) - Math.log(f.A)) : (f.B - p) / (f.B - f.A));
+  // ⭐ confluência: um alvo (por atingir) do timeframe de baixo, a andar contra a tendência do de cima, cai na zona de entrada do de cima (61,8%–78,6%)
+  function confluence(hiFib, loFibs) {
+    if (!hiFib) return null;
+    const zLo = Math.min(lv(hiFib.A, hiFib.B, ENTRY[0]), hiFib.deep), zHi = Math.max(lv(hiFib.A, hiFib.B, ENTRY[0]), hiFib.deep);
+    let best = null;
+    for (const f of loFibs || []) {
+      if (f.dir === hiFib.dir) continue;   // o de baixo tem de estar a caminhar para a zona do de cima
+      for (const t of f.targets) {
+        if (t.hit) continue;
+        const lo = Math.max(t.lo, zLo), hi = Math.min(t.hi, zHi);
+        if (lo <= hi) { const p = (lo + hi) / 2, r = retrOf(hiFib, p) * 100; if (!best || Math.abs(r - 63.4) < Math.abs(best.retr - 63.4)) best = { tgt: t.name, f: t.f, lo: t.lo, hi: t.hi, p, retr: r, role: f.role }; }
+      }
+    }
+    return best;
+  }
+  root.MSS_FIB = { ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+})(typeof window !== 'undefined' ? window : globalThis);
+
 // Alertas do Scanner de Estrutura — a lógica (sem rede): recebe velas, definições e marcações; devolve as mensagens.
 // Corre no vigia (Google Apps Script) e nos testes no computador. Usa o mesmo motor de estrutura da app (engine.js).
 (function (root) {
@@ -680,11 +739,13 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
+    tgtOn: true, tgtPct: 1, lineOn: true,
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true },
-    forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false },
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
+    forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
   };
-  const GRP_KEYS = { setup: ['setupOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'] };
+  const GRP_KEYS = { setup: ['setupOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'] };
+  const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
   function effA(A, sym) {
     const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? A.forR : A.forA) || {}), o = Object.assign({}, A);
@@ -751,7 +812,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null }));
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
-    return { candles: cs, closed, price, ext: layer(E.analyze, S.extAtr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    const d = { candles: cs, closed, price, ext: layer(E.analyze, S.extAtr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
+    return d;
   }
   function aggregateMonths(cs, k) {
     const out = []; let key = null, cur = null;
@@ -815,7 +878,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // timeframes de que os alertas precisam
   function neededTfs(S, A) {
     const s = new Set();
-    if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); });
+    if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) s.add(FB.NEXT[x.zone]); });
+    if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) s.add(l.tf); }));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
     if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
@@ -877,7 +941,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       if (st.seen[key]) continue;
       st.seen[key] = now;
       // a zona tem de estar em correção ≥ mínimo; quebras antigas (vigia desligado, 1.ª volta) ficam vistas sem aviso
-      if (!(z.pullback >= +A.minPull)) continue;
+      if (!(z.pullback >= +A.minPull) || z.pullback > 91.8) continue;   // acima de 91,8% está perto da invalidação: não é setup
       if (cc.ct < now - (TF_MS[su.trig] + 40 * 6e4) || st.silent) continue;
       const f = dt.int.res.fvgs.find((x) => x.dir === dir && x.mid >= lb.i - 1 && x.mid <= Math.max(lb.i, lb.conf || lb.i) + 1);
       const cid = ctxOf(su), cx = cid && dm[cid] && dm[cid].ext.snap;
@@ -904,6 +968,20 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
       ];
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);
+      // Fibonacci da zona: entrada ótima / profunda, ⭐ confluência com o timeframe de baixo, alvos
+      const zf = dz.fibs && dz.fibs[0];
+      if (zf) {
+        const zp = z.pullback, ent = zp >= 61.8 && zp <= 65 ? ' · ✔ entrada ótima (61,8–65%)' : zp > 78.6 ? ' · profunda (> 78,6%)' : '';
+        if (ent) lines[1] += ent;
+        const lo = FB.NEXT[su.zone], dl = lo && dm[lo], star = dl ? FB.confluence(zf, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        if (star) lines.push(`⭐ ${star.tgt} do ${LBL[lo]} (${fmt(star.lo)} – ${fmt(star.hi)}) cai na zona do ${LBL[su.zone]} (retração ${pct(star.retr)})`);
+        lines.push(`Alvos (${LBL[su.zone]}): topo/fundo da perna ${fmt(zf.B)} · ${zf.targets.map((x) => `${x.name.replace('Alvo ', 'A')} ${fmt(x.lo)}–${fmt(x.hi)}`).join(' · ')}`);
+        if (A.tgtOn) {
+          st.tgw = (st.tgw || []).filter((x) => !(x.sym === sym && x.name === su.name));
+          const tg = [{ name: up ? 'topo da perna' : 'fundo da perna', near: zf.B }].concat(zf.targets.filter((x) => !x.hit).map((x) => ({ name: x.name, near: x.near, lo: x.lo, hi: x.hi })));
+          tg.forEach((x) => st.tgw.push({ sym, name: su.name, tf: su.zone, dir, origin: zf.A, tname: x.name, near: x.near, lo: x.lo, hi: x.hi, at: now }));
+        }
+      }
       if (prot != null) lines.push(`Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(prot)}`);
       if (A.fvgOn) lines.push('<i>A seguir: aviso quando o preço tocar num FVG para lá dos 50% da pernada.</i>');
       out.push({ kind: 'setup', sym, text: lines.join('\n') });
@@ -1087,11 +1165,56 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
 
   // ---------- um ativo: velas em bruto → mensagens ----------
   // raw: { tfId: [{t, ct, o, h, l, c, v}] } (já com 3M/6M/1Y agrupados); edits: { 'SYM|tf': ed }
+  // ---------- 7: perto de um alvo de um setup avisado ----------
+  function targetAlerts(sym, raw, A, st, now, out) {
+    if (!st.tgw || !st.tgw.length) return;
+    const any = raw['5m'] || raw['1h'] || raw['4h'] || raw['1d'] || Object.values(raw).find((x) => x && x.length); if (!any || !any.length) return;
+    const price = any[any.length - 1].c, pc = Math.max(0.1, +A.tgtPct || 1) / 100;
+    st.tgw = st.tgw.filter((x) => {
+      if (x.sym !== sym) return true;
+      if (now - x.at > 120 * 864e5) return false;
+      const up = x.dir === 1;
+      if (up ? price < x.origin : price > x.origin) return false;   // passou a origem: setup invalidado
+      const reached = up ? price >= x.near * (1 - pc) : price <= x.near * (1 + pc);
+      if (!reached) return true;
+      if (A.tgtOn && !st.silent) out.push({ kind: 'tgt', sym, text: `🎯 <b>Perto do alvo · ${esc(x.name)} · ${esc(sym)}</b>\n${x.tname === 'topo da perna' || x.tname === 'fundo da perna' ? `O preço (${fmt(price)}) chegou perto do ${x.tname} do ${LBL[x.tf]} (${fmt(x.near)})` : `O preço (${fmt(price)}) chegou ao ${x.tname} do ${LBL[x.tf]} (${fmt(x.lo)} – ${fmt(x.hi)})`}. Pensa em realizar ou subir o stop.` });
+      return false;
+    });
+  }
+  // ---------- 8: linhas diagonais e canais desenhados (só os com 🔔) ----------
+  const lnAt = (l, t) => { const lg = l.p1 > 0 && l.p2 > 0, F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x; const k = (t - l.t1) / ((l.t2 - l.t1) || 1); return (off) => FI(F(l.p1) + (F(l.p2) - F(l.p1)) * k + (off || 0)); };
+  function lineAlerts(sym, raw, S, A, st, now, out) {
+    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert); if (!A.lineOn || !ls.length) return;
+    st.ln = st.ln || {};
+    for (const l of ls) {
+      const cs = raw[l.tf]; if (!cs || !cs.length) continue;
+      const price = cs[cs.length - 1].c, f = lnAt(l, now), pc = (+l.pct || (TF_MS[l.tf] >= 864e5 ? 1 : 0.5)) / 100;
+      const sides = l.type === 'chan' ? [['base', f(0)], ['par', f(l.off || 0)]] : [['linha', f(0)]];
+      const chHi = l.type === 'chan' ? Math.max(sides[0][1], sides[1][1]) : null;
+      for (const [nm, v] of sides) {
+        const key = sym + '|' + l.id + '|' + nm, dist = Math.abs(price - v) / v, rec = st.ln[key] || (st.ln[key] = { armed: dist > pc });
+        if (!rec.armed) { if (dist > pc * 3) rec.armed = true; continue; }
+        if (dist > pc) continue;
+        rec.armed = false;
+        if (st.silent) continue;
+        const what = l.type === 'chan' ? (v === chHi ? 'teto do canal — possível venda ou realização' : 'chão do canal — possível compra') : 'linha diagonal';
+        out.push({ kind: 'line', sym, text: `📐 <b>${esc(sym)} · ${LBL[l.tf]}</b>\nA ${pct(dist * 100)} ${l.type === 'chan' ? 'do' : 'da'} ${what} (${fmt(v)}).${l.name ? ' · ' + esc(l.name) : ''}` });
+      }
+      if (l.type === 'chan') {   // quebra do canal: fecho de uma vela fora
+        const cl = cs.filter((c) => c.ct < now), lc = cl[cl.length - 1]; if (!lc) continue;
+        const g = lnAt(l, lc.t + (lc.ct - lc.t) / 2), a = g(0), b = g(l.off || 0), hi = Math.max(a, b), lo = Math.min(a, b);
+        const key = sym + '|' + l.id + '|out', side = lc.c > hi ? 1 : lc.c < lo ? -1 : 0, rec = st.ln[key] || (st.ln[key] = { side });
+        if (side && side !== rec.side && !st.silent) out.push({ kind: 'line', sym, text: `📐 <b>${esc(sym)} · ${LBL[l.tf]}</b>\nFechou ${side === 1 ? 'acima' : 'abaixo'} do canal (${fmt(lc.c)}): quebra ${side === 1 ? 'para cima' : 'para baixo'}.${l.name ? ' · ' + esc(l.name) : ''}` });
+        rec.side = side;
+      }
+    }
+  }
   function evaluateAsset(sym, raw, S, A0, edits, st, now) {
     const A = effA(A0, sym), out = [], dm = {};
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
+    if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
@@ -1099,6 +1222,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
     smaAlerts(sym, raw, dm, A, st, now, out);
+    targetAlerts(sym, raw, A, st, now, out);
+    lineAlerts(sym, raw, S, A, st, now, out);
     return out;
   }
   function pruneState(st, now) {
@@ -1487,6 +1612,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     C.pruneState(st, now);
     for (const k of Object.keys(st.known)) if (favs.indexOf(k) < 0) delete st.known[k];
     if (st.sma) for (const k of Object.keys(st.sma)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.sma[k];
+    if (st.ln) for (const k of Object.keys(st.ln)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.ln[k];
+    if (st.tgw) st.tgw = st.tgw.filter((x) => favs.indexOf(x.sym) >= 0);
     saveState(st);
     hb.ms = Date.now() - t0;
     const e = fsSet(a, 'meta/alertlog', JSON.stringify(Object.assign(hb, { log: st.log })));
