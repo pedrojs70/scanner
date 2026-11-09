@@ -576,7 +576,7 @@
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
-  <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><div id="npSug" class="sug"></div></form><a href="#" id="npMulti" class="np-multi" title="Colar ou importar a lista do TradingView e juntar todos de uma vez">＋ Juntar vários</a>
+  <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><div id="npSug" class="sug"></div></form><a href="#" id="npMulti" class="np-multi" title="Colar ou importar a lista de rácios do TradingView e juntar todos de uma vez (também serve para ativos individuais)">＋ Adicionar rácios</a>
     <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button></div></div>
   <div id="npStrip"></div>
   <div class="np-cols">
@@ -666,7 +666,7 @@
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Mudar a ordem:</b> arrasta pela pega <b>⠿</b> (na coluna dos favoritos ou no quadro, quando ordenado por grupo). Só dentro do mesmo grupo — cripto, ações/futuros ou rácios. A ordem fica gravada na conta; “repor A–Z” volta à ordem alfabética.</li>
-      <li><b>Juntar vários:</b> por baixo da pesquisa, “＋ Juntar vários” — cola a lista do TradingView (ou o .txt de “Exportar lista”); a app traduz os nomes (GOLD→GC=F, ES1!→ES=F, XCUUSD→HG=F, NICKEL→NICK.L, LSE:…→.L) e mostra antes de juntar.</li>
+      <li><b>Adicionar rácios:</b> por baixo da pesquisa, “＋ Adicionar rácios” — cola a lista do TradingView (ou o .txt de “Exportar lista”); a app traduz os nomes (GOLD→GC=F, ES1!→ES=F, XCUUSD→HG=F, NICKEL→NICK.L, LSE:…→.L) e mostra antes de juntar.</li>
       <li><b>Na página do ativo:</b> ◀ ▶ (ou as setas ← → do teclado) passam ao ativo anterior/seguinte da tua ordem; “← Voltar” regressa à página de onde vieste (jornal, quadro dos favoritos ou Em foco).</li>
       <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
       <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (abre em Prontos + Falta FVG).</li>
@@ -788,7 +788,7 @@
   <div class="actions" style="flex-wrap:wrap;gap:8px"><button id="sdStay">Continuar a editar</button><button id="sdDiscard">Descartar</button><button id="sdSave" class="primary">💾 Gravar</button></div>
 </div></div>
 <div id="multiDlg" class="modal"><div class="dialog" style="width:min(720px,96vw)">
-  <button id="mlX" class="dlgclose" title="Fechar">✕</button><h2>＋ Juntar vários aos favoritos</h2>
+  <button id="mlX" class="dlgclose" title="Fechar">✕</button><h2>＋ Adicionar rácios aos favoritos</h2>
   <p class="small">Cola aqui a lista do TradingView (um por linha ou separados por vírgulas — ex.: <code>GOLD/SILVER</code>, <code>PLATINUM/ES1!</code>, <code>LSE:NUCG</code>) ou carrega o ficheiro .txt de “Exportar lista”. A app traduz os nomes para os dela.</p>
   <textarea id="mlTxt" rows="7" style="width:100%;font-family:JetBrains Mono, monospace;font-size:12.5px" spellcheck="false" placeholder="GOLD/SILVER&#10;PLATINUM/GOLD&#10;BTCUSDT/BRN1!"></textarea>
   <div style="margin:6px 0"><input type="file" id="mlFile" accept=".txt,.csv,text/plain"> </div>
@@ -801,7 +801,7 @@
   <div id="alTabA" class="altab"></div>
   <div id="alTabG" class="altab" hidden></div>
   <div id="alTabS" class="altab" hidden>
-  <p class="small muted" style="margin-top:0">Aqui ficam o Telegram, o vigia e os números de cada alerta (timeframes, percentagens…), iguais para todos os ativos. <b>Que alertas cada ativo recebe</b> escolhe-se em “Por ativo” ou no “Quadro”; as caixas de ligar/desligar abaixo só valem para ativos sem escolhas próprias.</p>
+  <p class="small muted" style="margin-top:0">Aqui ficam o Telegram, o vigia e os números de cada alerta (timeframes, percentagens…), iguais para todos os ativos. <b>Que alertas cada ativo recebe</b> escolhe-se em “Por ativo” ou no “Quadro”; aqui ficam só as ligações e os números (que valem para todos os ativos com esse alerta ligado).</p>
   <div id="alSt" class="alst"></div>
   <label class="chk albig alline"><input id="alOn" type="checkbox"> Alertas ligados <span class="muted small">(desliga tudo de uma vez, sem perder as escolhas)</span></label>
   <p class="muted small" style="margin:6px 0 0">Só para os ativos dos ★ favoritos. O vigia verifica de 5 em 5 minutos e avisa no fecho das velas.</p>
@@ -4425,7 +4425,7 @@ function motor_() {
     for (const [k] of alKeys()) {
       if (p[k] != null) { out[k] = !!p[k]; continue; }
       if (k.indexOf('su:') === 0) out[k] = !!A.setupOn && g.setup !== false && (A.setups || {})[k.slice(3)] !== false;
-      else out[k] = !!A[{ fvg: 'fvgOn', kz: 'kzOn', week: 'weekOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' }[k]] && g[k] !== false;
+      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' }[k]]) && g[k] !== false;
     }
     return out;
   }
@@ -4482,6 +4482,14 @@ function motor_() {
     $('#alSetups').innerHTML = (settings.setups || []).map((x, k) => `<label class="chk"><input type="checkbox" data-al="${k}" ${alDraft.setups[x.name] !== false ? 'checked' : ''} ${x.on ? '' : 'disabled'}> ${x.name} <span class="muted small">${ctxOf(x) ? tfLabel(ctxOf(x)) + ' · ' : ''}${tfLabel(x.zone)} → ${tfLabel(x.trig)}${x.on ? '' : ' (desligado nas Definições)'}</span></label>`).join('<br>');
     $('#alLinkMsg').textContent = ''; $('#alCopyMsg').textContent = '';
     alChatUi(); alLoadStatus(); alCheckMotor();
+    // a escolha de que alertas cada ativo recebe passou para "Por ativo"/"Quadro": copia o estado atual de cada favorito (uma vez) e esconde as caixas antigas
+    alDraft.per = alDraft.per || {};
+    if (!alDraft.perNew) alDraft.perNew = alEff(Object.assign({}, alDraft, { per: {} }), '__novo__');
+    (settings.favs || []).forEach((s) => { if (!alDraft.per[s]) alDraft.per[s] = alEff(alDraft, s); });
+    ['setupOn', 'fvgOn', 'kzOn', 'nearOn', 'smaOn', 'tgtOn', 'lineOn'].forEach((k) => { alDraft[k] = true; }); if (!alDraft.weekOn && !alDraft.dayOn) alDraft.weekOn = true;
+    alDraft.setups = {}; alDraft.forA = Object.assign({}, AL_DEF.forA); alDraft.forR = Object.assign({}, AL_DEF.forA);
+    ['alSetup', 'alFvg', 'alKz', 'alNear', 'alSma', 'alTgt', 'alLine'].forEach((id) => { const i = $('#' + id); if (i) { i.checked = true; const l = i.closest('label'); if (l) l.style.display = 'none'; } });
+    $('#alSetups').style.display = 'none';
     $('#alerts').classList.add('open'); alSetTab(alTab || 'a');
     if (!openAlerts.w) { openAlerts.w = 1; document.querySelectorAll('.altabs [data-at]').forEach((b) => b.addEventListener('click', () => alSetTab(b.dataset.at))); }
   }

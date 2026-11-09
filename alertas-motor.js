@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T21:11:51.217Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T21:34:34.147Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -753,9 +753,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
     const p = A.per && A.per[sym];
     if (p) {
-      const M = { fvg: 'fvgOn', kz: 'kzOn', week: 'weekOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' };
+      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn' };
       for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
-      if (p.week === false) o.dayOn = false;
+      if (p.week === false) { o.weekOn = false; o.dayOn = false; }   // ligado: semana/dia conforme os Ajustes
       const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
       if (sus.length) { o.setups = Object.assign({}, o.setups); sus.forEach((k) => { o.setups[k.slice(3)] = !!p[k]; }); o.setupOn = sus.some((k) => p[k]); }
     }
