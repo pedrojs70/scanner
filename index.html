@@ -628,6 +628,13 @@
       <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
     </ul>
 
+    <h3 class="helphead">📐 Escala logarítmica</h3>
+    <ul>
+      <li>O gráfico está em <b>escala log</b> (como no TradingView) e as <b>correções</b> são medidas em log, como as Fibonacci “baseadas na escala logarítmica”: os 50%, 61,8%, 65%, 78,6% e 91,8%, a % de correção, as zonas, os setups e os alertas.</li>
+      <li>As velas, os topos e fundos, as quebras, os FVG, a liquidez e a SMA 200 não dependem da escala — ficam iguais.</li>
+      <li>Nas pernas pequenas (TFs curtos) log e linear dão quase o mesmo; nas grandes (Semanal para cima, ativos que se multiplicaram) a diferença é real.</li>
+    </ul>
+
     <h3 class="helphead">➗ Rácios (A ÷ B)</h3>
     <ul>
       <li><b>O que é:</b> um gráfico só, em que cada vela é o ativo A dividido pelo ativo B (como o GOLD/BTC do TradingView). Sobe quando A ganha a B.</li>
@@ -1488,19 +1495,22 @@
     if (!s || !s.trend) return { label: res.blank ? 'Estrutura apagada — marca o início' : res.swings && res.swings.some((x) => x.start) ? 'Estrutura por definir' : 'Sem dados suficientes' };
     const d = s.trend;
     const ext = d === 1 ? Math.max(s.ext.p, price) : Math.min(s.ext.p, price);
-    const range = Math.abs(ext - s.prot.p) || 1e-12;
-    const pull = Math.max(0, (d === 1 ? ext - price : price - ext) / range * 100);
+    // correções medidas em escala logarítmica (como as Fibonacci em log do TradingView); linear só se houver preços ≤ 0
+    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0;
+    const F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x;
+    const retr = (e, x, p0) => { const den = F(e) - F(p0); return den ? Math.max(0, (F(e) - F(x)) / den * 100) : 0; };
+    const pull = retr(ext, price, s.prot.p);
     const invalid = d === 1 ? price < s.prot.p : price > s.prot.p;
     const newExt = d === 1 ? price > s.ext.p : price < s.ext.p;
     const recentExt = nowIdx - s.ext.i <= 1;   // novo extremo numa das 2 últimas velas fechadas
     const phase = invalid ? 'A testar o limite' : (newExt || recentExt || pull < 10) ? 'Em continuação' : 'Em correção';
-    const lvl = (f) => ext - d * f * range;
+    const lvl = (f) => FI(F(ext) - f * (F(ext) - F(s.prot.p)));
     const lb = res.breaks[res.breaks.length - 1];
     const lastSweep = res.sweeps[res.sweeps.length - 1] || null;
     // viragem por confirmar que já devolveu metade ou mais do movimento = range
     // decidido só com o FECHO da última vela fechada (wicks não contam)
     const lc = lastClose == null ? price : lastClose;
-    const pullClosed = Math.max(0, (d === 1 ? s.ext.p - lc : lc - s.ext.p) / (Math.abs(s.ext.p - s.prot.p) || 1e-12) * 100);
+    const pullClosed = lg && lc > 0 ? retr(s.ext.p, lc, s.prot.p) : Math.max(0, (d === 1 ? s.ext.p - lc : lc - s.ext.p) / (Math.abs(s.ext.p - s.prot.p) || 1e-12) * 100);
     const isRange = s.kind === 'CHoCH' && pullClosed >= 50;
     return {
       trend: d, kind: s.kind, isRange,
@@ -1510,7 +1520,7 @@
       fromBroken: s.lastBroken ? (price - s.lastBroken) / s.lastBroken * 100 : null,
       toInvalid: (price - s.prot.p) / price * 100,
       protected: s.prot.p, extreme: ext,
-      levels: { 50: lvl(0.5), 65: lvl(0.65), 918: lvl(0.918) },
+      levels: { 50: lvl(0.5), 618: lvl(0.618), 65: lvl(0.65), 786: lvl(0.786), 918: lvl(0.918) }, logScale: lg,
       lastBreak: lb ? Object.assign({ barsAgo: nowIdx - lb.i }, lb) : null,
       pending: res.pending || null,
       dispute: res.dispute ? { dir: res.dispute.dir, level: res.dispute.level, confirm: res.dispute.lo, sweep: res.dispute.opp, i: res.dispute.i, barsAgo: nowIdx - res.dispute.i } : null,
@@ -2960,7 +2970,7 @@
       autoSize: true,
       layout: { background: { color: '#0f1216' }, textColor: '#aab2bd', fontFamily: 'Inter, system-ui, sans-serif' },
       grid: { vertLines: { color: '#1b2027' }, horzLines: { color: '#1b2027' } },
-      rightPriceScale: { borderColor: '#2a313b' },
+      rightPriceScale: { borderColor: '#2a313b', mode: 1 },   // escala logarítmica (como no TradingView)
       timeScale: { borderColor: '#2a313b', timeVisible: true, secondsVisible: false, rightOffset: 8 },
       crosshair: { mode: 0 },
       localization: { locale: 'pt-PT', timeFormatter: (t) => new Date(t * 1000).toLocaleString('pt-PT', { day: '2-digit', month: 'short', year: '2-digit', hour: '2-digit', minute: '2-digit' }) },
@@ -2988,6 +2998,7 @@
     if (on && !rsiSeries) {
       rsiSeries = chart.addSeries(LWC.LineSeries, { color: '#b39ddb', lineWidth: 1, priceLineVisible: false, lastValueVisible: true, priceFormat: { type: 'price', precision: 0, minMove: 1 }, autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }) }, 1);
       rsiMarkers = LWC.createSeriesMarkers(rsiSeries, []);
+      try { rsiSeries.priceScale().applyOptions({ mode: 0 }); } catch (e) {}   // o RSI fica em escala normal
       rsiSeries.createPriceLine({ price: 70, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
       rsiSeries.createPriceLine({ price: 30, color: '#5a6472', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
       rsiSeries.createPriceLine({ price: 50, color: '#323a45', lineWidth: 1, lineStyle: 3, axisLabelVisible: false });
@@ -4201,10 +4212,11 @@ function motor_() {
     if (!d || !d.candles) return '';
     const cs = d.candles.slice(-70), sn = d.ext && d.ext.snap; const W = 300, H = h || 130;
     const lv = [sn && sn.protected, sn && sn.extreme].filter((v) => v != null);
-    let lo = Math.min(...cs.map((c) => c.l), ...lv), hi = Math.max(...cs.map((c) => c.h), ...lv); const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
-    const y = (v) => (H - (v - lo) / (hi - lo) * H).toFixed(1), sp = (W - 4) / cs.length;
+    const lgm = [...cs.map((c) => c.l), ...lv].every((v) => v > 0), F = lgm ? Math.log : (v) => v;   // escala log (como o gráfico grande)
+    let lo = F(Math.min(...cs.map((c) => c.l), ...lv)), hi = F(Math.max(...cs.map((c) => c.h), ...lv)); const pad = (hi - lo) * 0.06; lo -= pad; hi += pad;
+    const y = (v) => (H - (F(v) - lo) / (hi - lo) * H).toFixed(1), sp = (W - 4) / cs.length;
     let svg = '';
-    if (sn && sn.protected != null && sn.extreme != null) { const m = (sn.protected + sn.extreme) / 2; svg += `<rect x="0" y="${Math.min(y(m), y(sn.protected))}" width="${W}" height="${Math.abs(y(m) - y(sn.protected))}" fill="var(--np-red)" fill-opacity=".08"/><line x1="0" x2="${W}" y1="${y(sn.protected)}" y2="${y(sn.protected)}" stroke="var(--np-dn)" stroke-width="1.2"/><line x1="0" x2="${W}" y1="${y(m)}" y2="${y(m)}" stroke="var(--np-red)" stroke-dasharray="4 3" stroke-width="1"/>`; }
+    if (sn && sn.protected != null && sn.extreme != null) { const m = sn.levels ? sn.levels[50] : (sn.protected + sn.extreme) / 2; svg += `<rect x="0" y="${Math.min(y(m), y(sn.protected))}" width="${W}" height="${Math.abs(y(m) - y(sn.protected))}" fill="var(--np-red)" fill-opacity=".08"/><line x1="0" x2="${W}" y1="${y(sn.protected)}" y2="${y(sn.protected)}" stroke="var(--np-dn)" stroke-width="1.2"/><line x1="0" x2="${W}" y1="${y(m)}" y2="${y(m)}" stroke="var(--np-red)" stroke-dasharray="4 3" stroke-width="1"/>`; }
     cs.forEach((c, i) => { const x = (i + 0.5) * sp, col = c.c >= c.o ? 'var(--np-up)' : 'var(--np-dn)'; svg += `<line x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${y(c.h)}" y2="${y(c.l)}" stroke="${col}" stroke-width="1"/><rect x="${(x - sp * 0.3).toFixed(1)}" y="${Math.min(y(c.o), y(c.c))}" width="${(sp * 0.6).toFixed(1)}" height="${Math.max(1, Math.abs(y(c.o) - y(c.c))).toFixed(1)}" fill="${col}"/>`; });
     return `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" preserveAspectRatio="none" aria-hidden="true" style="display:block">${svg}</svg>`;
   }

@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-08T23:42:32.575Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T13:46:03.098Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -624,19 +624,22 @@
     if (!s || !s.trend) return { label: res.blank ? 'Estrutura apagada — marca o início' : res.swings && res.swings.some((x) => x.start) ? 'Estrutura por definir' : 'Sem dados suficientes' };
     const d = s.trend;
     const ext = d === 1 ? Math.max(s.ext.p, price) : Math.min(s.ext.p, price);
-    const range = Math.abs(ext - s.prot.p) || 1e-12;
-    const pull = Math.max(0, (d === 1 ? ext - price : price - ext) / range * 100);
+    // correções medidas em escala logarítmica (como as Fibonacci em log do TradingView); linear só se houver preços ≤ 0
+    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0;
+    const F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x;
+    const retr = (e, x, p0) => { const den = F(e) - F(p0); return den ? Math.max(0, (F(e) - F(x)) / den * 100) : 0; };
+    const pull = retr(ext, price, s.prot.p);
     const invalid = d === 1 ? price < s.prot.p : price > s.prot.p;
     const newExt = d === 1 ? price > s.ext.p : price < s.ext.p;
     const recentExt = nowIdx - s.ext.i <= 1;   // novo extremo numa das 2 últimas velas fechadas
     const phase = invalid ? 'A testar o limite' : (newExt || recentExt || pull < 10) ? 'Em continuação' : 'Em correção';
-    const lvl = (f) => ext - d * f * range;
+    const lvl = (f) => FI(F(ext) - f * (F(ext) - F(s.prot.p)));
     const lb = res.breaks[res.breaks.length - 1];
     const lastSweep = res.sweeps[res.sweeps.length - 1] || null;
     // viragem por confirmar que já devolveu metade ou mais do movimento = range
     // decidido só com o FECHO da última vela fechada (wicks não contam)
     const lc = lastClose == null ? price : lastClose;
-    const pullClosed = Math.max(0, (d === 1 ? s.ext.p - lc : lc - s.ext.p) / (Math.abs(s.ext.p - s.prot.p) || 1e-12) * 100);
+    const pullClosed = lg && lc > 0 ? retr(s.ext.p, lc, s.prot.p) : Math.max(0, (d === 1 ? s.ext.p - lc : lc - s.ext.p) / (Math.abs(s.ext.p - s.prot.p) || 1e-12) * 100);
     const isRange = s.kind === 'CHoCH' && pullClosed >= 50;
     return {
       trend: d, kind: s.kind, isRange,
@@ -646,7 +649,7 @@
       fromBroken: s.lastBroken ? (price - s.lastBroken) / s.lastBroken * 100 : null,
       toInvalid: (price - s.prot.p) / price * 100,
       protected: s.prot.p, extreme: ext,
-      levels: { 50: lvl(0.5), 65: lvl(0.65), 918: lvl(0.918) },
+      levels: { 50: lvl(0.5), 618: lvl(0.618), 65: lvl(0.65), 786: lvl(0.786), 918: lvl(0.918) }, logScale: lg,
       lastBreak: lb ? Object.assign({ barsAgo: nowIdx - lb.i }, lb) : null,
       pending: res.pending || null,
       dispute: res.dispute ? { dir: res.dispute.dir, level: res.dispute.level, confirm: res.dispute.lo, sweep: res.dispute.opp, i: res.dispute.i, barsAgo: nowIdx - res.dispute.i } : null,
@@ -932,7 +935,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       if (!leg.length) return true;
       const ext = up ? Math.max(...leg.map((c) => c.h)) : Math.min(...leg.map((c) => c.l));
       const size = Math.abs(ext - tr.origin); if (!size) return true;
-      const l50 = up ? ext - size / 2 : ext + size / 2;
+      const l50 = ext > 0 && tr.origin > 0 ? Math.sqrt(ext * tr.origin) : up ? ext - size / 2 : ext + size / 2;   // 50% da pernada em escala log (média geométrica)
       const cl = d.closed;
       const fv = d.int.res.fvgs.filter((f) => f.dir === tr.dir && cl[f.mid] && cl[f.mid].t >= tr.originT).filter((f) => {
         for (let j = f.created + 1; j < cl.length; j++) if (up ? cl[j].c < f.bot : cl[j].c > f.top) return false;   // ainda não atravessado por um fecho
