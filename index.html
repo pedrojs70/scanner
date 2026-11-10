@@ -2032,12 +2032,14 @@
       for (const t of f.targets) {
         if (t.hit) continue;
         const lo = Math.max(t.lo, zLo), hi = Math.min(t.hi, zHi);
-        if (lo <= hi) { const p = (lo + hi) / 2, r = retrOf(hiFib, p) * 100; if (!best || Math.abs(r - 63.4) < Math.abs(best.retr - 63.4)) best = { tgt: t.name, f: t.f, lo: t.lo, hi: t.hi, p, retr: r, role: f.role }; }
+        if (lo <= hi) { const p = (lo + hi) / 2, r = retrOf(hiFib, p) * 100; if (!best || Math.abs(r - 63.4) < Math.abs(best.retr - 63.4)) best = { tgt: t.name, f: t.f, lo: t.lo, hi: t.hi, p, retr: r, role: f.role, src: f }; }
       }
     }
     return best;
   }
-  root.MSS_FIB = { ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
+  const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
+  root.MSS_FIB = { starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function () {
@@ -2984,7 +2986,7 @@
     const dz = dm[zoneTf], lo = FB.NEXT[zoneTf], dl = lo && dm[lo];
     if (!dz || !dl || !dz.fibs || !dz.fibs[0]) return null;
     const c = FB.confluence(dz.fibs[0], [...(dl.fibs || []), ...(dl.fibsI || [])]);
-    return c ? Object.assign(c, { lo: c.lo, hi: c.hi, tf: lo, zone: zoneTf, txt: `⭐ ${c.tgt} do ${tfLabel(lo)} (${fmt(c.lo)} – ${fmt(c.hi)}) na zona do ${tfLabel(zoneTf)} (retração ${pct(c.retr)})` }) : null;
+    return c ? Object.assign(c, { lo: c.lo, hi: c.hi, tf: lo, zone: zoneTf, txt: `⭐ ${FB.starName(c, dl, tfLabel(lo))} (${fmt(c.lo)} – ${fmt(c.hi)}) na zona do ${tfLabel(zoneTf)} (retração ${pct(c.retr)})` }) : null;
   }
   function evalSetup(st) {
     const dz = data[st.zone], dt = data[st.trig];
@@ -3075,7 +3077,7 @@
         : `<span class="chip ${cx.trend === r.dir ? (cx.pullback > 78.6 ? 'rf-deep' : 'rf-pos2') : 'rf-bad'}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
       const chk = ctxChip + ' ' + items.filter((it) => !it[3]).map(([nm, ok, tip]) => `<span class="chip ${ok ? 'rf-pos2' : ok === false ? 'off' : 'rf-neu'}" title="${tip}">${ok ? '✔' : ok === false ? '✘' : '?'} ${nm}</span>`).join(' ')
         + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '') + zoneChip(r.z.pullback)
-        + (r.star ? ` <span class="chip rf-pos2" title="${r.star.txt}">⭐ ${r.star.tgt} do ${tfLabel(r.star.tf)} em ${fmt(r.star.p)}</span>` : '');
+        + (r.star ? ` <span class="chip rf-pos2" title="${r.star.txt}">⭐ ${FB.starName(r.star, data[r.star.tf], tfLabel(r.star.tf))} em ${fmt(r.star.p)}</span>` : '');
       const missing = items.filter((it) => !it[3] && !it[1]).map(([nm]) => nm.toLowerCase());
       const ready = !missing.length;
       const ctxNote = cx && cx.trend && cx.trend !== r.dir ? ` <span class="muted small">· contra o ${tfLabel(cid)} (${pct(cx.pullback)})</span>` : cx && cx.trend ? ` <span class="muted small">· a favor do ${tfLabel(cid)}</span>` : '';
@@ -4886,8 +4888,9 @@ function motor_() {
     const lb = n && n.lastBreak ? `; última quebra ${n.lastBreak.type} ${n.lastBreak.dir === 1 ? '▲' : '▼'} em ${fmt(n.lastBreak.level)} há ${n.lastBreak.barsAgo} velas (FVG ${n.lastBreak.fvg || '—'})` : '';
     const disp = n && n.dispute ? `; disputa ${n.dispute.dir === 1 ? '▲' : '▼'}: confirma se fechar além de ${fmt(n.dispute.confirm)}` : '';
     const fib = f ? `; Fibonacci (log): entrada ótima ${fmt(f.entry.lo)}–${fmt(f.entry.hi)}, 78,6% ${fmt(f.deep)}, alvos ${f.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${fmt(t.lo)}–${fmt(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
+    const fi = d.fibsI && d.fibsI[0], fibI = fi && (!f || Math.abs(fi.A - f.A) > 1e-9 || Math.abs(fi.B - f.B) > 1e-9) ? `; Fibonacci do movimento recente (log): entrada ótima ${fmt(fi.entry.lo)}–${fmt(fi.entry.hi)}, 78,6% ${fmt(fi.deep)}, alvos ${fi.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${fmt(t.lo)}–${fmt(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
     const sma = smaOfTf(d, 200);
-    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${sma ? `; SMA 200 ${fmt(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}`;
+    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${fmt(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}`;
   }
   function aiSummary() {
     const out = [`Analisa ${symbol} com base nestes dados do meu scanner de estrutura de mercado (ICT). Correções e Fibonacci em escala log. Diz-me: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Usa só estes números e cita-os. Responde em português de Portugal.`, ''];
