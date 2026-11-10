@@ -550,6 +550,21 @@
   #settings #setSetups, #settings #setTfs, #settings .settfs { max-width:100%; overflow-wrap:anywhere; }
   #settings .setrow { flex-wrap:wrap; } #settings .setrow select { flex:1 1 80px; min-width:0; } #settings .setrow .su-name { flex:1 1 100px; min-width:0; }
   @media (max-width:560px) { #settings .field { grid-template-columns:1fr; gap:4px; } #settings .field > *:last-child { justify-self:start; } }
+  /* Monitorização (Definições) */
+  .montbl { width:100%; min-width:0; table-layout:fixed; border-collapse:collapse; font-size:13px; margin:6px 0 4px; }
+  .montbl th, .montbl td { padding:5px 4px; border-bottom:1px solid var(--line); text-align:center; vertical-align:middle; }
+  .montbl th:first-child, .montbl td:first-child { text-align:left; }
+  .montbl td.nm { min-width:0; overflow:hidden; overflow-wrap:anywhere; white-space:normal; }
+  .montbl .mc { cursor:pointer; border-radius:6px; padding:3px 0; user-select:none; color:var(--muted); }
+  .montbl .mc.lit { background:color-mix(in srgb, #2e7d32 22%, transparent); color:inherit; }
+  .montbl .mc.min { background:#2e7d32; color:#fff; font-weight:700; }
+  .montbl .mc.fix { cursor:default; }
+  .montbl tr.inh .mc.min { background:color-mix(in srgb, #2e7d32 55%, transparent); }
+  .montbl .ex { font-size:11px; color:#e69500; }
+  .montbl .keep { font-size:11px; color:var(--muted); text-align:left; }
+  .montbl button.mrs { font-size:11px; padding:2px 6px; }
+  @media (max-width:560px) { .montbl { font-size:11px; } .montbl .keep { display:none; } .montbl col:not(:first-child) { width:13% !important; } }
+  .np-fq { width:100%; box-sizing:border-box; margin:8px 0 6px; padding:7px 10px; border:1px solid var(--np-ln, #ccc); background:transparent; color:inherit; font:inherit; font-size:14px; border-radius:0; }
 </style>
 </head>
 <body>
@@ -678,6 +693,8 @@
       <li><b>Em foco:</b> o ativo mais perto de precisar de ti — primeiro um pronto, depois “falta FVG”, depois em zona com a correção mais funda; estar perto da inversão desempata. Em “Também a ver”, os dois seguintes.</li>
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
+      <li><b>Pesquisa nos favoritos:</b> a caixa por cima da lista dos Favoritos e no Quadro filtra na hora — pelo nome (ouro), pelo ticker (GC=F), pelo nome que deste com ✎ ou, nos metais, em inglês (gold). Os rácios em que esse ativo entra também aparecem. Enquanto filtras não dá para arrastar.</li>
+      <li><b>Monitorização (Definições):</b> escolhe a partir de que timeframe cada favorito é vigiado — por grupo (Cripto 5m, Ações e ETFs 15m, Futuros 15m, Rácios 4H por defeito; o S&P 500 ES=F em 5m) e, no separador “Por ativo”, exceções para um ativo só. Abaixo desse timeframe nada é vigiado: os setups com gatilho mais baixo aparecem como “não vigiado” (sem alerta nem destaque) e as killzones só existem com 5m. O vigia vê os ativos de 5m a cada volta, os de 15m depois de cada fecho de 15m, os de 1H/4H de hora a hora — assim cabem muitos mais favoritos no plano grátis. No gráfico continuas a poder abrir qualquer timeframe.</li>
       <li><b>Ordenar por prontos:</b> no Quadro, o link “ordenar por prontos” mostra todos os ativos numa só lista (sem grupos), do mais pronto para o menos: primeiro quem tem mais setups prontos, depois falta FVG / falta quebra, depois em zona; desempatam a ⭐, o 💧 e o timeframe maior. O grupo de cada ativo aparece por baixo do nome. Arruma no momento em que carregas (não salta sozinho). “↶ voltar à ordem anterior” regressa à vista de antes.</li>
       <li><b>Repor A–Z:</b> volta à ordem alfabética dentro de cada grupo; logo a seguir aparece “↶ voltar à ordem anterior” para desfazer (até voltares a arrastar).</li>
       <li><b>Mudar a ordem:</b> arrasta pela pega <b>⠿</b> (na coluna dos favoritos ou no quadro, quando ordenado por grupo). Só dentro do mesmo grupo — cripto, ações/futuros ou rácios. A ordem fica gravada na conta; “repor A–Z” volta à ordem alfabética.</li>
@@ -940,6 +957,12 @@
   <div id="setLiq" class="settfs"></div>
   <div class="field"><div>Mostrar liquidez do dia e semana anteriores<small>máximos e mínimos, na barra por baixo dos setups (só informação)</small></div><input id="setPrev" type="checkbox"></div>
   <div class="field"><div>Quebra “recente”<small>até quantas velas atrás uma quebra do movimento recente ainda acende o gatilho ⚡ (caixa “Quebra” do checklist)</small></div><input id="setRecent" type="number" min="1" max="50"></div>
+  <h3 class="sethead">Monitorização <span class="muted small">(a partir de que timeframe cada favorito é vigiado)</span></h3>
+  <div class="small muted">Abaixo do timeframe escolhido o ativo não é vigiado: os setups com gatilho mais baixo ficam “não vigiado” (sem alerta e sem destaque no Quadro) e o vigia vê o ativo menos vezes — 5m a cada volta (5 min), 15m depois de cada fecho de 15m, 1H e 4H de hora a hora. Assim cabem muitos mais favoritos no plano grátis. No gráfico continuas a poder abrir qualquer timeframe.</div>
+  <div class="altabs" id="monTabs"><button type="button" data-mt="g" class="on">Por grupo</button><button type="button" data-mt="a">Por ativo (exceções)</button></div>
+  <div id="monG"></div>
+  <div id="monA" hidden><input id="monQ" type="search" placeholder="Procurar (nome ou ticker)…" style="width:100%;margin:6px 0"><div id="monAList"></div></div>
+
   <h3 class="sethead">Conta e dados</h3>
   <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
   <div class="field"><div>Cópias de segurança das marcações<small>a app guarda uma cópia por dia, antes de juntar com a conta (ao fazer login) e antes de repor uma cópia; ficam as 10 mais recentes, neste aparelho</small></div><span style="display:flex;gap:6px;flex-wrap:wrap"><select id="bakSel" style="max-width:260px"></select><button id="bakRestore" type="button">Repor</button></span></div>
@@ -1978,7 +2001,22 @@
     if (own && own[sym]) return own[sym];
     return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(sh).join('/') : one(sym);
   }
-  root.MSS_SYNTH = { NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  // ---------- monitorização: a partir de que timeframe cada favorito é vigiado ----------
+  // grupos: c = cripto, s = ações e ETFs, f = futuros (=F), r = rácios. Exceções por ativo em S.mon.per
+  const MON_TFS = ['5m', '15m', '1h', '4h'];
+  const MON_MS = { '5m': 3e5, '15m': 9e5, '1h': 36e5, '4h': 144e5 };
+  const MON_DEF = { grp: { c: '5m', s: '15m', f: '15m', r: '4h' }, per: { 'ES=F': '5m' } };
+  const isCryptoSym = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
+  const monGroup = (s) => (s.includes('/') ? 'r' : isCryptoSym(s) || isSynth(s) ? 'c' : /=F$/.test(s) ? 'f' : 's');
+  function monOf(S, s) {
+    const m = (S && S.mon) || MON_DEF, per = m.per || {};   // sem configuração ainda: os valores recomendados (ES=F em 5m)
+    if (per[s] && MON_MS[per[s]]) return per[s];
+    const g = Object.assign({}, MON_DEF.grp, m.grp || {})[monGroup(s)];
+    return MON_MS[g] ? g : '5m';
+  }
+  // de quanto em quanto tempo o vigia volta a analisar: 5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora
+  const monEvery = (tf) => (tf === '5m' ? 0 : tf === '15m' ? 9e5 : 36e5);
+  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>// Fibonacci automáticas (em escala log), a partir da estrutura de cada timeframe.
@@ -3054,7 +3092,8 @@
       if (noTf.length) return `<tr class="dim"><td class="tf">${st.name}</td><td colspan="5" class="muted">não disponível nesta ação — as ações não têm ${noTf.map(tfLabel).join(', ')}</td></tr>`;
       const fz = [[st.zone, 'ext'], [st.trig, 'int'], [ctxOf(st), 'ext']].filter(([id, L]) => id && frozen(data[id], L)).map(([id, L]) => `${tfLabel(id)} (${L === 'ext' ? 'tendência principal' : 'movimento recente'})`);
       const fzNote = fz.length ? `<div class="small" style="color:#f5c518;margin-top:3px">✋ ${fz.join(', ')} em modo manual — não atualiza até escolheres ⏩ Continuar automático</div>` : '';
-      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">${setupWhy(data, st).long}${fzNote}</td></tr>`;
+      const nvNote = (settings.favs || []).includes(symbol) && npNv(symbol, st) ? `<div class="small muted" style="margin-top:3px">👁 não vigiado — este ativo é vigiado a partir de ${tfLabel(monTf(symbol))} (Definições → Monitorização): sem alertas nem destaque no Quadro</div>` : '';
+      if (!r) return `<tr><td class="tf">${st.name}</td><td colspan="5" class="muted">${setupWhy(data, st).long}${fzNote}${nvNote}</td></tr>`;
       const up = r.dir === 1;
       const zoneCell = `<span class="chip ${r.zoneOk ? band(r.z.pullback) : 'off'}"><b>${tfLabel(st.zone)}</b> ${up ? '▲' : '▼'} ${pct(r.z.pullback)}${r.zoneOk ? ' ✔' : ''}</span>`;
       const trigCell = r.trig ? `<span class="chip ${r.trig.ok ? (up ? 'trgu' : 'trgd') : 'off'}"><b>${tfLabel(st.trig)}</b> ${r.trig.txt}</span>` : '—';
@@ -3086,7 +3125,7 @@
         <td class="tf">${st.name} <span class="muted small">${cid ? tfLabel(cid) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></td>
         <td><span class="${up ? 'upc' : 'dnc'}">${up ? '▲ Long' : '▼ Short'}</span></td>
         <td>${ctxCell}</td><td>${zoneCell}</td><td>${trigCell}</td><td>${chk}</td>
-        <td>${estado}${r.warn ? '<br>' + r.warn : ''}${fzNote}</td></tr>`;
+        <td>${estado}${r.warn ? '<br>' + r.warn : ''}${fzNote}${nvNote}</td></tr>`;
     }).join('');
     $('#confluence').innerHTML = `<div class="setups"><table><thead><tr><th>Setup</th><th>Sentido</th><th>Contexto</th><th>1 · Zona (correção ≥ 50%)</th><th>2 · Quebra de estrutura</th><th>Checklist</th><th>Estado</th></tr></thead><tbody>${html}</tbody></table></div>`;
     const ms = $('#msetups');
@@ -4110,14 +4149,20 @@
     (settings.setups || []).filter((x) => x.on).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); });
     return TFS.filter((t) => s.has(t.id));
   }
+  // ---------- monitorização (Definições): a partir de que timeframe cada favorito é vigiado ----------
+  const monTf = (s) => SY.monOf(settings, s);
+  const monMinMs = (s) => TF_MS0[monTf(s)] || 0;
+  const npNv = (s, st) => !!(st && (TF_MS0[st.trig] || 0) < monMinMs(s));   // setup com gatilho abaixo do vigiado
+  const favTfsOf = (s) => favTfs().filter((t) => (TF_MS0[t.id] || 1e15) >= monMinMs(s));
   async function loadFav(sym) {
     if (!isCrypto(sym)) {
-      const got = isSynth(sym) ? await synthCandles(sym, favTfs().map((t) => t.id)) : isRatio(sym) ? await ratioCandles(sym, favTfs().map((t) => t.id), true) : await stockCandles(sym, favTfs().map((t) => t.id)), out = {};
-      for (const id in got) out[id] = computeTf(got[id], id, sym);
+      const ids = favTfsOf(sym).map((t) => t.id);
+      const got = isSynth(sym) ? await synthCandles(sym, ids) : isRatio(sym) ? await ratioCandles(sym, ids, true) : await stockCandles(sym, ids), out = {};
+      for (const id in got) if (ids.includes(id)) out[id] = computeTf(got[id], id, sym);
       const any = out['1d'] || Object.values(out)[0];
       favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
     }
-    const tfs = favTfs(), out = {};
+    const tfs = favTfsOf(sym), out = {};
     // orçamento de velas: até 30 favoritos, a história toda do ativo aberto; acima disso reduz (mínimo 1000)
     const nFav = Math.max(1, (settings.favs || []).length);
     const favN = (tf) => Math.round(Math.min(tf.total || 1000, Math.max(1000, (tf.total || 1000) * Math.min(1, 30 / nFav))));
@@ -4397,7 +4442,41 @@
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
     $('#setTfs').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${settings.tfs.includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
+    monDraft = JSON.parse(JSON.stringify(settings.mon || SY.MON_DEF)); monDraft.grp = Object.assign({}, SY.MON_DEF.grp, monDraft.grp || {}); monDraft.per = monDraft.per || {};
+    monRender();
     $('#settings').classList.add('open');
+  }
+  // ---------- Monitorização: quadro por grupo e por ativo ----------
+  let monDraft = null, monTab = 'g';
+  const MON_COLS = ['5m', '15m', '1h', '4h'];
+  const MON_GN = { c: 'Cripto', s: 'Ações e ETFs', f: 'Futuros (S&P 500, ouro, petróleo…)', r: 'Rácios' };
+  const monVal = (s) => monDraft.per[s] || monDraft.grp[SY.monGroup(s)];
+  const monKeep = (tf) => { const ms = TF_MS0[tf] || 0, k = (settings.setups || []).filter((x) => x.on && (TF_MS0[x.trig] || 0) >= ms).map((x) => x.name); return (k.length ? k.join(', ') : 'nenhum setup') + (tf === '5m' ? ' · killzones' : ''); };
+  const monCells = (v, attr) => MON_COLS.map((c) => { const i = MON_COLS.indexOf(c), iv = MON_COLS.indexOf(v), pick = SY.MON_TFS.includes(c);
+    return `<td><div class="mc ${c === v ? 'min' : i > iv ? 'lit' : ''} ${pick ? '' : 'fix'}" ${pick ? `${attr}="${c}"` : ''} title="${pick ? 'vigiar a partir de ' + tfLabel(c) : 'sempre vigiado'}">${tfLabel(c)}</div></td>`; }).join('') + '<td><div class="mc lit fix" title="sempre vigiados">D·S·M</div></td>';
+  function monRender() {
+    if (!monDraft || !$('#monG')) return;
+    document.querySelectorAll('#monTabs button').forEach((b) => b.classList.toggle('on', b.dataset.mt === monTab));
+    $('#monG').hidden = monTab !== 'g'; $('#monA').hidden = monTab !== 'a';
+    const favs = settings.favs || [], head = `<colgroup><col><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:12%"></colgroup><tr><th></th><th colspan="5" class="muted small" style="text-align:center">vigiar a partir de</th></tr>`;
+    $('#monG').innerHTML = `<table class="montbl">${head}${['c', 's', 'f', 'r'].map((g) => { const n = favs.filter((x) => SY.monGroup(x) === g).length, v = monDraft.grp[g];
+      return `<tr><td class="nm"><b>${MON_GN[g]}</b> <span class="muted small">${n} favoritos</span><div class="keep">fica com: ${monKeep(v)}</div></td>${monCells(v, 'data-mg-' + g)}</tr>`; }).join('')}</table>
+      <div class="small muted">Carrega no timeframe a partir do qual queres vigiar (o verde-escuro); os de cima ficam sempre vigiados. Recomendado: Cripto 5m, Ações e Futuros 15m, Rácios 4H — e o S&P 500 (ES=F) em 5m como exceção, por causa das killzones.</div>`;
+    const q = ($('#monQ').value || '').trim().toLowerCase();
+    const list = favs.filter((x) => !q || x.toLowerCase().includes(q) || nm(x).toLowerCase().includes(q)).sort((a, b) => 'csfr'.indexOf(SY.monGroup(a)) - 'csfr'.indexOf(SY.monGroup(b)) || nm(a).localeCompare(nm(b)));
+    $('#monAList').innerHTML = `<table class="montbl">${head}${list.map((x) => { const ex = !!monDraft.per[x], v = monVal(x);
+      return `<tr class="${ex ? '' : 'inh'}"><td class="nm"><b>${npEsc(nm(x))}</b> ${nm(x) !== x ? `<span class="muted small">${x}</span>` : ''}<div class="keep">${ex ? `<span class="ex">exceção</span> · <button type="button" class="mrs" data-mr="${x}">↺ voltar ao grupo (${tfLabel(monDraft.grp[SY.monGroup(x)])})</button>` : `como o grupo ${MON_GN[SY.monGroup(x)].split(' (')[0]}`}</div></td>${monCells(v, 'data-ma="' + x + '" data-mv')}</tr>`; }).join('') || '<tr><td class="muted">sem favoritos</td></tr>'}</table>`;
+  }
+  function monInit() {
+    if (!$('#monTabs')) return;
+    $('#monTabs').addEventListener('click', (e) => { const b = e.target.closest('[data-mt]'); if (!b) return; monTab = b.dataset.mt; monRender(); });
+    $('#monQ').addEventListener('input', monRender);
+    $('#monG').addEventListener('click', (e) => { const c = e.target.closest('.mc'); if (!c) return; for (const g of 'csfr') if (c.dataset['mg-' + g] || c.getAttribute('data-mg-' + g)) { monDraft.grp[g] = c.getAttribute('data-mg-' + g); monRender(); return; } });
+    $('#monAList').addEventListener('click', (e) => {
+      const r = e.target.closest('[data-mr]'); if (r) { delete monDraft.per[r.dataset.mr]; monRender(); return; }
+      const c = e.target.closest('.mc[data-mv]'); if (!c) return; const x = c.dataset.ma, v = c.dataset.mv;
+      if (v === monDraft.grp[SY.monGroup(x)]) delete monDraft.per[x]; else monDraft.per[x] = v; monRender();
+    });
   }
   function applySettings() {
     settings = Object.assign({}, settings, {
@@ -4408,7 +4487,10 @@
       liqTfs: [...document.querySelectorAll('#setLiq input:checked')].map((i) => i.value),
       setups: (settings.setups || []).map((x, k) => ({ name: document.querySelector(`.su-name[data-k="${k}"]`).value || x.name, ctx: document.querySelector(`.su-ctx[data-k="${k}"]`).value, zone: document.querySelector(`.su-zone[data-k="${k}"]`).value, trig: document.querySelector(`.su-trig[data-k="${k}"]`).value, on: document.querySelector(`.su-on[data-k="${k}"]`).checked })),
     });
+    const monCh = monDraft && JSON.stringify(monDraft) !== JSON.stringify(settings.mon || null);
+    if (monDraft) settings.mon = monDraft;
     save('mss_settings4', settings); $('#settings').classList.remove('open'); loadAll();
+    if (monCh) { scanFavs(true); npRender(); }
   }
 
 
@@ -4646,7 +4728,8 @@ function motor_() {
     return `${x.st.name} ${x.dir === 1 ? '▲ Long' : '▼ Short'}: ${st} · zona ${pct(x.z.pullback)}${ctx}${x.sweep ? ' · 💧 quebra depois de sweep' : ''}${x.disp ? ' · ⚖ disputa por decidir' : ''}${x.star ? ' · ' + x.star.txt : ''}`;
   }
   // um sinal por setup: cinzento fora da zona · contorno âmbar em zona · âmbar cheio já quebrou (falta FVG) · verde pronto
-  function npSig(x, st) {
+  function npSig(x, st, s) {
+    if (!x && s && npNv(s, st)) return `<span class="sig none" data-tip="${npEsc(st.name + ': não vigiado — este ativo é vigiado a partir de ' + tfLabel(monTf(s)) + ' (Definições → Monitorização)')}">–</span>`;
     if (!x) return `<span class="sig none" data-tip="${npEsc(st.name + ': sem dados ou sem tendência definida')}">·</span>`;
     const cls = x.rank === 4 ? 'ready' : x.rank === 3 ? 'broke' : x.rank === 2 ? 'zone' : 'off';
     return `<span class="sig ${cls}" data-tip="${npEsc(npSetupTxt(x))}">${x.dir === 1 ? '▲' : '▼'}${x.sweep && x.rank >= 3 ? '<span class="dr">💧</span>' : ''}</span>`;
@@ -4675,7 +4758,7 @@ function motor_() {
     const best = ev.filter(Boolean).sort((a, b) => b.rank - a.rank || b.z.pullback - a.z.pullback)[0];
     const chg = f && f.tfs && f.tfs['1d'] && f.tfs['1d'].candles ? (() => { const c = f.tfs['1d'].candles, a = c[c.length - 2], b = c[c.length - 1]; return a ? (b.c / a.c - 1) * 100 : null; })() : null;
     const marks = `${near ? `<span class="np-dot" data-tip="${npEsc(near)}"></span>` : ''}${disp ? '<span data-tip="disputa por decidir" style="font-size:11px">⚖</span>' : ''}${fz.length ? `<span data-tip="${npEsc('✋ em modo manual — não atualiza: ' + fz.join(', '))}" style="font-size:11px">✋</span>` : ''}`;
-    return { f, ev, setups, best, chg, marks, sigs: setups.map((st, k) => npSig(f ? ev[k] : null, st)).join('') };
+    return { f, ev, setups, best, chg, marks, sigs: setups.map((st, k) => npSig(f ? ev[k] : null, st, s)).join('') };
   }
   const npGroup = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
   function npSorted() {
@@ -4683,9 +4766,28 @@ function motor_() {
     const fv = settings.favs || [], idx = (x) => fv.indexOf(x);
     return fv.slice().sort((a, b) => gr(a) - gr(b) || (settings.favManual ? idx(a) - idx(b) : a.localeCompare(b)));
   }
-  function npRenderRail() {
+  // ---------- pesquisa nos favoritos (lista e Quadro): nome, ticker, nome teu, inglês dos metais; os rácios entram se uma das pernas bater ----------
+  let npFQ = '';
+  const npNorm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  function npFavMatch(s, q) {
+    q = npNorm(q).trim(); if (!q) return true;
+    if (npNorm(s).includes(q) || npNorm(nm(s)).includes(q)) return true;
+    return (isRatio(s) ? s.split('/') : [s]).some((x) => npNorm(x).includes(q) || npNorm(nm(x)).includes(q) || METALS.some((m) => m.symbol === x && m.keys.some((k) => k.startsWith(q))));
+  }
+  // repõe o foco e o cursor na caixa de pesquisa depois de a lista ser redesenhada
+  function npFQKeep(id, fn) {
+    const had = document.activeElement && document.activeElement.id === id;
+    fn();
+    const i = $('#' + id); if (i && had) { i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch (e) {} }
+  }
+  function npFQWire(id, rerender) {
+    const i = $('#' + id); if (!i) return;
+    i.addEventListener('input', () => { npFQ = i.value; npFQKeep(id, rerender); });
+  }
+  function npRenderRail() { npFQKeep('npFavQ', npRenderRail0); }
+  function npRenderRail0() {
     const box = $('#npRail'); if (!box) return;
-    const setups = (settings.setups || []).filter((x) => x.on), favs = npSorted();
+    const setups = (settings.setups || []).filter((x) => x.on), favs = npSorted().filter((x) => npFavMatch(x, npFQ));
     let lastG = null, items = '';
     for (const s of favs) {
       const g = npGroup(s); if (g !== lastG) { items += `<li class="np-grp" style="cursor:default;border:0">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</li>`; lastG = g; }
@@ -4697,10 +4799,12 @@ function motor_() {
       <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
       <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span>💧 quebra após sweep</span><span><span class="np-dot"></span>perto da inversão</span><span>✋ manual · ⚖ disputa</span></div></div>
       <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>${settings.favManual ? '<div class="np-az"><span>a tua ordem</span> · <a href="#" class="npAZ">repor A–Z</a></div>' : `<div class="np-az">arrasta ⠿ para mudar a ordem${settings.favPrev ? ' · <a href="#" class="npUndoAZ"><b>↶ voltar à ordem anterior</b></a>' : ''}</div>`}
-      <ul class="np-rail">${items || '<li style="cursor:default;color:var(--np-mu)">Ainda não tens favoritos: procura um ativo em cima e junta-o com o ＋.</li>'}</ul>`;
+      <input id="npFavQ" class="np-fq" type="search" placeholder="Procurar nos favoritos (ex.: ouro, GC=F)…" value="${npEsc(npFQ)}" autocomplete="off">
+      <ul class="np-rail">${items || (npFQ ? '<li style="cursor:default;color:var(--np-mu)">Nenhum favorito com “' + npEsc(npFQ) + '”.</li>' : '<li style="cursor:default;color:var(--np-mu)">Ainda não tens favoritos: procura um ativo em cima e junta-o com o ＋.</li>')}</ul>`;
+    npFQWire('npFavQ', npRenderRail0);
     box.querySelectorAll('.np-rail li[data-s]').forEach((li) => li.addEventListener('click', () => npOpenAsset(li.dataset.s)));
     $('#npBoardLk').addEventListener('click', (e) => { e.preventDefault(); npShowBoard(); });
-    npAZWire(box); npDrag(box, '.np-rail li[data-s]');
+    npAZWire(box); if (!npFQ) npDrag(box, '.np-rail li[data-s]');   // a filtrar não se arrasta (a ordem dos escondidos perdia-se)
     box.querySelectorAll('[data-o]').forEach((b) => b.addEventListener('click', () => { settings.npSort = b.dataset.o; save('mss_settings4', settings); npRender(); }));
     box.querySelectorAll('[data-c]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npOpenChart(b.dataset.c); }));
     box.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npRemove(b.dataset.x); }));
@@ -4783,7 +4887,7 @@ function motor_() {
       : x.rank === 3 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> em zona (${pct(x.z.pullback)}) e o ${tfLabel(st.trig)} já quebrou${x.sweep ? ' depois de um sweep 💧' : ''} — falta o FVG.`
       : x.rank === 2 ? `<b>${st.name} ${x.dir === 1 ? 'Long' : 'Short'}:</b> o ${tfLabel(st.zone)} está em zona (${pct(x.z.pullback)}). À espera da quebra no ${tfLabel(st.trig)}.`
       : near ? 'Nenhum setup em zona — mas o preço está perto da inversão da tendência principal.' : 'Nenhum setup em zona nos favoritos. O mais avançado é este.';
-    const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;${e && e.rank === 4 ? `color:${NPC('up')};font-weight:700` : ''}">${!e ? 'sem dados' : e.rank === 4 ? 'Pronto' + (e.sweep ? ' 💧' : '') : e.rank === 3 ? 'falta FVG' + (e.sweep ? ' 💧' : '') : e.rank === 2 ? `em zona ${pct(e.z.pullback)}` : 'fora da zona'}</td></tr>`; }).join('');
+    const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;${e && e.rank === 4 ? `color:${NPC('up')};font-weight:700` : ''}">${!e ? (npNv(s, y) ? 'não vigiado' : 'sem dados') : e.rank === 4 ? 'Pronto' + (e.sweep ? ' 💧' : '') : e.rank === 3 ? 'falta FVG' + (e.sweep ? ' 💧' : '') : e.rank === 2 ? `em zona ${pct(e.z.pullback)}` : 'fora da zona'}</td></tr>`; }).join('');
     return `<div class="np-kick">${kick}</div><h2><a href="#" data-open="${s}" class="np-hl" title="Abrir o ativo">${npEsc(nm(s))}</a> <a href="#" data-chart="${s}" class="np-hc" title="Abrir logo o gráfico maior">📈</a>${nm(s) !== s ? `<span class="tk big">${s}</span>` : ''}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
       <p class="np-why">${why}${x.star ? `<br><span>${x.star.txt}</span>` : ''}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
       <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
@@ -4955,7 +5059,7 @@ function motor_() {
     r.trend = BOARD_TFS.map(([id, lb]) => { const sn = T[id] && T[id].ext.snap; if (!sn || !sn.trend) return `<span><b>${lb}</b><span class="mu">—</span></span>`; const deep = sn.pullback > 78.6;
       return `<span title="${tfLabel(id)}: ${sn.trend === 1 ? 'subida' : 'descida'}, correção ${pct(sn.pullback)}"><b>${lb}</b><span class="${sn.trend === 1 ? 'up' : 'dn'}">${sn.trend === 1 ? '▲' : '▼'}</span> <span class="${deep ? 'deep' : 'mu'}">${pct(sn.pullback)}</span></span>`; }).join('');
     // setups
-    r.setups = i.setups.map((st, k) => { const x = i.ev[k]; if (!x) return `<div class="su"><span class="k">${npEsc(st.name)}</span> <span class="mu">sem dados</span></div>`;
+    r.setups = i.setups.map((st, k) => { const x = i.ev[k]; if (!x) return `<div class="su"><span class="k">${npEsc(st.name)}</span> <span class="mu">${npNv(s, st) ? '— não vigiado' : 'sem dados'}</span></div>`;
       const t = x.rank === 4 ? 'pronto' : x.rank === 3 ? 'falta FVG' : x.rank === 2 ? 'falta quebra' : 'fora da zona';
       return `<div class="su" data-tip="${npEsc(npSetupTxt(x))}"><span class="k">${npEsc(st.name)}</span> <span class="r${x.rank}">${x.dir === 1 ? '▲ Long' : '▼ Short'} · ${x.deep ? 'perto da invalidação' : t}${x.sweep && x.rank >= 3 ? ' 💧' : ''}${x.star ? ' ⭐' : ''}</span></div>`; }).join('');
     // perto da inversão: o timeframe com o limite mais perto (a vermelho dentro da distância do alerta 5)
@@ -4978,10 +5082,11 @@ function motor_() {
     return r;
   }
   const BOARD_COLS = [['name', 'Ativo'], ['trend', 'Tendência principal'], ['setup', 'Setups'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['liq', 'Liquidez por varrer'], ['al', 'Último alerta']];
-  function npRenderBoard() {
+  function npRenderBoard() { npFQKeep('npBoardQ', npRenderBoard0); }
+  function npRenderBoard0() {
     const box = $('#npBoard'); if (!box) return;
     const so = settings.npBoardSort || 'name';
-    const rows = (settings.favs || []).map(npBoardRow);
+    const rows = (settings.favs || []).filter((x) => npFavMatch(x, npFQ)).map(npBoardRow);
     const cmp = { name: null, trend: null, setup: (a, b) => { for (let k = 0; k < 6; k++) if (b.ready[k] !== a.ready[k]) return b.ready[k] - a.ready[k]; return b.rank - a.rank; }, near: (a, b) => a.nearV - b.nearV, sma: (a, b) => a.smaV - b.smaV, liq: (a, b) => a.liqV - b.liqV, al: (a, b) => b.alV - a.alV }[so];
     let list;
     if (cmp) list = rows.sort(cmp);
@@ -4993,9 +5098,11 @@ function motor_() {
         <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
-      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || '<tr><td colspan="7" class="mu">Ainda não tens favoritos.</td></tr>'}</tbody></table>
+      <input id="npBoardQ" class="np-fq" type="search" placeholder="Procurar nos favoritos (ex.: ouro, GC=F) — os rácios com esse ativo também aparecem" value="${npEsc(npFQ)}" autocomplete="off">
+      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="7" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     $('#npBoardBack').addEventListener('click', npShowFeed);
+    npFQWire('npBoardQ', npRenderBoard0);
     const setSort = (k) => { if (k === so) return; if (so !== 'name' || k !== 'name') settings.npBoardPrevSort = so; settings.npBoardSort = k; save('mss_settings4', settings); npRenderBoard(); };
     $('#npBoardSel').addEventListener('change', (e) => setSort(e.target.value));
     box.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => setSort(th.dataset.k)));
@@ -5004,7 +5111,7 @@ function motor_() {
       if (so !== 'name') { const pv = settings.npBoardPrevSort && settings.npBoardPrevSort !== so ? settings.npBoardPrevSort : 'name'; settings.npBoardSort = pv; settings.npBoardPrevSort = null; }
       else if (settings.favPrev) { settings.favs = settings.favPrev.favs.filter((x) => (settings.favs || []).includes(x)).concat((settings.favs || []).filter((x) => !settings.favPrev.favs.includes(x))); settings.favManual = settings.favPrev.manual; settings.favPrev = null; }
       save('mss_settings4', settings); npRender(); }));
-    npAZWire(box); if (!cmp) npDrag(box, 'tr.row');
+    npAZWire(box); if (!cmp && !npFQ) npDrag(box, 'tr.row');
     box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
     box.querySelectorAll('.np-bc').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npOpenChart(b.dataset.c); }));
     box.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tip]') && window.matchMedia('(hover:none)').matches) return; npOpenAsset(tr.dataset.s); }));
@@ -5342,7 +5449,7 @@ function motor_() {
     $('#setCancel').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#setX').addEventListener('click', () => $('#settings').classList.remove('open'));
     $('#settings').addEventListener('click', (e) => { if (e.target.id === 'settings') $('#settings').classList.remove('open'); });   // clicar fora fecha
-    $('#setSave').addEventListener('click', applySettings);
+    $('#setSave').addEventListener('click', applySettings); monInit();
     $('#bakRestore').addEventListener('click', restoreBackup);
     $('#helpBtn').addEventListener('click', () => $('#help').classList.toggle('open'));
     $('#helpClose').addEventListener('click', () => $('#help').classList.remove('open'));

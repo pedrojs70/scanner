@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T11:55:58.109Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T12:28:34.089Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1254,7 +1254,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // ---------- 8: linhas diagonais e canais desenhados (só os com 🔔) ----------
   const lnAt = (l, t) => { const lg = l.p1 > 0 && l.p2 > 0, F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x; const k = (t - l.t1) / ((l.t2 - l.t1) || 1); return (off) => FI(F(l.p1) + (F(l.p2) - F(l.p1)) * k + (off || 0)); };
   function lineAlerts(sym, raw, S, A, st, now, out) {
-    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert); if (!A.lineOn || !ls.length) return;
+    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert && (TF_MS[l.tf] || 0) >= (A.lineMinMs || 0)); if (!A.lineOn || !ls.length) return;
     st.ln = st.ln || {};
     for (const l of ls) {
       const cs = raw[l.tf]; if (!cs || !cs.length) continue;
@@ -1279,8 +1279,20 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       }
     }
   }
+  // monitorização (Definições): abaixo do timeframe escolhido para o ativo nada é vigiado — setups com gatilho mais baixo, killzones (5m) e listas de timeframes
+  function monA(A, S, sym) {
+    const SY = root.MSS_SYNTH; if (!SY || !SY.monOf) return A;
+    const minMs = TF_MS[SY.monOf(S, sym)] || 0; if (minMs <= TF_MS['5m']) return A;
+    const B = Object.assign({}, A), ok = (id) => (TF_MS[id] || 0) >= minMs;
+    B.setups = Object.assign({}, A.setups || {});
+    (S.setups || []).forEach((x) => { if (!ok(x.trig)) B.setups[x.name] = false; });
+    B.kzOn = false;
+    ['nearTfs', 'fibTfs', 'smaTfs', 'kcTfs'].forEach((k) => { if (Array.isArray(A[k])) B[k] = A[k].filter(ok); });
+    B.lineMinMs = minMs;
+    return B;
+  }
   function evaluateAsset(sym, raw, S, A0, edits, st, now) {
-    const A = effA(A0, sym), out = [], dm = {};
+    const A = monA(effA(A0, sym), S, sym), out = [], dm = {};
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
@@ -1433,7 +1445,22 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (own && own[sym]) return own[sym];
     return /^[^/\s]+\/[^/\s]+$/.test(String(sym)) ? String(sym).split('/').map(sh).join('/') : one(sym);
   }
-  root.MSS_SYNTH = { NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  // ---------- monitorização: a partir de que timeframe cada favorito é vigiado ----------
+  // grupos: c = cripto, s = ações e ETFs, f = futuros (=F), r = rácios. Exceções por ativo em S.mon.per
+  const MON_TFS = ['5m', '15m', '1h', '4h'];
+  const MON_MS = { '5m': 3e5, '15m': 9e5, '1h': 36e5, '4h': 144e5 };
+  const MON_DEF = { grp: { c: '5m', s: '15m', f: '15m', r: '4h' }, per: { 'ES=F': '5m' } };
+  const isCryptoSym = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
+  const monGroup = (s) => (s.includes('/') ? 'r' : isCryptoSym(s) || isSynth(s) ? 'c' : /=F$/.test(s) ? 'f' : 's');
+  function monOf(S, s) {
+    const m = (S && S.mon) || MON_DEF, per = m.per || {};   // sem configuração ainda: os valores recomendados (ES=F em 5m)
+    if (per[s] && MON_MS[per[s]]) return per[s];
+    const g = Object.assign({}, MON_DEF.grp, m.grp || {})[monGroup(s)];
+    return MON_MS[g] ? g : '5m';
+  }
+  // de quanto em quanto tempo o vigia volta a analisar: 5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora
+  const monEvery = (tf) => (tf === '5m' ? 0 : tf === '15m' ? 9e5 : 36e5);
+  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Vigia (Google Apps Script): lê as definições e marcações da conta, vai buscar as velas, corre os alertas e manda para o Telegram.
@@ -1667,14 +1694,20 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     // só os favoritos com algum alerta ligado são analisados (os outros ficam só na app)
     const act = favs.filter((s) => C.anyOn(A, s, S) || st.trk.some((x) => x.sym === s) || (st.tgw || []).some((x) => x.sym === s));
     hb.act = act.length;
+    // monitorização: cada favorito só é analisado quando "lhe toca" (5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora)
+    st.lastAn = st.lastAn || {};
+    const due = (s) => { const ev = SYN.monEvery(SYN.monOf(S, s)), l = st.lastAn[s]; return !ev || !l || Math.floor(now / ev) > Math.floor(l / ev); };
     const order = [...new Set(st.trk.map((x) => x.sym))].filter((s) => act.indexOf(s) >= 0);
-    for (let k = 0; k < act.length; k++) { const s = act[(st.cur + k) % act.length]; if (order.indexOf(s) < 0) order.push(s); }
+    for (let k = 0; k < act.length; k++) { const s = act[(st.cur + k) % act.length]; if (order.indexOf(s) < 0 && due(s)) order.push(s); }
+    hb.due = order.length;
     const batch = [], dl = new Set(); let used = 0;
     for (const s of order) {
       const nw = legsOf(s).filter((x) => !dl.has(x)), c = nw.reduce((n, x) => n + costOf(x), 0);
       if (batch.length && (used + c > BUDGET || dl.size + nw.length > MAX_ASSETS || batch.length >= MAX_AN)) break;
       batch.push(s); nw.forEach((x) => dl.add(x)); used += c;
     }
+    batch.forEach((s) => { st.lastAn[s] = now; });
+    for (const k of Object.keys(st.lastAn)) if (favs.indexOf(k) < 0) delete st.lastAn[k];
     const rotated = batch.filter((s) => !st.trk.some((x) => x.sym === s)).length;
     st.cur = act.length ? (st.cur + Math.max(1, rotated)) % act.length : 0;
     hb.dl = dl.size; hb.an = batch.length; hb.maxDl = MAX_ASSETS; hb.maxAn = MAX_AN;
