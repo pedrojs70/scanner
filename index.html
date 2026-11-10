@@ -5064,8 +5064,11 @@ function motor_() {
     const disp = n && n.dispute ? `; disputa ${n.dispute.dir === 1 ? '▲' : '▼'}: confirma se fechar além de ${aiF(n.dispute.confirm)}` : '';
     const fib = f ? `; Fibonacci (log): entrada ótima ${aiF(f.entry.lo)}–${aiF(f.entry.hi)}, 78,6% ${aiF(f.deep)}, alvos ${f.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${aiF(t.lo)}–${aiF(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
     const fi = d.fibsI && d.fibsI[0], fibI = fi && (!f || Math.abs(fi.A - f.A) > 1e-9 || Math.abs(fi.B - f.B) > 1e-9) ? `; Fibonacci do movimento recente (log): entrada ótima ${aiF(fi.entry.lo)}–${aiF(fi.entry.hi)}, 78,6% ${aiF(fi.deep)}, alvos ${fi.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${aiF(t.lo)}–${aiF(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
+    let dv = ''; try { const v = divergences(d).filter((x) => x.live).pop(), rs = d._rsi && d._rsi[d._rsi.length - 1];
+      if (v) dv = `; divergência RSI ${v.dir === 1 ? 'de alta' : 'de baixa'} ativa: ${v.dir === 1 ? 'fundo' : 'topo'} ${aiF(v.a.p)} → ${aiF(v.b.p)}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)} (há ${d.closed.length - 1 - v.b.i} velas)`;
+      if (rs != null) dv += `; RSI ${rs.toFixed(0)}`; } catch (e) {}
     const sma = smaOfTf(d, 200);
-    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}`;
+    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}${dv}`;
   }
   // ---------- 📋 resumo para a IA: dados "mastigados" para decidir (obstáculos, risco/retorno, força relativa) e um formato de resposta curto ----------
   const AI_FORMAT = `Responde em português de Portugal, no máximo ~250 palavras, com este formato:
