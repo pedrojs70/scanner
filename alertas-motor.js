@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T14:27:13.739Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T14:57:10.195Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -897,7 +897,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function neededTfs(S, A) {
     const s = new Set();
     if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) s.add(FB.NEXT[x.zone]); });
-    if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) s.add(l.tf); }));
+    if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) lnTfs(l).forEach((id) => s.add(id)); }));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
     if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
@@ -1253,12 +1253,15 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // ---------- 8: linhas diagonais e canais desenhados (só os com 🔔) ----------
   const lnAt = (l, t) => { const lg = l.p1 > 0 && l.p2 > 0, F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x; const k = (t - l.t1) / ((l.t2 - l.t1) || 1); return (off) => FI(F(l.p1) + (F(l.p2) - F(l.p1)) * k + (off || 0)); };
+  const lnTfs = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]).filter((id) => TF_MS[id]).sort((a, b) => TF_MS[a] - TF_MS[b]);
   function lineAlerts(sym, raw, S, A, st, now, out) {
-    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert && (TF_MS[l.tf] || 0) >= (A.lineMinMs || 0)); if (!A.lineOn || !ls.length) return;
+    // uma linha pode estar em vários timeframes: um só alerta por linha; o fecho fora do canal conta no timeframe mais pequeno marcado (e vigiado)
+    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0)); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
+    if (!A.lineOn || !ls.length) return;
     st.ln = st.ln || {};
     for (const l of ls) {
       const cs = raw[l.tf]; if (!cs || !cs.length) continue;
-      const price = cs[cs.length - 1].c, f = lnAt(l, now), pc = (+l.pct || (TF_MS[l.tf] >= 864e5 ? 1 : 0.5)) / 100;
+      const price = cs[cs.length - 1].c, f = lnAt(l, now), pc = (+l.pct || (TF_MS[l.home || l.tf] >= 864e5 ? 1 : 0.5)) / 100;
       const sides = l.type === 'chan' ? [['base', f(0)], ['par', f(l.off || 0)]] : [['linha', f(0)]];
       const chHi = l.type === 'chan' ? Math.max(sides[0][1], sides[1][1]) : null;
       for (const [nm, v] of sides) {

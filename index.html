@@ -118,6 +118,12 @@
   .chartbar .cbreak { flex-basis:100%; height:0; order:5; }
   .chartbar #rngBtn, .chartbar #emaBtn, .chartbar #smaBtn, .chartbar #kcBtn, .chartbar #pocDBtn, .chartbar #pocWBtn, .chartbar #kzBtn { order:6; }
   .chartbar #maxBtn { order:4; margin-left:auto; }
+  .chartbar #fibBtn, .chartbar #lineBtn, .chartbar #lineTools { order:6; }   /* sempre na 2.ª linha: nada salta de sítio */
+  #lineTools { display:inline-flex; gap:4px; }
+  .lntfs { display:inline-flex; flex-wrap:wrap; gap:2px 8px; font-size:12px; margin-top:3px; }
+  .lntfs label { display:inline-flex; align-items:center; gap:2px; cursor:pointer; white-space:nowrap; }
+  .linemenu .lnmtf { padding:0 4px; max-width:340px; }
+  .linemenu .lnmtf .lntfs { margin-top:0; }
   .chartbox.editing .chartbar #editBtn { order:4; margin-left:auto; }
   #chartTitle { font-weight:600; margin-right:10px; }
   .tfbtn { padding:3px 8px; font-size:12px; } .tfbtn.on { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
@@ -211,7 +217,7 @@
   .np-syninfo { flex-basis:100%; font-size:12px; color:var(--np-mu); margin-top:8px; line-height:1.5; }
   .linehint { display:none; position:absolute; left:8px; top:8px; z-index:6; background:#f5c518; color:#111; font-size:12.5px; padding:5px 9px; border-radius:3px; pointer-events:auto; }
   .linehint a { color:#111; }
-  .linemenu { display:none; position:absolute; z-index:6; gap:4px; background:var(--panel, #fff); border:1px solid #1e88e5; border-radius:4px; padding:3px; }
+  .linemenu { display:none; position:absolute; z-index:6; gap:4px; align-items:center; flex-wrap:wrap; max-width:440px; background:var(--panel, #fff); border:1px solid #1e88e5; border-radius:4px; padding:3px; }
   .linemenu button { border:0; background:transparent; cursor:pointer; font-size:15px; padding:2px 6px; opacity:.55; } .linemenu button.on, .linemenu [data-mdel] { opacity:1; }
   #linePanel { display:none; padding:8px 10px; border-top:1px solid var(--line, #2a313b); font-size:13px; }
   #linePanel.open { display:block; }
@@ -731,6 +737,7 @@
       <li><b>Fibonacci automáticas:</b> a app traça sozinha, em cada timeframe, a Fibonacci da perna em curso (limite → topo/fundo), em log. Botão <b>ϕ Fibonacci</b> no gráfico para as ver: entrada ótima (61,8–65%), 78,6% e os alvos −0,236/−0,268 · −0,618/−0,65 · −1/−1,032. A roxo, a Fibonacci anterior (do mesmo limite ao topo/fundo anterior, já ultrapassado) — só alvos; cinzento ✔ = alvo atingido.</li>
       <li><b>Quando morre:</b> depois de chegar a um alvo, inverter e voltar ao nível anterior (ou à linha do 0), ou se fechar para lá da origem (1). No máximo 2 por timeframe.</li>
       <li><b>Nos setups:</b> chip “✔ Entrada ótima” (61,8–65%) ou “Profunda” (78,6–91,8%). Acima de 91,8% o setup passa a “Perto da invalidação” (não conta como pronto). <b>⭐</b> quando um alvo do timeframe de baixo (a caminhar contra o de cima) cai na zona do de cima (61,8–78,6%) — aparece no setup, no Em foco (sobe na ordem) e no Telegram.</li>
+      <li><b>Desenhar e mostrar linhas:</b> “／ Diagonal” e “▱ Canal” estão sempre na barra do gráfico; “📐 Linhas” só mostra ou esconde os desenhos (escondidos continuam guardados e os alertas continuam a funcionar). Ao carregar numa linha aparecem 🔔, 🗑 e as caixas dos timeframes: marca outro timeframe para a linha aparecer também lá; desmarcar ou 🗑 tira-a só desse timeframe (no último, apaga-a). Mover a linha muda-a em todos. O alerta é um só por linha: a aproximação avisa uma vez; a quebra de um canal conta ao fecho do timeframe mais pequeno marcado. No painel “As tuas linhas”, 🗑 apaga de todos os timeframes.</li>
       <li><b>📐 Linhas:</b> diagonais (2 cliques) e canais paralelos (2 cliques na linha de base + 1 no outro lado). Ficam no timeframe onde as desenhaste e gravadas na conta. 🔔 Alertar: o vigia avisa à distância escolhida e quando uma vela fecha fora de um canal.</li>
       <li><b>📋 Copiar para IA:</b> na página do ativo — copia um resumo completo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que o ativo entra). Cola numa conversa com o Claude; junta uma imagem do gráfico se quiseres.</li>
     </ul>
@@ -806,10 +813,10 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools" hidden><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="fibInfo" class="small"></div>
-    <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar (Delete)">🗑</button></div></div>
+    <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar deste timeframe (Delete)">🗑</button><span class="lnmtf"></span></div></div>
     <div id="linePanel"></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
@@ -3578,7 +3585,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', $('#linePanel').classList.contains('open')); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
+    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', linesOn()); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -3721,6 +3728,21 @@
   const lineUndo = {};   // símbolo → cópias anteriores das linhas (↶ Desfazer)
   const scheduleDraw = () => {};   // o desenho corre sempre (requestAnimationFrame)
   const userLines = (sym) => ((settings.lines || {})[sym || symbol] || []);
+  // uma linha pode aparecer em vários timeframes (l.tfs); l.tf é o timeframe onde foi desenhada
+  const lnTfsOf = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]);
+  const lnHere = (l) => lnTfsOf(l).includes(selectedTf);
+  const linesOn = () => settings.linesOn !== false;
+  const LN_TFS = () => TFS.map((t) => t.id).filter((id) => !['1Y', '6M'].includes(id) && (isCrypto(symbol) || Y_IV[id] || Y_AGG[id] || Y_MAGG[id]));
+  // tira a linha só deste timeframe; se era o último, apaga-a
+  function lineRemoveHere(id) {
+    setLines(userLines().map((l) => { if (l.id !== id) return l; const t = lnTfsOf(l).filter((x) => x !== selectedTf); return t.length ? Object.assign({}, l, { tfs: t }) : null; }).filter(Boolean));
+  }
+  function lineToggleTf(id, tf, on) {
+    setLines(userLines().map((l) => { if (l.id !== id) return l; let t = lnTfsOf(l).filter((x) => x !== tf); if (on) t.push(tf); t = LN_TFS().filter((x) => t.includes(x)); return t.length ? Object.assign({}, l, { tfs: t }) : null; }).filter(Boolean));
+    if (!userLines().some((l) => l.id === id)) lineSel = null;
+    lineHintUi(); try { renderChart(true); } catch (e) {}
+  }
+  const lnTfBoxes = (l, attr) => `<span class="lntfs">${LN_TFS().map((id) => `<label title="Mostrar esta linha no ${tfLabel(id)}"><input type="checkbox" ${attr}="${l.id}" data-ltf="${id}" ${lnTfsOf(l).includes(id) ? 'checked' : ''}>${tfLabel(id)}</label>`).join('')}</span>`;
   function setLines(ls, undoable) {
     settings.lines = settings.lines || {};
     if (undoable !== false) (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines()));
@@ -3760,7 +3782,7 @@
   }
   function drawUserLines(g) {
     if (!data[selectedTf]) return;
-    const ls = userLines().filter((l) => l.tf === selectedTf);
+    const ls = linesOn() ? userLines().filter(lnHere) : [];
     const pv = linePreview(); if (pv) ls.push(pv);
     for (const l of ls) {
       const G = lineGeom(l); if (G.segs.some((p) => p.some((v) => v == null))) continue;
@@ -3791,6 +3813,7 @@
     const c = el.querySelector('[data-lc]'); if (c) c.addEventListener('click', (e) => { e.preventDefault(); setLineMode(null); });
   }
   function setLineMode(m) {
+    if (m && !linesOn()) { settings.linesOn = true; save('mss_settings4', settings); try { updateEditUi(); } catch (e) {} }
     lineMode = m || null; linePts = []; lineHover = null; if (m) lineSel = null;
     if (m && editMode) requestExitEdit();
     try { chart.applyOptions({ handleScroll: !m, handleScale: !m }); } catch (e) {}
@@ -3810,13 +3833,14 @@
     if (linePts.length < need) { lineHintUi(); return; }
     const [a, b, c] = linePts;
     if (b.t === a.t) { linePts = [a]; return; }
-    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
+    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, tfs: [selectedTf], t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
     if (lineMode === 'chan') { const [F] = lnF(l); l.off = F(c.p) - F(lnVal(l, c.t, 0)); }
     setLines(userLines().concat(l)); lineSel = l.id; setLineMode(null); lineSel = l.id; lineHintUi();
   }
   // selecionar / arrastar pegas / mover linhas desenhadas
   function lineHit(x, y) {
-    const ls = userLines().filter((l) => l.tf === selectedTf);
+    if (!linesOn()) return null;
+    const ls = userLines().filter(lnHere);
     for (const l of ls.slice().reverse()) {
       const G = lineGeom(l);
       if (lineSel === l.id) { for (const [k, h] of [['p1', G.h1], ['p2', G.h2], ['off', G.h3]]) if (h && h[0] != null && Math.hypot(h[0] - x, h[1] - y) < 11) return { l, part: k }; }
@@ -3826,10 +3850,15 @@
   }
   function positionLineMenu() {
     const m = $('#lineMenu'); if (!m) return;
-    const l = lineSel && !lineMode && userLines().find((x) => x.id === lineSel && x.tf === selectedTf);
-    if (!l || lineDrag) { m.style.display = 'none'; return; }
+    const l = lineSel && !lineMode && linesOn() && userLines().find((x) => x.id === lineSel && lnHere(x));
+    if (!l || lineDrag) { m.style.display = 'none'; m.dataset.for = ''; return; }
+    if (m.dataset.for !== l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf) {   // caixas dos timeframes (só redesenha quando muda)
+      m.dataset.for = l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf;
+      m.querySelector('.lnmtf').innerHTML = lnTfBoxes(l, 'data-mtf');
+      m.querySelectorAll('[data-mtf]').forEach((i) => i.addEventListener('change', () => lineToggleTf(i.dataset.mtf, i.dataset.ltf, i.checked)));
+    }
     const G = lineGeom(l); if (G.h2[0] == null || G.h2[1] == null) { m.style.display = 'none'; return; }
-    m.style.display = 'flex'; m.style.left = Math.max(4, Math.min(chart.timeScale().width() - 150, G.h2[0] + 10)) + 'px'; m.style.top = Math.max(4, G.h2[1] - 40) + 'px';
+    m.style.display = 'flex'; m.style.left = Math.max(4, Math.min(chart.timeScale().width() - Math.max(150, m.offsetWidth + 8), G.h2[0] + 10)) + 'px'; m.style.top = Math.max(4, G.h2[1] - 40) + 'px';
     m.querySelector('[data-mal]').classList.toggle('on', !!l.alert);
   }
   function initLines() {
@@ -3875,12 +3904,12 @@
     document.addEventListener('keydown', (e) => {
       if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
       if (e.key === 'Escape' && (lineMode || lineSel)) { setLineMode(null); lineSel = null; lineHintUi(); }
-      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode) { e.preventDefault(); setLines(userLines().filter((l) => l.id !== lineSel)); lineSel = null; lineHintUi(); }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode) { e.preventDefault(); lineRemoveHere(lineSel); lineSel = null; lineHintUi(); }
       else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !editMode && lineUndo[symbol] && lineUndo[symbol].length && (lineSel || $('#linePanel').classList.contains('open'))) { e.preventDefault(); lineUndoDo(); }
     });
     const m = $('#lineMenu');
     m.querySelector('[data-mal]').addEventListener('click', () => { setLines(userLines().map((l) => (l.id === lineSel ? Object.assign({}, l, { alert: !l.alert }) : l))); });
-    m.querySelector('[data-mdel]').addEventListener('click', () => { setLines(userLines().filter((l) => l.id !== lineSel)); lineSel = null; lineHintUi(); });
+    m.querySelector('[data-mdel]').addEventListener('click', () => { lineRemoveHere(lineSel); lineSel = null; lineHintUi(); });
     $('#lineTools').querySelectorAll('[data-lm]').forEach((b) => b.addEventListener('click', () => setLineMode(b.dataset.lm === lineMode ? null : b.dataset.lm)));
     $('#lineTools').querySelector('[data-mag]').addEventListener('click', () => { settings.lineMag = !settings.lineMag; save('mss_settings4', settings); lineToolsUi(); });
     $('#lineTools').querySelector('[data-und]').addEventListener('click', lineUndoDo);
@@ -3888,17 +3917,19 @@
   function renderLinePanel() {
     const box = $('#linePanel'); if (!box) return; lineToolsUi();
     const ls = userLines(), d = data[selectedTf], price = d && d.price;
+    box.classList.toggle('open', linesOn() && (ls.length > 0 || !!lineMode));
     const rows = ls.map((l) => {
-      const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dist = (x) => price && l.tf === selectedTf ? ` (${pct((price - x) / x * 100, true)})` : '';
-      return `<div class="lprow"><span>${l.type === 'chan' ? 'Canal' : 'Diagonal'} · ${tfLabel(l.tf)} · agora ${fmt(v)}${dist(v)}${v2 != null ? ` / ${fmt(v2)}${dist(v2)}` : ''}</span>
+      const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dist = (x) => price ? ` (${pct((price - x) / x * 100, true)})` : '';
+      return `<div class="lprow"><span>${l.type === 'chan' ? 'Canal' : 'Diagonal'} <span class="muted small">(desenhado no ${tfLabel(l.tf)})</span> · agora ${fmt(v)}${dist(v)}${v2 != null ? ` / ${fmt(v2)}${dist(v2)}` : ''}<br>${lnTfBoxes(l, 'data-ptf')}</span>
         <label title="Avisar no Telegram quando o preço se aproximar (e, num canal, quando fechar fora)"><input type="checkbox" data-la="${l.id}" ${l.alert ? 'checked' : ''}> 🔔 Alertar</label>
         <label title="Distância para o aviso, em %">a <input type="number" step="0.1" min="0.1" max="20" data-lp="${l.id}" value="${l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)}" style="width:56px">%</label>
-        <button class="lyr" data-ld="${l.id}" title="Apagar">🗑</button></div>`;
+        <button class="lyr" data-ld="${l.id}" title="Apagar de todos os timeframes">🗑</button></div>`;
     }).join('');
     box.innerHTML = `<div class="lphead"><b>📐 As tuas linhas neste ativo</b></div>${rows || '<div class="muted small">Ainda sem linhas. Usa ／ Diagonal ou ▱ Canal na barra do gráfico. Liga 🔔 só nas principais — o vigia avisa quando o preço chega perto (e quando fecha fora de um canal).</div>'}`;
     const upd = (id, fn) => setLines(userLines().map((l) => (l.id === id ? fn(Object.assign({}, l)) : l)));
     box.querySelectorAll('[data-la]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.la, (l) => { l.alert = i.checked; return l; })));
     box.querySelectorAll('[data-lp]').forEach((i) => i.addEventListener('change', () => upd(i.dataset.lp, (l) => { l.pct = Math.max(0.1, Math.min(20, +String(i.value).replace(',', '.') || 1)); return l; })));
+    box.querySelectorAll('[data-ptf]').forEach((i) => i.addEventListener('change', () => lineToggleTf(i.dataset.ptf, i.dataset.ltf, i.checked)));
     box.querySelectorAll('[data-ld]').forEach((b) => b.addEventListener('click', () => { setLines(userLines().filter((l) => l.id !== b.dataset.ld)); if (lineSel === b.dataset.ld) lineSel = null; }));
   }
   function onChartClick(param) {
@@ -5499,7 +5530,8 @@ function motor_() {
     $('#resetBtn').addEventListener('click', resetEdits);
     $('#undoBtn').addEventListener('click', undoStep);
     $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
-    $('#lineBtn').addEventListener('click', () => { const pnl = $('#linePanel'), tb = $('#lineTools'); const op = !pnl.classList.contains('open'); pnl.classList.toggle('open', op); tb.hidden = !op; if (!op) setLineMode(null); else renderLinePanel(); updateEditUi(); });
+    // 📐 Linhas: só mostra / esconde os desenhos (continuam guardados e os alertas continuam a funcionar)
+    $('#lineBtn').addEventListener('click', () => { settings.linesOn = !linesOn(); save('mss_settings4', settings); if (!linesOn()) { setLineMode(null); lineSel = null; lineHintUi(); } renderLinePanel(); updateEditUi(); try { renderChart(true); } catch (e) {} });
     initLines();
     for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn'], ['#fibBtn', 'fibOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
