@@ -5165,6 +5165,15 @@ function motor_() {
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
     npTipInit(); mlInit(); navWatchModals(); try { history.replaceState({ v: 'feed' }, ''); } catch (e) {} setTimeout(fillAutoNames, 4000);
     npEnter();   // a app abre sempre no jornal
+    // link de um alerta do Telegram: ?a=ATIVO&tf=1w&v=chart → abre logo o ativo (ou o gráfico maior) nesse timeframe
+    try {
+      const u = new URLSearchParams(location.search), a = (u.get('a') || '').trim(), tf = u.get('tf'), v = u.get('v');
+      if (a) {
+        history.replaceState({ v: 'feed' }, '', location.pathname);
+        if (tf && TF_IDS.includes(tf)) { selectedTf = tf; save('mss_tf', tf); }
+        setTimeout(() => { if (v === 'chart') npOpenChart(a); else npOpenAsset(a); }, 300);
+      }
+    } catch (e) {}
   }
 
   // ---------- gravação online (Firebase): login com Google; marcas e definições guardadas na conta ----------

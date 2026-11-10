@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T22:47:27.052Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T23:23:34.037Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1003,7 +1003,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       }
       if (prot != null) lines.push(`Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(prot)}`);
       if (A.fvgOn) lines.push('<i>A seguir: aviso quando o preço tocar num FVG para lá dos 50% da pernada.</i>');
-      out.push({ kind: 'setup', sym, text: lines.join('\n') });
+      out.push({ kind: 'setup', sym, tf: su.zone, text: lines.join('\n') });
       // segue o pullback desta quebra (alerta 4)
       const s0 = dt.int.res.state;
       if (s0 && s0.prot) {
@@ -1023,7 +1023,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const inv = after.some((c) => (up ? c.l < tr.origin : c.h > tr.origin));
       const sn = d.int.snap;
       if (inv || (sn.trend && sn.trend !== tr.dir)) {
-        if (A.fvgOn && !st.silent) out.push({ kind: 'invalid', sym, text: `⚪ <b>Invalidado · ${title}</b>\n${inv ? `O preço passou a origem da pernada (${fmt(tr.origin)}).` : `O ${LBL[tr.tf]} voltou a quebrar ${up ? 'para baixo' : 'para cima'}.`} Deixo de seguir este setup.` });
+        if (A.fvgOn && !st.silent) out.push({ kind: 'invalid', sym, tf: tr.tf, text: `⚪ <b>Invalidado · ${title}</b>\n${inv ? `O preço passou a origem da pernada (${fmt(tr.origin)}).` : `O ${LBL[tr.tf]} voltou a quebrar ${up ? 'para baixo' : 'para cima'}.`} Deixo de seguir este setup.` });
         return false;
       }
       if (now - tr.at > 14 * 864e5) return false;
@@ -1048,7 +1048,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         if (cs[j].t <= tr.since || cs[j].t < now - (TF_MS[tr.tf] + 40 * 6e4) || st.silent) continue;   // tocado antes da quebra ou aviso atrasado
         const touch = edge;
         const corr = Math.abs(ext - touch) / size * 100;
-        out.push({ kind: 'fvg', sym, text: [
+        out.push({ kind: 'fvg', sym, tf: tr.tf, text: [
           `🎯 <b>FVG no pullback · ${title}</b>`,
           `O preço tocou o FVG ${LBL[tr.tf]} ${fmt(f.bot)} – ${fmt(f.top)}`,
           `Correção da pernada: ${pct(corr)} (origem ${fmt(tr.origin)} → ${up ? 'topo' : 'fundo'} ${fmt(ext)})`,
@@ -1244,7 +1244,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       if (up ? price < x.origin : price > x.origin) return false;   // passou a origem: setup invalidado
       const reached = up ? price >= x.near * (1 - pc) : price <= x.near * (1 + pc);
       if (!reached) return true;
-      if (A.tgtOn && !st.silent) out.push({ kind: 'tgt', sym, text: `🎯 <b>Perto do alvo · ${esc(x.name)} · ${esc(sym)}</b>\n${x.tname === 'topo da perna' || x.tname === 'fundo da perna' ? `O preço (${fmt(price)}) chegou perto do ${x.tname} do ${LBL[x.tf]} (${fmt(x.near)})` : `O preço (${fmt(price)}) chegou ao ${x.tname} do ${LBL[x.tf]} (${fmt(x.lo)} – ${fmt(x.hi)})`}. Pensa em realizar ou subir o stop.` });
+      if (A.tgtOn && !st.silent) out.push({ kind: 'tgt', sym, tf: x.tf, text: `🎯 <b>Perto do alvo · ${esc(x.name)} · ${esc(sym)}</b>\n${x.tname === 'topo da perna' || x.tname === 'fundo da perna' ? `O preço (${fmt(price)}) chegou perto do ${x.tname} do ${LBL[x.tf]} (${fmt(x.near)})` : `O preço (${fmt(price)}) chegou ao ${x.tname} do ${LBL[x.tf]} (${fmt(x.lo)} – ${fmt(x.hi)})`}. Pensa em realizar ou subir o stop.` });
       return false;
     });
   }
@@ -1493,9 +1493,20 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     props.st_n = String(n);
     p.setProperties(props);
   }
-  function tg(A, text) {
-    const url = 'https://api.telegram.org/bot' + A.tgToken + '/sendMessage';
-    const opt = { method: 'post', contentType: 'application/json', payload: JSON.stringify({ chat_id: A.tgChat, text, parse_mode: 'HTML', disable_web_page_preview: true }) };
+  // botões por baixo do alerta: abrem a app no ativo / no gráfico maior, no timeframe do alerta
+  const APP_URL = 'https://scanner.myfoliotrack.co.uk/';
+  function kbd(A, m) {
+    if (!m || !m.sym) return null;
+    const head = String(m.text || '').split('\n')[0];
+    let tf = m.tf || '';
+    if (!tf) for (const id of Object.keys(C.LBL)) if (new RegExp('(^|[^\\wÀ-ú])' + C.LBL[id] + '($|[^\\wÀ-ú])').test(head)) { tf = id; break; }
+    const base = String(A.appUrl || APP_URL) + '?a=' + encodeURIComponent(m.sym) + (tf ? '&tf=' + tf : '');
+    return { inline_keyboard: [[{ text: '📈 Abrir gráfico', url: base + '&v=chart' }, { text: 'Abrir ativo', url: base + '&v=asset' }]] };
+  }
+  function tg(A, text, m) {
+    const url = 'https://api.telegram.org/bot' + A.tgToken + '/sendMessage', body = { chat_id: A.tgChat, text, parse_mode: 'HTML', disable_web_page_preview: true }, kb = kbd(A, m);
+    if (kb) body.reply_markup = kb;
+    const opt = { method: 'post', contentType: 'application/json', payload: JSON.stringify(body) };
     let r = http(url, opt);
     if (r.code === 429) { Utilities.sleep(1500); r = http(url, opt); }
     return r.code === 200 ? null : 'Telegram ' + r.code + ': ' + r.text.slice(0, 120);
@@ -1690,7 +1701,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const own = Object.assign({}, S.autoNames || {}, S.names || {});
     for (const m of msgs) {
       if (m.sym) { const n = SYN.nameOf(m.sym, own); if (n && n !== m.sym) m.text = m.text.split('· ' + m.sym + '</b>').join('· ' + n + ' (' + m.sym + ')</b>').split('<b>' + m.sym + ' ·').join('<b>' + n + ' (' + m.sym + ') ·'); }
-      const e = tg(A, m.text); if (e) hb.err.push(e);
+      const e = tg(A, m.text, m); if (e) hb.err.push(e);
       st.log.unshift({ at: now, kind: m.kind, sym: m.sym, text: m.text });
     }
     st.log = st.log.slice(0, 80);
