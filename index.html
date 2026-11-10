@@ -564,7 +564,16 @@
   .montbl .keep { font-size:11px; color:var(--muted); text-align:left; }
   .montbl button.mrs { font-size:11px; padding:2px 6px; }
   @media (max-width:560px) { .montbl { font-size:11px; } .montbl .keep { display:none; } .montbl col:not(:first-child) { width:13% !important; } }
-  .np-fq { width:100%; box-sizing:border-box; margin:8px 0 6px; padding:7px 10px; border:1px solid var(--np-ln, #ccc); background:transparent; color:inherit; font:inherit; font-size:14px; border-radius:0; }
+  /* pesquisa nos favoritos: pequena, bem visível, com ✕ */
+  .np-fqw { position:relative; display:flex; align-items:center; width:100%; max-width:320px; margin:10px 0 8px; border:2px solid var(--np-red); background:color-mix(in srgb, var(--np-red) 7%, transparent); }
+  .np-fqw:focus-within { box-shadow:0 0 0 3px color-mix(in srgb, var(--np-red) 25%, transparent); }
+  .np-fqi { padding:0 4px 0 9px; font-size:19px; font-weight:700; color:var(--np-red); line-height:1; }
+  .np-fq { flex:1; min-width:0; border:0 !important; outline:0; background:transparent !important; box-shadow:none !important; color:inherit; font:inherit; font-size:14px; padding:7px 4px; }
+  .np-fq::placeholder { color:var(--np-mu, #888); }
+  .np-fqx { display:none; border:0 !important; background:transparent !important; color:inherit; font-size:15px; padding:4px 10px; cursor:pointer; opacity:.75; }
+  .np-fqx:hover { opacity:1; }
+  .np-fqw.has .np-fqx { display:block; }
+  .np-fqw.has { background:color-mix(in srgb, var(--np-red) 14%, transparent); }
 </style>
 </head>
 <body>
@@ -610,7 +619,7 @@
   <div class="np-cols">
     <aside id="npRail"></aside>
     <section id="npCenter">
-      <div id="npFeedWrap"><h2 class="np-h2" id="npFeedTitle">O que aconteceu hoje</h2><div id="npFeed"></div></div>
+      <div id="npFeedWrap"><h2 class="np-h2" id="npFeedTitle">O que aconteceu hoje</h2><div class="np-fqw" id="npJQW"><span class="np-fqi" aria-hidden="true">⌕</span><input id="npJQ" class="np-fq" type="text" placeholder="Só um ativo (ex.: ouro, BTC)…" autocomplete="off" spellcheck="false"><button type="button" class="np-fqx" id="npJQX" title="Apagar a procura" aria-label="Apagar a procura">✕</button></div><div id="npFeed"></div></div>
       <div id="npAsset"><div id="npAssetHead"></div><div id="npSlot"></div></div>
       <div id="npBoard"></div>
       <div id="npFocusAll"></div>
@@ -4780,9 +4789,12 @@ function motor_() {
     fn();
     const i = $('#' + id); if (i && had) { i.focus(); try { i.setSelectionRange(i.value.length, i.value.length); } catch (e) {} }
   }
+  const npFQBox = (id, ph) => `<div class="np-fqw ${npFQ ? 'has' : ''}"><span class="np-fqi" aria-hidden="true">⌕</span><input id="${id}" class="np-fq" type="text" placeholder="${ph}" value="${npEsc(npFQ)}" autocomplete="off" spellcheck="false"><button type="button" class="np-fqx" data-fqx="${id}" title="Apagar a procura" aria-label="Apagar a procura">✕</button></div>`;
   function npFQWire(id, rerender) {
     const i = $('#' + id); if (!i) return;
     i.addEventListener('input', () => { npFQ = i.value; npFQKeep(id, rerender); });
+    i.addEventListener('keydown', (e) => { if (e.key === 'Escape' && npFQ) { e.preventDefault(); npFQ = ''; npFQKeep(id, rerender); } });
+    const x = document.querySelector(`[data-fqx="${id}"]`); if (x) x.addEventListener('click', () => { npFQ = ''; rerender(); const j = $('#' + id); if (j) j.focus(); });
   }
   function npRenderRail() { npFQKeep('npFavQ', npRenderRail0); }
   function npRenderRail0() {
@@ -4799,7 +4811,7 @@ function motor_() {
       <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
       <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span>💧 quebra após sweep</span><span><span class="np-dot"></span>perto da inversão</span><span>✋ manual · ⚖ disputa</span></div></div>
       <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>${settings.favManual ? '<div class="np-az"><span>a tua ordem</span> · <a href="#" class="npAZ">repor A–Z</a></div>' : `<div class="np-az">arrasta ⠿ para mudar a ordem${settings.favPrev ? ' · <a href="#" class="npUndoAZ"><b>↶ voltar à ordem anterior</b></a>' : ''}</div>`}
-      <input id="npFavQ" class="np-fq" type="search" placeholder="Procurar nos favoritos (ex.: ouro, GC=F)…" value="${npEsc(npFQ)}" autocomplete="off">
+      ${npFQBox('npFavQ', 'Procurar nos favoritos…')}
       <ul class="np-rail">${items || (npFQ ? '<li style="cursor:default;color:var(--np-mu)">Nenhum favorito com “' + npEsc(npFQ) + '”.</li>' : '<li style="cursor:default;color:var(--np-mu)">Ainda não tens favoritos: procura um ativo em cima e junta-o com o ＋.</li>')}</ul>`;
     npFQWire('npFavQ', npRenderRail0);
     box.querySelectorAll('.np-rail li[data-s]').forEach((li) => li.addEventListener('click', () => npOpenAsset(li.dataset.s)));
@@ -4915,23 +4927,26 @@ function motor_() {
     npView = 'focus'; document.body.dataset.npv = 'focus'; clearInterval(npPxTimer);
     npRender(); window.scrollTo(0, 0); scanFavs(false); navPush({ v: 'focus' });
   }
-  function npRenderFocusAll() {
+  function npRenderFocusAll() { npFQKeep('npFocusQ', npRenderFocusAll0); }
+  function npRenderFocusAll0() {
     const box = $('#npFocusAll'); if (!box) return;
     const sel = settings.npFocusF || ['ready', 'fvg'];
-    const all = npRanked().map((b) => Object.assign(b, { cat: npCat(b) })).filter((b) => b.cat);
+    const all = npRanked().map((b) => Object.assign(b, { cat: npCat(b) })).filter((b) => b.cat && npFavMatch(b.s, npFQ));
     const cnt = (c) => all.filter((b) => b.cat === c).length;
     const list = all.filter((b) => sel.includes(b.cat));
     box.innerHTML = `<div class="bhead"><div><h2>Em foco</h2><div class="sub">${all.length} de ${(settings.favs || []).length} ativos merecem destaque · ${favProg || ''}</div></div><button id="npFocusBack">← Voltar ao jornal</button></div>
+      ${npFQBox('npFocusQ', 'Procurar (ex.: ouro, GC=F)…')}
       <div class="np-ff">${FOCUS_CATS.map(([k, t]) => `<button data-ff="${k}" class="${sel.includes(k) ? 'on' : ''}">${t} <span>${cnt(k)}</span></button>`).join('')}<button data-ff="all" class="${sel.length === 4 ? 'on' : ''}">Todos <span>${all.length}</span></button></div>
       <div class="np-fgrid">${list.map((b) => `<div class="np-box">${npFocusCard(b, { ready: 'PRONTO', fvg: 'FALTA FVG', zone: 'EM ZONA', near: 'PERTO DA INVERSÃO' }[b.cat])}</div>`).join('') || `<p class="np-why" style="color:var(--np-mu)">${all.length ? 'Nenhum ativo nestes filtros — escolhe outro em cima.' : 'Nenhum favorito em zona, com quebra ou perto da inversão neste momento.'}</p>`}</div>`;
     $('#npFocusBack').addEventListener('click', npShowFeed);
+    npFQWire('npFocusQ', npRenderFocusAll0);
     box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenChart(a.dataset.chart); }));
     box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
     box.querySelectorAll('[data-ff]').forEach((b) => b.addEventListener('click', () => {
       const k = b.dataset.ff; let cur = (settings.npFocusF || ['ready', 'fvg']).slice();
       if (k === 'all') cur = cur.length === 4 ? ['ready', 'fvg'] : FOCUS_CATS.map((c) => c[0]);
       else cur = cur.includes(k) ? cur.filter((x) => x !== k) : cur.concat(k);
-      settings.npFocusF = cur; save('mss_settings4', settings); npRenderFocusAll();
+      settings.npFocusF = cur; save('mss_settings4', settings); npRenderFocusAll0();
     }));
   }
   async function npLoadFeed() {
@@ -4960,7 +4975,10 @@ function motor_() {
     const t0 = new Date(); t0.setHours(0, 0, 0, 0);
     $('#npFeedTitle').textContent = npFilter === 'today' ? 'O que aconteceu hoje' : 'O que aconteceu esta semana';
     const log = (npFeed && npFeed.log) || [];
-    const list = log.filter((x) => (npFilter === 'today' ? x.at >= +t0 : x.at >= Date.now() - 7 * 864e5));
+    const jq = (($('#npJQ') || {}).value || '').trim();
+    const list = log.filter((x) => (npFilter === 'today' ? x.at >= +t0 : x.at >= Date.now() - 7 * 864e5) && (!jq || (x.sym && npFavMatch(x.sym, jq))));
+    const w = $('#npJQW'); if (w) w.classList.toggle('has', !!jq);
+    if (!list.length && jq) { box.innerHTML = `<div class="np-empty">Nada ${npFilter === 'today' ? 'hoje' : 'esta semana'} sobre “${npEsc(jq)}”.${npFilter === 'today' ? ' <a href="#" data-f2="week">Ver esta semana</a>' : ''}</div>`; box.querySelectorAll('[data-f2]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npSetFilter(a.dataset.f2); })); return; }
     if (!list.length) {
       box.innerHTML = `<div class="np-empty">${!npFeed ? 'A ler o histórico do vigia…' : npFeed.noUser ? 'Sem ligação à conta: o histórico do vigia aparece depois do login.' : !npFeed.lastRun ? 'Ainda não há histórico: o vigia dos alertas ainda não correu. Vê a página <a href="#" data-npl="alerts">Alertas</a>.' : npFilter === 'today' ? 'Hoje ainda não aconteceu nada nos teus favoritos que mereça alerta. <a href="#" data-f2="week">Ver esta semana</a>.' : 'Nada esta semana.'}</div>`;
       box.querySelectorAll('[data-npl]').forEach(npLinkWire); box.querySelectorAll('[data-f2]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npSetFilter(a.dataset.f2); }));
@@ -5098,7 +5116,7 @@ function motor_() {
         <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
-      <input id="npBoardQ" class="np-fq" type="search" placeholder="Procurar nos favoritos (ex.: ouro, GC=F) — os rácios com esse ativo também aparecem" value="${npEsc(npFQ)}" autocomplete="off">
+      ${npFQBox('npBoardQ', 'Procurar (ex.: ouro, GC=F)…')}
       <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="7" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     $('#npBoardBack').addEventListener('click', npShowFeed);
@@ -5304,6 +5322,7 @@ function motor_() {
     const favHits = (v) => { const t = v.toLowerCase(); return (settings.favs || []).filter((s) => nm(s) !== s && nm(s).toLowerCase().includes(t)).slice(0, 6).map((s) => ({ symbol: s, name: nm(s), exch: 'nos favoritos' })); };
     q.addEventListener('input', () => { clearTimeout(tq); const v = q.value.trim(); if (v.length < 2) { sug.style.display = 'none'; return; } tq = setTimeout(async () => { const fh = favHits(v), r = await searchAssets(v); npShowSug(sug, fh.concat(r.filter((o) => !fh.some((x) => x.symbol === o.symbol))), pick); }, 400); });
     q.addEventListener('blur', () => setTimeout(() => { sug.style.display = 'none'; }, 200));
+    const jq = $('#npJQ'); if (jq) { jq.addEventListener('input', npRenderFeed); jq.addEventListener('keydown', (e) => { if (e.key === 'Escape') { jq.value = ''; npRenderFeed(); } }); $('#npJQX').addEventListener('click', () => { jq.value = ''; npRenderFeed(); jq.focus(); }); }
     npTipInit(); mlInit(); navWatchModals(); try { history.replaceState({ v: 'feed' }, ''); } catch (e) {} setTimeout(fillAutoNames, 4000);
     npEnter();   // a app abre sempre no jornal
     // link de um alerta do Telegram: ?a=ATIVO&tf=1w&v=chart → abre logo o ativo (ou o gráfico maior) nesse timeframe
