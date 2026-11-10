@@ -3320,7 +3320,7 @@
   function atrOf(cs, n) { const o = new Array(cs.length).fill(null); let a = 0; for (let i = 0; i < cs.length; i++) { const c = cs[i], tr = i ? Math.max(c.h - c.l, Math.abs(c.h - cs[i - 1].c), Math.abs(c.l - cs[i - 1].c)) : c.h - c.l; if (i < n) { a += tr; if (i === n - 1) { a /= n; o[i] = a; } } else { a = (a * (n - 1) + tr) / n; o[i] = a; } } return o; }
   function renderChart(keepRange) {
     const d = data[selectedTf]; if (!d) return;
-    $('#chartTitle').textContent = `${symbol} · ${TFS.find((t) => t.id === selectedTf).label}`;
+    { const n = nm(symbol), e = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); $('#chartTitle').innerHTML = `${e(n)}${n !== symbol ? ` <span style="font-weight:400;opacity:.6;font-size:.8em">${e(symbol)}</span>` : ''} · ${TFS.find((t) => t.id === selectedTf).label}`; }
     document.querySelectorAll('.tfbtn').forEach((b) => { b.classList.toggle('on', b.dataset.tf === selectedTf); b.style.display = !isCrypto(symbol) && !Y_IV[b.dataset.tf] && !Y_AGG[b.dataset.tf] && !Y_MAGG[b.dataset.tf] ? 'none' : ''; });   // ações: sem 3m
     $('#tgExt').classList.toggle('on', vE()); $('#tgInt').classList.toggle('on', vI());
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
