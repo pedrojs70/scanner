@@ -5341,7 +5341,7 @@ function motor_() {
     npEnter();   // a app abre sempre no jornal
     // link de um alerta do Telegram: ?a=ATIVO&tf=1w&v=chart → abre logo o ativo (ou o gráfico maior) nesse timeframe
     try {
-      const u = new URLSearchParams(location.search), a = (u.get('a') || '').trim(), tf = u.get('tf'), v = u.get('v');
+      const u = new URLSearchParams(location.search), a = (u.get('a') || u.get('g') || '').trim(), tf = u.get('tf'), v = u.get('g') ? 'chart' : u.get('v');   // ?g= é o link curto visível no texto do alerta (abre o gráfico)
       if (a) {
         history.replaceState({ v: 'feed' }, '', location.pathname);
         if (tf && TF_IDS.includes(tf)) { selectedTf = tf; save('mss_tf', tf); }

@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T12:28:34.089Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T14:27:13.739Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1525,11 +1525,21 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // botões por baixo do alerta: abrem a app no ativo / no gráfico maior, no timeframe do alerta
   const APP_URL = 'https://scanner.myfoliotrack.co.uk/';
-  function kbd(A, m) {
-    if (!m || !m.sym) return null;
+  function tfOfMsg(m) {
     const head = String(m.text || '').split('\n')[0];
     let tf = m.tf || '';
     if (!tf) for (const id of Object.keys(C.LBL)) if (new RegExp('(^|[^\\wÀ-ú])' + C.LBL[id] + '($|[^\\wÀ-ú])').test(head)) { tf = id; break; }
+    return tf;
+  }
+  // experiência: link visível no fim da mensagem (o texto é o próprio endereço, por isso o Telegram abre sem perguntar)
+  function linkLine(A, m) {
+    if (!m || !m.sym || m.kind !== 'setup') return '';
+    const tf = tfOfMsg(m), url = String(A.appUrl || APP_URL) + '?g=' + m.sym + (tf ? '&tf=' + tf : '');
+    return '\n📈 ' + url.replace(/&/g, '&amp;');
+  }
+  function kbd(A, m) {
+    if (!m || !m.sym) return null;
+    const tf = tfOfMsg(m);
     const base = String(A.appUrl || APP_URL) + '?a=' + encodeURIComponent(m.sym) + (tf ? '&tf=' + tf : '');
     return { inline_keyboard: [[{ text: '📈 Abrir gráfico', url: base + '&v=chart' }, { text: 'Abrir ativo', url: base + '&v=asset' }]] };
   }
@@ -1737,7 +1747,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const own = Object.assign({}, S.autoNames || {}, S.names || {});
     for (const m of msgs) {
       if (m.sym) { const n = SYN.nameOf(m.sym, own); if (n && n !== m.sym) m.text = m.text.split('· ' + m.sym + '</b>').join('· ' + n + ' (' + m.sym + ')</b>').split('<b>' + m.sym + ' ·').join('<b>' + n + ' (' + m.sym + ') ·'); }
-      const e = tg(A, m.text, m); if (e) hb.err.push(e);
+      const e = tg(A, m.text + linkLine(A, m), m); if (e) hb.err.push(e);
       st.log.unshift({ at: now, kind: m.kind, sym: m.sym, text: m.text });
     }
     st.log = st.log.slice(0, 80);
