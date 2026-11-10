@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T16:07:51.538Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T16:40:44.042Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -979,7 +979,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const ctxTxt = !(cx && cx.trend) ? 'sem dados' : ctxFav ? (cx.pullback > 78.6 ? `a favor, mas fundo (${pct(cx.pullback)}) — perto de virar` : 'a favor') : `contra (${pct(cx.pullback)})`;
       // 💧 a quebra veio depois de um sweep do lado oposto (até 20 velas antes), como na app
       const swept = (dt.int.res.sweeps || []).some((sw) => !sw.invalid && sw.dir === -lb.dir && sw.i <= lb.i && lb.i - sw.i <= 20);
-      const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price);
+      const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price).concat(lineConf(S, sym, dt.price, now));
       const prot = t.protected;
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
@@ -1016,7 +1016,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
 
   // ---------- 4) depois do alerta de setup: o preço toca num FVG do gatilho para lá dos 50% da pernada ----------
-  function trackerAlerts(sym, dm, A, st, now, out) {
+  function trackerAlerts(sym, dm, A, st, now, out, S) {
     st.trk = st.trk.filter((tr) => {
       if (tr.sym !== sym) return true;
       const d = dm[tr.tf]; if (!d) return true;
@@ -1055,6 +1055,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
           `O preço tocou o FVG ${LBL[tr.tf]} ${fmt(f.bot)} – ${fmt(f.top)}`,
           `Correção da pernada: ${pct(corr)} (origem ${fmt(tr.origin)} → ${up ? 'topo' : 'fundo'} ${fmt(ext)})`,
           `Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(tr.origin)}`,
+          ...(S ? lineConf(S, sym, touch, now).map((x) => 'Confluência: ' + x) : []),
         ].join('\n') });
       }
       return true;
@@ -1187,7 +1188,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // ---------- um ativo: velas em bruto → mensagens ----------
   // raw: { tfId: [{t, ct, o, h, l, c, v}] } (já com 3M/6M/1Y agrupados); edits: { 'SYM|tf': ed }
   // ---------- 9: o preço entra na zona de entrada (Fibonacci 0,618–0,65; opcional 0,786) da perna atual ----------
-  function fibAlerts(sym, dm, A, st, now, out) {
+  function fibAlerts(sym, dm, A, st, now, out, S) {
     if (!A.fibOn || !FB) return;
     st.fibz = st.fibz || {};
     for (const id of A.fibTfs || []) {
@@ -1208,6 +1209,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
           `O preço (${fmt(p)}) entrou na ${nmz} da ${up ? 'subida' : 'descida'} (1 = ${fmt(f.A)} → 0 = ${fmt(f.B)}): ${val} · retração ${pct(r)}. Possível ${up ? 'compra' : 'venda'} — espera a quebra no timeframe de baixo.`,
           star ? `⭐ ${FB.starName(star, dl, LBL[lo])} (${fmt(star.lo)} – ${fmt(star.hi)}) cai nesta zona` : '',
           `Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(f.A)}`,
+          ...(S ? lineConf(S, sym, p, now).map((x) => 'Confluência: ' + x) : []),
         ].filter(Boolean).join('\n') });
       }
     }
@@ -1254,6 +1256,18 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // ---------- 8: linhas diagonais e canais desenhados (só os com 🔔) ----------
   const lnAt = (l, t) => { const lg = l.p1 > 0 && l.p2 > 0, F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x; const k = (t - l.t1) / ((l.t2 - l.t1) || 1); return (off) => FI(F(l.p1) + (F(l.p2) - F(l.p1)) * k + (off || 0)); };
   const lnTfs = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]).filter((id) => TF_MS[id]).sort((a, b) => TF_MS[a] - TF_MS[b]);
+  // as minhas linhas perto do preço (para a linha "Confluência" dos alertas): usa a distância escolhida em cada linha
+  function lineConf(S, sym, price, now) {
+    const out = [];
+    for (const l of ((S.lines || {})[sym] || [])) {
+      const f = lnAt(l, now), pc = (+l.pct || (TF_MS[l.tf] >= 864e5 ? 1 : 0.5)) / 100, tl = lnTfs(l).map((id) => LBL[id]).join('/');
+      const sides = l.type === 'chan' ? [[f(0), 0], [f(l.off || 0), 1]] : [[f(0), -1]];
+      const hi = l.type === 'chan' ? Math.max(sides[0][0], sides[1][0]) : null;
+      for (const [v] of sides) { if (!v || !isFinite(v)) continue; const d = Math.abs(price - v) / v; if (d > pc) continue;
+        out.push(`${l.type === 'chan' ? (v === hi ? 'teto do teu canal' : 'chão do teu canal') : 'a tua diagonal'} ${tl} em ${fmt(v)} a ${pct(d * 100)}`); }
+    }
+    return out;
+  }
   function lineAlerts(sym, raw, S, A, st, now, out) {
     // uma linha pode estar em vários timeframes: um só alerta por linha; o fecho fora do canal conta no timeframe mais pequeno marcado (e vigiado)
     const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0)); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
@@ -1302,14 +1316,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
-    trackerAlerts(sym, dm, A, st, now, out);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
+    trackerAlerts(sym, dm, A, st, now, out, S);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
     smaAlerts(sym, raw, dm, A, st, now, out);
     targetAlerts(sym, raw, A, st, now, out);
-    fibAlerts(sym, dm, A, st, now, out);
+    fibAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
     return out;
