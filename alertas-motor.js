@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T14:57:10.195Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T16:07:51.538Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1544,7 +1544,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (!m || !m.sym) return null;
     const tf = tfOfMsg(m);
     const base = String(A.appUrl || APP_URL) + '?a=' + encodeURIComponent(m.sym) + (tf ? '&tf=' + tf : '');
-    return { inline_keyboard: [[{ text: '📈 Abrir gráfico', url: base + '&v=chart' }, { text: 'Abrir ativo', url: base + '&v=asset' }]] };
+    const h = String(m.text || '').split('\n')[0].replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').slice(0, 120);
+    const ai = base + '&v=ai' + (m.at ? '&al=' + m.at : '') + '&k=' + encodeURIComponent(m.kind || '') + '&h=' + encodeURIComponent(h);
+    return { inline_keyboard: [[{ text: '📈 Abrir gráfico', url: base + '&v=chart' }, { text: 'Abrir ativo', url: base + '&v=asset' }], [{ text: '🤖 Análise IA', url: ai }]] };
   }
   function tg(A, text, m) {
     const url = 'https://api.telegram.org/bot' + A.tgToken + '/sendMessage', body = { chat_id: A.tgChat, text, parse_mode: 'HTML', disable_web_page_preview: true }, kb = kbd(A, m);
@@ -1750,7 +1752,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const own = Object.assign({}, S.autoNames || {}, S.names || {});
     for (const m of msgs) {
       if (m.sym) { const n = SYN.nameOf(m.sym, own); if (n && n !== m.sym) m.text = m.text.split('· ' + m.sym + '</b>').join('· ' + n + ' (' + m.sym + ')</b>').split('<b>' + m.sym + ' ·').join('<b>' + n + ' (' + m.sym + ') ·'); }
-      const e = tg(A, m.text + linkLine(A, m), m); if (e) hb.err.push(e);
+      m.at = now; const e = tg(A, m.text + linkLine(A, m), m); if (e) hb.err.push(e);
       st.log.unshift({ at: now, kind: m.kind, sym: m.sym, text: m.text });
     }
     st.log = st.log.slice(0, 80);

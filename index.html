@@ -587,6 +587,11 @@
   .np-kind button + button { border-left:1px solid var(--np-ink) !important; }
   .np-kind button.on { background:var(--np-ink) !important; color:var(--np-bg) !important; }
   #npFeed .sym .tk { font-weight:400; opacity:.65; margin-left:4px; font-size:.9em; }
+  #aiBanner { position:fixed; left:50%; top:10px; transform:translateX(-50%); z-index:200; display:flex; gap:10px; align-items:center; max-width:min(720px, 94vw); background:#111; color:#fff; padding:10px 12px; border:2px solid #f5c518; box-shadow:0 8px 24px rgba(0,0,0,.35); font-size:14px; }
+  #aiBanner .t { font-size:12px; opacity:.8; margin-top:2px; max-height:3.6em; overflow:hidden; }
+  #aiBanner button { flex:0 0 auto; background:#f5c518 !important; color:#111 !important; border:0 !important; font-weight:700; padding:8px 12px; border-radius:0; }
+  #aiBanner #aiX { background:transparent !important; color:#fff !important; font-weight:400; padding:6px 8px; }
+  #aiBanner button[disabled] { opacity:.6; }
 </style>
 </head>
 <body>
@@ -723,6 +728,7 @@
       <li><b>Mudar a ordem:</b> arrasta pela pega <b>⠿</b> (na coluna dos favoritos ou no quadro, quando ordenado por grupo). Só dentro do mesmo grupo — cripto, ações/futuros ou rácios. A ordem fica gravada na conta; “repor A–Z” volta à ordem alfabética.</li>
       <li><b>Adicionar rácios:</b> por baixo da pesquisa, “＋ Adicionar rácios” — cola a lista do TradingView (ou o .txt de “Exportar lista”); a app traduz os nomes (GOLD→GC=F, ES1!→ES=F, XCUUSD→HG=F, NICKEL→NICK.L, LSE:…→.L) e mostra antes de juntar.</li>
       <li><b>Na página do ativo:</b> ◀ ▶ (ou as setas ← → do teclado) passam ao ativo anterior/seguinte da tua ordem; “← Voltar” regressa à página de onde vieste (jornal, quadro dos favoritos ou Em foco).</li>
+      <li><b>🤖 Análise IA (Telegram):</b> o botão por baixo de cada alerta abre a app nesse ativo com uma faixa em cima: “📋 Copiar e abrir o Claude” copia o resumo do ativo com o alerta à cabeça (e o pedido para começar por enquadrar esse alerta no contexto) e abre uma conversa nova no Claude — é só colar e enviar.</li>
       <li><b>Botões nos alertas do Telegram:</b> cada alerta traz “📈 Abrir gráfico” e “Abrir ativo” — abrem a app nesse ativo, já no timeframe do alerta (no setup, o da zona). No telemóvel, se abrir dentro do Telegram, desliga o navegador integrado nas definições do Telegram. Se a app não tiver a sessão iniciada, pede o login primeiro.</li>
       <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
       <li><b>Nome e 📈 nos cartões Em foco:</b> no cartão Em foco do jornal e em cada cartão de “Ver todos em foco”, o nome do ativo abre a página do ativo e o 📈 ao lado abre logo o gráfico maior. “← Voltar” regressa a onde estavas (jornal ou Em foco).</li>
@@ -5058,8 +5064,8 @@ function motor_() {
     const sma = smaOfTf(d, 200);
     return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${fmt(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}`;
   }
-  function aiSummary() {
-    const out = [`Analisa ${symbol} com base nestes dados do meu scanner de estrutura de mercado (ICT). Correções e Fibonacci em escala log. Diz-me: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Usa só estes números e cita-os. Responde em português de Portugal.`, ''];
+  function aiSummary(al) {
+    const out = [al ? `Recebi este alerta do meu scanner${al.at ? ' às ' + new Date(al.at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''} sobre ${nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol}:\n«${al.text}»\n\nComeça por enquadrar ESTE alerta: o que quer dizer, porque disparou e que peso tem no contexto de todos os timeframes, da tendência maior, das confluências e dos riscos que estão nos dados abaixo — está a favor do contexto ou contra, e o que teria de acontecer a seguir para ser uma oportunidade (ou para a descartar). Só depois faz a análise completa do ativo: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Correções e Fibonacci em escala log. Usa só estes números e cita-os. Responde em português de Portugal.` : `Analisa ${symbol} com base nestes dados do meu scanner de estrutura de mercado (ICT). Correções e Fibonacci em escala log. Diz-me: a leitura por timeframe, onde há confluência, zonas de entrada e alvos, riscos (o que invalida), e se algum setup faz sentido agora. Usa só estes números e cita-os. Responde em português de Portugal.`, ''];
     const d0 = data[selectedTf]; out.push(`${nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol} — preço ${d0 ? fmt(d0.price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
     TFS.forEach((t) => { if (data[t.id]) out.push(aiTfLine(t.id, data[t.id])); });
     const ev = (settings.setups || []).filter((x) => x.on).map((st) => { const r = evalSetup(st); if (!r) return null; const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
@@ -5078,6 +5084,33 @@ function motor_() {
         out.push(`- ${r} (${fmt(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}`); });
     }
     return out.join('\n');
+  }
+  // ---------- 🤖 Análise IA a partir de um alerta do Telegram: a app abre o ativo e mostra um botão para copiar o resumo (com o alerta à cabeça) e abrir o Claude ----------
+  let aiAlert = null;
+  function aiAlertText() {
+    if (!aiAlert) return null;
+    const lg = ((npFeed && npFeed.log) || []).find((x) => x.sym === aiAlert.sym && (!aiAlert.kind || x.kind === aiAlert.kind) && Math.abs(x.at - aiAlert.at) < 6e4);
+    const txt = lg ? String(lg.text || '').split('\n').map(npStrip).filter((l) => l && !/^A seguir:|^📈 https?:/.test(l)).join(' · ') : aiAlert.h || '';
+    return { at: (lg && lg.at) || aiAlert.at, text: txt || '(alerta sem texto)' };
+  }
+  function aiBannerUi() {
+    let b = $('#aiBanner');
+    if (!aiAlert) { if (b) b.remove(); return; }
+    if (!b) { b = document.createElement('div'); b.id = 'aiBanner'; document.body.appendChild(b); }
+    const ok = !!data[selectedTf] && symbol === aiAlert.sym;
+    b.innerHTML = `<div><b>🤖 Análise IA deste alerta</b><div class="t">${npEsc((aiAlertText() || {}).text || '')}</div></div><button id="aiGo" ${ok ? '' : 'disabled'}>${ok ? '📋 Copiar e abrir o Claude' : 'a carregar o ativo…'}</button><button id="aiX" title="Fechar">✕</button>`;
+    $('#aiX').addEventListener('click', () => { aiAlert = null; aiBannerUi(); });
+    $('#aiGo').addEventListener('click', aiCopyAlert);
+    if (!ok) setTimeout(aiBannerUi, 1200);
+  }
+  function aiCopyAlert() {
+    if (!data[selectedTf]) return;
+    const txt = aiSummary(aiAlertText());
+    // cópia síncrona (dentro do toque) e só depois abre o Claude — assim o browser não bloqueia nenhuma das duas
+    let ok = false; const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) {} ta.remove();
+    if (!ok) { try { navigator.clipboard.writeText(txt); ok = true; } catch (e) {} }
+    window.open('https://claude.ai/new', '_blank');
+    const b = $('#aiBanner'); if (b) b.querySelector('.t').textContent = ok ? 'Copiado ✔ — no Claude, cola (manter o dedo → Colar, ou Ctrl+V) e envia.' : 'Não consegui copiar — usa o botão 📋 Copiar para IA da página.';
   }
   async function aiCopy() {
     if (!data[selectedTf]) { alert('Espera que o ativo acabe de carregar.'); return; }
@@ -5376,7 +5409,8 @@ function motor_() {
       if (a) {
         history.replaceState({ v: 'feed' }, '', location.pathname);
         if (tf && TF_IDS.includes(tf)) { selectedTf = tf; save('mss_tf', tf); }
-        setTimeout(() => { if (v === 'chart') npOpenChart(a); else npOpenAsset(a); }, 300);
+        if (v === 'ai') aiAlert = { sym: a, at: +u.get('al') || 0, kind: u.get('k') || '', h: u.get('h') || '' };
+        setTimeout(() => { if (v === 'chart') npOpenChart(a); else npOpenAsset(a); if (aiAlert) setTimeout(aiBannerUi, 500); }, 300);
       }
     } catch (e) {}
   }
