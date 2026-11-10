@@ -539,6 +539,17 @@
   .algrp { margin:2px 0 4px; font-size:12px; color:var(--muted); display:flex; gap:12px; align-items:center; }
   .algrp label { display:inline-flex; gap:4px; align-items:center; cursor:pointer; }
 .np-hl{color:inherit!important;text-decoration:none!important}.np-hl:hover{text-decoration:underline!important}.np-hc{font-size:.55em;text-decoration:none!important;vertical-align:middle;opacity:.8}.np-hc:hover{opacity:1}
+  /* Definições: sem scroll para o lado — a coluna da direita encolhe e os campos ajustam-se à largura */
+  #settings .dialog { width:min(720px, 96vw); overflow-x:hidden; box-sizing:border-box; }
+  #settings .field { grid-template-columns:minmax(0,1fr) fit-content(330px); }
+  #settings .field > *:last-child { min-width:0; max-width:min(330px, 100%); }
+  #settings .field > span, #settings .field > div:last-child:not(:first-child) { display:flex; flex-wrap:wrap; gap:2px 10px; }
+  #settings .field > span .chk { white-space:nowrap; }
+  #settings .field select, #settings .field input[type=text], #settings .field input[type=number] { max-width:100%; box-sizing:border-box; }
+  #settings #setSess { width:100%; min-width:110px; }
+  #settings #setSetups, #settings #setTfs, #settings .settfs { max-width:100%; overflow-wrap:anywhere; }
+  #settings .setrow { flex-wrap:wrap; } #settings .setrow select { flex:1 1 80px; min-width:0; } #settings .setrow .su-name { flex:1 1 100px; min-width:0; }
+  @media (max-width:560px) { #settings .field { grid-template-columns:1fr; gap:4px; } #settings .field > *:last-child { justify-self:start; } }
 </style>
 </head>
 <body>
@@ -662,15 +673,19 @@
     <h3 class="helphead">📰 O jornal (página de entrada)</h3>
     <ul>
       <li><b>O que aconteceu hoje / esta semana:</b> os alertas que o vigia enviou para o Telegram, por hora, com mini-gráfico. “Abrir o ativo” abre a página completa; “Abrir o gráfico” abre logo o gráfico em grande.</li>
-      <li><b>Favoritos (coluna da esquerda):</b> um sinal por setup (Longo prazo · Swing · Day trade · Scalp). ▲ Long / ▼ Short. Cinzento = fora da zona; contorno âmbar = em zona, à espera da quebra; âmbar cheio = já quebrou, falta o FVG; verde = pronto. 💧 = a quebra veio depois de um sweep do lado oposto. ● vermelho = perto da inversão num timeframe grande (as distâncias do alerta 5). ✋ = timeframe em modo manual (não atualiza). ⚖ = disputa por decidir. Passa o rato (ou toca) num sinal para ver o texto completo. Por baixo do preço, a linha do setup mais avançado.</li>
+      <li><b>Favoritos (coluna da esquerda):</b> um sinal por setup (Longo prazo · Swing · Day trade · Scalp). ▲ Long / ▼ Short. Cinzento = fora da zona; contorno âmbar = em zona, à espera da quebra; âmbar cheio = já quebrou, falta o FVG; verde = pronto. 💧 = a quebra veio depois de um sweep do lado oposto. ● vermelho = perto da inversão num timeframe grande (as distâncias do alerta “Perto da quebra”). ✋ = timeframe em modo manual (não atualiza). ⚖ = disputa por decidir. Passa o rato (ou toca) num sinal para ver o texto completo. Por baixo do preço, a linha do setup mais avançado.</li>
       <li><b>Ordem:</b> “Cripto primeiro” ou “Ações primeiro”, sempre A–Z dentro de cada grupo. 📈 abre o gráfico; ✕ tira dos favoritos (e apaga as marcas desse ativo).</li>
       <li><b>Em foco:</b> o ativo mais perto de precisar de ti — primeiro um pronto, depois “falta FVG”, depois em zona com a correção mais funda; estar perto da inversão desempata. Em “Também a ver”, os dois seguintes.</li>
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
+      <li><b>Ordenar por prontos:</b> no Quadro, o link “ordenar por prontos” mostra todos os ativos numa só lista (sem grupos), do mais pronto para o menos: primeiro quem tem mais setups prontos, depois falta FVG / falta quebra, depois em zona; desempatam a ⭐, o 💧 e o timeframe maior. O grupo de cada ativo aparece por baixo do nome. Arruma no momento em que carregas (não salta sozinho). “↶ voltar à ordem anterior” regressa à vista de antes.</li>
+      <li><b>Repor A–Z:</b> volta à ordem alfabética dentro de cada grupo; logo a seguir aparece “↶ voltar à ordem anterior” para desfazer (até voltares a arrastar).</li>
       <li><b>Mudar a ordem:</b> arrasta pela pega <b>⠿</b> (na coluna dos favoritos ou no quadro, quando ordenado por grupo). Só dentro do mesmo grupo — cripto, ações/futuros ou rácios. A ordem fica gravada na conta; “repor A–Z” volta à ordem alfabética.</li>
       <li><b>Adicionar rácios:</b> por baixo da pesquisa, “＋ Adicionar rácios” — cola a lista do TradingView (ou o .txt de “Exportar lista”); a app traduz os nomes (GOLD→GC=F, ES1!→ES=F, XCUUSD→HG=F, NICKEL→NICK.L, LSE:…→.L) e mostra antes de juntar.</li>
       <li><b>Na página do ativo:</b> ◀ ▶ (ou as setas ← → do teclado) passam ao ativo anterior/seguinte da tua ordem; “← Voltar” regressa à página de onde vieste (jornal, quadro dos favoritos ou Em foco).</li>
+      <li><b>Botões nos alertas do Telegram:</b> cada alerta traz “📈 Abrir gráfico” e “Abrir ativo” — abrem a app nesse ativo, já no timeframe do alerta (no setup, o da zona). No telemóvel, se abrir dentro do Telegram, desliga o navegador integrado nas definições do Telegram. Se a app não tiver a sessão iniciada, pede o login primeiro.</li>
       <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
+      <li><b>Nome e 📈 nos cartões Em foco:</b> no cartão Em foco do jornal e em cada cartão de “Ver todos em foco”, o nome do ativo abre a página do ativo e o 📈 ao lado abre logo o gráfico maior. “← Voltar” regressa a onde estavas (jornal ou Em foco).</li>
       <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (abre em Prontos + Falta FVG).</li>
       <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar ao jornal” ou o título regressam à entrada.</li>
       <li><b>Contexto:</b> verde = a favor; âmbar = a favor mas já corrigiu mais de 78,6% (perto de virar contra); vermelho = contra.</li>
@@ -717,16 +732,16 @@
     <h3 class="helphead">🔔 Alertas no Telegram</h3>
     <ul>
       <li><b>🔔 Alertas</b> (botão no topo): escolhes o que queres receber, ligas o Telegram e instalas o <b>vigia</b> — um pequeno programa no Google Apps Script (grátis) que corre de 5 em 5 minutos, mesmo com o computador desligado. Só vigia os ★ favoritos e usa as tuas marcações.</li>
-      <li><b>1 · Setup:</b> a zona do setup em Zona de Long/Short (correção ≥ 50%, ajustável) e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido. A mensagem traz o FVG, a força e o volume da vela da quebra, o fecho, o contexto, a confluência (SMA 50/100/200 perto, preço fora do Keltner ±3ATR) e o nível que invalida.</li>
-      <li><b>2 · FVG no pullback:</b> depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
-      <li><b>3 · Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
-      <li><b>4 · Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
-      <li><b>5 · Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
-      <li><b>6 · SMA 200:</b> avisa quando o preço chega à média das últimas 200 velas do timeframe (por defeito Semanal e Diário) — a descer 💰 (vinha de cima: possível zona de compra) ou a subir 🧱 (vinha de baixo: teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho; opcionalmente antes, a X% da média. Depois de avisar só volta a avisar quando o preço se afastar mais de 5% (ajustável) e voltar.</li>
-      <li><b>7 · Perto do alvo:</b> depois de um alerta de setup, a app segue os alvos do timeframe da zona — o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 (log) — e avisa quando o preço chega a 1% (ajustável) de cada um.</li>
-      <li><b>8 · Linhas e canais:</b> só as linhas que desenhaste com 🔔 ligado. Avisa uma vez quando o preço chega à distância escolhida (volta a avisar depois de se afastar 3× essa distância) e, num canal, quando uma vela do timeframe da linha fecha fora.</li>
-      <li><b>9 · Zona de entrada (Fibonacci):</b> opcional. Avisa quando o preço entra em 0,618–0,65 (e, se quiseres, 0,786) da perna em curso, antes de haver quebra. Uma vez por perna.</li>
-      <li><b>10 · Keltner (fecho):</b> opcional, só Diário, Semanal e Mensal. Avisa quando uma vela fecha fora de EMA 20 ± 3 ATR.</li>
+      <li><b>Setup:</b> a zona do setup em Zona de Long/Short (correção ≥ 50%, ajustável) e o TF de gatilho fecha uma quebra (CHoCH ou BOS) nesse sentido. A mensagem traz o FVG, a força e o volume da vela da quebra, o fecho, o contexto, a confluência (SMA 50/100/200 perto, preço fora do Keltner ±3ATR) e o nível que invalida.</li>
+      <li><b>FVG no pullback:</b> (liga-se só no separador Por ativo — não tem nada a ajustar) depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
+      <li><b>Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
+      <li><b>Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
+      <li><b>Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
+      <li><b>SMA 200:</b> avisa quando o preço chega à média das últimas 200 velas do timeframe (por defeito Semanal e Diário) — a descer 💰 (vinha de cima: possível zona de compra) ou a subir 🧱 (vinha de baixo: teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho; opcionalmente antes, a X% da média. Depois de avisar só volta a avisar quando o preço se afastar mais de 5% (ajustável) e voltar.</li>
+      <li><b>Perto do alvo:</b> depois de um alerta de setup, a app segue os alvos do timeframe da zona — o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 (log) — e avisa quando o preço chega a 1% (ajustável) de cada um.</li>
+      <li><b>Linhas e canais:</b> (liga-se no separador Por ativo; o 🔔 e a distância em % escolhem-se em cada linha, carregando nela no gráfico) só as linhas que desenhaste com 🔔 ligado. Avisa uma vez quando o preço chega à distância escolhida (volta a avisar depois de se afastar 3× essa distância) e, num canal, quando uma vela do timeframe da linha fecha fora.</li>
+      <li><b>Zona de entrada (Fibonacci):</b> opcional. Avisa quando o preço entra em 0,618–0,65 (e, se quiseres, 0,786) da perna em curso, antes de haver quebra. Uma vez por perna. Com “só com confluência ⭐”, só avisa quando um alvo do timeframe logo abaixo (Mensal→Semanal, Semanal→Diário…) cai dentro da zona.</li>
+      <li><b>Keltner (fecho):</b> opcional, só Diário, Semanal e Mensal. Avisa quando uma vela fecha fora de EMA 20 ± 3 ATR.</li>
       <li><b>Vale para ativos / rácios:</b> em cada alerta escolhes se vale para os ativos normais, para os rácios (A÷B) ou para os dois. Por defeito as killzones e a SMA 200 ficam desligadas nos rácios.</li>
       <li>Com muitos favoritos, o vigia vê cerca de 6 por volta e os outros à vez (limite diário do Google). Os ativos com setups a seguir são vistos em todas as voltas.</li>
     </ul>
@@ -818,52 +833,57 @@
   <div class="alrow"><span class="muted small">Filtros extra (desligados = só informação na mensagem):</span><br>
     <label class="chk"><input id="alFFvg" type="checkbox"> só com FVG</label> <label class="chk"><input id="alFStrong" type="checkbox"> só vela forte</label> <label class="chk"><input id="alFVol" type="checkbox"> só volume alto</label> <label class="chk"><input id="alFCtx" type="checkbox"> só contexto a favor</label></div>
 
+  <div hidden>
   <h3 class="sethead">2 · FVG no pullback <span class="muted small">(depois do alerta de setup)</span></h3>
   <div class="algrp" data-g="fvg"></div>
   <label class="chk alline"><input id="alFvg" type="checkbox"> Avisar logo que o preço toca num FVG do TF de gatilho para lá dos 50% da pernada da quebra; e quando o setup fica invalidado</label>
+  </div>
 
-  <h3 class="sethead">3 · Killzones <span class="muted small">(só dentro das horas)</span></h3>
+  <h3 class="sethead">2 · Killzones <span class="muted small">(só dentro das horas)</span></h3>
   <div class="algrp" data-g="kz"></div>
   <label class="chk alline"><input id="alKz" type="checkbox"> Avisar quando a liquidez é apanhada dentro de uma killzone (velas de 5m)</label>
   <div class="alrow"><span class="muted small">Killzones:</span> <label class="chk"><input id="alKzL" type="checkbox"> Londres</label> <label class="chk"><input id="alKzN" type="checkbox"> Nova Iorque</label>
     <br><span class="muted small">Liquidez:</span> <label class="chk"><input id="alKzA" type="checkbox"> topo/fundo da Ásia</label> <label class="chk"><input id="alKzD" type="checkbox"> topo/fundo do dia anterior</label> <label class="chk"><input id="alKzLo" type="checkbox"> topo/fundo de Londres (na NY)</label>
     <br><span class="muted small">O horário é o das Definições (perfil das killzones).</span></div>
 
-  <h3 class="sethead">4 · Liquidez da semana / do dia anteriores <span class="muted small">(a qualquer hora)</span></h3>
+  <h3 class="sethead">3 · Liquidez da semana / do dia anteriores <span class="muted small">(a qualquer hora)</span></h3>
   <div class="algrp" data-g="week"></div>
   <div class="small muted">Avisar quando o máximo ou o mínimo é apanhado (decidido pelo fecho da vela de 1H):</div>
   <label class="chk alline"><input id="alWk" type="checkbox"> topo/fundo da <b>semana</b> anterior</label>
   <label class="chk alline"><input id="alDy" type="checkbox"> topo/fundo do <b>dia</b> anterior <span class="muted small">(dá mais alertas; se for apanhado dentro de uma killzone, só chega o aviso do ponto 3)</span></label>
   <div class="alrow"><span class="muted small">Tipo:</span> <label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
 
-  <h3 class="sethead">5 · Perto da quebra da tendência principal</h3>
+  <h3 class="sethead">4 · Perto da quebra da tendência principal</h3>
   <div class="algrp" data-g="near"></div>
   <label class="chk alline"><input id="alNear" type="checkbox"> Avisar quando o preço se aproxima do nível de quebra da tendência principal (um aviso por nível)</label>
   <div class="alrow"><span class="muted small">Timeframes e distância ao nível (% do preço):</span><br><span id="alNearTfs"></span></div>
   <div class="alrow"><label class="chk"><input id="alNearI" type="checkbox"> inversão <span class="muted small">(perto do limite — fechar além = CHoCH)</span></label><br><label class="chk"><input id="alNearC" type="checkbox"> continuação <span class="muted small">(perto do topo/fundo da perna — fechar além = BOS)</span></label></div>
 
-  <h3 class="sethead">6 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
+  <h3 class="sethead">5 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
   <div class="algrp" data-g="sma"></div>
   <label class="chk alline"><input id="alSma" type="checkbox"> Avisar quando o preço chega à SMA 200 — a descer 💰 (possível zona de compra) ou a subir 🧱 (teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho.</label>
   <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alSmaTfs"></span>
     <br><span class="muted small">Avisar antes, a</span> <input id="alSmaPre" type="number" min="0" max="20" step="0.1" style="width:64px"> <span class="muted small">% da média (0 = só quando toca)</span>
     <br><span class="muted small">Volta a avisar depois de o preço se afastar mais de</span> <input id="alSmaRe" type="number" min="0.5" max="50" step="0.5" style="width:64px"> <span class="muted small">% da média</span></div>
 
-  <h3 class="sethead">7 · Perto do alvo <span class="muted small">(depois de um alerta de setup)</span></h3>
+  <h3 class="sethead">6 · Perto do alvo <span class="muted small">(depois de um alerta de setup)</span></h3>
   <div class="algrp" data-g="tgt"></div>
   <label class="chk alline"><input id="alTgt" type="checkbox"> Avisar quando o preço chega perto de um alvo de um setup avisado: o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 do timeframe da zona (escala log)</label>
   <div class="alrow"><span class="muted small">Avisar a</span> <input id="alTgtPct" type="number" min="0.1" max="10" step="0.1" style="width:64px"> <span class="muted small">% do alvo · cada alvo avisa uma vez; deixa de seguir se o preço passar a origem da perna</span></div>
 
+  <div hidden>
   <h3 class="sethead">8 · Linhas e canais <span class="muted small">(os que desenhaste com 🔔)</span></h3>
   <div class="algrp" data-g="line"></div>
   <label class="chk alline"><input id="alLine" type="checkbox"> Avisar quando o preço chega perto de uma linha diagonal ou de um lado de um canal (a distância escolhe-se em cada linha), e quando uma vela fecha fora de um canal</label>
+  </div>
 
-  <h3 class="sethead">9 · Zona de entrada — Fibonacci <span class="muted small">(opcional · liga-se por ativo, no separador Por ativo)</span></h3>
+  <h3 class="sethead">7 · Zona de entrada — Fibonacci <span class="muted small">(opcional · liga-se por ativo, no separador Por ativo)</span></h3>
   <div class="small muted">Avisa uma vez por perna quando o preço entra na entrada ótima (0,618–0,65) da Fibonacci em curso, no sentido da tendência — mesmo sem quebra no timeframe de baixo. Diz se um alvo do timeframe de baixo cai na zona (⭐) e onde invalida.</div>
   <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alFibTfs"></span>
-    <br><label class="chk"><input id="alFib786" type="checkbox"> Avisar também na zona profunda (0,786)</label></div>
+    <br><label class="chk"><input id="alFib786" type="checkbox"> Avisar também na zona profunda (0,786)</label>
+    <br><label class="chk"><input id="alFibStar" type="checkbox"> Só com confluência ⭐ <span class="muted small">(só avisa se um alvo do timeframe logo abaixo cair dentro da zona — menos avisos, os mais fortes)</span></label></div>
 
-  <h3 class="sethead">10 · Keltner — fecho fora da banda <span class="muted small">(opcional · liga-se por ativo)</span></h3>
+  <h3 class="sethead">8 · Keltner — fecho fora da banda <span class="muted small">(opcional · liga-se por ativo)</span></h3>
   <div class="small muted">Avisa quando uma vela <b>fecha</b> acima de EMA 20 + 3 ATR ou abaixo de EMA 20 − 3 ATR (preço muito esticado). Uma vez por saída; volta a avisar depois de uma vela fechar do outro lado da linha do meio.</div>
   <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alKcTfs"></span></div>
 
@@ -909,7 +929,7 @@
   <div class="field"><div>Ranges automáticos<small>quais a app calcula: entram na coluna Range da tabela e, no gráfico, aparecem como caixas (as do dia e da semana anteriores só quando o botão “▭ Dia/Sem ant.” está ligado) (podes esconder cada um num timeframe clicando na linha da caixa, em modo edição)</small></div><span><label class="chk"><input id="setRDay" type="checkbox"> dia anterior</label> <label class="chk"><input id="setRWeek" type="checkbox"> semana anterior</label> <label class="chk"><input id="setRAsia" type="checkbox"> Ásia (1H e abaixo)</label> <label class="chk"><input id="setRLondon" type="checkbox"> Londres (1H e abaixo)</label></span></div>
   <div class="field"><div>Horário das killzones<small>Cripto e ações: Ásia 01:00–05:00, Londres 07:00–10:00, NY 13:30–16:00 (hora UK). ICT clássico (forex/futuros): Ásia 01:00–05:00, Londres 07:00–10:00, NY 12:00–15:00, fecho de Londres 15:00–17:00. Seguem sempre a hora de Nova Iorque, por isso acertam-se sozinhas com a mudança de hora.</small></div><select id="setKzProf"><option value="cripto">Cripto e ações</option><option value="ict">ICT clássico</option></select></div>
   <div class="field"><div>Killzones no gráfico<small>faixas de fundo em 1H e abaixo; o botão “⏱ Killzones” na barra do gráfico liga e desliga todas</small></div><span><label class="chk"><input id="setKzA" type="checkbox"> Ásia</label> <label class="chk"><input id="setKzL" type="checkbox"> Londres</label> <label class="chk"><input id="setKzN" type="checkbox"> Nova Iorque</label></span></div>
-  <div class="field"><div>Ajustar sessões à mão (opcional, hora de Nova Iorque)<small>Deixa vazio para usar o horário escolhido acima. Formato: asia:20-24, londres:2-5, ny:8.5-11 (8.5 = 8h30)</small></div><input id="setSess" type="text" style="width:240px"></div>
+  <div class="field"><div>Ajustar sessões à mão (opcional, hora de Nova Iorque)<small>Deixa vazio para usar o horário escolhido acima. Formato: asia:20-24, londres:2-5, ny:8.5-11 (8.5 = 8h30)</small></div><input id="setSess" type="text" placeholder="vazio = automático"></div>
   <div class="field"><div>Divergências RSI: velas de cada lado<small>um fundo/topo do RSI tem de ser o mais baixo/alto das n velas antes e depois (TradingView usa 5). Mais baixo = mais divergências; mais alto = menos e mais fortes</small></div><input id="setDivPiv" type="number" min="2" max="15"></div>
   <h3 class="sethead">Tabela e setups</h3>
   <div>Setups <span class="muted small">(zona → quebra)</span></div>
@@ -4392,9 +4412,9 @@
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
   const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
-    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true, fibOn: false, fibTfs: ['1w', '1d'], fib786: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
+    smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true, fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true } };
-  const AL_CHK = { alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+  const AL_CHK = { alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), fibTfs: ((settings.alerts || {}).fibTfs || AL_DEF.fibTfs).slice(), kcTfs: ((settings.alerts || {}).kcTfs || AL_DEF.kcTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : (Math.floor(m / 1440) === 1 ? 'há 1 dia' : `há ${Math.floor(m / 1440)} dias`); };
@@ -4674,7 +4694,7 @@ function motor_() {
     box.innerHTML = `<h2 class="np-h2"><a href="#" class="np-blk" id="npBoardLk" title="Abrir o quadro com todos os favoritos e mais informação">Favoritos<small>quadro →</small></a></h2>
       <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
       <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span>💧 quebra após sweep</span><span><span class="np-dot"></span>perto da inversão</span><span>✋ manual · ⚖ disputa</span></div></div>
-      <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>${settings.favManual ? '<div class="np-az"><span>a tua ordem</span> · <a href="#" class="npAZ">repor A–Z</a></div>' : '<div class="np-az">arrasta ⠿ para mudar a ordem</div>'}
+      <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>${settings.favManual ? '<div class="np-az"><span>a tua ordem</span> · <a href="#" class="npAZ">repor A–Z</a></div>' : `<div class="np-az">arrasta ⠿ para mudar a ordem${settings.favPrev ? ' · <a href="#" class="npUndoAZ"><b>↶ voltar à ordem anterior</b></a>' : ''}</div>`}
       <ul class="np-rail">${items || '<li style="cursor:default;color:var(--np-mu)">Ainda não tens favoritos: procura um ativo em cima e junta-o com o ＋.</li>'}</ul>`;
     box.querySelectorAll('.np-rail li[data-s]').forEach((li) => li.addEventListener('click', () => npOpenAsset(li.dataset.s)));
     $('#npBoardLk').addEventListener('click', (e) => { e.preventDefault(); npShowBoard(); });
@@ -4711,9 +4731,10 @@ function motor_() {
   function npSaveOrder(list) {
     const fv = settings.favs || [], seen = new Set(list);
     settings.favs = list.filter((x) => fv.includes(x)).concat(fv.filter((x) => !seen.has(x)));
-    settings.favManual = true; save('mss_settings4', settings); npRender();
+    settings.favManual = true; settings.favPrev = null; save('mss_settings4', settings); npRender();
   }
-  function npAZWire(box) { box.querySelectorAll('.npAZ').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); if (!confirm('Voltar à ordem alfabética (A–Z) dentro de cada grupo? A tua ordem perde-se.')) return; settings.favManual = false; save('mss_settings4', settings); npRender(); })); }
+  function npAZWire(box) { box.querySelectorAll('.npAZ').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); settings.favPrev = { favs: (settings.favs || []).slice(), manual: !!settings.favManual }; settings.favManual = false; save('mss_settings4', settings); npRender(); }));
+    box.querySelectorAll('.npUndoAZ').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); const pv = settings.favPrev; if (!pv) return; settings.favs = pv.favs.filter((x) => (settings.favs || []).includes(x)).concat((settings.favs || []).filter((x) => !pv.favs.includes(x))); settings.favManual = pv.manual; settings.favPrev = null; save('mss_settings4', settings); npRender(); })); }
   function npRemove(x) { if (!removeFavOk(x)) return; settings.favs = (settings.favs || []).filter((y) => y !== x); delete favData[x]; save('mss_settings4', settings); updateStar(); npRender(); }
   // fita dos favoritos (ativo aberto): nome + sinais pequenos
   function npRenderStrip() {
@@ -4923,6 +4944,10 @@ function motor_() {
   function npBoardRow(s) {
     const i = npInfo(s), f = i.f, T = (f && f.tfs) || {}, price = f && f.price, A = alCfg();
     const r = { s, price, chg: i.chg, rank: i.best ? i.best.rank * 1000 + (i.best.z.pullback || 0) : -1 };
+    // ordem "mais prontos": n.º de prontos → falta FVG/quebra → em zona; desempata ⭐, 💧 e timeframe maior (Longo prazo pesa mais que Scalp)
+    { const n = [0, 0, 0, 0, 0]; let star = 0, sw = 0, tfw = 0;
+      i.setups.forEach((st, k) => { const x = i.ev[k]; if (!x) return; const rk = x.deep ? 1 : Math.max(0, Math.min(4, x.rank || 0)); n[rk]++; if (rk >= 2) { if (x.star) star++; if (x.sweep) sw++; tfw += (rk * 10) * (i.setups.length - k); } });
+      r.ready = [n[4], n[3] + n[2], n[1], star, sw, tfw]; }
     // tendência principal por timeframe
     r.trend = BOARD_TFS.map(([id, lb]) => { const sn = T[id] && T[id].ext.snap; if (!sn || !sn.trend) return `<span><b>${lb}</b><span class="mu">—</span></span>`; const deep = sn.pullback > 78.6;
       return `<span title="${tfLabel(id)}: ${sn.trend === 1 ? 'subida' : 'descida'}, correção ${pct(sn.pullback)}"><b>${lb}</b><span class="${sn.trend === 1 ? 'up' : 'dn'}">${sn.trend === 1 ? '▲' : '▼'}</span> <span class="${deep ? 'deep' : 'mu'}">${pct(sn.pullback)}</span></span>`; }).join('');
@@ -4954,22 +4979,28 @@ function motor_() {
     const box = $('#npBoard'); if (!box) return;
     const so = settings.npBoardSort || 'name';
     const rows = (settings.favs || []).map(npBoardRow);
-    const cmp = { name: null, trend: null, setup: (a, b) => b.rank - a.rank, near: (a, b) => a.nearV - b.nearV, sma: (a, b) => a.smaV - b.smaV, liq: (a, b) => a.liqV - b.liqV, al: (a, b) => b.alV - a.alV }[so];
+    const cmp = { name: null, trend: null, setup: (a, b) => { for (let k = 0; k < 6; k++) if (b.ready[k] !== a.ready[k]) return b.ready[k] - a.ready[k]; return b.rank - a.rank; }, near: (a, b) => a.nearV - b.nearV, sma: (a, b) => a.smaV - b.smaV, liq: (a, b) => a.liqV - b.liqV, al: (a, b) => b.alV - a.alV }[so];
     let list;
     if (cmp) list = rows.sort(cmp);
     else { const ord = npSorted(); list = rows.sort((a, b) => ord.indexOf(a.s) - ord.indexOf(b.s)); }
     let body = '', lastG = null;
     for (const r of list) {
       if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="8">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
-      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}</div><div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
+      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}</div>${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
         <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
-    box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
+    box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''}</div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select><button id="npBoardBack">← Voltar ao jornal</button></div></div>
       <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || '<tr><td colspan="7" class="mu">Ainda não tens favoritos.</td></tr>'}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     $('#npBoardBack').addEventListener('click', npShowFeed);
-    $('#npBoardSel').addEventListener('change', (e) => { settings.npBoardSort = e.target.value; save('mss_settings4', settings); npRenderBoard(); });
-    box.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => { settings.npBoardSort = th.dataset.k; save('mss_settings4', settings); npRenderBoard(); }));
+    const setSort = (k) => { if (k === so) return; if (so !== 'name' || k !== 'name') settings.npBoardPrevSort = so; settings.npBoardSort = k; save('mss_settings4', settings); npRenderBoard(); };
+    $('#npBoardSel').addEventListener('change', (e) => setSort(e.target.value));
+    box.querySelectorAll('th[data-k]').forEach((th) => th.addEventListener('click', () => setSort(th.dataset.k)));
+    box.querySelectorAll('.npReady').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); setSort('setup'); }));
+    box.querySelectorAll('.npUndo').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault();
+      if (so !== 'name') { const pv = settings.npBoardPrevSort && settings.npBoardPrevSort !== so ? settings.npBoardPrevSort : 'name'; settings.npBoardSort = pv; settings.npBoardPrevSort = null; }
+      else if (settings.favPrev) { settings.favs = settings.favPrev.favs.filter((x) => (settings.favs || []).includes(x)).concat((settings.favs || []).filter((x) => !settings.favPrev.favs.includes(x))); settings.favManual = settings.favPrev.manual; settings.favPrev = null; }
+      save('mss_settings4', settings); npRender(); }));
     npAZWire(box); if (!cmp) npDrag(box, 'tr.row');
     box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
     box.querySelectorAll('.np-bc').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npOpenChart(b.dataset.c); }));

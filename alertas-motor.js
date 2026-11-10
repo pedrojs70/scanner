@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-09T23:23:34.037Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T10:57:43.688Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -740,7 +740,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     tgtOn: true, tgtPct: 1, lineOn: true,
-    fibOn: false, fibTfs: ['1w', '1d'], fib786: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
+    fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
     forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
@@ -1197,9 +1197,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       for (const [k, lvl, nmz, val] of lv) {
         const key = leg + '|' + k; if (st.fibz[key]) continue;
         if (!(up ? p <= lvl : p >= lvl)) continue;
+        const r = FB.retrOf(f, p) * 100, lo = FB.NEXT[id], dl = lo && dm[lo], star = dl ? FB.confluence(f, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        if (A.fibStar && !star) continue;   // "só com confluência ⭐": sem alvo do TF de baixo na zona, não avisa (e pode avisar mais tarde se a ⭐ aparecer)
         st.fibz[key] = now;
         if (st.silent) continue;
-        const r = FB.retrOf(f, p) * 100, lo = FB.NEXT[id], dl = lo && dm[lo], star = dl ? FB.confluence(f, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
         out.push({ kind: 'fibz', sym, text: [
           `${up ? '🟢' : '🔴'} <b>Zona de entrada · ${LBL[id]} · ${esc(sym)}</b>`,
           `O preço (${fmt(p)}) entrou na ${nmz} da ${up ? 'subida' : 'descida'} (1 = ${fmt(f.A)} → 0 = ${fmt(f.B)}): ${val} · retração ${pct(r)}. Possível ${up ? 'compra' : 'venda'} — espera a quebra no timeframe de baixo.`,
