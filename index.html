@@ -740,7 +740,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h55</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 22h10</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -3950,17 +3950,22 @@
     settings.lines[symbol] = ls; save('mss_settings4', settings); renderLinePanel(); try { updateEditUi(); } catch (e) {}
   }
   function lineUndoDo() { const st = lineUndo[symbol]; if (!st || !st.length) return; settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); }
+  // espaço médio entre velas (para lá da primeira/última vela): nas ações conta só os dias de bolsa, senão as linhas dobravam ao passar a última vela
+  function stepAt(cs, end) {
+    const n = cs.length, k = Math.min(200, n - 1); if (k < 1) return TF_MS0[selectedTf] || 864e5;
+    return end ? (cs[n - 1].t - cs[n - 1 - k].t) / k : (cs[k].t - cs[0].t) / k;
+  }
   function idxOfT(t) {
     const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
-    if (t >= cs[n - 1].t) return n - 1 + (t - cs[n - 1].t) / tf;
-    if (t <= cs[0].t) return (t - cs[0].t) / tf;
+    if (t >= cs[n - 1].t) return n - 1 + (t - cs[n - 1].t) / stepAt(cs, true);
+    if (t <= cs[0].t) return (t - cs[0].t) / stepAt(cs, false);
     let lo = 0, hi = n - 1; while (lo < hi) { const m = (lo + hi + 1) >> 1; if (cs[m].t <= t) lo = m; else hi = m - 1; }
     return lo + (t - cs[lo].t) / ((cs[lo + 1].t - cs[lo].t) || tf);
   }
   function tOfIdx(x) {
-    const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
-    if (x >= n - 1) return cs[n - 1].t + (x - (n - 1)) * tf;
-    if (x <= 0) return cs[0].t + x * tf;
+    const cs = data[selectedTf].candles, n = cs.length;
+    if (x >= n - 1) return cs[n - 1].t + (x - (n - 1)) * stepAt(cs, true);
+    if (x <= 0) return cs[0].t + x * stepAt(cs, false);
     const i = Math.floor(x); return cs[i].t + (x - i) * (cs[i + 1].t - cs[i].t);
   }
   const lnF = (l) => (l.p1 > 0 && l.p2 > 0 ? [Math.log, Math.exp] : [(v) => v, (v) => v]);
