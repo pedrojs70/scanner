@@ -2689,6 +2689,7 @@
   let dataSym = null;   // ativo a que pertencem os dados no ecrã
   async function loadAll() {
     const token = ++loadToken;
+    if (/^BTC(USDT|USDC|FDUSD|EUR)?$/.test(symbol)) ['TOTAL', 'STABLE.D'].forEach((x) => { if (!favData[x] || Date.now() - favData[x].at > 10 * 60e3) loadFav(x).catch(() => {}); });   // enquadramento da análise IA do BTC
     setStatus('A carregar dados…');
     try {
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
@@ -5197,12 +5198,12 @@ function motor_() {
 3) A VIGIAR: no mesmo formato ("SHORT <ativo> (<setup>) — Esperar pela quebra no <TF> …"), só os que merecem atenção hoje.
 4) CUIDADO: no mesmo formato, com o lado e o veredicto ("SHORT <ativo> (<setup>) — Evitar: <razão com números>"). Inclui os que vão contra o timeframe de cima, contra a força relativa, com R:R abaixo de 1,5 ou stop muito largo (aí diz "só com posição pequena").
 5) O QUE MUDARIA O DIA: 1–2 níveis, cada um com o ativo, o lado afetado e o fecho que o muda (ex.: "fecho do Níquel acima de 14,425 (+3,4%) anula o SHORT").
-Nunca escrevas "pronto", "entrar" ou "evitar" sem dizer se é LONG ou SHORT. Nos índices de domínio (.D) diz em uma frase o que esse lado significa na prática. Usa só os números destes dados e cita-os; diz a distância ao preço em % em cada nível. Não inventes ativos que não estejam aqui.`;
+Nunca escrevas "pronto", "entrar" ou "evitar" sem dizer se é LONG ou SHORT. Quando citares uma tendência, diz se é a tendência principal ou o movimento recente, e de que TF. Médias (SMA/EMA): só as do Diário para cima. Nos índices de domínio (.D) diz em uma frase o que esse lado significa na prática. Usa só os números destes dados e cita-os; diz a distância ao preço em % em cada nível. Não inventes ativos que não estejam aqui.`;
   function daySummary() {
     const rows = dayRows(), dt = new Date().toLocaleString('pt-PT', { dateStyle: 'full', timeStyle: 'short' });
     const D = (x, p) => pct((x - p) / p * 100, true);
     const line = (r) => { const f = r.f, p = r.price, w = dayWarn(r), rv = r.rv;
-      const sig = rv ? REV_COLS.filter(([k]) => rv.ok[k]).map(([k]) => { const v = rv.val[k]; return `${k === 'fr' ? 'força rel.' : REV_COLS.find((c) => c[0] === k)[1]}${v ? ' ' + v.v + (v.d ? ' (' + v.d + ')' : '') : ''}`; }).join('; ') : '';
+      const sig = rv ? REV_COLS.filter(([k]) => rv.ok[k] && !(k === 'sma' && TF_MS0[r.st.zone] < 864e5)).map(([k]) => { const v = rv.val[k]; return `${k === 'fr' ? 'força rel.' : REV_COLS.find((c) => c[0] === k)[1]}${v ? ' ' + v.v + (v.d ? ' (' + v.d + ')' : '') : ''}`; }).join('; ') : '';
       return `- ${r.x.dir === 1 ? 'LONG' : 'SHORT'} ${nm(r.s)} (${r.s}) · ${r.st.name} (zona ${tfLabel(r.st.zone)}, quebra ${tfLabel(r.st.trig)}) · ${dayStateLong(r)}${dayIdxNote(r.s, r.x.dir)}
   preço ${aiF(p)} · correção ${pct(r.x.z.pullback)}${f ? ` · entrada ótima ${aiF(f.entry.lo)}–${aiF(f.entry.hi)} · invalida ${aiF(f.A)} (${D(f.A, p)}) · alvo ${aiF(f.B)} (${D(f.B, p)})` : ''}${r.rr ? ` · R:R ${r.rr.toFixed(1)}` : ''}
   sinais de reversão ${rv ? rv.score + '/' + REV_COLS.length : '—'}${sig ? ': ' + sig : ''}${r.x.ctx ? ` · contexto ${tfLabel(ctxOf(r.st))} ${r.x.ctx.fav ? 'a favor' : 'CONTRA'}` : ''}${r.frN ? ` · força rel. a favor: ${r.fav.join(', ') || 'nenhum'}; contra: ${r.con.join(', ') || 'nenhum'}` : ' · sem rácios'}${r.x.star ? ` · ${r.x.star.txt}` : ''}${r.others.length ? ` · também em zona: ${r.others.join(', ')}` : ''}${w.length ? ` · ATENÇÃO: ${w.join(', ')}` : ''}`; };
@@ -5401,7 +5402,7 @@ ${AI_DAY_FORMAT}`;
   const aiF = (x) => (x == null || !isFinite(x) ? '?' : Math.abs(x) >= 1000 ? fmt(x) : (+x).toLocaleString('pt-PT', { maximumSignificantDigits: 5 }));
   function aiTfLine(id, d) {
     const x = d.ext.snap, n = d.int.snap, f = d.fibs && d.fibs[0];
-    const tr = (sn) => (!sn || !sn.trend ? 'sem estrutura' : `${sn.label}${sn.phase ? ' (' + sn.phase.toLowerCase() + ')' : ''}, correção ${pct(sn.pullback)}, limite ${aiF(sn.protected)}, ${sn.trend === 1 ? 'topo' : 'fundo'} da perna ${aiF(sn.extreme)}`);
+    const tr = (sn) => (!sn || !sn.trend ? 'sem estrutura' : `${sn.trend === 1 ? '▲ ALTA' : '▼ BAIXA'} — ${sn.label}${/virar/i.test(sn.label || '') ? ` (fez a 1.ª quebra para ${sn.trend === 1 ? 'cima' : 'baixo'} (CHoCH), ainda sem BOS a confirmar)` : ''}${sn.phase ? ', ' + sn.phase.toLowerCase() : ''}, correção ${pct(sn.pullback)} (o preço ${sn.trend === 1 ? 'recuou' : 'subiu'} ${pct(sn.pullback)} da perna ${sn.trend === 1 ? 'de subida' : 'de descida'}; zona de entrada a 50–65%), limite ${aiF(sn.protected)}, ${sn.trend === 1 ? 'topo' : 'fundo'} da perna ${aiF(sn.extreme)}`);
     const lb = n && n.lastBreak ? `; última quebra ${n.lastBreak.type} ${n.lastBreak.dir === 1 ? '▲' : '▼'} em ${aiF(n.lastBreak.level)} há ${n.lastBreak.barsAgo} velas (FVG ${n.lastBreak.fvg || '—'})` : '';
     const disp = n && n.dispute ? `; disputa ${n.dispute.dir === 1 ? '▲' : '▼'}: confirma se fechar além de ${aiF(n.dispute.confirm)}` : '';
     const fib = f ? `; Fibonacci (log): entrada ótima ${aiF(f.entry.lo)}–${aiF(f.entry.hi)}, 78,6% ${aiF(f.deep)}, alvos ${f.targets.map((t) => `${t.name.replace('Alvo ', 'A')} ${aiF(t.lo)}–${aiF(t.hi)}${t.hit ? ' (atingido)' : ''}`).join(', ')}` : '';
@@ -5409,8 +5410,8 @@ ${AI_DAY_FORMAT}`;
     let dv = ''; try { const v = divergences(d).filter((x) => x.live).pop(), rs = d._rsi && d._rsi[d._rsi.length - 1];
       if (v) dv = `; divergência RSI ${v.dir === 1 ? 'de alta' : 'de baixa'} ativa: ${v.dir === 1 ? 'fundo' : 'topo'} ${aiF(v.a.p)} → ${aiF(v.b.p)}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)} (há ${d.closed.length - 1 - v.b.i} velas)`;
       if (rs != null) dv += `; RSI ${rs.toFixed(0)}`; } catch (e) {}
-    const sma = smaOfTf(d, 200);
-    return `- ${tfLabel(id)}: principal ${tr(x)}; recente ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}${dv}`;
+    const sma = ['1d', '1w', '1M', '3M', '6M', '1Y'].includes(id) ? smaOfTf(d, 200) : null;   // médias só do Diário para cima
+    return `- ${tfLabel(id)}: TENDÊNCIA PRINCIPAL ${tr(x)} | MOVIMENTO RECENTE ${tr(n)}${lb}${disp}${fib}${fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}${dv}`;
   }
   // ---------- 📋 resumo para a IA: dados "mastigados" para decidir (obstáculos, risco/retorno, força relativa) e um formato de resposta curto ----------
   const AI_FORMAT = `Responde em português de Portugal, no máximo ~250 palavras, com este formato:
@@ -5420,6 +5421,11 @@ ${AI_DAY_FORMAT}`;
 3) OBSTÁCULO mais importante acima e abaixo do preço (nível e distância).
 4) MELHOR CENÁRIO DE ENTRADA, com o lado escrito (ex.: "Long em X–Y"): zona, stop, alvo e risco/retorno; e, se houver, uma alternativa melhor (outra zona ou outro ativo, pela força relativa).
 5) O QUE MUDARIA A LEITURA: o preço ou fecho que me faria mudar de ideias.
+REGRAS:
+- Cada TF tem DUAS estruturas: a TENDÊNCIA PRINCIPAL e o MOVIMENTO RECENTE. Sempre que citares uma tendência, diz qual das duas é e o TF (ex.: "Semanal, tendência principal: ▼ baixa, a virar para baixo (CHoCH); Semanal, movimento recente: ▲ alta"). Nunca escrevas só "o Semanal está a virar para baixo".
+- Uma correção da tendência principal de um TF de cima ainda abaixo dos 50% NÃO é, por si, contra um setup do TF de baixo no sentido dessa correção: diz antes até onde a correção tem margem (a zona 50–65% desse TF) e usa-a como alvo/obstáculo. Só é "contra" se o setup for no sentido oposto ao da correção ou se o preço já estiver na zona 50–65% desse TF.
+- Médias (SMA/EMA): só cita as do Diário para cima; ignora as do 4H e abaixo.
+- Se os dados trouxerem um bloco ENQUADRAMENTO DO MERCADO CRIPTO, acrescenta no fim uma secção 6) ENQUADRAMENTO CRIPTO: uma linha para o TOTAL e uma para o USDT.D + USDC.D (tendência principal e movimento recente do Semanal e do Diário) e diz se CONFIRMAM ou CONTRARIAM o veredicto; se contrariarem, baixa a confiança. Se o bloco disser "sem dados", diz isso numa linha.
 Usa só os números destes dados (correções e Fibonacci em escala log) e cita-os. Se eu pedir "desenvolve", aí sim faz a análise completa por timeframe.`;
   // níveis à volta do preço, de todas as fontes da app (estrutura, liquidez, Fibonacci, médias, Keltner, as minhas linhas)
   function aiObstacles(price) {
@@ -5431,7 +5437,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       const f = d.fibs && d.fibs[0];
       if (f) { add((f.entry.lo + f.entry.hi) / 2, `entrada ótima Fib ${lb} (${aiF(f.entry.lo)}–${aiF(f.entry.hi)})`); add(f.deep, `Fib 78,6% ${lb}`); f.targets.filter((t) => !t.hit).forEach((t) => add((t.lo + t.hi) / 2, `${t.name} Fib ${lb} (${aiF(t.lo)}–${aiF(t.hi)})`)); }
       const fi = d.fibsI && d.fibsI[0]; if (fi && (!f || fi.A !== f.A)) fi.targets.filter((t) => !t.hit).forEach((t) => add((t.lo + t.hi) / 2, `${t.name} Fib ${lb} mov. recente`));
-      if (['1w', '1d', '4h'].includes(id)) { const sm = smaOfTf(d, 200); add(sm, `SMA 200 ${lb}`); }
+      if (['1M', '1w', '1d'].includes(id)) { const sm = smaOfTf(d, 200); add(sm, `SMA 200 ${lb}`); }   // médias só do Diário para cima
       if (['1M', '1w', '1d'].includes(id) && d.candles && d.candles.length > 30) { const cl = d.candles.map((c) => c.c), m = emaOf(cl, 20).pop(), a = atrOf(d.candles, 10).pop(); if (m && a) { add(m + 3 * a, `Keltner +3ATR ${lb}`); add(m - 3 * a, `Keltner −3ATR ${lb}`); } }
     }
     liqFrom(data['1h']).filter((x) => !x.taken).forEach((x) => add(x.p, `liquidez ${x.n}`));
