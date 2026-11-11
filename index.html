@@ -923,7 +923,7 @@
     <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="fibInfo" class="small"></div>
-    <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar deste timeframe (Delete)">🗑</button><span class="lnmtf"></span></div></div>
+    <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar deste timeframe (Delete)">🗑</button><button data-mext="1" title="Prolongar para a direita">⟶</button><span class="lnmtf"></span></div></div>
     <div id="linePanel"></div>
     <div class="legend">
       <span><i class="sw" style="background:#ff3b3b"></i>limite da tendência principal</span>
@@ -3885,6 +3885,9 @@
   // uma linha pode aparecer em vários timeframes (l.tfs); l.tf é o timeframe onde foi desenhada
   const lnTfsOf = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]);
   const lnHere = (l) => lnTfsOf(l).includes(selectedTf);
+  // segmento (fim no 2.º ponto) ou prolongada para a direita; linhas antigas (sem ext) continuam prolongadas
+  const lnExt = (l) => l.ext !== false;
+  const lnLive = (l, t) => lnExt(l) || (t || Date.now()) <= Math.max(l.t1, l.t2);
   const linesOn = () => settings.linesOn !== false;
   const LN_TFS = () => TFS.map((t) => t.id).filter((id) => !['1Y', '6M'].includes(id) && (isCrypto(symbol) || Y_IV[id] || Y_AGG[id] || Y_MAGG[id]));
   // tira a linha só deste timeframe; se era o último, apaga-a
@@ -3942,7 +3945,8 @@
     const W = ts.width(), tEnd = tOfIdx(ts.coordinateToLogical(W));
     const offs = l.type === 'chan' ? [0, l.off || 0] : [0];
     // a linha é reta em escala log; desenhada em pedaços para ficar presa aos mesmos preços em qualquer escala, timeframe e zoom
-    const K = 48, polys = offs.map((o) => { const pts = []; for (let k = 0; k <= K; k++) { const t = l.t1 + (tEnd - l.t1) * k / K; pts.push([X(t), Y(lnVal(l, t, o))]); } return pts; });
+    const ta = Math.min(l.t1, l.t2), tb = lnExt(l) ? Math.max(tEnd, Math.max(l.t1, l.t2)) : Math.max(l.t1, l.t2);
+    const K = 48, polys = offs.map((o) => { const pts = []; for (let k = 0; k <= K; k++) { const t = ta + (tb - ta) * k / K; pts.push([X(t), Y(lnVal(l, t, o))]); } return pts; });
     const segs = []; polys.forEach((P) => { for (let k = 1; k < P.length; k++) segs.push([P[k - 1][0], P[k - 1][1], P[k][0], P[k][1]]); });
     const h1 = [X(l.t1), Y(l.p1)], h2 = [X(l.t2), Y(l.p2)], tm = (l.t1 + l.t2) / 2, h3 = l.type === 'chan' ? [X(tm), Y(lnVal(l, tm, l.off || 0))] : null;
     return { segs, polys, h1, h2, h3 };
@@ -3972,8 +3976,8 @@
   function linePreview() {
     if (!lineMode || lineMode === 'del' || !lineHover || !linePts.length) return null;
     const a = linePts[0];
-    if (linePts.length === 1) { if (lineHover.t === a.t) return null; return { id: '_pv', type: 'line', tf: selectedTf, t1: a.t, p1: a.p, t2: lineHover.t, p2: lineHover.p }; }
-    const b = linePts[1], l = { id: '_pv', type: 'chan', tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p }; const [F] = lnF(l); l.off = F(lineHover.p) - F(lnVal(l, lineHover.t, 0)); return l;
+    if (linePts.length === 1) { if (lineHover.t === a.t) return null; return { id: '_pv', type: 'line', tf: selectedTf, t1: a.t, p1: a.p, t2: lineHover.t, p2: lineHover.p, ext: false }; }
+    const b = linePts[1], l = { id: '_pv', type: 'chan', tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false }; const [F] = lnF(l); l.off = F(lineHover.p) - F(lnVal(l, lineHover.t, 0)); return l;
   }
   const LINE_HINT = { line: ['Diagonal: carrega no 1.º ponto', 'Diagonal: mexe o rato e carrega no 2.º ponto'], chan: ['Canal: carrega no 1.º ponto da linha de base', 'Canal: carrega no 2.º ponto da linha de base', 'Canal: mexe o rato até ao outro lado do canal e carrega'] };
   function lineHintUi() {
@@ -4004,7 +4008,7 @@
     if (linePts.length < need) { lineHintUi(); return; }
     const [a, b, c] = linePts;
     if (b.t === a.t) { linePts = [a]; return; }
-    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, tfs: [selectedTf], t1: a.t, p1: a.p, t2: b.t, p2: b.p, alert: false, pct: null, at: Date.now() };
+    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, tfs: [selectedTf], t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false, alert: false, pct: null, at: Date.now() };
     if (lineMode === 'chan') { const [F] = lnF(l); l.off = F(c.p) - F(lnVal(l, c.t, 0)); }
     setLines(userLines().concat(l)); lineSel = l.id; setLineMode(null); lineSel = l.id; lineHintUi();
   }
@@ -4030,9 +4034,9 @@
       const pc = m.querySelector('[data-mpc]'); pc.addEventListener('change', () => setLines(userLines().map((x) => (x.id === pc.dataset.mpc ? Object.assign({}, x, { pct: Math.max(0.1, Math.min(20, +String(pc.value).replace(',', '.') || 1)) }) : x)), false));
       ['keydown', 'pointerdown', 'mousedown', 'click'].forEach((ev) => pc.addEventListener(ev, (e) => e.stopPropagation()));
     }
-    const G = lineGeom(l); if (G.h2[0] == null || G.h2[1] == null) { m.style.display = 'none'; return; }
-    m.style.display = 'flex'; m.style.left = Math.max(4, Math.min(chart.timeScale().width() - Math.max(150, m.offsetWidth + 8), G.h2[0] + 10)) + 'px'; m.style.top = Math.max(4, G.h2[1] - 40) + 'px';
+    m.style.display = 'flex'; m.style.left = '8px'; m.style.top = '44px';   // sempre no mesmo sítio: canto de cima à esquerda, por baixo da dica
     m.querySelector('[data-mal]').classList.toggle('on', !!l.alert);
+    const xb = m.querySelector('[data-mext]'); xb.classList.toggle('on', lnExt(l)); xb.title = lnExt(l) ? 'Prolongada para a direita — carrega para acabar no 2.º ponto' : 'Acaba no 2.º ponto (sem alerta depois dele) — carrega para prolongar para a direita';
   }
   function initLines() {
     const el = $('#chart');
@@ -4083,6 +4087,7 @@
     const m = $('#lineMenu');
     m.querySelector('[data-mal]').addEventListener('click', () => { setLines(userLines().map((l) => (l.id === lineSel ? Object.assign({}, l, { alert: !l.alert }) : l))); });
     m.querySelector('[data-mdel]').addEventListener('click', () => { lineRemoveHere(lineSel); lineSel = null; lineHintUi(); });
+    m.querySelector('[data-mext]').addEventListener('click', () => { setLines(userLines().map((l) => (l.id === lineSel ? Object.assign({}, l, { ext: !lnExt(l) }) : l))); });
     $('#lineTools').querySelectorAll('[data-lm]').forEach((b) => b.addEventListener('click', () => setLineMode(b.dataset.lm === lineMode ? null : b.dataset.lm)));
     $('#lineTools').querySelector('[data-mag]').addEventListener('click', () => { settings.lineMag = !settings.lineMag; save('mss_settings4', settings); lineToolsUi(); });
     $('#lineTools').querySelector('[data-und]').addEventListener('click', lineUndoDo);
@@ -5380,7 +5385,7 @@ ${AI_DAY_FORMAT}`;
         const lo = FB.NEXT[id], w1 = swOf(d), w2 = swOf(dm[lo]), w = w1 || w2, wx = w1 ? d : dm[lo];
         ok.sw = !!w; if (w) V('sw', `varreu ${F(w.level)}`, `${tfLabel(w1 ? id : lo)} · há ${wx.closed.length - 1 - w.i} velas`);
         let best = null;
-        userLines(s).forEach((l) => { const pc = (+l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)) / 100, a0 = lnVal(l, now, 0), a1 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null;
+        userLines(s).filter((l) => lnLive(l, now)).forEach((l) => { const pc = (+l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)) / 100, a0 = lnVal(l, now, 0), a1 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null;
           [[a0, l.type === 'chan' ? (a1 != null && a0 > a1 ? 'teto do canal' : 'chão do canal') : 'diagonal'], ...(a1 != null ? [[a1, a1 > a0 ? 'teto do canal' : 'chão do canal']] : [])].forEach(([v, n]) => {
             if (!(v > 0)) return; const dd = Math.abs(price - v) / v; if (!best || dd < best.dd) best = { v, n, dd, ok: dd <= pc }; }); });
         ok.ln = !!(best && best.ok); if (best) V('ln', `${best.n} ${F(best.v)}`, D(best.v, price));
@@ -5474,7 +5479,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       if (['1M', '1w', '1d'].includes(id) && d.candles && d.candles.length > 30) { const cl = d.candles.map((c) => c.c), m = emaOf(cl, 20).pop(), a = atrOf(d.candles, 10).pop(); if (m && a) { add(m + 3 * a, `Keltner +3ATR ${lb}`); add(m - 3 * a, `Keltner −3ATR ${lb}`); } }
     }
     liqFrom(data['1h']).filter((x) => !x.taken).forEach((x) => add(x.p, `liquidez ${x.n}`));
-    userLines().forEach((l) => { const now = Date.now(), tl = lnTfsOf(l).map(tfLabel).join('/'); if (l.type === 'chan') { const a = lnVal(l, now, 0), b = lnVal(l, now, l.off || 0); add(Math.max(a, b), `teto do meu canal ${tl}`); add(Math.min(a, b), `chão do meu canal ${tl}`); } else add(lnVal(l, now, 0), `a minha diagonal ${tl}`); });
+    userLines().filter((l) => lnLive(l)).forEach((l) => { const now = Date.now(), tl = lnTfsOf(l).map(tfLabel).join('/'); if (l.type === 'chan') { const a = lnVal(l, now, 0), b = lnVal(l, now, l.off || 0); add(Math.max(a, b), `teto do meu canal ${tl}`); add(Math.min(a, b), `chão do meu canal ${tl}`); } else add(lnVal(l, now, 0), `a minha diagonal ${tl}`); });
     const d = (x) => (x.p - price) / price * 100;
     const up = L.filter((x) => x.p > price && d(x) < 25).sort((a, b) => a.p - b.p), dn = L.filter((x) => x.p < price && d(x) > -25).sort((a, b) => b.p - a.p);
     return { up, dn, d };
@@ -5521,7 +5526,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       out.push('Obstáculos ABAIXO: ' + (ob.dn.slice(0, 7).map(f).join('; ') || 'nenhum até −25%'));
     }
     // as minhas linhas
-    const ls = userLines();
+    const ls = userLines().filter((l) => lnLive(l));
     if (ls.length) out.push('', 'As minhas linhas: ' + ls.map((l) => { const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dd = (x) => (price ? ` (${pct((x - price) / price * 100, true)})` : '');
       return `${l.type === 'chan' ? 'canal' : 'diagonal'} em ${lnTfsOf(l).map(tfLabel).join('/')} agora em ${aiF(v)}${dd(v)}${v2 != null ? ' / ' + aiF(v2) + dd(v2) : ''}${l.alert ? ' (com alerta 🔔)' : ''}`; }).join('; '));
     // força relativa

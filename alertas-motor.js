@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-11T17:07:41.992Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-11T20:19:10.691Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1324,11 +1324,13 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // ---------- 8: linhas diagonais e canais desenhados (só os com 🔔) ----------
   const lnAt = (l, t) => { const lg = l.p1 > 0 && l.p2 > 0, F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x; const k = (t - l.t1) / ((l.t2 - l.t1) || 1); return (off) => FI(F(l.p1) + (F(l.p2) - F(l.p1)) * k + (off || 0)); };
+  // linha com fim (segmento) só conta até ao 2.º ponto; prolongada (ou linhas antigas) conta sempre
+  const lnLive = (l, t) => l.ext !== false || t <= Math.max(l.t1, l.t2);
   const lnTfs = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]).filter((id) => TF_MS[id]).sort((a, b) => TF_MS[a] - TF_MS[b]);
   // as minhas linhas perto do preço (para a linha "Confluência" dos alertas): usa a distância escolhida em cada linha
   function lineConf(S, sym, price, now) {
     const out = [];
-    for (const l of ((S.lines || {})[sym] || [])) {
+    for (const l of ((S.lines || {})[sym] || []).filter((x) => lnLive(x, now))) {
       const f = lnAt(l, now), pc = (+l.pct || (TF_MS[l.tf] >= 864e5 ? 1 : 0.5)) / 100, tl = lnTfs(l).map((id) => LBL[id]).join('/');
       const sides = l.type === 'chan' ? [[f(0), 0], [f(l.off || 0), 1]] : [[f(0), -1]];
       const hi = l.type === 'chan' ? Math.max(sides[0][0], sides[1][0]) : null;
@@ -1339,7 +1341,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   function lineAlerts(sym, raw, S, A, st, now, out) {
     // uma linha pode estar em vários timeframes: um só alerta por linha; o fecho fora do canal conta no timeframe mais pequeno marcado (e vigiado)
-    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0)); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
+    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert && lnLive(l, now)).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0)); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
     if (!A.lineOn || !ls.length) return;
     st.ln = st.ln || {};
     for (const l of ls) {
