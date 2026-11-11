@@ -638,6 +638,7 @@
   .np-tabs button { background:transparent !important; border:0 !important; border-bottom:3px solid transparent; color:var(--np-ink); font:inherit; font-weight:600; font-size:14px; padding:9px 14px 7px; cursor:pointer; white-space:nowrap; border-radius:0; }
   .np-tabs button:hover { background:var(--np-hover) !important; }
   body[data-npv="feed"] .np-tabs [data-tab="feed"], body[data-npv="board"] .np-tabs [data-tab="board"], body[data-npv="focus"] .np-tabs [data-tab="focus"], body[data-npv="rev"] .np-tabs [data-tab="rev"] { background:var(--np-ink) !important; color:var(--np-bg); }
+  .np-day-ai.wait, button.np-day-ai.wait { background:#777 !important; }
 </style>
 </head>
 <body>
@@ -769,7 +770,7 @@
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Tudo · Ativos · Rácios:</b> ao lado de cada caixa de procura (favoritos, Quadro, Em foco e jornal) escolhe se queres ver tudo, só os ativos (ações, cripto e futuros) ou só os rácios. No jornal, o nome do ativo aparece em português com o ticker ao lado.</li>
-      <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) e abre o Claude: cola e envia.</li>
+      <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) e abre o Claude: cola e envia. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
       <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
       <li><b>Lateralização (5m/15m/1H):</b> quando o gatilho está dentro de uma caixa (vários toques em cima e em baixo), as viragens lá dentro não contam; o gatilho passa a ser o fecho fora da caixa no sentido do setup (“quebrou a lateralização”). No gráfico aparece a caixa tracejada “↔ lateralização”.</li>
       <li><b>Swings mínimos nos 5m e 15m:</b> nas Definições, um topo/fundo do movimento recente só conta se o recuo for pelo menos N × a volatilidade média das últimas 100 velas (1 = recomendado, 0 = desligado). Acaba com os HH/LH de uma vela nas lateralizações.</li>
@@ -4545,7 +4546,7 @@
     const worker = async () => { while (work.length) { const s = work.shift(); try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavList(); npRender(); } };
     await Promise.all([worker(), worker(), worker()]);
     favProg = 'atualizado ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
-    favBusy = false; renderFavList();
+    favBusy = false; renderFavList(); npRender();
     if (favAgain) scanFavs(false);
   }
   function openSymbol(s) {
@@ -5127,42 +5128,63 @@ function motor_() {
       [['1d', 'd'], ['1w', 'w']].forEach(([id, kk]) => { const t = dm[id] && dm[id].ext.snap && dm[id].ext.snap.trend; if (t === 1) o[kk][0]++; else if (t === -1) o[kk][1]++; }); }
     return ['c', 's', 'f'].filter((k) => g[k]).map((k) => ({ k, name: MON_GN[k].split(' (')[0], ...g[k] }));
   }
+  function dayPanoNames() {
+    const g = {}; for (const s of settings.favs || []) { if (isRatio(s) || !favData[s]) continue; const k = SY.monGroup(s), dm = favData[s].tfs || {}, o = g[k] = g[k] || { w: [[], [], []], d: [[], [], []] };
+      [['1w', 'w'], ['1d', 'd']].forEach(([id, kk]) => { const t = dm[id] && dm[id].ext.snap && dm[id].ext.snap.trend; o[kk][t === 1 ? 0 : t === -1 ? 1 : 2].push(nm(s)); }); }
+    const L = (a) => a.join(', ') || 'nenhum';
+    return ['c', 's', 'f'].filter((k) => g[k]).map((k) => { const o = g[k]; return `- ${MON_GN[k].split(' (')[0]}:
+  Semanal ▲ em alta: ${L(o.w[0])} | ▼ em baixa: ${L(o.w[1])}${o.w[2].length ? ' | sem dados/sem tendência: ' + o.w[2].join(', ') : ''}
+  Diário ▲ em alta: ${L(o.d[0])} | ▼ em baixa: ${L(o.d[1])}${o.d[2].length ? ' | sem dados/sem tendência: ' + o.d[2].join(', ') : ''}`; }).join('\n');
+  }
+  // índices de domínio (.D): o que um Long/Short quer dizer na prática
+  function dayIdxNote(s, dir) {
+    if (!/\.D$/i.test(s)) return '';
+    if (/^(STABLE|USDT|USDC)\.D$/i.test(s)) return dir === 1 ? ' · NOTA: é um índice de domínio — LONG aqui = dinheiro a fugir para stablecoins (mau para Longs em cripto)' : ' · NOTA: é um índice de domínio — SHORT aqui = dinheiro a sair das stablecoins para cripto (bom para Longs em cripto)';
+    if (/^BTC\.D$/i.test(s)) return dir === 1 ? ' · NOTA: índice de domínio — LONG aqui = o Bitcoin a ganhar às altcoins' : ' · NOTA: índice de domínio — SHORT aqui = as altcoins a ganhar ao Bitcoin';
+    return ` · NOTA: índice de domínio — ${dir === 1 ? 'LONG = este segmento a ganhar' : 'SHORT = este segmento a perder'} quota no mercado cripto (não é um ativo que se compre)`;
+  }
+  const dayStateLong = (r) => { const x = r.x, side = x.dir === 1 ? 'LONG' : 'SHORT';
+    return x.rank === 4 ? `PRONTO para ${side}: zona do ${tfLabel(r.st.zone)} a ${pct(x.z.pullback)} e quebra no ${tfLabel(r.st.trig)} com FVG${x.sweep ? ', depois de um sweep' : ''}`
+      : x.rank === 3 ? `${side} quase pronto: quebra no ${tfLabel(r.st.trig)} feita${x.sweep ? ' depois de um sweep' : ''}, falta o FVG`
+      : x.box ? `${side} à espera: o ${tfLabel(r.st.trig)} está em lateralização, falta fechar fora da caixa` : `${side} à espera: em zona no ${tfLabel(r.st.zone)}, falta a quebra no ${tfLabel(r.st.trig)}`; };
   function dayRatios() {
     return (settings.favs || []).filter((r) => isRatio(r) && favData[r]).map((r) => { const dm = favData[r].tfs || {}, t = (id) => { const z = dm[id] && dm[id].ext.snap; return z && z.trend ? (z.trend === 1 ? '▲' : '▼') : '—'; };
       const [A, B] = ratioLegs(r); return { r, A, B, w: t('1w'), d: t('1d') }; });
   }
+  function dayLoad() { const f = settings.favs || [], n = f.filter((x) => favData[x]).length; return { n, t: f.length, busy: n < f.length }; }   // em refrescos os dados antigos continuam válidos; só conta o que ainda nunca carregou
   function dayBoxHtml() {
     if (!Object.keys(favData).length) return '';
+    const ld = dayLoad();
     const rows = dayRows(), L = rows.filter((r) => r.x.dir === 1).slice(0, 5), S = rows.filter((r) => r.x.dir === -1).slice(0, 5);
     const li = (r, i) => { const w = dayWarn(r); return `<a href="#" data-open="${r.s}" class="np-day-i"><span class="n">${i + 1}</span><span><b>${npEsc(nm(r.s))}</b> · ${r.st.name} <span class="np-day-st s${r.x.rank}">${dayState(r.x)}</span><br><small>zona ${tfLabel(r.st.zone)} ${pct(r.x.z.pullback)}${r.rr ? ` · R:R ${r.rr.toFixed(1).replace('.', ',')}` : ''}${r.rv ? ` · ${r.rv.score}/${REV_COLS.length} sinais` : ''}${w.length ? ` · <span style="color:var(--np-red)">⚠ ${w.join(', ')}</span>` : ''}</small></span></a>`; };
     const col = (t, c, a) => `<div class="np-day-c"><div class="np-day-h" style="color:${c}">${t}</div>${a.map(li).join('') || '<p class="np-why" style="color:var(--np-mu);font-size:13px">nada em zona</p>'}</div>`;
     const pano = dayPanorama().map((p) => `${p.name}: D ${p.d[0]}▲ ${p.d[1]}▼`).join(' · ');
     return `<div class="np-box" id="npDay"><div class="np-kick">TOP DO DIA</div><div style="font-size:12px;color:var(--np-mu);margin:2px 0 8px">${pano} · sem scalp · ordem: estado do setup, sinais de reversão, contexto e R:R</div>
       <div class="np-day">${col('▲ LONG', 'var(--np-green, #2e7d32)', L)}${col('▼ SHORT', 'var(--np-red)', S)}</div>
-      <button type="button" id="npDayAi" class="np-day-ai">🤖 Análise IA do dia</button><div id="npDayMsg" style="font-size:12px;color:var(--np-mu);margin-top:6px"></div></div>`;
+      <button type="button" id="npDayAi" class="np-day-ai${ld.busy ? ' wait' : ''}" title="${ld.busy ? 'Ainda a carregar os favoritos — se carregares agora, o brief avisa a IA de que os dados estão incompletos' : 'Copia o brief do dia e abre o Claude'}">${ld.busy ? `⏳ a carregar ${ld.n} de ${ld.t}… (Análise IA do dia)` : '🤖 Análise IA do dia'}</button><div id="npDayMsg" style="font-size:12px;color:var(--np-mu);margin-top:6px"></div></div>`;
   }
-  const AI_DAY_FORMAT = `Responde em português de Portugal, de leitura fácil (~350 palavras no máximo), com este formato:
-1) CENÁRIO GERAL em 2–3 frases: para onde está virado o mercado (por grupo) e o que dizem os rácios (o que está a ganhar a quê).
-2) TOP LONG e TOP SHORT: no máximo 5 cada, por ordem de força. Uma linha cada: ativo · setup · estado · entrada · invalida · alvo · R:R · porquê (2–3 sinais com números). Se discordares da ordem que te dou, reordena e diz porquê numa frase.
-3) A VIGIAR: os que estão em zona mas ainda sem quebra e merecem atenção hoje.
-4) CUIDADO: setups que vão contra o timeframe de cima ou contra a força relativa — e se algum do Top deve ser evitado.
-5) O QUE MUDARIA O DIA: 1–2 níveis/ativos que, se quebrarem, mudam o cenário.
-Usa só os números destes dados e cita-os; diz a distância ao preço em % em cada nível. Não inventes ativos que não estejam aqui.`;
+  const AI_DAY_FORMAT = `Responde em português de Portugal, de leitura fácil (~400 palavras no máximo), com este formato:
+1) CENÁRIO GERAL, uma linha por grupo: diz QUAIS ativos estão em alta e QUAIS em baixa (nomes, não só contagens) e tira a conclusão prática — que lado está a favor da maré nesse grupo (ex.: "Ações: Semanal em baixa em X, Y, Z; em alta só A e B → Shorts a favor; Longs só em A e B"). Depois uma linha com o que os rácios dizem (o que está a ganhar a quê). Se um grupo não tiver dados, diz só "sem dados".
+2) TOP LONG e TOP SHORT: no máximo 5 cada, por ordem de força. CADA linha começa pelo lado e pelo veredicto: "LONG <ativo> (<setup>) — Entrar já" / "— Esperar por <zona ou fecho> (<distância %>)" / "— Evitar". Depois: estado em palavras (ex.: "pronto: quebra no 15m com FVG"), entrada, invalida, alvo, R:R e porquê (2–3 sinais com números). Se discordares da ordem que te dou, reordena e diz porquê numa frase.
+3) A VIGIAR: no mesmo formato ("SHORT <ativo> (<setup>) — Esperar pela quebra no <TF> …"), só os que merecem atenção hoje.
+4) CUIDADO: no mesmo formato, com o lado e o veredicto ("SHORT <ativo> (<setup>) — Evitar: <razão com números>"). Inclui os que vão contra o timeframe de cima, contra a força relativa, com R:R abaixo de 1,5 ou stop muito largo (aí diz "só com posição pequena").
+5) O QUE MUDARIA O DIA: 1–2 níveis, cada um com o ativo, o lado afetado e o fecho que o muda (ex.: "fecho do Níquel acima de 14,425 (+3,4%) anula o SHORT").
+Nunca escrevas "pronto", "entrar" ou "evitar" sem dizer se é LONG ou SHORT. Nos índices de domínio (.D) diz em uma frase o que esse lado significa na prática. Usa só os números destes dados e cita-os; diz a distância ao preço em % em cada nível. Não inventes ativos que não estejam aqui.`;
   function daySummary() {
     const rows = dayRows(), dt = new Date().toLocaleString('pt-PT', { dateStyle: 'full', timeStyle: 'short' });
     const D = (x, p) => pct((x - p) / p * 100, true);
     const line = (r) => { const f = r.f, p = r.price, w = dayWarn(r), rv = r.rv;
       const sig = rv ? REV_COLS.filter(([k]) => rv.ok[k]).map(([k]) => { const v = rv.val[k]; return `${k === 'fr' ? 'força rel.' : REV_COLS.find((c) => c[0] === k)[1]}${v ? ' ' + v.v + (v.d ? ' (' + v.d + ')' : '') : ''}`; }).join('; ') : '';
-      return `- ${nm(r.s)} (${r.s}) · ${r.st.name} (zona ${tfLabel(r.st.zone)}, quebra ${tfLabel(r.st.trig)}) · ${r.x.dir === 1 ? 'LONG' : 'SHORT'} · ${dayState(r.x)}${r.x.sweep ? ' · quebra depois de sweep' : ''}
+      return `- ${r.x.dir === 1 ? 'LONG' : 'SHORT'} ${nm(r.s)} (${r.s}) · ${r.st.name} (zona ${tfLabel(r.st.zone)}, quebra ${tfLabel(r.st.trig)}) · ${dayStateLong(r)}${dayIdxNote(r.s, r.x.dir)}
   preço ${aiF(p)} · correção ${pct(r.x.z.pullback)}${f ? ` · entrada ótima ${aiF(f.entry.lo)}–${aiF(f.entry.hi)} · invalida ${aiF(f.A)} (${D(f.A, p)}) · alvo ${aiF(f.B)} (${D(f.B, p)})` : ''}${r.rr ? ` · R:R ${r.rr.toFixed(1)}` : ''}
   sinais de reversão ${rv ? rv.score + '/' + REV_COLS.length : '—'}${sig ? ': ' + sig : ''}${r.x.ctx ? ` · contexto ${tfLabel(ctxOf(r.st))} ${r.x.ctx.fav ? 'a favor' : 'CONTRA'}` : ''}${r.frN ? ` · força rel. a favor: ${r.fav.join(', ') || 'nenhum'}; contra: ${r.con.join(', ') || 'nenhum'}` : ' · sem rácios'}${r.x.star ? ` · ${r.x.star.txt}` : ''}${r.others.length ? ` · também em zona: ${r.others.join(', ')}` : ''}${w.length ? ` · ATENÇÃO: ${w.join(', ')}` : ''}`; };
     const L = rows.filter((r) => r.x.dir === 1), S = rows.filter((r) => r.x.dir === -1);
-    const pano = dayPanorama().map((p) => `- ${p.name} (${p.n}): Diário ${p.d[0]} em alta / ${p.d[1]} em baixa; Semanal ${p.w[0]} em alta / ${p.w[1]} em baixa`).join('\n');
+    const pano = dayPanoNames(), ld = dayLoad();
     const rat = dayRatios().map((x) => `- ${nm(x.A)} / ${nm(x.B)}: Semanal ${x.w} Diário ${x.d}${x.w === '▲' && x.d !== '▼' ? ` (${nm(x.A)} a ganhar)` : x.w === '▼' && x.d !== '▲' ? ` (${nm(x.B)} a ganhar)` : ''}`).join('\n');
-    return `Brief do dia — scanner de estrutura ICT (${dt})
+    return `${ld.busy ? `⚠ DADOS INCOMPLETOS: a app ainda estava a carregar os favoritos (${ld.n} de ${ld.t}). Avisa-me disso logo no início e não tires conclusões gerais dos grupos/rácios sem dados.\n\n` : ''}Brief do dia — scanner de estrutura ICT (${dt})
 Tendência = a estrutura PRINCIPAL de cada timeframe. Correção ≥ 50% = em zona. Setups sem scalp (Longo prazo, Swing, Day trade). A ordem já vem por força: estado do setup → sinais de reversão → contexto do timeframe de cima → força relativa → R:R.
 
-PANORAMA (favoritos por grupo)
+PANORAMA (tendência principal dos favoritos, por grupo)
 ${pano || '- (sem dados)'}
 
 RÁCIOS (▲ = o primeiro está a ganhar ao segundo)
