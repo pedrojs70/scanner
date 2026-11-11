@@ -96,7 +96,7 @@
   #resetBtn:disabled, #undoBtn:disabled, #redoBtn:disabled, #saveBtn:disabled { opacity:.45; cursor:default; }
   #saveBtn.dirty { background:#2e7d32; border-color:#2e7d32; color:#fff; font-weight:600; }
   .chartbox.max { position:fixed; inset:0; z-index:40; margin:0; border-radius:0; display:flex; flex-direction:column; overflow:hidden; }
-  .chartbox.editing #resetBtn, .chartbox.editing #kzBtn, .chartbox.editing #pocDBtn, .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocWBtn, .chartbox.editing #maxBtn, .chartbox.editing .legend { display:none !important; }
+  .chartbox.editing .legend { display:none !important; }   /* os botões ficam todos no mesmo sítio ao entrar/sair da edição */
   .chartbox.editing .edithint { padding:4px 10px; }
   .chartbox.max #chart { flex:1 1 0; min-height:0; height:auto; overflow:hidden; }
   .badge.pend { background:rgba(158,170,186,.18); color:#e0e6ec; padding:1px 6px; }
@@ -124,7 +124,9 @@
   .lntfs label { display:inline-flex; align-items:center; gap:2px; cursor:pointer; white-space:nowrap; }
   .linemenu .lnmtf { padding:0 4px; max-width:340px; }
   .linemenu .lnmtf .lntfs { margin-top:0; }
-  .chartbox.editing .chartbar #editBtn { order:4; margin-left:auto; }
+  #editBtn { min-width:132px; text-align:center; }
+  #editBtn.on { background:#f5c518; color:#111; border-color:#f5c518; font-weight:700; }
+  .chartbar #importBtn { order:7; }
   #chartTitle { font-weight:600; margin-right:10px; }
   .tfbtn { padding:3px 8px; font-size:12px; } .tfbtn.on { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
   #chart { position:relative; height:560px; }
@@ -134,12 +136,12 @@
   @media (max-width:760px) { #cbRight { flex:0 0 auto; flex-wrap:nowrap; margin-left:0; } .chartbox.editing #cbRight { flex-wrap:wrap; justify-content:flex-start; } }
   /* barra do gráfico (computador): [timeframes] ……… [Principal | Recente] │ [Editar · desfazer · apagar · automático] │ [Fechar] */
   @media (min-width:761px) {
-    .chartbox:not(.editing) .chartbar #tgExt { margin-left:0; border-top-right-radius:0; border-bottom-right-radius:0; }
-    .chartbox:not(.editing) .chartbar #tgInt { margin-left:-7px !important; border-left:0 !important; border-top-left-radius:0; border-bottom-left-radius:0; }
-    .chartbox:not(.editing) .chartbar #editBtn { margin-left:26px !important; position:relative; font-weight:600; }
-    .chartbox:not(.editing) .chartbar #maxBtn { margin-left:26px; position:relative; }
-    .chartbox:not(.editing) .chartbar #editBtn::before, .chartbox:not(.editing) .chartbar #maxBtn::before { content:''; position:absolute; left:-14px; top:3px; bottom:3px; width:1px; background:var(--line); pointer-events:none; }
-    .chartbox:not(.editing) .chartbar #dispBtn { order:3; margin-left:14px; }
+    .chartbox .chartbar #tgExt { margin-left:0; border-top-right-radius:0; border-bottom-right-radius:0; }
+    .chartbox .chartbar #tgInt { margin-left:-7px !important; border-left:0 !important; border-top-left-radius:0; border-bottom-left-radius:0; }
+    .chartbox .chartbar #editBtn { margin-left:26px !important; position:relative; font-weight:600; }
+    .chartbox .chartbar #maxBtn { margin-left:26px; position:relative; }
+    .chartbox .chartbar #editBtn::before, .chartbox .chartbar #maxBtn::before { content:''; position:absolute; left:-14px; top:3px; bottom:3px; width:1px; background:var(--line); pointer-events:none; }
+    .chartbox .chartbar #dispBtn { order:3; margin-left:14px; }
     /* ferramentas de edição mais discretas: só ganham moldura ao passar o rato */
     .chartbox:not(.editing) .chartbar #undoBtn, .chartbox:not(.editing) .chartbar #clearBtn, .chartbox:not(.editing) .chartbar #resetBtn { background:transparent; border-color:transparent; color:var(--muted); }
     .chartbox:not(.editing) .chartbar #undoBtn:not(:disabled):hover, .chartbox:not(.editing) .chartbar #clearBtn:not(:disabled):hover, .chartbox:not(.editing) .chartbar #resetBtn:not(:disabled):hover { border-color:var(--line); color:var(--text); }
@@ -428,10 +430,10 @@
   body[data-np="1"] #npSlot #tfbar .tfbtn + .tfbtn { border-left:0; }
   body[data-np="1"] #npSlot .chartbar .cbreak { border-top:1px dashed var(--np-ln); height:0; margin:2px 0; }
   @media (min-width:761px) {
-    body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #tgInt { margin-left:-6px !important; }
+    body[data-np="1"] #npSlot .chartbox .chartbar #tgInt { margin-left:-6px !important; }
     body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #undoBtn, body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #clearBtn, body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #resetBtn { background:transparent; border-color:transparent; color:var(--np-mu); }
     body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #undoBtn:not(:disabled):hover, body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #clearBtn:not(:disabled):hover, body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #resetBtn:not(:disabled):hover { border-color:var(--np-ln); color:var(--np-ink); }
-    body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #editBtn::before, body[data-np="1"] #npSlot .chartbox:not(.editing) .chartbar #maxBtn::before { background:var(--np-ln); }
+    body[data-np="1"] #npSlot .chartbox .chartbar #editBtn::before, body[data-np="1"] #npSlot .chartbox .chartbar #maxBtn::before { background:var(--np-ln); }
   }
   @media (max-width:760px) {
     body[data-np="1"] #np { padding:12px 14px 40px; }
@@ -918,7 +920,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="fibInfo" class="small"></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar deste timeframe (Delete)">🗑</button><span class="lnmtf"></span></div></div>
@@ -3727,12 +3729,12 @@
   function refreshTf(id) { data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
   function updateEditUi() {
     const nEd = editCount(selectedTf);
-    $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✕ Fechar' : '✎ Editar estrutura';
+    $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✔ Terminar edição' : '✎ Editar estrutura';
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
-    $('#clearBtn').textContent = editMode ? '🧹 Apagar' : '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`;
+    $('#clearBtn').textContent = '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`;
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
@@ -3741,7 +3743,8 @@
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
     const dirty = !!(draft && draft.dirty); $('#saveBtn').disabled = !dirty; $('#saveBtn').classList.toggle('dirty', dirty); $('#saveBtn').textContent = dirty ? '💾 Gravar *' : '💾 Gravado';
-    $('#saveBtn').style.display = $('#redoBtn').style.display = editMode ? '' : 'none';
+    $('#saveBtn').style.display = $('#redoBtn').style.display = '';   // sempre visíveis (desligados fora da edição): nada salta de sítio
+    if (!editMode) { $('#redoBtn').disabled = true; $('#saveBtn').disabled = true; }
     $('#resetBtn').textContent = nEd ? `↺ Voltar ao automático (${nEd} marcas)` : '↺ Voltar ao automático';
   }
   function closeMenu() { const m = $('#editMenu'); m.style.display = 'none'; m.innerHTML = ''; }
@@ -3905,13 +3908,6 @@
     settings.lines[symbol] = ls; save('mss_settings4', settings); renderLinePanel();
   }
   function lineUndoDo() { const st = lineUndo[symbol]; if (!st || !st.length) return; settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); }
-  // posição (com fração) entre velas -> píxel; o gráfico só converte posições inteiras e dá 0 nas outras
-  function xOfLg(lg) {
-    if (lg == null || !isFinite(lg)) return null;
-    const ts = chart.timeScale(), i = Math.floor(lg), x0 = ts.logicalToCoordinate(i);
-    if (lg === i || x0 == null) return x0;
-    const x1 = ts.logicalToCoordinate(i + 1); return x1 == null ? x0 : x0 + (x1 - x0) * (lg - i);
-  }
   function idxOfT(t) {
     const cs = data[selectedTf].candles, n = cs.length, tf = TF_MS0[selectedTf] || 864e5;
     if (t >= cs[n - 1].t) return n - 1 + (t - cs[n - 1].t) / tf;
@@ -3933,6 +3929,13 @@
     let t = tOfIdx(lg), p = candleSeries.coordinateToPrice(y); if (p == null || !isFinite(t)) return null;
     if (settings.lineMag) { const cs = data[selectedTf].candles, i = Math.round(lg); const c = cs[Math.max(0, Math.min(cs.length - 1, i))]; if (c && i >= 0 && i < cs.length) { const yh = candleSeries.priceToCoordinate(c.h), yl = candleSeries.priceToCoordinate(c.l); const best = Math.abs(yh - y) < Math.abs(yl - y) ? [c.h, yh] : [c.l, yl]; if (Math.abs(best[1] - y) < 28) { p = best[0]; t = c.t; } } }
     return { t, p };
+  }
+  // posição (com fração) entre velas -> píxel; o gráfico só converte posições inteiras e dá 0 nas outras
+  function xOfLg(lg) {
+    if (lg == null || !isFinite(lg)) return null;
+    const ts = chart.timeScale(), i = Math.floor(lg), x0 = ts.logicalToCoordinate(i);
+    if (lg === i || x0 == null) return x0;
+    const x1 = ts.logicalToCoordinate(i + 1); return x1 == null ? x0 : x0 + (x1 - x0) * (lg - i);
   }
   function lineGeom(l) {   // segmentos no ecrã de uma linha/canal (do 1.º ponto até à direita)
     const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => xOfLg(idxOfT(t));
@@ -6067,7 +6070,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); $('#alerts').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    initChart(); chart.subscribeClick(onChartClick); initAutoDrag();   // os cliques ao desenhar linhas são tratados só em initLines (antes contavam a dobrar) applyTheme();
+    initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); applyTheme();   // os cliques ao desenhar linhas são tratados só em initLines (antes contavam a dobrar)
     // clique direito na escala dos preços (à direita): volta ao ajuste automático, como o duplo clique
     $('#chart').addEventListener('contextmenu', (ev) => {
       const r = $('#chart').getBoundingClientRect(); let w = r.width; try { w = chart.timeScale().width(); } catch (e) {}
