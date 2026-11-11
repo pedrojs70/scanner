@@ -185,7 +185,7 @@
     background:var(--np-bg); color:var(--np-ink); }
   body[data-np="1"][data-npdark="1"] { --np-bg:#121314; --np-ink:#ECEBE6; --np-mu:#A3A29C; --np-ln:#2C2D2F; --np-card:#191A1C; --np-hover:#1E2022; --np-on:#232528; --np-red:#FF7A50; --np-red2:#FF9A78; --np-up:#3CC98B; --np-dn:#FF6B6B; --np-text:#D6D5CF;
     --sg-off:#2A2C2F; --sg-offfg:#8A8B8E; --sg-zone:#E3A93A; --sg-zonefg:#F2C46B; --sg-broke:#E7A82A; --sg-brokefg:#1E1500; --sg-ready:#2EAF77; --sg-none:#46484C; }
-  body[data-np="1"] #np { display:block; max-width:1440px; margin:0 auto; padding:18px 28px 60px; font-family:Inter, system-ui, sans-serif; color:var(--np-ink); }
+  body[data-np="1"] #np { display:block; max-width:none; margin:0; padding:18px 28px 60px; font-family:Inter, system-ui, sans-serif; color:var(--np-ink); }
   body[data-np="1"][data-npv="asset"] #np { max-width:none; }
   body[data-np="1"] > header, body[data-np="1"] #mtabs, body[data-np="1"] main > #favs, body[data-np="1"] main > .sechead, body[data-np="1"] main > #confluence, body[data-np="1"] main > #msetups, body[data-np="1"] main > #mcards, body[data-np="1"] main > #prevbar, body[data-np="1"] main > .tablewrap, body[data-np="1"] main > .chartbox { display:none !important; }
   body[data-np="1"] main { padding:0; }
@@ -736,7 +736,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 20h50</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
