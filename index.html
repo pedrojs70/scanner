@@ -5408,10 +5408,13 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     const N = nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol;
     const out = [al ? `Recebi este alerta do meu scanner${al.at ? ' às ' + new Date(al.at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''} sobre ${N}:\n«${al.text}»\n\nQuero saber se ESTE alerta é uma boa oportunidade ou não: enquadra-o no contexto de todos os timeframes, da tendência maior, dos obstáculos, do risco/retorno e da força relativa que estão nos dados abaixo. Se houver uma entrada melhor (noutra zona ou noutro ativo), diz qual.\n\n${AI_FORMAT}` : `Analisa ${N} com estes dados do meu scanner de estrutura de mercado (ICT) e diz-me se há alguma entrada que valha a pena agora.\n\n${AI_FORMAT}`, ''];
     const d0 = data[selectedTf], price = d0 ? d0.price : null;
+    // scalp só em cripto: nas ações, matérias-primas e rácios fica de fora o setup de Scalp e a linha do 5m
+    const cry = !isRatio(symbol) && isCrypto(symbol), noScalp = (st) => cry || !(st.trig === '5m' || /scalp/i.test(st.name || ''));
+    out.push(cry ? 'Foco: Longo prazo e Swing decidem o veredicto e o cenário de entrada; o Day trade e o Scalp entram como gatilho mais fino dentro da zona.' : 'Foco: Longo prazo e Swing decidem o veredicto e o cenário de entrada; o Day trade entra só como nota secundária (sem Scalp neste ativo).', '');
     out.push(`${N} — preço ${price != null ? aiF(price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
-    TFS.forEach((t) => { if (data[t.id]) out.push(aiTfLine(t.id, data[t.id])); });
+    TFS.forEach((t) => { if (data[t.id] && (cry || t.id !== '5m')) out.push(aiTfLine(t.id, data[t.id])); });
     // setups, com risco/retorno calculado pela app
-    const ev = (settings.setups || []).filter((x) => x.on).map((st) => { const r = evalSetup(st); if (!r) return null; const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
+    const ev = (settings.setups || []).filter((x) => x.on && noScalp(x)).map((st) => { const r = evalSetup(st); if (!r) return null; const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
       const est = r.zDeep ? 'perto da invalidação' : r.zoneOk && r.trig && r.trig.ok && fvg ? 'pronto' : r.zoneOk && r.trig && r.trig.ok ? 'falta FVG' : r.zoneOk ? 'em zona, falta quebra' : 'fora da zona';
       let rr = '';
       if (price != null && r.zoneOk) {
@@ -5443,7 +5446,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       out.push('', `Rácios com ${symbol} (A ÷ B: sobe quando A ganha a B):`);
       rs.forEach((r) => { const f = favData[r]; if (!f || !f.tfs) { out.push(`- ${r}: sem dados carregados`); return; }
         const tfs = ['1M', '1w', '1d', '4h'].filter((id) => f.tfs[id]).map((id) => { const sn = f.tfs[id].ext.snap; return sn && sn.trend ? `${tfLabel(id)} ${sn.trend === 1 ? '▲' : '▼'} ${pct(sn.pullback)}` : `${tfLabel(id)} —`; }).join(', ');
-        const best = favEvals(r).filter(Boolean).sort((a, b) => b.rank - a.rank)[0];
+        const best = favEvals(r).filter((x) => x && noScalp(x.st)).sort((a, b) => b.rank - a.rank)[0];
         out.push(`- ${nm(r)} ${r} (${aiF(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}`); });
     }
     return out.join('\n');
