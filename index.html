@@ -213,6 +213,22 @@
   #npRail { flex:1 1 230px; max-width:270px; }
   #npCenter { flex:999 1 560px; min-width:0; }
   #npFocus { flex:1 1 290px; max-width:350px; }
+  /* ecrãs médios (Z Fold aberto, tablets): 2 colunas — Jornal + (Top do dia / Em foco); a lista de favoritos fica na aba Favoritos */
+  @media (max-width:1150px) and (min-width:761px) {
+    body[data-npv="feed"] #npRail { display:none; }
+    .np-cols { flex-wrap:nowrap; gap:24px; }
+    #npCenter { flex:1 1 auto; }
+    #npFocus { flex:0 0 330px; max-width:330px; }
+    body[data-np="1"] #np { padding:14px 18px 40px; }
+  }
+  /* telemóvel (ecrã de fora do Fold): uma coluna, primeiro o Top do dia e o Em foco, depois o Jornal; favoritos na aba Favoritos */
+  @media (max-width:760px) {
+    body[data-npv="feed"] #npRail { display:none; }
+    .np-cols { flex-direction:column; flex-wrap:nowrap; gap:18px; }
+    .np-cols > * { width:100%; }
+    #npFocus { order:1; } #npCenter { order:2; }
+    .np-mast h1 { font-size:26px !important; margin:2px 0 !important; }
+  }
   body[data-npv="asset"] #npFocus, body[data-npv="asset"] #npFilters, body[data-npv="asset"] #npFeedWrap, body[data-npv="asset"] #npRail { display:none; }
   body:not([data-npv="asset"]) #npAsset, body:not([data-npv="asset"]) #npStrip { display:none; }
   body[data-npv="board"] #npFocus, body[data-npv="board"] #npFilters, body[data-npv="board"] #npFeedWrap, body[data-npv="board"] #npRail { display:none; }
