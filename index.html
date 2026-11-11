@@ -701,6 +701,10 @@
   .np-tabs button:hover { background:var(--np-hover) !important; }
   body[data-npv="feed"] .np-tabs [data-tab="feed"], body[data-npv="board"] .np-tabs [data-tab="board"], body[data-npv="focus"] .np-tabs [data-tab="focus"], body[data-npv="rev"] .np-tabs [data-tab="rev"] { background:var(--np-ink) !important; color:var(--np-bg); }
   .np-day-ai.wait, button.np-day-ai.wait { background:#777 !important; }
+  /* fora da edição: indicadores + Fibonacci + mostrar/esconder linhas; dentro da edição: só as ferramentas de desenho (Linha, Canal, Íman) */
+  .chartbox:not(.editing) #lineTools { display:none !important; }
+  .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocDBtn, .chartbox.editing #pocWBtn, .chartbox.editing #kzBtn, .chartbox.editing #fibBtn, .chartbox.editing #lineBtn { display:none !important; }
+  #lineTools [data-und] { display:none !important; }   /* o Desfazer da barra de cima já desfaz também as linhas */
 </style>
 </head>
 <body>
@@ -736,7 +740,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h10</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h40</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -936,7 +940,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha diagonal: carrega no 1.º ponto, mexe o rato e carrega no 2.º">／ Diagonal</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
+    <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
     <div id="fibInfo" class="small"></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar a linha de todos os timeframes (Delete). Para a tirar só de um timeframe, desmarca a caixa dele">🗑</button><button data-mext="1" title="Prolongar para a direita">⟶</button><span class="lnmtf"></span></div></div>
@@ -2446,7 +2450,11 @@
   // desfazer / refazer: só em memória e só desde a última gravação (ao abrir a app ou depois de gravar começa vazio)
   try { localStorage.removeItem('mss_undo1'); } catch (e) {}
   const undo = {}, redo = {};
+  // histórico único da edição: estrutura ('s', por timeframe) e linhas ('l'), pela ordem em que aconteceram
+  const hist = [], rhist = [], lineRedo = {};
+  const hMatch = (h) => h.sym === symbol && (h.t === 'l' || h.tf === selectedTf);
   function pushUndo(id) {
+    hist.push({ t: 's', sym: symbol, tf: id }); rhist.length = 0; lineRedo[symbol] = [];
     const k = symbol + '|' + id, e = edits[k];
     (undo[k] = undo[k] || []).push(e ? serEd(e) : null);
     if (undo[k].length > 100) undo[k].shift();
@@ -2461,8 +2469,21 @@
     saveEdits(); closeMenu(); refreshTf(selectedTf);
   }
   const undoStep = () => swapStep(undo, redo), redoStep = () => swapStep(redo, undo);
-  const redoCount = (id) => (redo[symbol + '|' + id] || []).length;
-  const undoCount = (id) => (undo[symbol + '|' + id] || []).length;
+  const lastIdx = (a) => { for (let i = a.length - 1; i >= 0; i--) if (hMatch(a[i])) return i; return -1; };
+  function undoAll() {
+    const i = lastIdx(hist); if (i < 0) return; const h = hist.splice(i, 1)[0];
+    if (h.t === 'l') { const st = lineUndo[symbol]; if (st && st.length) { (lineRedo[symbol] = lineRedo[symbol] || []).push(JSON.stringify(userLines())); settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); try { renderChart(true); } catch (e) {} } }
+    else undoStep();
+    rhist.push(h); updateEditUi();
+  }
+  function redoAll() {
+    const i = lastIdx(rhist); if (i < 0) return; const h = rhist.splice(i, 1)[0];
+    if (h.t === 'l') { const st = lineRedo[symbol]; if (st && st.length) { (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines())); settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); try { renderChart(true); } catch (e) {} } }
+    else redoStep();
+    hist.push(h); updateEditUi();
+  }
+  const redoCount = () => rhist.filter(hMatch).length;
+  const undoCount = () => hist.filter(hMatch).length;
   function getEdits(id, create, sym) {
     const k = (sym || symbol) + '|' + id;
     if (!edits[k] && create) edits[k] = { fvg: new Set(), int: newLayer(), ext: newLayer() };
@@ -3760,7 +3781,7 @@
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
     const dirty = !!(draft && draft.dirty); $('#saveBtn').disabled = !dirty; $('#saveBtn').classList.toggle('dirty', dirty); $('#saveBtn').textContent = dirty ? '💾 Gravar *' : '💾 Gravado';
     $('#saveBtn').style.display = $('#redoBtn').style.display = '';   // sempre visíveis (desligados fora da edição): nada salta de sítio
-    if (!editMode) { $('#redoBtn').disabled = true; $('#saveBtn').disabled = true; }
+    if (!editMode) { $('#undoBtn').disabled = true; $('#redoBtn').disabled = true; $('#saveBtn').disabled = true; $('#undoBtn').textContent = '↶ Desfazer'; $('#redoBtn').textContent = '↷ Refazer'; }
     $('#resetBtn').textContent = nEd ? `↺ Voltar ao automático (${nEd} marcas)` : '↺ Voltar ao automático';
   }
   function closeMenu() { const m = $('#editMenu'); m.style.display = 'none'; m.innerHTML = ''; }
@@ -3846,7 +3867,7 @@
     const move = (ev) => {
       if (autoDrag) { ev.stopPropagation(); ev.preventDefault(); autoDrag.x = pos(ev).x; draw(); return; }
       if (!editMode || ev.touches) return; const lx = lineX();
-      el.style.cursor = lx && Math.abs(pos(ev).x - lx.x) <= 7 ? 'ew-resize' : '';
+      const pp = pos(ev); el.style.cursor = lineHit(pp.x, pp.y) ? 'pointer' : lx && Math.abs(pp.x - lx.x) <= 7 ? 'ew-resize' : '';
     };
     const end = (ev) => {
       if (!autoDrag) return; ev.stopPropagation();
@@ -3904,7 +3925,7 @@
   // segmento (fim no 2.º ponto) ou prolongada para a direita; linhas antigas (sem ext) continuam prolongadas
   const lnExt = (l) => l.ext !== false;
   const lnLive = (l, t) => lnExt(l) || (t || Date.now()) <= Math.max(l.t1, l.t2);
-  const linesOn = () => settings.linesOn !== false;
+  const linesOn = () => editMode || settings.linesOn !== false;
   const LN_TFS = () => TFS.map((t) => t.id).filter((id) => !['1Y', '6M'].includes(id) && (isCrypto(symbol) || Y_IV[id] || Y_AGG[id] || Y_MAGG[id]));
   // tira a linha só deste timeframe; se era o último, apaga-a
   function lineRemoveHere(id) {
@@ -3924,9 +3945,9 @@
   function setLines(ls, undoable) {
     setTimeout(lnSavedFlash, 0);
     settings.lines = settings.lines || {};
-    if (undoable !== false) (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines()));
+    if (undoable !== false && editMode) { (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines())); hist.push({ t: 'l', sym: symbol }); rhist.length = 0; lineRedo[symbol] = []; }
     if (lineUndo[symbol] && lineUndo[symbol].length > 40) lineUndo[symbol].shift();
-    settings.lines[symbol] = ls; save('mss_settings4', settings); renderLinePanel();
+    settings.lines[symbol] = ls; save('mss_settings4', settings); renderLinePanel(); try { updateEditUi(); } catch (e) {}
   }
   function lineUndoDo() { const st = lineUndo[symbol]; if (!st || !st.length) return; settings.lines[symbol] = JSON.parse(st.pop()); lineSel = null; save('mss_settings4', settings); renderLinePanel(); }
   function idxOfT(t) {
@@ -4001,14 +4022,14 @@
   function lineHintUi() {
     const el = $('#lineHint'); if (!el) return;
     const sel = lineSel && userLines().find((l) => l.id === lineSel);
-    el.innerHTML = lineMode ? `${LINE_HINT[lineMode][Math.min(linePts.length, LINE_HINT[lineMode].length - 1)]} · <a href="#" data-lc="1">cancelar (Esc)</a>` : sel ? 'Arrasta as bolinhas para ajustar · arrasta a linha para a mover · Delete apaga' : '';
+    el.innerHTML = lineMode ? `${LINE_HINT[lineMode][Math.min(linePts.length, LINE_HINT[lineMode].length - 1)]} · <a href="#" data-lc="1">cancelar (Esc)</a>` : sel ? (editMode ? 'Arrasta as bolinhas para ajustar · arrasta a linha para a mover · Delete apaga' : 'Linha trancada · para a mover ou apagar entra em ✎ Editar estrutura') : '';
     el.style.display = el.innerHTML ? 'block' : 'none';
     const c = el.querySelector('[data-lc]'); if (c) c.addEventListener('click', (e) => { e.preventDefault(); setLineMode(null); });
   }
   function setLineMode(m) {
     if (m && !linesOn()) { settings.linesOn = true; save('mss_settings4', settings); try { updateEditUi(); } catch (e) {} }
     lineMode = m || null; linePts = []; lineHover = null; if (m) lineSel = null;
-    if (m && editMode) requestExitEdit();
+    if (m && !editMode) setEdit(true);   // desenhar linhas faz parte da edição
     try { chart.applyOptions({ handleScroll: !m, handleScale: !m }); } catch (e) {}
     lineToolsUi(); lineHintUi(); renderLinePanel();
   }
@@ -4054,6 +4075,7 @@
     }
     m.style.display = 'flex'; m.style.left = '8px'; m.style.top = '44px';   // sempre no mesmo sítio: canto de cima à esquerda, por baixo da dica
     m.querySelector('[data-mal]').classList.toggle('on', !!l.alert);
+    m.querySelector('[data-mdel]').style.display = editMode ? '' : 'none';
     const xb = m.querySelector('[data-mext]'); xb.classList.toggle('on', lnExt(l)); xb.title = lnExt(l) ? 'Prolongada para a direita — carrega para acabar no 2.º ponto' : 'Acaba no 2.º ponto (sem alerta depois dele) — carrega para prolongar para a direita';
   }
   function initLines() {
@@ -4074,11 +4096,13 @@
       } else el.style.cursor = lineHit(p.x, p.y) ? 'pointer' : '';
     });
     el.addEventListener('pointerdown', (ev) => {
-      if (lineMode || editMode || !data[selectedTf] || ev.button > 0 || ev.target.closest('#lineMenu, #lineHint, #editMenu')) return;
+      if (lineMode || !data[selectedTf] || ev.button > 0 || ev.target.closest('#lineMenu, #lineHint, #editMenu')) return;
       const p = pos(ev), h = lineHit(p.x, p.y);
       if (!h) { if (lineSel) { lineSel = null; lineHintUi(); } return; }
-      ev.stopPropagation(); ev.preventDefault();
       lineSel = h.l.id; lineHintUi();
+      if (!editMode) return;   // fora da edição as linhas estão trancadas: só abre o menu (alerta, timeframes)
+      ev.stopPropagation(); ev.preventDefault();
+      suppressClick = true; setTimeout(() => { suppressClick = false; }, 400);   // o clique na linha não edita a estrutura
       const ls = userLines().map((x) => Object.assign({}, x)), l = ls.find((x) => x.id === h.l.id);
       lineDrag = { l, part: h.part, orig: Object.assign({}, l), start: ptAt(p.x, p.y), ls, before: JSON.stringify(userLines()), moved: false };
       try { chart.applyOptions({ handleScroll: false, handleScale: false }); } catch (e) {}
@@ -4099,8 +4123,8 @@
     document.addEventListener('keydown', (e) => {
       if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
       if (e.key === 'Escape' && (lineMode || lineSel)) { setLineMode(null); lineSel = null; lineHintUi(); }
-      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || '')) { e.preventDefault(); lineDelete(lineSel); lineSel = null; lineHintUi(); }
-      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !editMode && lineUndo[symbol] && lineUndo[symbol].length && (lineSel || $('#linePanel').classList.contains('open'))) { e.preventDefault(); lineUndoDo(); }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && editMode && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || '')) { e.preventDefault(); lineDelete(lineSel); lineSel = null; lineHintUi(); }
+      else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && editMode && !$('#editMenu').innerHTML) { e.preventDefault(); if (e.shiftKey) redoAll(); else undoAll(); }
     });
     const m = $('#lineMenu');
     m.querySelector('[data-mal]').addEventListener('click', () => { setLines(userLines().map((l) => (l.id === lineSel ? Object.assign({}, l, { alert: !l.alert }) : l))); });
@@ -4344,7 +4368,7 @@
     updateEditUi(); renderChart(keepRange !== false);
   }
   // gravar / descartar o rascunho da edição
-  function clearHistory() { for (const k of Object.keys(undo)) delete undo[k]; for (const k of Object.keys(redo)) delete redo[k]; }
+  function clearHistory() { for (const k of Object.keys(undo)) delete undo[k]; for (const k of Object.keys(redo)) delete redo[k]; for (const a of [hist, rhist]) for (let i = a.length - 1; i >= 0; i--) if (a[i].t === 's') a.splice(i, 1); }
   function commitDraft() {
     if (draft) { draft.dirty = false; draft.snap = {}; }
     const keep = draft; draft = null; persistEdits(); draft = keep; if (draft) draft.snap = Object.assign({}, edLast);
@@ -6051,14 +6075,14 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && $('#help').classList.contains('open')) { $('#help').classList.remove('open'); e.stopImmediatePropagation(); } });
     $('#tgExt').addEventListener('click', () => { editLayer = 'ext'; settings.layer = 'ext'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
     $('#editBtn').addEventListener('click', () => (editMode ? requestExitEdit() : setEdit(true)));
-    $('#redoBtn').addEventListener('click', redoStep);
+    $('#redoBtn').addEventListener('click', redoAll);
     $('#saveBtn').addEventListener('click', commitDraft);
     $('#sdSave').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); commitDraft(); setEdit(false); });
     $('#sdDiscard').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); discardDraft(); setEdit(false); });
     $('#sdStay').addEventListener('click', () => $('#saveDlg').classList.remove('open'));
     window.addEventListener('beforeunload', (ev) => { if (draft && draft.dirty) { ev.preventDefault(); ev.returnValue = ''; } });
     $('#resetBtn').addEventListener('click', resetEdits);
-    $('#undoBtn').addEventListener('click', undoStep);
+    $('#undoBtn').addEventListener('click', undoAll);
     $('#pocDBtn').addEventListener('click', () => { settings.pocD = !settings.pocD; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     // 📐 Linhas: só mostra / esconde os desenhos (continuam guardados e os alertas continuam a funcionar)
     $('#lineBtn').addEventListener('click', () => { settings.linesOn = !linesOn(); save('mss_settings4', settings); if (!linesOn()) { setLineMode(null); lineSel = null; lineHintUi(); } renderLinePanel(); updateEditUi(); try { renderChart(true); } catch (e) {} });
