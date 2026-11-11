@@ -740,7 +740,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h40</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h55</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -4388,12 +4388,17 @@
     $('#saveDlg').classList.add('open');
   }
   function toggleMax(force) {
-    const box = $('.chartbox'), on = force != null ? force : !box.classList.contains('max');
+    const box = $('.chartbox'), wasMax = box.classList.contains('max'), on = force != null ? force : !wasMax;
     box.classList.toggle('max', on); $('#maxBtn').textContent = on ? '✕ Fechar' : '⤢ Gráfico maior';
     setTimeout(() => { try { if (rsiOn && chart.panes()[1]) chart.panes()[1].setHeight(Math.max(110, Math.round($('#chart').clientHeight * 0.2))); } catch (e) {} }, 150);   // RSI com ~20% da altura
     let navOk = false; try { navOk = !navPop && document.body.dataset.np === '1'; } catch (e) {}
-    if (navOk) {
-      if (on) navPush({ v: 'max', s: symbol });
+    if (navOk && !on && wasMax && chartOrigin) {   // gráfico aberto direto de uma página (Quadro, Em foco, Reversões, Jornal): fechar volta sempre a essa página
+      const o = chartOrigin; chartOrigin = null; npChartDirect = false; npFrom = o;
+      try { history.replaceState({ v: o }, ''); } catch (e) {}
+      setTimeout(() => npBack(), 0);
+    } else if (navOk) {
+      if (on && wasMax) { /* já estava aberto (ex.: entrar/sair da edição): não acrescenta passos ao histórico */ }
+      else if (on) navPush({ v: 'max', s: symbol });
       else if (history.state && (history.state.v === 'max' || history.state.v === 'chart')) { const direct = history.state.v === 'chart'; npChartDirect = false; if (direct) history.back(); else { navSkip++; history.back(); } }
       else if (npChartDirect) { npChartDirect = false; setTimeout(() => npBack(), 0); }
     }
@@ -5780,7 +5785,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       if (st.v !== 'modal') { document.querySelectorAll('.modal.open').forEach((m) => m.classList.remove('open')); const hp = $('#help'); if (hp) hp.classList.remove('open'); }
       if (editMode) { requestExitEdit(); if (editMode) return; }
       const box = $('.chartbox');
-      if (box && box.classList.contains('max') && st.v !== 'max' && st.v !== 'chart') { npChartDirect = false; chartFromFav = false; toggleMax(false); }
+      if (box && box.classList.contains('max') && st.v !== 'max' && st.v !== 'chart') { npChartDirect = false; chartFromFav = false; chartOrigin = null; toggleMax(false); }
       if (st.v === 'feed') { if (npView !== 'feed') npShowFeed(); }
       else if (st.v === 'board') { if (npView !== 'board') npShowBoard(); }
       else if (st.v === 'focus') { if (npView !== 'focus') npShowFocusAll(); }
@@ -5816,8 +5821,8 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     clearInterval(npPxTimer); npPxTimer = setInterval(() => { if (npView === 'asset') npSyncStatus(); }, 2000);
     navPush({ v: 'asset', s });
   }
-  let npChartDirect = false;
-  function npOpenChart(s) { const f = navPop; navPop = true; npOpenAsset(s); navPop = f; npChartDirect = true; navPush({ v: 'chart', s }); setTimeout(() => { const g = navPop; navPop = true; toggleMax(true); navPop = g; renderChart(true); }, 120); }
+  let npChartDirect = false, chartOrigin = null;
+  function npOpenChart(s) { chartOrigin = npView !== 'asset' ? npView : null; const f = navPop; navPop = true; npOpenAsset(s); navPop = f; npChartDirect = true; navPush({ v: 'chart', s }); setTimeout(() => { const g = navPop; navPop = true; toggleMax(true); navPop = g; renderChart(true); }, 120); }
   function npShowFeed() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const mx = $('.chartbox'); if (mx && mx.classList.contains('max')) { chartFromFav = false; toggleMax(false); }
