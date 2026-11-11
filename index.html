@@ -614,6 +614,14 @@
   #raToast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:210; background:#111; color:#fff; padding:10px 12px; display:flex; gap:10px; align-items:center; font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
   #raToast button { background:#f5c518 !important; color:#111 !important; border:0 !important; font-weight:700; padding:6px 10px; border-radius:0; cursor:pointer; }
   #raToast #raX, #raToast #raX2 { background:transparent !important; color:#fff !important; font-weight:400; }
+  .revtbl td.nv { font-size:12px; line-height:1.25; color:var(--np-mu); min-width:74px; }
+  .revtbl td.nv .v { white-space:nowrap; }
+  .revtbl td.nv .d { font-size:11px; opacity:.85; white-space:nowrap; }
+  .revtbl td.nv.hit { color:var(--np-green, #2e7d32); font-weight:700; background:color-mix(in srgb, var(--np-green, #2e7d32) 8%, transparent); }
+  .revtbl td.nv.hit .d { font-weight:500; }
+  .revbar { display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap; justify-content:space-between; }
+  .revbar .np-ff { margin-bottom:0; }
+  .revbar .revmode { margin-left:auto; }
 </style>
 </head>
 <body>
@@ -744,7 +752,7 @@
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Tudo · Ativos · Rácios:</b> ao lado de cada caixa de procura (favoritos, Quadro, Em foco e jornal) escolhe se queres ver tudo, só os ativos (ações, cripto e futuros) ou só os rácios. No jornal, o nome do ativo aparece em português com o ticker ao lado.</li>
-      <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
+      <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
       <li><b>Lateralização (5m/15m/1H):</b> quando o gatilho está dentro de uma caixa (vários toques em cima e em baixo), as viragens lá dentro não contam; o gatilho passa a ser o fecho fora da caixa no sentido do setup (“quebrou a lateralização”). No gráfico aparece a caixa tracejada “↔ lateralização”.</li>
       <li><b>Swings mínimos nos 5m e 15m:</b> nas Definições, um topo/fundo do movimento recente só conta se o recuo for pelo menos N × a volatilidade média das últimas 100 velas (1 = recomendado, 0 = desligado). Acaba com os HH/LH de uma vela nas lateralizações.</li>
       <li><b>Pesquisa nos favoritos:</b> a caixa por cima da lista dos Favoritos e no Quadro filtra na hora — pelo nome (ouro), pelo ticker (GC=F), pelo nome que deste com ✎ ou, nos metais, em inglês (gold). Os rácios em que esse ativo entra também aparecem. Enquanto filtras não dá para arrastar.</li>
@@ -5154,30 +5162,45 @@ function motor_() {
     ['fr', 'Força rel.', 'Pelos teus rácios (Semanal e Diário), o ativo ganha a mais do que perde (Long) ou perde mais do que ganha (Short)'], ['ctx', 'Contexto', 'O timeframe de cima vai no mesmo sentido']];
   let npRevTf = 'all';
   function revRows() {
-    const rows = [], now = Date.now();
+    const rows = [], now = Date.now(), F = (x) => aiF(x), D = (x, p) => pct((x - p) / p * 100, true);
     for (const s of settings.favs || []) {
       const dm = (favData[s] || {}).tfs || {};
       for (const id of REV_TFS) {
         const d = dm[id]; if (!d || !d.ext || !d.ext.snap) continue; const z = d.ext.snap;
         if (!z.trend || !(z.pullback >= 50 && z.pullback <= DEEP_MAX)) continue;
-        const dir = z.trend, price = d.price, f = d.fibs && d.fibs[0], k = d.closed.length - 1, ok = {};
-        if (f) { const r = FB.retrOf(f, price) * 100; ok.fib = r >= 61.8 && r <= 80;
+        const dir = z.trend, price = d.price, f = d.fibs && d.fibs[0], ok = {}, val = {};
+        const V = (k, v, sub, title) => { val[k] = { v, d: sub || '', t: title || '' }; };
+        if (f) {
+          const r = FB.retrOf(f, price) * 100; ok.fib = r >= 61.8 && r <= 80;
+          V('fib', `${F(f.entry.lo)}–${F(f.entry.hi)}`, `retração ${pct(r)} · 0,786 ${F(f.deep)}`, 'Entrada ótima 0,618–0,65; ✔ quando a retração está entre 61,8% e 80%');
           const m50 = f.A > 0 && f.B > 0 ? Math.exp((Math.log(f.A) + Math.log(f.B)) / 2) : (f.A + f.B) / 2, zl = Math.min(f.A, m50), zh = Math.max(f.A, m50);
-          ok.fvg = [...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])].some((x) => x.dir === dir && x.filled == null && x.top >= zl && x.bot <= zh); }
-        ok.star = !!starOf(dm, id);
-        const sm = smaOfTf(d, 200); ok.sma = !!(sm && Math.abs(price - sm) / sm <= 0.02);
-        try { const cl = d.closed.map((c) => c.c), m = emaOf(cl, 20).pop(), a = atrOf(d.closed, 10).pop(), last3 = d.closed.slice(-3);
-          ok.kc = !!(m && a && (dir === 1 ? Math.min(...last3.map((c) => c.l)) <= m - 3 * a : Math.max(...last3.map((c) => c.h)) >= m + 3 * a)); } catch (e) {}
-        try { ok.div = divergences(d).some((v) => v.live && v.dir === dir); } catch (e) {}
-        const swOf = (x) => x && [...(x.int.res.sweeps || []), ...(x.ext.res.sweeps || [])].some((w) => !w.invalid && w.dir === -dir && w.i >= x.closed.length - 6);
-        ok.sw = swOf(d) || swOf(dm[FB.NEXT[id]]);
-        ok.ln = userLines(s).some((l) => { const pc = (+l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)) / 100, vs = [lnVal(l, now, 0)].concat(l.type === 'chan' ? [lnVal(l, now, l.off || 0)] : []); return vs.some((v) => v > 0 && Math.abs(price - v) / v <= pc); });
-        if (!isRatio(s)) { const fr = aiStrength(s); ok.fr = fr.win.length + fr.lose.length > 0 && (dir === 1 ? fr.win.length > fr.lose.length : fr.lose.length > fr.win.length); }
-        const up = dm[REV_UP[id]]; ok.ctx = !!(up && up.ext.snap.trend === dir);
+          const fv = [...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])].filter((x) => x.dir === dir && x.filled == null && x.top >= zl && x.bot <= zh)
+            .sort((a, b) => Math.abs((a.top + a.bot) / 2 - price) - Math.abs((b.top + b.bot) / 2 - price))[0];
+          ok.fvg = !!fv; if (fv) { const edge = price > fv.top ? fv.top : price < fv.bot ? fv.bot : price; V('fvg', `${F(fv.bot)}–${F(fv.top)}`, edge === price ? 'o preço está dentro' : D(edge, price)); }
+          V('inv', F(f.A), D(f.A, price));
+          const risk = Math.abs(price - f.A), rw = dir === 1 ? f.B - price : price - f.B;
+          if (risk > 0 && rw > 0) { const rr = rw / risk; V('rr', rr.toFixed(1).replace('.', ','), `até ${F(f.B)}`); ok.rr = rr >= 2; }
+        }
+        const c = starOf(dm, id); ok.star = !!c; if (c) V('star', `${F(c.lo)}–${F(c.hi)}`, `${c.tgt} do ${tfLabel(c.tf)}`);
+        const sm = smaOfTf(d, 200); ok.sma = !!(sm && Math.abs(price - sm) / sm <= 0.02); if (sm) V('sma', F(sm), D(sm, price));
+        try { const cl = d.closed.map((x) => x.c), m = emaOf(cl, 20).pop(), a = atrOf(d.closed, 10).pop(), last3 = d.closed.slice(-3);
+          if (m && a) { const band = dir === 1 ? m - 3 * a : m + 3 * a; ok.kc = dir === 1 ? Math.min(...last3.map((x) => x.l)) <= band : Math.max(...last3.map((x) => x.h)) >= band; V('kc', `${dir === 1 ? '−' : '+'}3ATR ${F(band)}`, D(band, price)); } } catch (e) {}
+        try { const v = divergences(d).filter((x) => x.live && x.dir === dir).pop(); ok.div = !!v; if (v) V('div', `RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}`, `há ${d.closed.length - 1 - v.b.i} velas`); } catch (e) {}
+        const swOf = (x) => x && [...(x.int.res.sweeps || []), ...(x.ext.res.sweeps || [])].filter((w) => !w.invalid && w.dir === -dir && w.i >= x.closed.length - 6).sort((a, b) => b.i - a.i)[0];
+        const lo = FB.NEXT[id], w1 = swOf(d), w2 = swOf(dm[lo]), w = w1 || w2, wx = w1 ? d : dm[lo];
+        ok.sw = !!w; if (w) V('sw', `varreu ${F(w.level)}`, `${tfLabel(w1 ? id : lo)} · há ${wx.closed.length - 1 - w.i} velas`);
+        let best = null;
+        userLines(s).forEach((l) => { const pc = (+l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)) / 100, a0 = lnVal(l, now, 0), a1 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null;
+          [[a0, l.type === 'chan' ? (a1 != null && a0 > a1 ? 'teto do canal' : 'chão do canal') : 'diagonal'], ...(a1 != null ? [[a1, a1 > a0 ? 'teto do canal' : 'chão do canal']] : [])].forEach(([v, n]) => {
+            if (!(v > 0)) return; const dd = Math.abs(price - v) / v; if (!best || dd < best.dd) best = { v, n, dd, ok: dd <= pc }; }); });
+        ok.ln = !!(best && best.ok); if (best) V('ln', `${best.n} ${F(best.v)}`, D(best.v, price));
+        if (!isRatio(s)) { const fr = aiStrength(s); if (fr.n) { const fav = dir === 1 ? fr.winN : fr.loseN, con = dir === 1 ? fr.loseN : fr.winN, cut = (a) => a.slice(0, 3).join(', ') + (a.length > 3 ? ` +${a.length - 3}` : '');
+          ok.fr = fav.length > con.length; V('fr', fav.length ? 'a favor: ' + cut(fav) : 'a favor: nenhum', con.length ? 'contra: ' + cut(con) : (fr.mixN.length ? 'misto: ' + cut(fr.mixN) : ''), `a favor: ${fav.join(', ') || '—'}\ncontra: ${con.join(', ') || '—'}${fr.mixN.length ? '\nmisto: ' + fr.mixN.join(', ') : ''}`); } }
+        const up = dm[REV_UP[id]]; ok.ctx = !!(up && up.ext.snap.trend === dir); if (up && up.ext.snap.trend) V('ctx', `${tfLabel(REV_UP[id])} ${up.ext.snap.trend === 1 ? '▲' : '▼'}`, `correção ${pct(up.ext.snap.pullback)}`);
         const su = (settings.setups || []).find((x) => x.on && x.zone === id), ev = su ? favSetup(s, su) : null;
         const gat = !ev ? '—' : ev.rank === 4 ? '✔ pronto' : ev.rank === 3 ? '⚡ falta FVG' : ev.box ? '↔ lateral' : ev.rank === 2 ? '⏳ falta quebra' : '—';
-        const score = REV_COLS.filter(([c]) => ok[c]).length;
-        rows.push({ s, id, dir, pull: z.pullback, price, ok, score, gat, su });
+        const score = REV_COLS.filter(([k]) => ok[k]).length;
+        rows.push({ s, id, dir, pull: z.pullback, price, ok, val, score, gat, su, fr: !isRatio(s) && ok.fr !== undefined });
       }
     }
     return rows.sort((a, b) => b.score - a.score || b.pull - a.pull);
@@ -5192,17 +5215,21 @@ function motor_() {
     const box = $('#npRev'); if (!box) return;
     const all = revRows().filter((r) => npFavMatch(r.s, npFQ) && npKindOk(r.s, npKind)), list = all.filter((r) => npRevTf === 'all' || r.id === npRevTf);
     const cnt = (id) => all.filter((r) => id === 'all' || r.id === id).length, SH = { '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M' };
-    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de gatilho (só informativo)">Gatilho</th><th></th></tr>`;
+    const num = settings.revMode !== 'tick';
+    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th><th title="Risco/retorno do preço atual até ao topo/fundo da perna, com stop na origem (verde se ≥ 2)">R:R</th>' : ''}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de gatilho (só informativo)">Gatilho</th><th></th></tr>`;
+    const cellN = (r, k) => { const x = r.val[k]; if (!x) return `<td class="nv"><span class="mu">${k === 'fr' && isRatio(r.s) ? 'n/a' : '—'}</span></td>`; return `<td class="nv ${r.ok[k] ? 'hit' : ''}"${x.t ? ` title="${npEsc(x.t)}"` : ''}><div class="v">${npEsc(x.v)}</div>${x.d ? `<div class="d">${npEsc(x.d)}</div>` : ''}</td>`; };
+    const cellT = (r, k) => `<td class="ck">${r.ok[k] ? '✔' : k === 'fr' && !r.fr ? '<span class="mu">n/a</span>' : '<span class="mu">·</span>'}</td>`;
     const body = list.map((r) => `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px">${r.s}</div>` : ''}</td><td><b>${SH[r.id]}</b></td>
       <td style="color:${r.dir === 1 ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'}">${r.dir === 1 ? '▲ Long' : '▼ Short'}</td><td>${pct(r.pull)}</td>
-      ${REV_COLS.map(([c]) => `<td class="ck">${r.ok[c] ? '✔' : c === 'fr' && r.ok.fr === undefined ? '<span class="mu">n/a</span>' : '<span class="mu">·</span>'}</td>`).join('')}
+      ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.map(([c]) => (num ? cellN : cellT)(r, c)).join('')}${num ? cellN(r, 'inv') + cellN(r, 'rr') : ''}
       <td><b>${r.score}/${REV_COLS.length}</b></td><td style="white-space:nowrap">${r.gat}</td><td><a href="#" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico neste timeframe">📈</a></td></tr>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Reversões prováveis</h2><div class="sub">${all.length} zona${all.length === 1 ? '' : 's'} de correção (≥ 50%) nos favoritos · ordenado pelo número de sinais a favor · o gatilho é só informativo — passa o rato pelos títulos das colunas</div></div><button id="npRevBack">← Voltar ao jornal</button></div>
       ${npFQBox('npRevQ', 'Procurar (ex.: ouro, GC=F)…')}
-      <div class="np-ff">${[['all', 'Todos'], ...REV_TFS.map((id) => [id, tfLabel(id)])].map(([id, t]) => `<button data-rt="${id}" class="${npRevTf === id ? 'on' : ''}">${t}<span>${cnt(id)}</span></button>`).join('')}</div>
-      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + 7}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
+      <div class="revbar"><div class="np-ff">${[['all', 'Todos'], ...REV_TFS.map((id) => [id, tfLabel(id)])].map(([id, t]) => `<button data-rt="${id}" class="${npRevTf === id ? 'on' : ''}">${t}<span>${cnt(id)}</span></button>`).join('')}</div><div class="np-kind revmode" role="group" aria-label="Ver"><button type="button" data-rmode="num" class="${num ? 'on' : ''}" title="Cada sinal com o nível e a distância ao preço">Numérico</button><button type="button" data-rmode="tick" class="${num ? '' : 'on'}" title="Só ✔ onde bate certo">Tick</button></div></div>
+      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + (num ? 10 : 7)}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
     $('#npRevBack').addEventListener('click', npShowFeed);
     npFQWire('npRevQ', npRenderRev0);
+    box.querySelectorAll('[data-rmode]').forEach((b) => b.addEventListener('click', () => { settings.revMode = b.dataset.rmode; save('mss_settings4', settings); npRenderRev0(); }));
     box.querySelectorAll('[data-rt]').forEach((b) => b.addEventListener('click', () => { npRevTf = b.dataset.rt; npRenderRev0(); }));
     box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
     box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); selectedTf = a.dataset.tf; save('mss_tf', selectedTf); npOpenChart(a.dataset.chart); }));
@@ -5261,14 +5288,15 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   // força relativa a partir dos rácios onde o ativo entra (Semanal e Diário)
   function aiStrength(sym0) {
     const symbol = sym0 || window.__curSym || '';
-    const win = [], lose = [], mix = [];
+    const win = [], lose = [], mix = [], winN = [], loseN = [], mixN = [];
     (settings.favs || []).filter((r) => isRatio(r) && ratioLegs(r).includes(symbol)).forEach((r) => {
       const f = favData[r]; if (!f || !f.tfs) return; const [A, B] = ratioLegs(r), other = A === symbol ? B : A, sgn = A === symbol ? 1 : -1;
       const v = ['1w', '1d'].map((id) => { const sn = f.tfs[id] && f.tfs[id].ext.snap; return sn && sn.trend ? sn.trend * sgn : 0; });
       const tag = `${nm(other)} (S ${v[0] > 0 ? '▲' : v[0] < 0 ? '▼' : '—'} D ${v[1] > 0 ? '▲' : v[1] < 0 ? '▼' : '—'})`;
-      (v[0] > 0 && v[1] >= 0 ? win : v[0] < 0 && v[1] <= 0 ? lose : mix).push(tag);
+      const g = v[0] > 0 && v[1] >= 0 ? 0 : v[0] < 0 && v[1] <= 0 ? 1 : 2;
+      [win, lose, mix][g].push(tag); [winN, loseN, mixN][g].push(nm(other));
     });
-    return { win, lose, mix };
+    return { win, lose, mix, winN, loseN, mixN, n: win.length + lose.length + mix.length };
   }
   function aiSummary(al) {
     const N = nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol;
