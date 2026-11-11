@@ -592,6 +592,9 @@
   #aiBanner button { flex:0 0 auto; background:#f5c518 !important; color:#111 !important; border:0 !important; font-weight:700; padding:8px 12px; border-radius:0; }
   #aiBanner #aiX { background:transparent !important; color:#fff !important; font-weight:400; padding:6px 8px; }
   #aiBanner button[disabled] { opacity:.6; }
+  .linemenu .lnpc { display:inline-flex; align-items:center; gap:3px; font-size:12px; margin-right:6px; }
+  .linemenu .lnpc input { width:64px; padding:2px 4px; font-size:12px; }
+  .linemenu .lnsaved { font-size:12px; color:#2e7d32; font-weight:600; margin-left:6px; opacity:0; transition:opacity .4s; }
 </style>
 </head>
 <body>
@@ -3750,7 +3753,11 @@
     lineHintUi(); try { renderChart(true); } catch (e) {}
   }
   const lnTfBoxes = (l, attr) => `<span class="lntfs">${LN_TFS().map((id) => `<label title="Mostrar esta linha no ${tfLabel(id)}"><input type="checkbox" ${attr}="${l.id}" data-ltf="${id}" ${lnTfsOf(l).includes(id) ? 'checked' : ''}>${tfLabel(id)}</label>`).join('')}</span>`;
+  // "✓ Gravado" no menu da linha: as linhas gravam-se sozinhas na conta a cada mudança
+  let lnSavedT = 0;
+  function lnSavedFlash() { lnSavedT = Date.now(); const e = document.querySelector('#lineMenu .lnsaved'); if (e) { e.textContent = '✓ Gravado'; e.style.opacity = 1; setTimeout(() => { if (Date.now() - lnSavedT >= 1900 && e) e.style.opacity = 0; }, 2000); } }
   function setLines(ls, undoable) {
+    setTimeout(lnSavedFlash, 0);
     settings.lines = settings.lines || {};
     if (undoable !== false) (lineUndo[symbol] = lineUndo[symbol] || []).push(JSON.stringify(userLines()));
     if (lineUndo[symbol] && lineUndo[symbol].length > 40) lineUndo[symbol].shift();
@@ -3783,9 +3790,11 @@
     const ts = chart.timeScale(), Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => ts.logicalToCoordinate(idxOfT(t));
     const W = ts.width(), tEnd = tOfIdx(ts.coordinateToLogical(W));
     const offs = l.type === 'chan' ? [0, l.off || 0] : [0];
-    const segs = offs.map((o) => [X(l.t1), Y(lnVal(l, l.t1, o)), X(tEnd), Y(lnVal(l, tEnd, o))]);
+    // a linha é reta em escala log; desenhada em pedaços para ficar presa aos mesmos preços em qualquer escala, timeframe e zoom
+    const K = 48, polys = offs.map((o) => { const pts = []; for (let k = 0; k <= K; k++) { const t = l.t1 + (tEnd - l.t1) * k / K; pts.push([X(t), Y(lnVal(l, t, o))]); } return pts; });
+    const segs = []; polys.forEach((P) => { for (let k = 1; k < P.length; k++) segs.push([P[k - 1][0], P[k - 1][1], P[k][0], P[k][1]]); });
     const h1 = [X(l.t1), Y(l.p1)], h2 = [X(l.t2), Y(l.p2)], tm = (l.t1 + l.t2) / 2, h3 = l.type === 'chan' ? [X(tm), Y(lnVal(l, tm, l.off || 0))] : null;
-    return { segs, h1, h2, h3 };
+    return { segs, polys, h1, h2, h3 };
   }
   function drawUserLines(g) {
     if (!data[selectedTf]) return;
@@ -3793,11 +3802,11 @@
     const pv = linePreview(); if (pv) ls.push(pv);
     for (const l of ls) {
       const G = lineGeom(l); if (G.segs.some((p) => p.some((v) => v == null))) continue;
-      const sel = lineSel === l.id || l === pv, pts = G.segs;
+      const sel = lineSel === l.id || l === pv, PL = G.polys;
       g.strokeStyle = l.alert ? '#f5c518' : '#64b5f6'; g.lineWidth = sel ? 2.2 : 1.5; g.setLineDash(l === pv ? [6, 4] : []);
-      if (l.type === 'chan') { g.fillStyle = 'rgba(100,181,246,0.08)'; g.beginPath(); g.moveTo(pts[0][0], pts[0][1]); g.lineTo(pts[0][2], pts[0][3]); g.lineTo(pts[1][2], pts[1][3]); g.lineTo(pts[1][0], pts[1][1]); g.closePath(); g.fill(); }
-      pts.forEach((p) => { g.beginPath(); g.moveTo(p[0], p[1]); g.lineTo(p[2], p[3]); g.stroke(); }); g.setLineDash([]);
-      if (l.alert && !sel) { g.font = '11px Inter, sans-serif'; g.fillText('🔔', pts[0][0] + 4, pts[0][1] - 4); }
+      if (l.type === 'chan') { g.fillStyle = 'rgba(100,181,246,0.08)'; g.beginPath(); PL[0].forEach((q, k) => (k ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]))); PL[1].slice().reverse().forEach((q) => g.lineTo(q[0], q[1])); g.closePath(); g.fill(); }
+      PL.forEach((P) => { g.beginPath(); P.forEach((q, k) => (k ? g.lineTo(q[0], q[1]) : g.moveTo(q[0], q[1]))); g.stroke(); }); g.setLineDash([]);
+      if (l.alert && !sel) { g.font = '11px Inter, sans-serif'; g.fillText('🔔', PL[0][0][0] + 4, PL[0][0][1] - 4); }
       if (sel && l !== pv) [G.h1, G.h2, G.h3].filter(Boolean).forEach((h) => { g.fillStyle = '#fff'; g.strokeStyle = '#1e88e5'; g.lineWidth = 2; g.beginPath(); g.arc(h[0], h[1], 6, 0, 7); g.fill(); g.stroke(); });
     }
     const Y = (p) => candleSeries.priceToCoordinate(p), X = (t) => chart.timeScale().logicalToCoordinate(idxOfT(t));
@@ -3861,8 +3870,10 @@
     if (!l || lineDrag) { m.style.display = 'none'; m.dataset.for = ''; return; }
     if (m.dataset.for !== l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf) {   // caixas dos timeframes (só redesenha quando muda)
       m.dataset.for = l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf;
-      m.querySelector('.lnmtf').innerHTML = lnTfBoxes(l, 'data-mtf');
+      m.querySelector('.lnmtf').innerHTML = `<label class="lnpc" title="Distância do preço à linha para o aviso">a <input type="number" step="0.1" min="0.1" max="20" data-mpc="${l.id}" value="${l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)}">%</label>${lnTfBoxes(l, 'data-mtf')}<span class="lnsaved"></span>`;
       m.querySelectorAll('[data-mtf]').forEach((i) => i.addEventListener('change', () => lineToggleTf(i.dataset.mtf, i.dataset.ltf, i.checked)));
+      const pc = m.querySelector('[data-mpc]'); pc.addEventListener('change', () => setLines(userLines().map((x) => (x.id === pc.dataset.mpc ? Object.assign({}, x, { pct: Math.max(0.1, Math.min(20, +String(pc.value).replace(',', '.') || 1)) }) : x)), false));
+      ['keydown', 'pointerdown', 'mousedown', 'click'].forEach((ev) => pc.addEventListener(ev, (e) => e.stopPropagation()));
     }
     const G = lineGeom(l); if (G.h2[0] == null || G.h2[1] == null) { m.style.display = 'none'; return; }
     m.style.display = 'flex'; m.style.left = Math.max(4, Math.min(chart.timeScale().width() - Math.max(150, m.offsetWidth + 8), G.h2[0] + 10)) + 'px'; m.style.top = Math.max(4, G.h2[1] - 40) + 'px';
@@ -3911,7 +3922,7 @@
     document.addEventListener('keydown', (e) => {
       if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '')) return;
       if (e.key === 'Escape' && (lineMode || lineSel)) { setLineMode(null); lineSel = null; lineHintUi(); }
-      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode) { e.preventDefault(); lineRemoveHere(lineSel); lineSel = null; lineHintUi(); }
+      else if ((e.key === 'Delete' || e.key === 'Backspace') && lineSel && !lineMode && !editMode && !/^(INPUT|TEXTAREA|SELECT)$/.test((e.target || {}).tagName || '')) { e.preventDefault(); lineRemoveHere(lineSel); lineSel = null; lineHintUi(); }
       else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !editMode && lineUndo[symbol] && lineUndo[symbol].length && (lineSel || $('#linePanel').classList.contains('open'))) { e.preventDefault(); lineUndoDo(); }
     });
     const m = $('#lineMenu');
@@ -3924,7 +3935,7 @@
   function renderLinePanel() {
     const box = $('#linePanel'); if (!box) return; lineToolsUi();
     const ls = userLines(), d = data[selectedTf], price = d && d.price;
-    box.classList.toggle('open', linesOn() && (ls.length > 0 || !!lineMode));
+    box.classList.remove('open');   // tudo o que era deste painel está agora no menu que aparece ao carregar na linha
     const rows = ls.map((l) => {
       const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dist = (x) => price ? ` (${pct((price - x) / x * 100, true)})` : '';
       return `<div class="lprow"><span>${l.type === 'chan' ? 'Canal' : 'Diagonal'} <span class="muted small">(desenhado no ${tfLabel(l.tf)})</span> · agora ${fmt(v)}${dist(v)}${v2 != null ? ` / ${fmt(v2)}${dist(v2)}` : ''}<br>${lnTfBoxes(l, 'data-ptf')}</span>
@@ -5072,6 +5083,7 @@ function motor_() {
   }
   // ---------- 📋 resumo para a IA: dados "mastigados" para decidir (obstáculos, risco/retorno, força relativa) e um formato de resposta curto ----------
   const AI_FORMAT = `Responde em português de Portugal, no máximo ~250 palavras, com este formato:
+0) Primeira linha: o PREÇO ATUAL do ativo (o dos dados, com a hora), para eu ter a referência dos preços que se seguem; em cada nível que citares diz também a distância ao preço em %.
 1) VEREDICTO numa linha: Entrar / Esperar / Evitar / Há melhor (outro ativo ou outra zona) — confiança baixa/média/alta.
 2) A FAVOR (3–5 pontos com números) e CONTRA (3–5 pontos com números).
 3) OBSTÁCULO mais importante acima e abaixo do preço (nível e distância).
