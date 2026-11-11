@@ -420,6 +420,27 @@
     body[data-np="1"] #npSlot .chartbox { display:block !important; }
     body[data-np="1"] #npSlot #mcards, body[data-np="1"] #npSlot #msetups { display:none !important; }
     body[data-np="1"] { padding-bottom:0; }
+    /* setups do ativo: um cartão por setup em vez da tabela larga (que obrigava a página a abrir em zoom-out) */
+    body[data-np="1"] #npSlot .setups { overflow:visible; }
+    body[data-np="1"] #npSlot .setups table, body[data-np="1"] #npSlot .setups tbody { display:block; width:100%; min-width:0; }
+    body[data-np="1"] #npSlot .setups thead { display:none; }
+    body[data-np="1"] #npSlot .setups tr { display:flex; flex-wrap:wrap; align-items:center; gap:6px 8px; padding:10px 0; border-bottom:1px solid var(--np-ln); }
+    body[data-np="1"] #npSlot .setups td { display:block; padding:0 !important; border:0 !important; white-space:normal !important; min-width:0; }
+    body[data-np="1"] #npSlot .setups td:nth-child(1) { flex:1 1 60%; }
+    body[data-np="1"] #npSlot .setups td:nth-child(1) br { display:none; }
+    body[data-np="1"] #npSlot .setups td:nth-child(2) { flex:0 0 auto; }
+    body[data-np="1"] #npSlot .setups td:nth-child(3)::before { content:'Contexto '; font-size:11px; color:var(--np-mu); }
+    body[data-np="1"] #npSlot .setups td:nth-child(4)::before { content:'Zona '; font-size:11px; color:var(--np-mu); }
+    body[data-np="1"] #npSlot .setups td:nth-child(5)::before { content:'Quebra '; font-size:11px; color:var(--np-mu); }
+    body[data-np="1"] #npSlot .setups td:nth-child(6) { flex:1 1 100%; display:flex; flex-wrap:wrap; gap:4px; }
+    body[data-np="1"] #npSlot .setups td:nth-child(6) br { display:none; }
+    body[data-np="1"] #npSlot .setups td:nth-child(7) { flex:1 1 100%; }
+    body[data-np="1"] #npSlot .setups .chip { white-space:nowrap; }
+    /* nada pode alargar a página no telemóvel: o que for largo rola dentro da sua caixa */
+    body[data-np="1"] #np, body[data-np="1"] #npSlot, body[data-np="1"] #npAsset { max-width:100vw; overflow-x:clip; }
+    body[data-np="1"] .revwrap, body[data-np="1"] #npSlot .tablewrap { max-width:100%; }
+    body[data-np="1"] #npAssetHead .acts { display:flex; flex-wrap:wrap; gap:6px; }
+    body[data-np="1"] #npAssetHead .acts button { margin:0; }
   }
   .primary { background:var(--acc); color:#06121a; border-color:var(--acc); font-weight:600; }
   @media (max-width:700px){ #chart { height:420px; } header { padding:10px; } main { padding:10px; } }
@@ -680,7 +701,7 @@
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
   <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><button type="button" id="npQX" class="np-qx" title="Apagar" aria-label="Apagar">✕</button><div id="npSug" class="sug"></div></form><a href="#" id="npMulti" class="np-multi" title="Colar ou importar a lista de rácios do TradingView e juntar todos de uma vez (também serve para ativos individuais)">＋ Adicionar rácios</a>
     <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button></div></div>
-  <nav id="npTabs" class="np-tabs" aria-label="Páginas"><button type="button" data-tab="feed">Jornal</button><button type="button" data-tab="board">Quadro</button><button type="button" data-tab="focus">Em foco</button><button type="button" data-tab="rev">Reversões</button></nav>
+  <nav id="npTabs" class="np-tabs" aria-label="Páginas"><button type="button" data-tab="feed">Jornal</button><button type="button" data-tab="board">Favoritos</button><button type="button" data-tab="focus">Em foco</button><button type="button" data-tab="rev">Reversões</button></nav>
   <div id="npStrip"></div>
   <div class="np-cols">
     <aside id="npRail"></aside>
@@ -770,7 +791,8 @@
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Tudo · Ativos · Rácios:</b> ao lado de cada caixa de procura (favoritos, Quadro, Em foco e jornal) escolhe se queres ver tudo, só os ativos (ações, cripto e futuros) ou só os rácios. No jornal, o nome do ativo aparece em português com o ticker ao lado.</li>
-      <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) e abre o Claude: cola e envia. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
+      <li><b>Mercado cripto total (TOTAL):</b> junta-o aos favoritos (procura “total”), abre-o e importa o histórico com 📥 — no TradingView abre <i>CRYPTOCAP:TOTAL</i> e exporta o Mensal, Semanal, Diário, 4H e 1H (“Exportar dados do gráfico”), como fizeste no USDT.D + USDC.D. Daí em diante o vigia acrescenta um ponto da CoinGecko a cada 5 minutos. A análise IA do Bitcoin passa a trazer o TOTAL e o USDT.D + USDC.D como enquadramento, e diz se confirmam ou contrariam o lado escolhido.</li>
+      <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) para colares numa conversa com o Claude. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
       <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
       <li><b>Lateralização (5m/15m/1H):</b> quando o gatilho está dentro de uma caixa (vários toques em cima e em baixo), as viragens lá dentro não contam; o gatilho passa a ser o fecho fora da caixa no sentido do setup (“quebrou a lateralização”). No gráfico aparece a caixa tracejada “↔ lateralização”.</li>
       <li><b>Swings mínimos nos 5m e 15m:</b> nas Definições, um topo/fundo do movimento recente só conta se o recuo for pelo menos N × a volatilidade média das últimas 100 velas (1 = recomendado, 0 = desligado). Acaba com os HH/LH de uma vela nas lateralizações.</li>
@@ -787,7 +809,7 @@
       <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
       <li><b>Nome e 📈 nos cartões Em foco:</b> no cartão Em foco do jornal e em cada cartão de “Ver todos em foco”, o nome do ativo abre a página do ativo e o 📈 ao lado abre logo o gráfico maior. “← Voltar” regressa a onde estavas (jornal ou Em foco).</li>
       <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (um de cada vez; “Todos” mostra tudo; abre em Prontos).</li>
-      <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar” regressa à página de onde vieste; a barra de abas (Jornal · Quadro · Em foco · Reversões), por baixo da pesquisa, leva-te a qualquer página.</li>
+      <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar” regressa à página de onde vieste; a barra de abas (Jornal · Favoritos · Em foco · Reversões), por baixo da pesquisa, leva-te a qualquer página.</li>
       <li><b>Contexto:</b> verde = a favor; âmbar = a favor mas já corrigiu mais de 78,6% (perto de virar contra); vermelho = contra.</li>
       <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
     </ul>
@@ -1991,7 +2013,9 @@
 // Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
 (function (root) {
   'use strict';
-  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'] } };
+  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'], key: 'sd' },
+    'TOTAL': { name: 'Capitalização total do mercado cripto (CRYPTOCAP:TOTAL)', cg: 'total', key: 'tot' } };
+  const keyOf = (s) => (SYN[s] && SYN[s].key) || 'sd';   // prefixo dos documentos na conta (meta/<key>_<tf>, meta/<key>_live)
   const isSynth = (s) => Object.prototype.hasOwnProperty.call(SYN, s);
   const HIST_TFS = ['1M', '1w', '1d', '4h', '1h', '15m'];   // timeframes guardados (o 15m só pela consolidação do vigia)
   const BASE_TFS = ['1M', '1w', '1d', '4h', '1h', '15m', '5m'];
@@ -2096,14 +2120,15 @@
   }
   // valor atual a partir da resposta /global da CoinGecko
   function cgValue(sym, j) {
+    if (SYN[sym].cg === 'total') { const t = j && j.data && j.data.total_market_cap && j.data.total_market_cap.usd; return t > 0 ? Math.round(t) : null; }
     const p = j && j.data && j.data.market_cap_percentage; if (!p) return null;
     let v = 0; for (const k of SYN[sym].cg) { if (!(p[k] > 0)) return null; v += p[k]; }
     return Math.round(v * 1e5) / 1e5;
   }
   // nomes legíveis dos ativos mais comuns (a app e o vigia usam os mesmos)
-  const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'COCO.L': 'Cacau (ETC)' };
+  const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'TOTAL': 'Mercado cripto total', 'COCO.L': 'Cacau (ETC)' };
   // nomes curtos para os rácios (cabem numa linha: Ouro/Bitcoin, AGAP/BTC…)
-  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'COCO.L': 'Cacau ETC' };
+  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'TOTAL': 'Cripto total', 'COCO.L': 'Cacau ETC' };
   function nameOf(sym, own) {
     const one = (x) => (own && own[x]) || NAMES[x] || x;
     const sh = (x) => (own && own[x] && own[x].length <= 12 ? own[x] : SHORT[x] || String(x).replace(/\.L$/, '').replace(/USDT$/, ''));
@@ -2125,7 +2150,7 @@
   }
   // de quanto em quanto tempo o vigia volta a analisar: 5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora
   const monEvery = (tf) => (tf === '5m' ? 0 : tf === '15m' ? 9e5 : 36e5);
-  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, keyOf, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>// Fibonacci automáticas (em escala log), a partir da estrutura de cada timeframe.
@@ -2601,10 +2626,10 @@
     for (let i = 0; i < 25 && !(cloud.user && cloud.db); i++) await new Promise((r) => setTimeout(r, 200));   // espera pelo login
     if (!cloud.user || !cloud.db) throw new Error('entra na conta: o histórico do ' + sym + ' está guardado na conta');
     const col = cloud.db.collection('users').doc(cloud.user.uid).collection('meta');
-    const ids = SY.HIST_TFS.map((tf) => 'sd_' + tf).concat('sd_live');
+    const K = SY.keyOf(sym), ids = SY.HIST_TFS.map((tf) => K + '_' + tf).concat(K + '_live');
     const docs = await Promise.all(ids.map((id) => col.doc(id).get()));
     const hist = {}; let live = [];
-    docs.forEach((d, k) => { if (!d.exists) return; let j; try { j = JSON.parse(d.data().json); } catch (e) { return; } if (ids[k] === 'sd_live') live = j; else hist[SY.HIST_TFS[k]] = j; });
+    docs.forEach((d, k) => { if (!d.exists) return; let j; try { j = JSON.parse(d.data().json); } catch (e) { return; } if (ids[k] === K + '_live') live = j; else hist[SY.HIST_TFS[k]] = j; });
     const r = { hist, live, at: Date.now() }; synthCache[sym] = r; return r;
   }
   async function synthCandles(sym, tfIds) {
@@ -2635,8 +2660,8 @@
     if (!confirm(`Importar para o ${sym}:\n${txt}${bad.length ? '\n\nIgnorados:\n' + bad.join('\n') : ''}\n\nSubstitui o histórico destes timeframes na conta.`)) return;
     const col = cloud.db.collection('users').doc(cloud.user.uid).collection('meta');
     try {
-      for (const r of ok) { let rows = r.rows, j = JSON.stringify(rows); while (j.length > 900000) { rows = rows.slice(Math.floor(rows.length / 4)); j = JSON.stringify(rows); } await col.doc('sd_' + r.tf).set({ json: j, at: Date.now() }); }
-      if (!ok.some((r) => r.tf === '15m')) await col.doc('sd_15m').delete();   // o 15m consolidado pelo vigia podia não bater com o histórico novo
+      for (const r of ok) { let rows = r.rows, j = JSON.stringify(rows); while (j.length > 900000) { rows = rows.slice(Math.floor(rows.length / 4)); j = JSON.stringify(rows); } await col.doc(SY.keyOf(sym) + '_' + r.tf).set({ json: j, at: Date.now() }); }
+      if (!ok.some((r) => r.tf === '15m')) await col.doc(SY.keyOf(sym) + '_15m').delete();   // o 15m consolidado pelo vigia podia não bater com o histórico novo
     } catch (e) { alert('Não consegui gravar na conta: ' + (e.message || e)); return; }
     delete synthCache[sym]; delete favData[sym];
     if (symbol === sym) { Object.keys(data).forEach((k) => delete data[k]); loadAll(); }
@@ -2644,7 +2669,10 @@
   }
   function synthHits(q) {
     const v = String(q || '').trim().toLowerCase(); if (v.length < 3) return [];
-    return /^(usdt|usdc|stable|domin|tether)/.test(v) ? [{ symbol: 'STABLE.D', name: 'USDT.D + USDC.D · domínio das stablecoins', exch: 'TradingView + CoinGecko' }] : [];
+    const out = [];
+    if (/^(usdt|usdc|stable|domin|tether)/.test(v)) out.push({ symbol: 'STABLE.D', name: 'USDT.D + USDC.D · domínio das stablecoins', exch: 'TradingView + CoinGecko' });
+    if (/^(total|crypto ?total|cryptocap|market ?cap|capitaliza|mercado cripto)/.test(v)) out.push({ symbol: 'TOTAL', name: 'Capitalização total do mercado cripto (CRYPTOCAP:TOTAL)', exch: 'TradingView + CoinGecko' });
+    return out;
   }
 
   // agrupa velas mensais em trimestres (3M), semestres (6M) e anos (1Y), alinhados ao calendário
@@ -4317,7 +4345,7 @@
   const normOne = (s) => String(s || '').trim().toUpperCase().replace(/^BINANCE:/, '').replace(/\.P$/, '');
   // nomes curtos dentro de um rácio (ex.: gold/btc → GC=F/BTCUSDT)
   const R_ALIAS = { GOLD: 'GC=F', OURO: 'GC=F', XAU: 'GC=F', XAUUSD: 'GC=F', SILVER: 'SI=F', PRATA: 'SI=F', XAG: 'SI=F', XAGUSD: 'SI=F', BTC: 'BTCUSDT', BITCOIN: 'BTCUSDT', ETH: 'ETHUSDT', SP500: 'ES=F', SPX: 'ES=F', 'S&P': 'ES=F', 'S&P500': 'ES=F', NATGAS: 'NG=F', GAS: 'NG=F', 'GÁS': 'NG=F', NG: 'NG=F', WTI: 'CL=F', OIL: 'CL=F', BRENT: 'BZ=F', COPPER: 'HG=F', COBRE: 'HG=F' };
-  const normSym = (s) => { const v = String(s || ''); if (/USDT\.D\s*\+\s*(CRYPTOCAP:)?USDC\.D/i.test(v)) return 'STABLE.D'; if (v.includes('/')) { const p = v.split('/').map(normOne); if (p.length === 2 && p[0] && p[1]) return p.map((x) => R_ALIAS[x] || x).join('/'); } return normOne(v); };
+  const normSym = (s) => { const v = String(s || ''); if (/USDT\.D\s*\+\s*(CRYPTOCAP:)?USDC\.D/i.test(v)) return 'STABLE.D'; if (/^\s*(CRYPTOCAP:)?TOTAL\s*$/i.test(v)) return 'TOTAL'; if (v.includes('/')) { const p = v.split('/').map(normOne); if (p.length === 2 && p[0] && p[1]) return p.map((x) => R_ALIAS[x] || x).join('/'); } return normOne(v); };
   const isCrypto = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   function favTfs() {
     const s = new Set();
@@ -5161,7 +5189,7 @@ function motor_() {
     const pano = dayPanorama().map((p) => `${p.name}: D ${p.d[0]}▲ ${p.d[1]}▼`).join(' · ');
     return `<div class="np-box" id="npDay"><div class="np-kick">TOP DO DIA</div><div style="font-size:12px;color:var(--np-mu);margin:2px 0 8px">${pano} · sem scalp · ordem: estado do setup, sinais de reversão, contexto e R:R</div>
       <div class="np-day">${col('▲ LONG', 'var(--np-green, #2e7d32)', L)}${col('▼ SHORT', 'var(--np-red)', S)}</div>
-      <button type="button" id="npDayAi" class="np-day-ai${ld.busy ? ' wait' : ''}" title="${ld.busy ? 'Ainda a carregar os favoritos — se carregares agora, o brief avisa a IA de que os dados estão incompletos' : 'Copia o brief do dia e abre o Claude'}">${ld.busy ? `⏳ a carregar ${ld.n} de ${ld.t}… (Análise IA do dia)` : '🤖 Análise IA do dia'}</button><div id="npDayMsg" style="font-size:12px;color:var(--np-mu);margin-top:6px"></div></div>`;
+      <button type="button" id="npDayAi" class="np-day-ai${ld.busy ? ' wait' : ''}" title="${ld.busy ? 'Ainda a carregar os favoritos — se carregares agora, o brief avisa a IA de que os dados estão incompletos' : 'Copia o brief do dia para colares numa conversa com o Claude'}">${ld.busy ? `⏳ a carregar ${ld.n} de ${ld.t}… (Análise IA do dia)` : '🤖 Análise IA do dia'}</button><div id="npDayMsg" style="font-size:12px;color:var(--np-mu);margin-top:6px"></div></div>`;
   }
   const AI_DAY_FORMAT = `Responde em português de Portugal, de leitura fácil (~400 palavras no máximo), com este formato:
 1) CENÁRIO GERAL, uma linha por grupo: diz QUAIS ativos estão em alta e QUAIS em baixa (nomes, não só contagens) e tira a conclusão prática — que lado está a favor da maré nesse grupo (ex.: "Ações: Semanal em baixa em X, Y, Z; em alta só A e B → Shorts a favor; Longs só em A e B"). Depois uma linha com o que os rácios dizem (o que está a ganhar a quê). Se um grupo não tiver dados, diz só "sem dados".
@@ -5202,8 +5230,7 @@ ${AI_DAY_FORMAT}`;
     const txt = daySummary(); let ok = false;
     const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) {} ta.remove();
     if (!ok) { try { navigator.clipboard.writeText(txt); ok = true; } catch (e) {} }
-    window.open('https://claude.ai/new', '_blank');
-    const m = $('#npDayMsg'); if (m) m.textContent = ok ? 'Copiado ✔ — no Claude, cola (manter o dedo → Colar, ou Ctrl+V) e envia.' : 'Não consegui copiar — tenta outra vez.';
+    const m = $('#npDayMsg'); if (m) m.textContent = ok ? 'Copiado ✔ — cola numa conversa com o Claude (manter o dedo → Colar, ou Ctrl+V) e envia.' : 'Não consegui copiar — tenta outra vez.';
   }
   function dayWire(box) {
     const b = box.querySelector('#npDayAi'); if (b) b.addEventListener('click', dayCopyAi);
@@ -5470,6 +5497,16 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
         const tfs = ['1M', '1w', '1d', '4h'].filter((id) => f.tfs[id]).map((id) => { const sn = f.tfs[id].ext.snap; return sn && sn.trend ? `${tfLabel(id)} ${sn.trend === 1 ? '▲' : '▼'} ${pct(sn.pullback)}` : `${tfLabel(id)} —`; }).join(', ');
         const best = favEvals(r).filter((x) => x && noScalp(x.st)).sort((a, b) => b.rank - a.rank)[0];
         out.push(`- ${nm(r)} ${r} (${aiF(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}`); });
+    }
+    // BTC: enquadrar com o mercado cripto total (TOTAL) e o domínio das stablecoins (USDT.D + USDC.D)
+    if (/^BTC(USDT|USDC|FDUSD|EUR)?$/.test(symbol)) {
+      const ctx = [['TOTAL', 'Capitalização total do mercado cripto (TOTAL) — ▲ = entra dinheiro no mercado cripto, a favor de Longs em BTC'], ['STABLE.D', 'Domínio das stablecoins (USDT.D + USDC.D) — LEITURA INVERSA: ▲ = dinheiro a fugir para stablecoins (contra Longs em BTC); ▼ = dinheiro a sair das stablecoins para cripto (a favor de Longs)']];
+      out.push('', 'ENQUADRAMENTO DO MERCADO CRIPTO (usa isto para confirmar ou pôr em causa o veredicto do BTC; diz explicitamente se TOTAL e USDT.D+USDC.D confirmam ou contrariam o lado que escolheres):');
+      ctx.forEach(([sy, lab]) => { const f = favData[sy];
+        if (!f || !f.tfs || !Object.keys(f.tfs).length) { out.push(`- ${lab}: sem dados (${(settings.favs || []).includes(sy) ? 'ainda a carregar ou sem histórico importado' : 'junta ' + sy + ' aos favoritos e importa o histórico do TradingView'})`); return; }
+        out.push(`- ${lab}, valor ${aiF(f.price)}:`);
+        ['1M', '1w', '1d', '4h'].forEach((id) => { if (f.tfs[id]) out.push('  ' + aiTfLine(id, f.tfs[id])); });
+        const best = favEvals(sy).filter((x) => x && x.rank >= 2).sort((a, b) => b.rank - a.rank)[0]; if (best) out.push('  setup em zona: ' + npSetupTxt(best)); });
     }
     return out.join('\n');
   }

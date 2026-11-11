@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-10T16:40:44.042Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-11T17:07:41.992Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -436,14 +436,19 @@
     const lowest = (a, b) => { let m = a; for (let i = a; i <= b; i++) if (L(i) < L(m)) m = i; return { p: L(m), i: m }; };
     const highest = (a, b) => { let m = a; for (let i = a; i <= b; i++) if (H(i) > H(m)) m = i; return { p: H(m), i: m }; };
     // swing: recuo >= legRatio x perna, mas nunca menos de floorAtr x ATR nem mais de minRetraceAtr x ATR (ATR insuflado em tendências fortes)
+    // swings mínimos (timeframes curtos): numa lateralização o ATR de 14 velas encolhe e qualquer repique conta como swing;
+    // com slowFloor > 0 o recuo nunca pode ser menor do que slowFloor x ATR médio das últimas 100 velas (que não encolhe)
+    const slow = new Array(n).fill(null);
+    if (o.slowFloor > 0) { let acc = 0; const q = []; for (let i = 0; i < n; i++) { const tr = i === 0 ? H(i) - L(i) : Math.max(H(i) - L(i), Math.abs(H(i) - C(i - 1)), Math.abs(L(i) - C(i - 1))); q.push(tr); acc += tr; if (q.length > 100) acc -= q.shift(); slow[i] = acc / q.length; } }
+    const sf = (i, j) => (o.slowFloor > 0 ? o.slowFloor * (slow[i] || slow[j] || 0) : 0);
     const thr = (i, j, leg) => {
       const a = atr[i] || atr[j] || (H(j) - L(j));
-      if (!(o.legRatio > 0)) return o.minRetraceAtr * a;
-      return Math.max((o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(leg)));
+      if (!(o.legRatio > 0)) return Math.max(o.minRetraceAtr * a, sf(i, j));
+      return Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(leg)));
     };
     let zLastH = H(0), zLastL = L(0);   // últimos pontos do zigzag (origem da perna atual)
     // o extremo da perna que quebrou estrutura é um ponto estrutural: basta o recuo mínimo (floorAtr) para contar como swing
-    const flo = (i, j) => (o.floorAtr == null ? 1 : o.floorAtr) * (atr[i] || atr[j] || (H(j) - L(j)));
+    const flo = (i, j) => Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * (atr[i] || atr[j] || (H(j) - L(j))));
     const brk = (dir, p) => o.breakSwing !== false && o.legRatio > 0 && trend === dir && lastBroken != null && dir * (p - lastBroken) > 0;
 
     let zdir = 0, hi = { p: H(0), i: 0 }, lo = { p: L(0), i: 0 };
@@ -657,7 +662,22 @@
     };
   }
 
-  const api = { analyze, analyzeRecent, snapshot, DEFAULTS };
+  // ---------- lateralização: caixa onde o preço anda há várias velas, com toques em cima e em baixo ----------
+  // olha para as últimas W velas fechadas ANTES da última; devolve a caixa e o que a última vela fez (dentro, fechou acima, fechou abaixo)
+  function rangeBox(closed, opt) {
+    const W = (opt && opt.W) || 36, K = (opt && opt.maxAtr) || 4, n = closed.length; if (n < W + 20) return null;
+    const a = closed.slice(n - 1 - W, n - 1), last = closed[n - 1];
+    let hi = -Infinity, lo = Infinity; a.forEach((c) => { if (c.h > hi) hi = c.h; if (c.l < lo) lo = c.l; });
+    let tr = 0, m = 0; for (let i = Math.max(1, n - 101); i < n - 1; i++) { const c = closed[i], p = closed[i - 1]; tr += Math.max(c.h - c.l, Math.abs(c.h - p.c), Math.abs(c.l - p.c)); m++; }
+    const atr = tr / Math.max(1, m), hgt = hi - lo; if (!(atr > 0) || hgt > K * atr) return null;
+    // pelo menos 2 toques em cima e 2 em baixo, separados (zona = 20% da altura da caixa junto à borda)
+    const z = 0.2 * hgt, touches = (f) => { let t = 0, lastI = -9; a.forEach((c, i) => { if (f(c) && i - lastI > 3) { t++; lastI = i; } }); return t; };
+    if (touches((c) => c.h >= hi - z) < 2 || touches((c) => c.l <= lo + z) < 2) return null;
+    const state = last.c > hi ? 'up' : last.c < lo ? 'down' : 'inside';
+    return { hi, lo, state, from: closed[n - 1 - W].t, to: last.t, bars: W };
+  }
+
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -742,7 +762,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     tgtOn: true, tgtPct: 1, lineOn: true,
-    fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'],
+    fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
     forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
@@ -756,7 +776,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
     const p = A.per && A.per[sym];
     if (p) {
-      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn' };
+      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
       for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
       if (p.week === false) { o.weekOn = false; o.dayOn = false; }   // ligado: semana/dia conforme os Ajustes
       const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
@@ -768,7 +788,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function anyOn(A, sym, S) {
     const e = effA(A, sym), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
     const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
-    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || ln);
+    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -826,8 +846,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const closed = cs.filter((c) => c.ct < now);
     const price = cs[cs.length - 1].c;
     const base = { confirm: +S.confirm, lockBars: +S.lockBars, volMult: +S.volMult, dispAtr: +S.dispAtr, contBars: +S.contBars, fvgMinAtr: +S.fvgMinAtr, contAtr: +S.contAtr, closeMarginAtr: +S.closeMarginAtr, acceptBars: +S.acceptBars, failBars: failFor(S, id), legRatio: +S.legRatio, floorAtr: +S.floorAtr };
+    // swings mínimos nos timeframes curtos (só o movimento recente): recuo >= swFloor x ATR médio de 100 velas
+    const sfl = ['5m', '15m'].includes(id) ? ((S.swFloor == null ? 1 : +S.swFloor) || 0) : 0;
     const layer = (fn, atrMult, reqDisp, ov) => {
-      const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null }));
+      const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null, slowFloor: fn === E.analyzeRecent ? sfl : 0 }));
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
     const d = { candles: cs, closed, price, ext: layer(E.analyze, S.extAtr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
@@ -905,6 +927,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const anyP = (k) => Object.values(A.per || {}).some((p) => p && p[k] === true);
     if (A.fibOn || anyP('fibz')) (A.fibTfs || A_DEF.fibTfs).forEach((id) => s.add(id));
     if (A.kcAlOn || anyP('kc')) (A.kcTfs || A_DEF.kcTfs).forEach((id) => s.add(id));
+    if (A.revOn || anyP('rev')) (A.revTfs || A_DEF.revTfs).forEach((id) => { s.add(id); if (REV_UP[id] && REV_UP[id] !== '3M') s.add(REV_UP[id]); if (FB && FB.NEXT[id]) s.add(FB.NEXT[id]); });
     return [...s];
   }
 
@@ -954,8 +977,21 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     for (const su of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false)) {
       const dz = dm[su.zone], dt = dm[su.trig]; if (!dz || !dt) continue;
       const z = dz.ext.snap; if (!z.trend) continue;
-      const dir = z.trend, t = dt.int.snap, lb = t.lastBreak;
-      if (!lb || lb.dir !== dir || t.trend !== dir) continue;
+      const dir = z.trend, t = dt.int.snap;
+      let lb = t.lastBreak;
+      // lateralização no gatilho (5m/15m/1H): as viragens dentro da caixa não contam; o gatilho é o fecho fora dela, no sentido do setup
+      const bx = ['5m', '15m', '1h'].includes(su.trig) && E.rangeBox ? E.rangeBox(dt.closed) : null;
+      if (bx) {
+        if (!((bx.state === 'up' && dir === 1) || (bx.state === 'down' && dir === -1))) continue;
+        const k = dt.closed.length - 1, c = dt.closed[k];
+        let tr = 0; for (let i = Math.max(1, k - 14); i < k; i++) { const x = dt.closed[i], p = dt.closed[i - 1]; tr += Math.max(x.h - x.l, Math.abs(x.h - p.c), Math.abs(x.l - p.c)); }
+        const atr = tr / 14 || 1, lvl = dir === 1 ? bx.hi : bx.lo, fv = (dt.int.res.fvgs || []).some((f) => f.dir === dir && f.mid >= k - 2);
+        const bk = `bx|${sym}|${su.name}|${dir}`, last = st.seen[bk + '|t'] || 0;   // uma saída de caixa avisa uma vez (as velas seguintes também ficam fora da caixa nova)
+        if (c.t - last < bx.bars * TF_MS[su.trig]) continue;
+        if (!st.silent) st.seen[bk + '|t'] = c.t;
+        if (t.lastBreak && t.lastBreak.dir === dir && dt.closed[t.lastBreak.i]) st.seen[`s|${sym}|${su.name}|${dt.closed[t.lastBreak.i].t}|${dir}`] = now;   // a quebra interna da mesma vela não repete
+        lb = { box: bx, type: 'fecho fora da lateralização', dir, level: lvl, i: k, conf: k, fvg: fv ? 'sim' : 'não', candle: Math.abs(c.c - c.o) >= (+S.dispAtr || 1) * atr ? 'forte' : 'normal', closeAtr: dir * (c.c - lvl) / atr, closeTight: dir * (c.c - lvl) / atr < 0.3 };
+      } else if (!lb || lb.dir !== dir || t.trend !== dir) continue;
       const cl = dt.closed, bc = cl[lb.i], cc = cl[Math.min(cl.length - 1, lb.conf != null ? lb.conf : lb.i)];
       if (!bc || !cc) continue;
       const key = `s|${sym}|${su.name}|${bc.t}|${dir}`;
@@ -984,7 +1020,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}`,
-        `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
+        lb.box ? `Gatilho ${LBL[su.trig]}: quebrou a lateralização ${up ? 'para cima' : 'para baixo'} — caixa ${fmt(lb.box.lo)} – ${fmt(lb.box.hi)} (${lb.box.bars} velas), fecho ${fmt(bc.c)}` : `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
       ];
@@ -1237,6 +1273,39 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       }
     }
   }
+  // ---------- 11: reversão provável — zona de correção ≥ 50% com vários sinais a favor (sem depender do gatilho) ----------
+  const REV_UP = { '1h': '4h', '4h': '1d', '1d': '1w', '1w': '1M', '1M': '3M' };
+  function revAlerts(sym, dm, A, st, now, out, S) {
+    if (!A.revOn || !FB) return;
+    st.rev = st.rev || {};
+    for (const id of A.revTfs || []) {
+      const d = dm[id]; if (!d || !d.ext) continue; const z = d.ext.snap, f = d.fibs && d.fibs[0];
+      if (!z.trend || !f || !(z.pullback >= 50 && z.pullback <= 91.8)) continue;
+      const dir = z.trend, p = d.price, cl = d.closed, ok = [];
+      const r = FB.retrOf(f, p) * 100; if (r >= 61.8 && r <= 80) ok.push('Fib 0,618–0,786');
+      const lo = FB.NEXT[id], dl = lo && dm[lo]; if (dl && FB.confluence(f, [...(dl.fibs || []), ...(dl.fibsI || [])])) ok.push('⭐ alvo do ' + LBL[lo]);
+      const m50 = f.A > 0 && f.B > 0 ? Math.exp((Math.log(f.A) + Math.log(f.B)) / 2) : (f.A + f.B) / 2, zl = Math.min(f.A, m50), zh = Math.max(f.A, m50);
+      if ([...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])].some((x) => x.dir === dir && x.filled == null && x.top >= zl && x.bot <= zh)) ok.push('FVG na zona');
+      const sm = smaLast(cl.map((c) => c.c), 200); if (sm && Math.abs(p - sm) / sm <= 0.02) ok.push('SMA 200');
+      const mid = emaLast(cl.map((c) => c.c), 20), a = atrLast(cl, 10), l3 = cl.slice(-3);
+      if (mid && a && (dir === 1 ? Math.min(...l3.map((c) => c.l)) <= mid - 3 * a : Math.max(...l3.map((c) => c.h)) >= mid + 3 * a)) ok.push('Keltner ±3ATR');
+      const swOf = (x) => x && [...(x.int.res.sweeps || []), ...(x.ext.res.sweeps || [])].some((w) => !w.invalid && w.dir === -dir && w.i >= x.closed.length - 6);
+      if (swOf(d) || swOf(dl)) ok.push('💧 sweep');
+      if (S && lineConf(S, sym, p, now).length) ok.push('linha tua');
+      const up = dm[REV_UP[id]]; if (up && up.ext && up.ext.snap.trend === dir) ok.push('contexto ' + LBL[REV_UP[id]]);
+      const N = 8, key = `${sym}|${id}|${f.A.toPrecision(6)}|${f.B.toPrecision(6)}`;
+      if (ok.length < (+A.revMin || 5) || st.rev[key]) continue;
+      st.rev[key] = now; if (st.silent) continue;
+      out.push({ kind: 'rev', sym, tf: id, text: [
+        `🔄 <b>Reversão provável · ${LBL[id]} · ${esc(sym)}</b> — ${ok.length}/${N} sinais`,
+        `${dir === 1 ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)} · preço ${fmt(p)}`,
+        `A favor: ${ok.map((x) => '✔ ' + x).join(' · ')}`,
+        `Ainda falta a quebra no timeframe de baixo — é um aviso para olhares, não um setup.`,
+        `Invalida ${dir === 1 ? 'abaixo' : 'acima'} de ${fmt(f.A)}`,
+      ].join('\n') });
+    }
+    for (const k of Object.keys(st.rev)) if (now - st.rev[k] > 400 * 864e5) delete st.rev[k];
+  }
   // ---------- 7: perto de um alvo de um setup avisado ----------
   function targetAlerts(sym, raw, A, st, now, out) {
     if (!st.tgw || !st.tgw.length) return;
@@ -1314,6 +1383,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
+    if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out, S);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
@@ -1324,6 +1394,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     smaAlerts(sym, raw, dm, A, st, now, out);
     targetAlerts(sym, raw, A, st, now, out);
     fibAlerts(sym, dm, A, st, now, out, S);
+    revAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
     return out;
@@ -1343,7 +1414,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
 // Usado pela app (no HTML) e pelo vigia (alertas-motor.js).
 (function (root) {
   'use strict';
-  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'] } };
+  const SYN = { 'STABLE.D': { name: 'USDT.D + USDC.D (domínio das stablecoins)', cg: ['usdt', 'usdc'], key: 'sd' },
+    'TOTAL': { name: 'Capitalização total do mercado cripto (CRYPTOCAP:TOTAL)', cg: 'total', key: 'tot' } };
+  const keyOf = (s) => (SYN[s] && SYN[s].key) || 'sd';   // prefixo dos documentos na conta (meta/<key>_<tf>, meta/<key>_live)
   const isSynth = (s) => Object.prototype.hasOwnProperty.call(SYN, s);
   const HIST_TFS = ['1M', '1w', '1d', '4h', '1h', '15m'];   // timeframes guardados (o 15m só pela consolidação do vigia)
   const BASE_TFS = ['1M', '1w', '1d', '4h', '1h', '15m', '5m'];
@@ -1448,14 +1521,15 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // valor atual a partir da resposta /global da CoinGecko
   function cgValue(sym, j) {
+    if (SYN[sym].cg === 'total') { const t = j && j.data && j.data.total_market_cap && j.data.total_market_cap.usd; return t > 0 ? Math.round(t) : null; }
     const p = j && j.data && j.data.market_cap_percentage; if (!p) return null;
     let v = 0; for (const k of SYN[sym].cg) { if (!(p[k] > 0)) return null; v += p[k]; }
     return Math.round(v * 1e5) / 1e5;
   }
   // nomes legíveis dos ativos mais comuns (a app e o vigia usam os mesmos)
-  const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'COCO.L': 'Cacau (ETC)' };
+  const NAMES = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás natural', 'BZ=F': 'Brent', 'CL=F': 'Petróleo WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P 500', 'NQ=F': 'Nasdaq 100', 'BTCUSDT': 'Bitcoin', 'ETHUSDT': 'Ethereum', 'SOLUSDT': 'Solana', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Domínio stablecoins', 'TOTAL': 'Mercado cripto total', 'COCO.L': 'Cacau (ETC)' };
   // nomes curtos para os rácios (cabem numa linha: Ouro/Bitcoin, AGAP/BTC…)
-  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'COCO.L': 'Cacau ETC' };
+  const SHORT = { 'GC=F': 'Ouro', 'SI=F': 'Prata', 'PL=F': 'Platina', 'PA=F': 'Paládio', 'HG=F': 'Cobre', 'NG=F': 'Gás', 'BZ=F': 'Brent', 'CL=F': 'WTI', 'CC=F': 'Cacau', 'ES=F': 'S&P', 'NQ=F': 'Nasdaq', 'BTCUSDT': 'BTC', 'ETHUSDT': 'ETH', 'SOLUSDT': 'SOL', 'XRPUSDT': 'XRP', 'NICK.L': 'Níquel', 'STABLE.D': 'Stable.D', 'TOTAL': 'Cripto total', 'COCO.L': 'Cacau ETC' };
   function nameOf(sym, own) {
     const one = (x) => (own && own[x]) || NAMES[x] || x;
     const sh = (x) => (own && own[x] && own[x].length <= 12 ? own[x] : SHORT[x] || String(x).replace(/\.L$/, '').replace(/USDT$/, ''));
@@ -1477,7 +1551,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // de quanto em quanto tempo o vigia volta a analisar: 5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora
   const monEvery = (tf) => (tf === '5m' ? 0 : tf === '15m' ? 9e5 : 36e5);
-  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, keyOf, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Vigia (Google Apps Script): lê as definições e marcações da conta, vai buscar as velas, corre os alertas e manda para o Telegram.
@@ -1669,26 +1743,34 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
 
   // ---------- ativos sintéticos (STABLE.D): um ponto da CoinGecko por volta; histórico na conta ----------
-  function synthHist(a) {
-    const h = {};
-    for (const tf of SYN.HIST_TFS) { const j = fsGet(a, 'meta/sd_' + tf); if (j) { try { h[tf] = JSON.parse(j); } catch (e) {} } }
+  function synthHist(a, sym) {
+    const h = {}, K = SYN.keyOf(sym);
+    for (const tf of SYN.HIST_TFS) { const j = fsGet(a, 'meta/' + K + '_' + tf); if (j) { try { h[tf] = JSON.parse(j); } catch (e) {} } }
     return h;
   }
-  function synthRecord(a, A, hb, now) {
+  // uma só chamada à CoinGecko por volta serve todos os sintéticos (STABLE.D, TOTAL)
+  function synthRecord(a, A, hb, now, syms) {
     const r = http('https://api.coingecko.com/api/v3/global' + (A.cgKey ? '?x_cg_demo_api_key=' + encodeURIComponent(A.cgKey) : ''));
-    let live = []; try { live = JSON.parse(fsGet(a, 'meta/sd_live') || '[]'); } catch (e) {}
+    let j = null;
     if (r.code !== 200) hb.err.push('CoinGecko ' + r.code + (A.cgKey ? '' : ' — põe a chave grátis na página Alertas'));
-    else { const v = SYN.cgValue('STABLE.D', JSON.parse(r.text)); if (v == null) hb.err.push('CoinGecko sem domínio USDT/USDC'); else live.push([now, v]); }
-    let hist = null;
-    // uma vez por dia: os pontos com mais de 3 dias passam para o histórico (o ficheiro de pontos fica pequeno)
-    if (live.length && now - live[0][0] > 4 * 864e5) {
-      hist = synthHist(a);
-      const c = SYN.consolidate(hist, live, now);
-      for (const tf of SYN.HIST_TFS) if (c.hist[tf] && c.hist[tf].length) { const e = fsSet(a, 'meta/sd_' + tf, JSON.stringify(c.hist[tf])); if (e) hb.err.push(e); }
-      hist = c.hist; live = c.live;
+    else { try { j = JSON.parse(r.text); } catch (e) {} }
+    const out = {};
+    for (const sym of syms) {
+      const K = SYN.keyOf(sym);
+      let live = []; try { live = JSON.parse(fsGet(a, 'meta/' + K + '_live') || '[]'); } catch (e) {}
+      if (j) { const v = SYN.cgValue(sym, j); if (v == null) hb.err.push('CoinGecko sem valor para ' + sym); else live.push([now, v]); }
+      let hist = null;
+      // uma vez por dia: os pontos com mais de 3 dias passam para o histórico (o ficheiro de pontos fica pequeno)
+      if (live.length && now - live[0][0] > 4 * 864e5) {
+        hist = synthHist(a, sym);
+        const c = SYN.consolidate(hist, live, now);
+        for (const tf of SYN.HIST_TFS) if (c.hist[tf] && c.hist[tf].length) { const e = fsSet(a, 'meta/' + K + '_' + tf, JSON.stringify(c.hist[tf])); if (e) hb.err.push(e); }
+        hist = c.hist; live = c.live;
+      }
+      const e = fsSet(a, 'meta/' + K + '_live', JSON.stringify(live)); if (e) hb.err.push(e);
+      out[sym] = { live, hist };
     }
-    const e = fsSet(a, 'meta/sd_live', JSON.stringify(live)); if (e) hb.err.push(e);
-    return { live, hist };
+    return out;
   }
 
   // ---------- uma volta ----------
@@ -1716,7 +1798,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const relay = String(A.relay || '').trim();
     // cada favorito é uma análise; cada ativo diferente (as pernas dos rácios incluídas) é um download, feito uma só vez por volta
     const legsOf = (s) => (C.isRatio(s) ? s.split('/') : [s]);
-    const syn = favs.some(SYN.isSynth) ? synthRecord(a, A, hb, now) : null;
+    const synSyms = [...new Set(favs.flatMap((s) => s.split('/')).filter(SYN.isSynth))];
+    const syn = synSyms.length ? synthRecord(a, A, hb, now, synSyms) : null;
     const anyRatio = favs.some(C.isRatio), ftfs = anyRatio ? [...new Set(tfs.concat(C.baseTfs(tfs)))] : tfs;
     const costOf = (s) => (isCrypto(s) && !relay ? new Set(ftfs.map((id) => (C.MAGG[id] ? '1M' : id))).size : 1);
     // primeiro os ativos com setups a seguir (o toque no FVG não pode esperar), depois os outros à vez
@@ -1742,10 +1825,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     hb.dl = dl.size; hb.an = batch.length; hb.maxDl = MAX_ASSETS; hb.maxAn = MAX_AN;
     hb.needDl = new Set([].concat(...act.map(legsOf))).size;
     const legs = [...dl], crypto = legs.filter(isCrypto);
-    let synH = syn && syn.hist;
+    const synH = {}; if (syn) for (const k in syn) if (syn[k].hist) synH[k] = syn[k].hist;
     const cdata = crypto.length ? (relay ? relayCandles(relay, crypto, ftfs, edits) : cryptoCandles(crypto, ftfs, edits)) : {};
     const sdata = {};
-    const legData = (x) => { if (SYN.isSynth(x)) { if (!syn) return { _err: 'sem dados' }; if (!synH) synH = synthHist(a); if (!Object.keys(synH).length && !syn.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH, syn.live, ftfs); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
+    const legData = (x) => { if (SYN.isSynth(x)) { const sy = syn && syn[x]; if (!sy) return { _err: 'sem dados' }; if (!synH[x]) synH[x] = synthHist(a, x); if (!Object.keys(synH[x]).length && !sy.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH[x], sy.live, ftfs); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
     const msgs = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }
@@ -1775,7 +1858,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (st.sma) for (const k of Object.keys(st.sma)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.sma[k];
     if (st.ln) for (const k of Object.keys(st.ln)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.ln[k];
     if (st.tgw) st.tgw = st.tgw.filter((x) => favs.indexOf(x.sym) >= 0);
-    for (const o of [st.fibz, st.kc]) if (o) for (const k of Object.keys(o)) if (favs.indexOf(k.split('|')[0]) < 0) delete o[k];
+    for (const o of [st.fibz, st.kc, st.rev]) if (o) for (const k of Object.keys(o)) if (favs.indexOf(k.split('|')[0]) < 0) delete o[k];
     saveState(st);
     hb.ms = Date.now() - t0;
     const e = fsSet(a, 'meta/alertlog', JSON.stringify(Object.assign(hb, { log: st.log })));
