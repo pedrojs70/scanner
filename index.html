@@ -736,7 +736,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 20h55</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 21h10</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -5444,7 +5444,7 @@ ${AI_DAY_FORMAT}`;
     box.querySelectorAll('[data-rmode]').forEach((b) => b.addEventListener('click', () => { settings.revMode = b.dataset.rmode; save('mss_settings4', settings); npRenderRev0(); }));
     box.querySelectorAll('[data-rt]').forEach((b) => b.addEventListener('click', () => { npRevTf = b.dataset.rt; npRenderRev0(); }));
     box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
-    box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); selectedTf = a.dataset.tf; save('mss_tf', selectedTf); npOpenChart(a.dataset.chart); }));
+    box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); selectedTf = a.dataset.tf; save('mss_tf', selectedTf); npKeepTf = true; npOpenChart(a.dataset.chart); }));
   }
   function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else if (npView === 'rev') npRenderRev(); else npRenderAssetHead(); npSyncStatus(); }
   function npBack() {
@@ -5780,8 +5780,11 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     });
   }
   let npFrom = 'feed', npBoardY = 0;   // de onde se abriu o ativo (jornal, quadro dos favoritos ou Em foco)
+  let npKeepTf = false;   // um link com timeframe (alerta do Telegram, página Reversões) escolhe o TF; de resto abre sempre no Diário
   function npOpenAsset(s) {
     if (editMode) { requestExitEdit(); if (editMode) return; }
+    const sameSym = symbol === s, wantTf = npKeepTf ? selectedTf : '1d'; npKeepTf = false;
+    if (selectedTf !== wantTf) { selectedTf = wantTf; save('mss_tf', wantTf); if (sameSym) setTimeout(() => { try { if (!data[wantTf]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); updateEditUi(); } } catch (e) {} }, 0); }
     if (npView !== 'asset') { npFrom = npView; if (npView === 'board' || npView === 'focus' || npView === 'rev') npBoardY = window.scrollY; }
     if (symbol !== s) { symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); }
     npView = 'asset'; document.body.dataset.npv = 'asset';
@@ -5901,7 +5904,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       const u = new URLSearchParams(location.search), a = (u.get('a') || u.get('g') || '').trim(), tf = u.get('tf'), v = u.get('g') ? 'chart' : u.get('v');   // ?g= é o link curto visível no texto do alerta (abre o gráfico)
       if (a) {
         history.replaceState({ v: 'feed' }, '', location.pathname);
-        if (tf && TF_IDS.includes(tf)) { selectedTf = tf; save('mss_tf', tf); }
+        if (tf && TF_IDS.includes(tf)) { selectedTf = tf; save('mss_tf', tf); npKeepTf = true; }
         if (v === 'ai') aiAlert = { sym: a, at: +u.get('al') || 0, kind: u.get('k') || '', h: u.get('h') || '' };
         setTimeout(() => { if (v === 'chart') npOpenChart(a); else npOpenAsset(a); if (aiAlert) setTimeout(aiBannerUi, 500); }, 300);
       }
