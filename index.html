@@ -759,7 +759,7 @@
       <li><b>Botões nos alertas do Telegram:</b> cada alerta traz “📈 Abrir gráfico” e “Abrir ativo” — abrem a app nesse ativo, já no timeframe do alerta (no setup, o da zona). No telemóvel, se abrir dentro do Telegram, desliga o navegador integrado nas definições do Telegram. Se a app não tiver a sessão iniciada, pede o login primeiro.</li>
       <li><b>Alertas por ativo:</b> em Alertas → “Por ativo” seleciona um ou vários ativos (ou Cripto / Ações / Rácios) e escolhe os alertas; no “Quadro” vês e mudas tudo numa grelha, incluindo o que recebem os novos favoritos. Ativos sem alertas não são analisados pelo vigia.</li>
       <li><b>Nome e 📈 nos cartões Em foco:</b> no cartão Em foco do jornal e em cada cartão de “Ver todos em foco”, o nome do ativo abre a página do ativo e o 📈 ao lado abre logo o gráfico maior. “← Voltar” regressa a onde estavas (jornal ou Em foco).</li>
-      <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (abre em Prontos + Falta FVG).</li>
+      <li><b>Ver todos em foco:</b> por baixo do Em foco abre um cartão para cada ativo que merece destaque — pronto, falta FVG, em zona ou perto da inversão — com filtros em cima (um de cada vez; “Todos” mostra tudo; abre em Prontos).</li>
       <li><b>Ativo aberto:</b> os favoritos passam para uma fita em cima (com os mesmos sinais) e o ativo usa a largura toda. “← Voltar ao jornal” ou o título regressam à entrada.</li>
       <li><b>Contexto:</b> verde = a favor; âmbar = a favor mas já corrigiu mais de 78,6% (perto de virar contra); vermelho = contra.</li>
       <li><b>Tema escuro / claro</b> no menu de cima; <b>Sair</b> termina a sessão.</li>
@@ -842,7 +842,7 @@
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe, até marcares o ponto de partida.
 <br>• <b>💾 Gravar</b> — as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só vão para o aparelho e para a conta quando carregas em Gravar. Ao fechar com alterações por gravar: Gravar / Descartar / Continuar a editar.
 <br>• <b>↶ Desfazer / ↷ Refazer</b> — um passo de cada vez; só desde a última gravação (ao abrir a app e depois de gravar começa vazio).
-<br>• <b>↺ Voltar ao automático</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha (pede confirmação e faz cópia de segurança). Para apagar as marcas de um ativo em <b>todos</b> os timeframes: nos favoritos, abre o ativo e carrega em <b>⟲ Recriar gráfico em automático</b>. Para <b>todos</b> os favoritos de uma vez: “⟲ recriar todos” por baixo de Favoritos (ou no Quadro) — pede confirmação, faz cópia de segurança e mostra ↶ Desfazer.</li>
+<br>• <b>↺ Voltar ao automático</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha (pede confirmação e faz cópia de segurança). Para apagar as marcas de um ativo em <b>todos</b> os timeframes: nos favoritos, abre o ativo e carrega em <b>⟲ Recriar gráfico em automático</b>. Para <b>todos</b> os favoritos de uma vez: “⟲ recriar todos em automático” no cabeçalho do Quadro dos favoritos — pede confirmação, faz cópia de segurança e mostra ↶ Desfazer.</li>
     </ul>
   </div>
   <div class="chartbox">
@@ -4957,7 +4957,7 @@ function motor_() {
       const line = b && b.rank >= 2 ? `${b.st.name} ${b.dir === 1 ? '▲' : '▼'} ${b.rank === 4 ? 'pronto' : b.rank === 3 ? 'falta FVG' : 'falta quebra'}${b.ctx && !b.ctx.fav ? ` · contexto contra ${pct(b.ctx.pull)}` : b.ctx && b.ctx.pull > 78.6 ? ' · contexto fundo' : ''}${b.sweep && b.rank >= 3 ? ' 💧' : ''}` : '';
       items += `<li data-s="${s}" data-g="${g}"><span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)" aria-label="Arrastar ${s}">⠿</span><div style="flex:1;min-width:0"><div class="s">${nmHtml(s)}${i.marks}</div><div class="p">${i.f && i.f.price != null ? fmt(i.f.price) : 'a carregar…'}${i.chg != null ? ` <span style="color:${i.chg >= 0 ? NPC('up') : NPC('dn')}">${i.chg >= 0 ? '+' : '−'}${Math.abs(i.chg).toFixed(1).replace('.', ',')}%</span>` : ''}</div>${line ? `<div class="ln">${line}</div>` : ''}</div><div class="sigs">${i.sigs}</div><button class="np-x" data-c="${s}" aria-label="Abrir o gráfico de ${s}" title="Abrir o gráfico">📈</button><button class="np-x" data-x="${s}" aria-label="Tirar ${s} dos favoritos" title="Tirar dos favoritos">✕</button></li>`;
     }
-    box.innerHTML = `<h2 class="np-h2"><a href="#" class="np-blk" id="npBoardLk" title="Abrir o quadro com todos os favoritos e mais informação">Favoritos<small>quadro →</small></a></h2><div style="margin:-4px 0 6px;font-size:13px"><a href="#" id="npReAllR" title="Apaga as tuas marcações à mão de todos os favoritos (com cópia e Desfazer)" style="float:right;color:var(--np-mu)">⟲ recriar todos</a><a href="#" id="npRevLk" title="Ativos em zona de correção com tudo o que bate certo para uma reversão — sem depender do gatilho"><b>Reversões prováveis →</b></a></div>
+    box.innerHTML = `<h2 class="np-h2"><a href="#" class="np-blk" id="npBoardLk" title="Abrir o quadro com todos os favoritos e mais informação">Favoritos<small>quadro →</small></a></h2><div style="margin:-4px 0 6px;font-size:13px"><a href="#" id="npRevLk" title="Ativos em zona de correção com tudo o que bate certo para uma reversão — sem depender do gatilho"><b>Reversões prováveis →</b></a></div>
       <div class="np-legend">Um sinal por setup: ${setups.map((x) => x.name).join(' · ')}
       <div class="lg"><span><span class="sig off">▲</span>fora da zona</span><span><span class="sig zone">▲</span>em zona</span><span><span class="sig broke">▲</span>falta FVG</span><span><span class="sig ready">▲</span>pronto</span><span>▲ Long · ▼ Short</span><span>💧 quebra após sweep</span><span><span class="np-dot"></span>perto da inversão</span><span>✋ manual · ⚖ disputa</span></div></div>
       <div class="np-sort" role="group" aria-label="Ordem dos favoritos"><button data-o="crypto" class="${settings.npSort !== 'stocks' ? 'on' : ''}">Cripto primeiro</button><button data-o="stocks" class="${settings.npSort === 'stocks' ? 'on' : ''}">Ações primeiro</button></div>${settings.favManual ? '<div class="np-az"><span>a tua ordem</span> · <a href="#" class="npAZ">repor A–Z</a></div>' : `<div class="np-az">arrasta ⠿ para mudar a ordem${settings.favPrev ? ' · <a href="#" class="npUndoAZ"><b>↶ voltar à ordem anterior</b></a>' : ''}</div>`}
@@ -4967,7 +4967,6 @@ function motor_() {
     box.querySelectorAll('.np-rail li[data-s]').forEach((li) => li.addEventListener('click', () => npOpenAsset(li.dataset.s)));
     $('#npBoardLk').addEventListener('click', (e) => { e.preventDefault(); npShowBoard(); });
     const rv = $('#npRevLk'); if (rv) rv.addEventListener('click', (e) => { e.preventDefault(); npShowRev(); });
-    const ra = $('#npReAllR'); if (ra) ra.addEventListener('click', (e) => { e.preventDefault(); recreateAllAuto(); });
     npAZWire(box); if (!npFQ && npKind === 'all') npDrag(box, '.np-rail li[data-s]');   // a filtrar não se arrasta (a ordem dos escondidos perdia-se)
     box.querySelectorAll('[data-o]').forEach((b) => b.addEventListener('click', () => { settings.npSort = b.dataset.o; save('mss_settings4', settings); npRender(); }));
     box.querySelectorAll('[data-c]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npOpenChart(b.dataset.c); }));
@@ -5054,7 +5053,7 @@ function motor_() {
     const rows = (settings.setups || []).filter((y) => y.on).map((y) => { const e = favSetup(s, y); return `<tr><td style="font-weight:600">${y.name}</td><td style="color:${!e ? NPC('mu') : e.dir === 1 ? NPC('up') : NPC('dn')}">${!e ? '—' : e.dir === 1 ? 'Long' : 'Short'}</td><td style="text-align:right;${e && e.rank === 4 ? `color:${NPC('up')};font-weight:700` : ''}">${!e ? (npNv(s, y) ? 'não vigiado' : 'sem dados') : e.rank === 4 ? 'Pronto' + (e.sweep ? ' 💧' : '') : e.rank === 3 ? 'falta FVG' + (e.sweep ? ' 💧' : '') : e.rank === 2 ? `em zona ${pct(e.z.pullback)}` : 'fora da zona'}</td></tr>`; }).join('');
     return `<div class="np-kick">${kick}</div><h2><a href="#" data-open="${s}" class="np-hl" title="Abrir o ativo">${npEsc(nm(s))}</a> <a href="#" data-chart="${s}" class="np-hc" title="Abrir logo o gráfico maior">📈</a>${nm(s) !== s ? `<span class="tk big">${s}</span>` : ''}</h2><div class="np-mono" style="color:var(--np-mu)">${f.price != null ? fmt(f.price) : ''}</div>
       <p class="np-why">${why}${x.star ? `<br><span>${x.star.txt}</span>` : ''}${near ? `<br><span style="color:var(--np-red)">● ${near}</span>` : ''}</p>
-      <div style="margin:6px 0 4px;position:relative">${npMiniChart(f.tfs[st.zone], 130)}<span style="position:absolute;top:2px;right:4px;font-weight:800;font-size:15px;color:var(--np-ink);letter-spacing:.02em">${({ '5m': '5m', '15m': '15m', '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M', '3M': '3M', '6M': '6M', '1Y': 'A' })[st.zone] || tfLabel(st.zone)}</span></div><div style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</div>
+      <div style="margin:6px 0 4px">${npMiniChart(f.tfs[st.zone], 130)}</div><div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px"><span style="font-size:11px;color:var(--np-mu)">${tfLabel(st.zone)} · linha vermelha = limite · tracejado = 50%</span><b style="font-size:16px;font-weight:800;color:var(--np-ink)">${({ '5m': '5m', '15m': '15m', '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M', '3M': '3M', '6M': '6M', '1Y': 'A' })[st.zone] || tfLabel(st.zone)}</b></div>
       <table class="np-st"><tbody>${rows}</tbody></table>
       <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;font-size:14px"><a href="#" data-open="${s}">Abrir o ativo completo →</a></div>`;
   }
@@ -5082,23 +5081,20 @@ function motor_() {
   function npRenderFocusAll() { npFQKeep('npFocusQ', npRenderFocusAll0); }
   function npRenderFocusAll0() {
     const box = $('#npFocusAll'); if (!box) return;
-    const sel = settings.npFocusF || ['ready', 'fvg'];
+    const sel = typeof settings.npFocusF === 'string' ? settings.npFocusF : 'ready';   // um filtro de cada vez (ou Todos)
     const all = npRanked().map((b) => Object.assign(b, { cat: npCat(b) })).filter((b) => b.cat && npFavMatch(b.s, npFQ) && npKindOk(b.s, npKind));
     const cnt = (c) => all.filter((b) => b.cat === c).length;
-    const list = all.filter((b) => sel.includes(b.cat));
+    const list = sel === 'all' ? all : all.filter((b) => b.cat === sel);
     box.innerHTML = `<div class="bhead"><div><h2>Em foco</h2><div class="sub">${all.length} de ${(settings.favs || []).length} ativos merecem destaque · ${favProg || ''}</div></div><button id="npFocusBack">← Voltar ao jornal</button></div>
       ${npFQBox('npFocusQ', 'Procurar (ex.: ouro, GC=F)…')}
-      <div class="np-ff">${FOCUS_CATS.map(([k, t]) => `<button data-ff="${k}" class="${sel.includes(k) ? 'on' : ''}">${t} <span>${cnt(k)}</span></button>`).join('')}<button data-ff="all" class="${sel.length === 4 ? 'on' : ''}">Todos <span>${all.length}</span></button></div>
+      <div class="np-ff">${FOCUS_CATS.map(([k, t]) => `<button data-ff="${k}" class="${sel === k ? 'on' : ''}">${t} <span>${cnt(k)}</span></button>`).join('')}<button data-ff="all" class="${sel === 'all' ? 'on' : ''}">Todos <span>${all.length}</span></button></div>
       <div class="np-fgrid">${list.map((b) => `<div class="np-box">${npFocusCard(b, { ready: 'PRONTO', fvg: 'FALTA FVG', zone: 'EM ZONA', near: 'PERTO DA INVERSÃO' }[b.cat])}</div>`).join('') || `<p class="np-why" style="color:var(--np-mu)">${all.length ? 'Nenhum ativo nestes filtros — escolhe outro em cima.' : 'Nenhum favorito em zona, com quebra ou perto da inversão neste momento.'}</p>`}</div>`;
     $('#npFocusBack').addEventListener('click', npShowFeed);
     npFQWire('npFocusQ', npRenderFocusAll0);
     box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenChart(a.dataset.chart); }));
     box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
     box.querySelectorAll('[data-ff]').forEach((b) => b.addEventListener('click', () => {
-      const k = b.dataset.ff; let cur = (settings.npFocusF || ['ready', 'fvg']).slice();
-      if (k === 'all') cur = cur.length === 4 ? ['ready', 'fvg'] : FOCUS_CATS.map((c) => c[0]);
-      else cur = cur.includes(k) ? cur.filter((x) => x !== k) : cur.concat(k);
-      settings.npFocusF = cur; save('mss_settings4', settings); npRenderFocusAll0();
+      settings.npFocusF = b.dataset.ff; save('mss_settings4', settings); npRenderFocusAll0();
     }));
   }
   async function npLoadFeed() {
@@ -5457,7 +5453,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   function npRenderAssetHead() {
     const h = $('#npAssetHead'); if (!h) return;
     const on = (settings.favs || []).includes(symbol), dd = data[selectedTf] || Object.values(data)[0];
-    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${nmHtml(symbol, true)} <button class="np-ren" id="npRen" title="Mudar o nome que aparece (o ticker não muda)">✎</button></h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
+    h.innerHTML = `<div><div class="np-kick">ATIVO</div><h2>${nmHtml(symbol, true)} <button class="np-ren" id="npMaxGo" title="Abrir já o gráfico maior (ao fechar voltas a esta página)">📈</button> <button class="np-ren" id="npRen" title="Mudar o nome que aparece (o ticker não muda)">✎</button></h2></div><div><div class="px">${dd ? fmt(dd.price) : '…'}</div><div class="st"></div></div>
       <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar gráfico em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ${npFrom === 'board' ? 'aos favoritos' : npFrom === 'focus' ? 'ao Em foco' : npFrom === 'rev' ? 'às Reversões' : 'ao jornal'}</button></div>`;
     $('#npBack').addEventListener('click', npBack);
     { const ord = npSorted(), k = ord.indexOf(symbol);
@@ -5467,6 +5463,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
         h.firstElementChild.appendChild(nv); nv.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => npOpenAsset(b.dataset.go))); } }
     $('#npAI').addEventListener('click', aiCopy);
     $('#npRen').addEventListener('click', () => renameAsset(symbol));
+    $('#npMaxGo').addEventListener('click', () => { npChartDirect = false; const mb = $('#maxBtn'); const box = $('.chartbox'); if (mb && box && !box.classList.contains('max')) mb.click(); });
     const inv = $('#npInv'); if (inv) inv.addEventListener('click', () => npOpenAsset(ratioLegs(symbol).reverse().join('/')));
     if (isSynth(symbol)) {
       const sym = symbol, fi = $('#npImpF');
