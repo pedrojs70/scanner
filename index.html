@@ -709,6 +709,7 @@
   body.uni #tgExt, body.uni #tgInt, body.uni #importBtn { display:none !important; }
   .sensbox { display:inline-flex; align-items:center; gap:4px; padding:0 6px; } .sensbox select { font:inherit; font-size:12px; border:1px solid var(--np-ln, #ccc); background:transparent; padding:2px; }
   #sensBox { display:none; }
+  .chartbox.editing #maxBtn { display:none !important; }   /* a editar: sai-se só por ✔ Terminar edição (pergunta se gravas) */
 .yuni{display:none} body.uni .yuni{display:inline} body.uni .nuni{display:none}
 </style>
 </head>
@@ -745,7 +746,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 13h45</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 14h30</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -797,7 +798,7 @@
 
     <h3 class="helphead">◆ Como a app está organizada agora</h3>
     <p><b>Duas estruturas por timeframe.</b> A <b>tendência principal</b> decide a direção, a zona e a Fibonacci dos setups (as pernas grandes, com menos ruído). O <b>movimento recente</b> dá o gatilho no 1H (Swing) e no 4H (Longo prazo). No Diário, Semanal e Mensal o recente não é gatilho: quando vira a favor dentro da zona de um setup aparece <b>✔ Confirmação</b> no checklist (e um alerta ✅) — o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disso não manda alertas.</p>
-    <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos, padrão = 3. Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
+    <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos; o padrão de todos os ativos está nas Definições (vem a 1). Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
     <p><b>Pontos que passam para baixo:</b> quando marcas um HH, HL, LH ou LL na tendência principal de um timeframe, a app põe esse topo/fundo também nos de baixo (até ao 4H), na vela mais alta/baixa desse período — se o timeframe de baixo ainda não o tiver. Em ✎ Editar estrutura esses pontos aparecem com ↓ (no menu: "herdado do Semanal"); se apagares a marca lá em cima, saem também em baixo; se apagares um herdado cá em baixo, não volta. Os pontos que a app pôs sozinha entre as tuas marcas (ex.: marcaste um HH sem o HL antes) aparecem esbatidos. Ao marcar, um aviso amarelo diz-te se o nome não bate com o preço (ex.: um HH abaixo do topo anterior) e corrige num clique.</p>
     <p><b>15m e 5m só nos ativos com intraday</b> (por defeito só o BTC; Definições → Monitorização → Por ativo). Nos outros desaparecem da app os timeframes de 15m e 5m, o Day trade, o Scalp e as killzones: os setups são Longo prazo e Swing.</p>
     <p><b>Estrutura única</b> (Definições, experimental, desligada): uma só estrutura por timeframe em vez de duas. Liga e desliga à vontade — as tuas correções à mão dos dois modos ficam guardadas.</p>
@@ -1147,6 +1148,9 @@
   <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
   <h3 class="sethead sub">Estrutura</h3>
   <div class="small muted" style="margin:2px 0 6px">Por defeito cada timeframe tem duas estruturas: a <b>tendência principal</b> (direção, zona e Fibonacci dos setups) e o <b>movimento recente</b> (gatilho no 1H/4H e ✔ Confirmação no Diário/Semanal). Se a principal de um ativo tiver pontos a menos ou a mais, ajusta-a no gráfico em <b>✎ Editar estrutura</b> com o botão <b>Pontos</b> (com a tendência principal escolhida) (1 = mais pontos … 5 = menos; vale só para esse ativo e esse grupo de timeframes: contexto, meio ou gatilho).</div>
+  <div class="field"><div>Pontos da tendência principal — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>padrão para todos os ativos: 1 = mais pontos … 3 = cálculo clássico … 5 = menos pontos (só as pernas grandes). Exceções por ativo: no gráfico, em ✎ Editar estrutura, botão “Pontos”</small></div><select id="setPriCtx"></select></div>
+  <div class="field"><div>Pontos da tendência principal — <b>meio</b> (Diário, 4H)</div><select id="setPriMid"></select></div>
+  <div class="field"><div>Pontos da tendência principal — <b>gatilho</b> (1H, 15m, 5m)</div><select id="setPriTrig"></select></div>
   <div class="field"><div>Estrutura única (experimental)<small>desligada por defeito. Ligada: uma só estrutura por timeframe (sem principal/recente) — a zona, a Fibonacci e o gatilho saem dela, e o botão Pontos passa a mexer nela. Podes ligar e desligar à vontade: as correções à mão dos dois modos ficam guardadas</small></div><input id="setUni" type="checkbox"></div>
   <div class="field uniopt"><div>Estrutura única: pontos — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>1 = mais pontos (mais sensível) … 5 = menos pontos (só as pernas grandes)</small></div><select id="setSensCtx"></select></div>
   <div class="field uniopt"><div>Estrutura única: pontos — <b>meio</b> (Diário, 4H)</div><select id="setSensMid"></select></div>
@@ -2554,9 +2558,9 @@
   const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
   const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
-  // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL por ativo (3 = padrão das Definições)
+  // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL (1 = mais pontos … 3 = cálculo clássico … 5 = menos)
   const PRI_LV = { 1: { m: 0.5, leg: 0.35, floor: 1 }, 2: { m: 0.7, leg: 0.45, floor: 1.25 }, 4: { m: 1.3, leg: 0.6, floor: 2 }, 5: { m: 1.7, leg: 0.7, floor: 2.5 } };
-  const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || 3); };
+  const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
   const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
   function computeTf(cs, id, sym) {
     const now = Date.now();
@@ -4943,6 +4947,7 @@
     renderBackups();
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr; $('#setSwF').value = settings.swFloor == null ? 1 : settings.swFloor;
+    { const ps = Object.assign({ ctx: 1, mid: 1, trig: 1 }, settings.priSens || {}); $('#setPriCtx').innerHTML = SENS_OPT(0, +ps.ctx); $('#setPriMid').innerHTML = SENS_OPT(0, +ps.mid); $('#setPriTrig').innerHTML = SENS_OPT(0, +ps.trig); }
     $('#setUni').checked = uniOn(settings); document.querySelectorAll('.uniopt').forEach((x) => { x.style.display = $('#setUni').checked ? '' : 'none'; }); $('#setUni').onchange = () => document.querySelectorAll('.uniopt').forEach((x) => { x.style.display = $('#setUni').checked ? '' : 'none'; }); const us = Object.assign({}, UNI_DEF, settings.uniSens || {}); $('#setSensCtx').innerHTML = SENS_OPT(0, +us.ctx); $('#setSensMid').innerHTML = SENS_OPT(0, +us.mid); $('#setSensTrig').innerHTML = SENS_OPT(0, +us.trig);
     $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
@@ -4986,8 +4991,8 @@
     });
   }
   function applySettings() {
-    const swOld = settings.swFloor == null ? 1 : +settings.swFloor, uniOld = JSON.stringify([uniOn(settings), settings.uniSens || null]);
-    settings = Object.assign({}, settings, { uniStruct: $('#setUni').checked, uniSens: { ctx: +$('#setSensCtx').value, mid: +$('#setSensMid').value, trig: +$('#setSensTrig').value },
+    const swOld = settings.swFloor == null ? 1 : +settings.swFloor, uniOld = JSON.stringify([uniOn(settings), settings.uniSens || null]), priOld = JSON.stringify(settings.priSens || null);
+    settings = Object.assign({}, settings, { priSens: { ctx: +$('#setPriCtx').value, mid: +$('#setPriMid').value, trig: +$('#setPriTrig').value }, uniStruct: $('#setUni').checked, uniSens: { ctx: +$('#setSensCtx').value, mid: +$('#setSensMid').value, trig: +$('#setSensTrig').value },
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, swFloor: Math.max(0, +$('#setSwF').value || 0), volMult: +$('#setVol').value,
       recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, divPivot: Math.max(2, Math.min(15, +$('#setDivPiv').value || 5)), legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
@@ -4997,7 +5002,7 @@
     });
     const uniCh = uniOld !== JSON.stringify([uniOn(settings), settings.uniSens || null]);
     if (uniCh) uniApply();
-    const monCh = (monDraft && JSON.stringify(monDraft) !== JSON.stringify(settings.mon || null)) || swOld !== (settings.swFloor == null ? 1 : +settings.swFloor) || uniCh;
+    const monCh = (monDraft && JSON.stringify(monDraft) !== JSON.stringify(settings.mon || null)) || swOld !== (settings.swFloor == null ? 1 : +settings.swFloor) || uniCh || priOld !== JSON.stringify(settings.priSens || null);
     if (monDraft) settings.mon = monDraft;
     save('mss_settings4', settings); $('#settings').classList.remove('open'); loadAll();
     if (monCh) { scanFavs(true); npRender(); }
@@ -6276,7 +6281,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     try { sensUi(); } catch (e) {}
   }
   function sensUi() {
-    const sel = $('#sensSel'); if (!sel) return; const u = uniOn(settings), K = u ? 'uniSensPer' : 'priSensPer', g = UNI_GRP[selectedTf] || 'mid', per = (settings[K] || {})[symbol] || {}, def = u ? +((settings.uniSens || {})[g] || UNI_DEF[g]) : 3;
+    const sel = $('#sensSel'); if (!sel) return; const u = uniOn(settings), K = u ? 'uniSensPer' : 'priSensPer', g = UNI_GRP[selectedTf] || 'mid', per = (settings[K] || {})[symbol] || {}, def = u ? +((settings.uniSens || {})[g] || UNI_DEF[g]) : +((settings.priSens || {})[g] || 1);
     const gn = { ctx: 'contexto', mid: 'meio', trig: 'gatilho' }[g];
     sel.innerHTML = `<option value="">padrão (${def})</option>` + [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${+per[g] === v ? ' selected' : ''}>${v}${v === 1 ? ' — mais' : v === 5 ? ' — menos' : ''}</option>`).join('');
     sel.title = `Pontos da ${u ? 'estrutura' : 'tendência principal'} de ${nm(symbol)} nos timeframes de ${gn} (só este ativo): 1 = mais pontos, 5 = menos`;
