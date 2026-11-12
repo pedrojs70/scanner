@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T20:51:55.417Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T23:15:41.890Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -107,7 +107,7 @@
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
           const pt = ms.side === 'H' ? { p: H(j), i: j } : { p: L(j), i: j };
-          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true });
+          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor });
           if (ms.side === 'H') { lastPH = pt; lastManH = pt; } else { lastPL = pt; lastManL = pt; }
           // o início já diz o sentido: num fundo começa a subir, num topo começa a descer (protegido no próprio início)
           trend = ms.side === 'H' ? -1 : 1; prot = pt; ext = pt; target = null; counter = null; kind = null;
@@ -327,7 +327,7 @@
     let mode0 = null;
     if (ov.start && ov.start.t != null) {
       const k = idxOf(ov.start.t);
-      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; }
+      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
     }
     // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início (manual)
     if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
@@ -491,8 +491,8 @@
       if (o.trace && j > 1) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
-          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); trend = -1; }
-          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); trend = 1; }
+          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); trend = -1; }
+          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); trend = 1; }
           hi = { p: H(j), i: j }; lo = { p: L(j), i: j };
         }
         continue;
@@ -691,7 +691,25 @@
     return { hi, lo, state, from: closed[n - 1 - W].t, to: last.t, bars: W };
   }
 
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS };
+
+  // âncora automática (estrutura única): o Semanal começa no último topo/fundo confirmado do Mensal, o Diário no último do Semanal.
+  // pres = estrutura do timeframe de cima, pc = velas fechadas dele, cc = velas fechadas deste. Devolve o início {t, side, label, mode:'auto', anchor:true} ou null.
+  function anchorFrom(pres, pc, cc, minAfter) {
+    if (!pres || !pres.swings || !pc || !pc.length || !cc || cc.length < 3) return null;
+    const sw = pres.swings.filter((s) => !s.provisional && s.i >= 0 && s.i < pc.length).sort((a, b) => a.i - b.i), need = Math.max(1, minAfter || 1);
+    // do último topo/fundo confirmado para trás: se a perna de cima ainda é tão curta que este timeframe ficava quase sem velas (ex.: um ponto recente, pequeno), recua para o anterior
+    for (let q = sw.length - 1; q >= 0; q--) {
+      const s = sw[q], a = pc[s.i].t, b = s.i + 1 < pc.length ? pc[s.i + 1].t : (pc[s.i].ct != null ? pc[s.i].ct + 1 : a + 1);
+      let k = -1;
+      for (let j = 0; j < cc.length; j++) { const c = cc[j], ce = c.ct != null ? c.ct : c.t; if (ce < a || c.t >= b) continue; if (k < 0 || (s.type === 'H' ? c.h > cc[k].h : c.l < cc[k].l)) k = j; }
+      if (k < 0) return null;   // antes do histórico deste timeframe
+      if (cc.length - 1 - k < need) continue;
+      const lab = s.manualLabel && /^(HH|HL|LH|LL)$/.test(s.manualLabel) ? s.manualLabel : s.label;
+      return { t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
+    }
+    return null;
+  }
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -859,7 +877,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const UNI_LV = { 1: { atr: 1.5, leg: 0.4, floor: 1.25 }, 2: { atr: 2, leg: 0.5, floor: 1.5 }, 3: { atr: 2.5, leg: 0.55, floor: 1.75 }, 4: { atr: 3, leg: 0.6, floor: 2 }, 5: { atr: 3.5, leg: 0.7, floor: 2.5 } };
   const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
-  const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
+  const uniOn = (S) => S.uniStruct !== false;   // por defeito: UMA estrutura por gráfico — contexto (Anual→Diário, só quebras) e gatilho (4H→5m, todos os topos/fundos)
   // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL (1 = mais pontos … 3 = cálculo clássico … 5 = menos)
   // Pontos da tendência principal: 1 e 2 = todos os topos/fundos de cada perna (motor do movimento recente, com correções mínimas maiores); 3 = só as pernas que quebram estrutura, sensível; 4 = cálculo clássico; 5 = menos pontos
   // 1 e 2: [múltiplo do ATR, proporção da perna, mínimo em ATR] por tipo de timeframe — nos timeframes largos a vela é grande face às correções, por isso o limite em ATR desce
@@ -867,8 +885,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const PRI_LV = { 1: { zz: 1, M: [1.5, 0.3, 0.8], W: [2.5, 0.5, 1.5], D: [3, 0.6, 2] }, 2: { zz: 1, M: [2, 0.4, 1.25], W: [3, 0.6, 2], D: [3.5, 0.7, 2.5] }, 3: { m: 0.5, leg: 0.35, floor: 1 }, 5: { m: 1.4, leg: 0.6, floor: 2 } };
   const zzOf = (pl, id) => pl[['1Y', '6M', '3M', '1M'].includes(id) ? 'M' : id === '1w' ? 'W' : 'D'];
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
-  const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
-  function computeTf(cs, id, S, ed, now, sym) {
+  // estrutura única: 2 grupos — contexto (zona, Fibonacci) e gatilho (sinal); Pontos na mesma escala da tendência principal (1–2 todos os topos/fundos · 3 só quebras · 4 clássico · 5 menos)
+  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI2_DEF = { ctx: 3, trig: 1 };
+  const uniG = (id) => UNI2_GRP[id] || 'trig';
+  const uniL = (id) => (uniG(id) === 'ctx' ? 'ext' : 'int');   // marcas: contexto guarda-as na camada da antiga principal, gatilho na do antigo recente
+  const uniLevel = (S, id, sym) => { const g = uniG(id), per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI2_DEF[g]); };
+  // âncora automática (igual à app): Semanal começa no último topo/fundo confirmado do Mensal; Diário no último do Semanal
+  const ANCH_MIN = { '1w': 8, '1d': 15 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
+  const ANCH = { '1w': '1M', '1d': '1w' };
+  function computeTf(cs, id, S, ed, now, sym, par) {
     cs.forEach((c) => (c.tt = Math.floor(c.t / 1000)));
     const closed = cs.filter((c) => c.ct < now);
     const price = cs[cs.length - 1].c;
@@ -880,9 +906,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
     if (uniOn(S)) {   // estrutura única (igual à app)
-      const lv = UNI_LV[uniLevel(S, id, sym)] || UNI_LV[3];
-      const one = layer(E.analyzeRecent, lv.atr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int), { legRatio: lv.leg, floorAtr: lv.floor });
-      const d1 = { candles: cs, closed, price, ext: one, int: one, uni: true };
+      const lvl = uniLevel(S, id, sym), pu = PRI_LV[lvl], L = uniL(id), eL = ed && ed[L];
+      let ov = ed && Object.assign({ ignFvg: ed.fvg }, ed[L]), anc = null;
+      if (ANCH[id] && par && S.uniAnchor !== false && !(eL && (eL.start || eL.blank))) {
+        try { const pp = par(ANCH[id]); if (pp && pp.cs && pp.cs.length > 2) { const pd = computeTf(pp.cs, ANCH[id], S, pp.ed || null, now, sym, par); anc = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (anc) { anc.from = ANCH[id]; ov = Object.assign({}, ov || {}, { start: anc, modes: [] }); } } } catch (e) { anc = null; }
+      }
+      const one = pu && pu.zz ? layer(E.analyzeRecent, zzOf(pu, id)[0], S.dispInt, ov, { legRatio: zzOf(pu, id)[1], floorAtr: zzOf(pu, id)[2] })
+        : layer(E.analyze, +S.extAtr * (pu ? pu.m : 1), S.dispExt, ov, pu ? { legRatio: pu.leg, floorAtr: pu.floor } : null);
+      const d1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       if (FB) { try { d1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { d1.fibs = []; } d1.fibsI = d1.fibs; }
       return d1;
     }
@@ -1052,6 +1083,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.fibOn || anyP('fibz')) (A.fibTfs || A_DEF.fibTfs).forEach((id) => s.add(id));
     if (A.kcAlOn || anyP('kc')) (A.kcTfs || A_DEF.kcTfs).forEach((id) => s.add(id));
     if (A.revOn || anyP('rev')) (A.revTfs || A_DEF.revTfs).forEach((id) => { s.add(id); if (REV_UP[id] && REV_UP[id] !== '3M') s.add(REV_UP[id]); if (FB && FB.NEXT[id]) s.add(FB.NEXT[id]); });
+    if (uniOn(S) && S.uniAnchor !== false) { if (s.has('1d')) s.add('1w'); if (s.has('1w')) s.add('1M'); }   // a âncora do Diário/Semanal precisa do Semanal/Mensal
     return [...s];
   }
 
@@ -1142,8 +1174,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price).concat(lineConf(S, sym, dt.price, now));
       const prot = t.protected;
       // 💪 quebra forte: a principal do gatilho também quebrou a favor depois de começar a correção da zona
-      const xs = dt.ext && !dt.uni ? dt.ext.snap : null, xb = xs && xs.lastBreak, zx = dz.ext.res.state && dz.ext.res.state.ext;
-      const strong = !!(xb && xb.dir === dir && xs.trend === dir && cl[xb.i] && (!zx || !dz.closed[zx.i] || cl[xb.i].t >= dz.closed[zx.i].t));
+      // estrutura única: conta a estrutura do timeframe logo acima do gatilho (1H → 4H, 15m → 1H, 5m → 15m)
+      const sTf = dt.uni ? ({ '1h': '4h', '15m': '1h', '5m': '15m' })[su.trig] : su.trig, ds = sTf && dm[sTf];
+      const xs = ds && ds.ext && (dt.uni || !ds.uni) ? ds.ext.snap : null, xb = xs && xs.lastBreak, zx = dz.ext.res.state && dz.ext.res.state.ext, scl = ds ? ds.closed : cl;
+      const strong = !!(xb && xb.dir === dir && xs.trend === dir && scl[xb.i] && (!zx || !dz.closed[zx.i] || scl[xb.i].t >= dz.closed[zx.i].t));
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}`,
@@ -1151,15 +1185,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
       ];
-      if (strong) lines.splice(3, 0, `💪 Quebra forte: a tendência principal do ${LBL[su.trig]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})`);
+      if (strong) lines.splice(3, 0, dt.uni ? `💪 Quebra forte: a estrutura do ${LBL[sTf]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})` : `💪 Quebra forte: a tendência principal do ${LBL[su.trig]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})`);
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);
       // Fibonacci da zona: entrada ótima / profunda, ⭐ confluência com o timeframe de baixo, alvos
       const zf = dz.fibs && dz.fibs[0];
       if (zf) {
         const zp = z.pullback, ent = zp >= 61.8 && zp <= 65 ? ' · ✔ entrada ótima (61,8–65%)' : zp > 78.6 ? ' · profunda (> 78,6%)' : '';
         if (ent) lines[1] += ent;
-        let lo = FB.NEXT[su.zone], dl = lo && dm[lo], star = dl ? FB.confluence(zf, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
-        if (!star && lo && FB.NEXT[lo] && dm[FB.NEXT[lo]]) { const l2 = FB.NEXT[lo], d2 = dm[l2], s2 = FB.confluence(zf, d2.fibs || []); if (s2) { star = s2; lo = l2; dl = d2; } }   // 2 degraus abaixo: só a principal
+        const okLo = (x) => !dz.uni || ['1M', '1w', '1d', '4h'].includes(x);   // estrutura única: só Fibonacci de pernas que contam (até ao 4H)
+        let lo = FB.NEXT[su.zone], dl = lo && okLo(lo) && dm[lo], star = dl ? FB.confluence(zf, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        if (!star && lo && FB.NEXT[lo] && okLo(FB.NEXT[lo]) && dm[FB.NEXT[lo]]) { const l2 = FB.NEXT[lo], d2 = dm[l2], s2 = FB.confluence(zf, d2.fibs || []); if (s2) { star = s2; lo = l2; dl = d2; } }   // 2 degraus abaixo: só a principal
         if (star) lines.push(`⭐ ${FB.starName(star, dl, LBL[lo])} (${fmt(star.lo)} – ${fmt(star.hi)}) cai na zona do ${LBL[su.zone]} (retração ${pct(star.retr)})`);
         lines.push(`Alvos (${LBL[su.zone]}): topo/fundo da perna ${fmt(zf.B)} · ${zf.targets.map((x) => `${x.name.replace('Alvo ', 'A')} ${fmt(x.lo)}–${fmt(x.hi)}`).join(' · ')}`);
         if (A.tgtOn) {
@@ -1184,20 +1219,22 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // não é gatilho (esse é o 1H/4H, mais cedo e com stop mais curto): é o sinal de que o movimento ganhou força — "segunda oportunidade"
   function confAlerts(sym, dm, S, A, st, now, out) {
     for (const su of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false && (TF_MS[x.zone] || 0) >= TF_MS['1d'])) {
-      const dz = dm[su.zone]; if (!dz || dz.uni || !dz.ext || !dz.int) continue;
-      const z = dz.ext.snap, n = dz.int.snap; if (!z.trend) continue;
-      const dir = z.trend, lb = n.lastBreak, cl = dz.closed;
+      const dz = dm[su.zone]; if (!dz || !dz.ext || !dz.int) continue;
+      // duas estruturas: o recente do timeframe da zona; estrutura única: a estrutura do timeframe logo abaixo (zona do Diário → 4H)
+      const cTf = dz.uni ? FB && FB.NEXT[su.zone] : su.zone, dc = cTf && dm[cTf]; if (!dc || !dc.ext) continue;
+      const z = dz.ext.snap, n = dz.uni ? dc.ext.snap : dz.int.snap; if (!z.trend) continue;
+      const dir = z.trend, lb = n.lastBreak, cl = dc.closed;
       if (!lb || lb.dir !== dir || n.trend !== dir || lb.type !== 'CHoCH') continue;
-      const ex = dz.ext.res.state && dz.ext.res.state.ext; if (ex && lb.i <= ex.i) continue;   // a viragem tem de vir depois do topo/fundo da perna (dentro da correção)
+      const ex = dz.ext.res.state && dz.ext.res.state.ext; if (ex && dz.closed[ex.i] && cl[lb.i] && cl[lb.i].t <= dz.closed[ex.i].t) continue;   // a viragem tem de vir depois do topo/fundo da perna (dentro da correção)
       const bc = cl[Math.min(cl.length - 1, lb.conf != null ? lb.conf : lb.i)]; if (!bc) continue;
       const key = `cf|${sym}|${su.name}|${bc.t}|${dir}`; if (st.seen[key]) continue; st.seen[key] = now;
       if (!(z.pullback >= +A.minPull) || z.pullback > 91.8) continue;
-      if (st.silent || bc.ct < now - (TF_MS[su.zone] + 2 * 36e5)) continue;
+      if (st.silent || bc.ct < now - (TF_MS[cTf] + 2 * 36e5)) continue;
       const up = dir === 1;
       out.push({ kind: 'conf', sym, tf: su.zone, text: [
         `✅ <b>Confirmação · ${esc(su.name)} ${up ? 'Long' : 'Short'} · ${esc(sym)}</b>`,
-        `Zona ${LBL[su.zone]} (tendência principal ${up ? 'em subida' : 'em descida'}): correção ${pct(z.pullback)}`,
-        `O movimento recente do ${LBL[su.zone]} virou ${up ? 'para cima' : 'para baixo'} (CHoCH em ${fmt(lb.level)}, fecho ${fmt(bc.c)}): o movimento ganhou força.`,
+        `Zona ${LBL[su.zone]} (${dz.uni ? 'estrutura de contexto' : 'tendência principal'} ${up ? 'em subida' : 'em descida'}): correção ${pct(z.pullback)}`,
+        `${dz.uni ? `A estrutura do ${LBL[cTf]}` : `O movimento recente do ${LBL[su.zone]}`} virou ${up ? 'para cima' : 'para baixo'} (CHoCH em ${fmt(lb.level)}, fecho ${fmt(bc.c)}): o movimento ganhou força.`,
         `É uma entrada mais tardia do que a do gatilho (${LBL[su.trig]}): stop mais longe, risco/retorno pior.`,
         z.protected != null ? `Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(z.protected)}` : '',
       ].filter(Boolean).join('\n') });
@@ -1539,7 +1576,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
-    for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now, sym); } catch (e) {} }
+    for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now, sym, (pid) => (raw[pid] ? { cs: raw[pid], ed: edits[sym + '|' + pid] || null } : null)); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out, S);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
     if (A.setupOn && A.confOn !== false) confAlerts(sym, dm, S, A, st, now, out);
@@ -1945,7 +1982,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const a = auth(cfg.chave);
     const sj = fsGet(a, 'meta/settings');
     const S = Object.assign({}, DEF, sj ? JSON.parse(sj) : {});
-    try { SYN.monMigrate(S); } catch (e) {}   // 15m/5m só nos ativos com intraday (BTC), mesmo antes de abrires a app nova
+    try { SYN.monMigrate(S); } catch (e) {}
+    if (!S.uniV2) { S.uniStruct = true; S.uniSens = { ctx: 3, trig: 1 }; S.uniSensPer = {}; }   // uma estrutura por gráfico (igual à app nova), mesmo antes de a abrires   // 15m/5m só nos ativos com intraday (BTC), mesmo antes de abrires a app nova
     const A = Object.assign({}, C.A_DEF, S.alerts || {}); A.setups = A.setups || {};
     let st = loadState();
     const first = !st;

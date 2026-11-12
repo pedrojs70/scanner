@@ -755,7 +755,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 22h00</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 23h30</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -806,13 +806,14 @@
     </ul>
 
     <h3 class="helphead">◆ Como a app está organizada agora</h3>
-    <p><b>Duas estruturas por timeframe.</b> A <b>tendência principal</b> decide a direção, a zona e a Fibonacci dos setups (as pernas grandes, com menos ruído). O <b>movimento recente</b> dá o gatilho no 1H (Swing) e no 4H (Longo prazo). No Diário, Semanal e Mensal o recente não é gatilho: quando vira a favor dentro da zona de um setup aparece <b>✔ Confirmação</b> no checklist (e um alerta ✅) — o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disso não manda alertas.</p>
-    <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = todos os topos e fundos de cada perna (correções de pelo menos ~1,5 velas médias no Mensal, 2,5 no Semanal e 3 no Diário e abaixo), 2 = o mesmo com pernas maiores, 3 = só os pontos que levaram a uma quebra de estrutura, 4 = cálculo clássico, 5 = menos pontos; o padrão de todos os ativos está nas Definições (vem a 1). Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
-    <p><b>✔ Quebra na principal</b> (checklist, IA e “💪 Quebra forte” no alerta do setup): o gatilho é sempre a quebra do movimento recente (1H no Swing, 4H no Longo prazo); quando, depois de começar a correção da zona, a <b>tendência principal</b> desse timeframe também quebra a favor (CHoCH ou BOS), é mais do que um recuo — é uma viragem a sério. <b>⭐ Confluência</b>: além do timeframe logo abaixo da zona (ex.: 4H na zona do Diário), conta também a Fibonacci da tendência principal do seguinte (1H).</p>
-    <p><b>Pontos que passam para baixo:</b> quando marcas um HH, HL, LH ou LL na tendência principal de um timeframe, a app põe esse topo/fundo também nos de baixo (até ao 1H), na vela mais alta/baixa desse período — se o timeframe de baixo ainda não o tiver. Em ✎ Editar estrutura esses pontos aparecem com ↓ (no menu: "herdado do Semanal"); se apagares a marca lá em cima, saem também em baixo; se apagares um herdado cá em baixo, não volta. Os pontos que a app pôs sozinha entre as tuas marcas (ex.: marcaste um HH sem o HL antes) aparecem esbatidos. Ao marcar, um aviso amarelo diz-te se o nome não bate com o preço (ex.: um HH abaixo do topo anterior) e corrige num clique.</p>
+    <p><b>Uma estrutura por gráfico.</b> Do <b>Anual ao Diário</b> é a <b>estrutura de contexto</b>: por defeito só os topos/fundos que levaram a uma quebra de estrutura (Pontos 3) — poucas pernas, as que contam. Daí saem a direção, a zona de correção (50% para cima) e a Fibonacci dos setups: com poucas pernas, cada zona é forte. Do <b>4H para baixo</b> é a <b>estrutura de gatilho</b>: todos os topos e fundos (Pontos 1) — daí sai o CHoCH/BOS de entrada (1H no Swing, 4H no Longo prazo).</p>
+    <p><b>⚓ Encadeamento automático.</b> O <b>Semanal</b> começa sempre no último topo/fundo confirmado do <b>Mensal</b>, e o <b>Diário</b> no último do <b>Semanal</b> (linha vertical ⚓ no gráfico). Quando o Mensal ou o Semanal ganham um ponto novo (ou o marcas tu), os de baixo recomeçam aí. Nada é apagado: o que está antes da âncora fica guardado mas não conta. Se a última perna de cima ainda for curta (menos de ~8 semanas no Semanal ou ~15 dias no Diário), a âncora recua para o ponto anterior. Um <b>Início</b> marcado por ti manda sobre a âncora. Mensal, 3M, 6M e Anual marcas tu.</p>
+    <p><b>✔ Confirmação</b> (checklist, IA e alerta ✅): com o preço na zona de um setup, a estrutura do timeframe logo abaixo da zona vira a favor (CHoCH) — ex.: zona do Diário e o 4H virou. <b>✔ Confirmada no 4H</b> (e “💪 Quebra forte” no alerta): a quebra do gatilho 1H também aparece na estrutura do 4H. <b>⭐ Confluência</b>: um alvo da Fibonacci do Diário ou do 4H cai dentro da zona do timeframe de cima.</p>
+    <p><b>Botão Pontos</b> (em ✎ Editar estrutura): muda os pontos deste ativo no grupo do gráfico aberto — contexto ou gatilho. 1 = todos os topos/fundos · 2 = o mesmo, pernas maiores · 3 = só quebras · 4 = clássico · 5 = menos. O padrão de todos os ativos está nas Definições.</p>
+    <p><b>Pontos que passam para baixo:</b> um HH/HL/LH/LL que marques passa para os timeframes de baixo (até ao 1H), na vela mais alta/baixa desse período — com ↓ na edição. Apagas em cima, sai em baixo; apagas em baixo, não volta.</p>
     <p><b>15m e 5m só nos ativos com intraday</b> (por defeito só o BTC; Definições → Monitorização → Por ativo). Nos outros desaparecem da app os timeframes de 15m e 5m, o Day trade, o Scalp e as killzones: os setups são Longo prazo e Swing.</p>
-    <p><b>Estrutura única</b> (Definições, experimental, desligada): uma só estrutura por timeframe em vez de duas. Liga e desliga à vontade — as tuas correções à mão dos dois modos ficam guardadas.</p>
-    <h3 class="helphead">2 · As duas camadas e as regras</h3>
+    <p><b>Modo antigo</b> (Definições → Estrutura, desligar “Uma estrutura por gráfico”): volta a tendência principal e o movimento recente em cada gráfico; as regras de baixo descrevem esse modo.</p>
+    <h3 class="helphead">2 · Modo antigo: as duas camadas e as regras</h3>
     <ul>
       <li><b>Duas camadas, as mesmas regras.</b> A <b>tendência principal</b> só conta recuos grandes (≥ 3× a amplitude média das velas, ajustável) e diz <b>onde</b> o preço está: em que tendência, quanto já corrigiu e onde fica o limite. O <b>movimento recente</b> conta recuos mais pequenos (≥ 2×) e diz <b>o que está a acontecer agora</b>: se o recuo ainda está a decorrer ou se já virou. Em ICT: a tendência principal é o dealing range (equilíbrio a 50%, discount/premium); o movimento recente é onde acontece o MSS de entrada. Cada camada tem as suas próprias marcas.</li>
       <li><b>Quando muda cada camada:</b> a tendência principal só muda com um fecho para lá do <b>limite</b> (o fundo de onde partiu a subida, ou o topo de onde partiu a descida). O movimento recente segue os <b>swings mais recentes</b>: numa descida só vira para cima com um fecho acima do último topo mais baixo; numa subida só vira para baixo com um fecho abaixo do último fundo mais alto.</li>
@@ -1024,7 +1025,7 @@
   <div class="field"><div>Correção mínima da zona<small>a zona só conta a partir desta correção (%)</small></div><input id="alMin" type="number" min="0" max="100" step="1"></div>
   <div class="alrow"><span class="muted small">Filtros extra (desligados = só informação na mensagem):</span><br>
     <label class="chk"><input id="alFFvg" type="checkbox"> só com FVG</label> <label class="chk"><input id="alFStrong" type="checkbox"> só vela forte</label> <label class="chk"><input id="alFVol" type="checkbox"> só volume alto</label> <label class="chk"><input id="alFCtx" type="checkbox"> só contexto a favor</label></div>
-  <label class="chk alline"><input id="alConf" type="checkbox"> <b>✅ Confirmação</b>: avisar quando, com o preço na zona de um setup (Swing, Longo prazo), o <b>movimento recente</b> do timeframe da zona (Diário, Semanal) vira a favor <span class="muted small">— não é o gatilho (esse é o 1H/4H, mais cedo): é o sinal de que o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disto, o movimento recente do Diário, Semanal e Mensal não manda alertas.</span></label>
+  <label class="chk alline"><input id="alConf" type="checkbox"> <b>✅ Confirmação</b>: avisar quando, com o preço na zona de um setup (Swing, Longo prazo), a estrutura do timeframe logo abaixo da zona vira a favor — ex.: zona do Diário e o 4H fez CHoCH <span class="muted small">— não é o gatilho (esse é o 1H/4H, mais cedo): é o sinal de que o movimento ganhou força, uma segunda oportunidade com stop mais longe. (No modo antigo: o movimento recente do próprio timeframe da zona.)</span></label>
 
   <div hidden>
   <h3 class="sethead">2 · FVG no pullback <span class="muted small">(depois do alerta de setup)</span></h3>
@@ -1157,14 +1158,12 @@
   <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
   <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
   <h3 class="sethead sub">Estrutura</h3>
-  <div class="small muted" style="margin:2px 0 6px">Por defeito cada timeframe tem duas estruturas: a <b>tendência principal</b> (direção, zona e Fibonacci dos setups) e o <b>movimento recente</b> (gatilho no 1H/4H e ✔ Confirmação no Diário/Semanal). Se a principal de um ativo tiver pontos a menos ou a mais, ajusta-a no gráfico em <b>✎ Editar estrutura</b> com o botão <b>Pontos</b> (com a tendência principal escolhida) (1 = mais pontos … 5 = menos; vale só para esse ativo e esse grupo de timeframes: contexto, meio ou gatilho).</div>
-  <div class="field"><div>Pontos da tendência principal — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>padrão para todos os ativos: <b>1</b> = todos os topos e fundos de cada perna (só correções relevantes para esse timeframe: no Mensal bastam ~1,5 velas médias, no Semanal 2,5, no Diário e abaixo 3) · <b>2</b> = o mesmo, pernas maiores · <b>3</b> = só os pontos que levaram a uma quebra de estrutura · <b>4</b> = cálculo clássico · <b>5</b> = menos pontos. Exceções por ativo: no gráfico, em ✎ Editar estrutura, botão “Pontos”</small></div><select id="setPriCtx"></select></div>
-  <div class="field"><div>Pontos da tendência principal — <b>meio</b> (Diário, 4H)</div><select id="setPriMid"></select></div>
-  <div class="field"><div>Pontos da tendência principal — <b>gatilho</b> (1H, 15m, 5m)</div><select id="setPriTrig"></select></div>
-  <div class="field"><div>Estrutura única (experimental)<small>desligada por defeito. Ligada: uma só estrutura por timeframe (sem principal/recente) — a zona, a Fibonacci e o gatilho saem dela, e o botão Pontos passa a mexer nela. Podes ligar e desligar à vontade: as correções à mão dos dois modos ficam guardadas</small></div><input id="setUni" type="checkbox"></div>
-  <div class="field uniopt"><div>Estrutura única: pontos — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>1 = mais pontos (mais sensível) … 5 = menos pontos (só as pernas grandes)</small></div><select id="setSensCtx"></select></div>
-  <div class="field uniopt"><div>Estrutura única: pontos — <b>meio</b> (Diário, 4H)</div><select id="setSensMid"></select></div>
-  <div class="field uniopt"><div>Estrutura única: pontos — <b>gatilho</b> (1H, 15m, 5m)<small>no 5m e 15m vale também o filtro “Swings mínimos” abaixo. Exceções por ativo: no gráfico, em ✎ Editar estrutura, botão “Pontos”</small></div><select id="setSensTrig"></select></div>
+  <div class="field"><div>Uma estrutura por gráfico<small>ligado (recomendado): cada gráfico tem <b>uma só estrutura</b>. Do Anual ao Diário é a <b>estrutura de contexto</b> — só as pernas que contam, de onde saem a direção, a zona e a Fibonacci dos setups. Do 4H para baixo é a <b>estrutura de gatilho</b> — todos os topos e fundos, de onde sai o CHoCH/BOS de entrada. Desligado: o modo antigo, com tendência principal e movimento recente em cada gráfico (as marcas dos dois modos ficam guardadas)</small></div><input id="setUni" type="checkbox"></div>
+  <div class="field uniopt"><div>Pontos — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal, Diário)<small>padrão para todos os ativos: <b>1</b> = todos os topos e fundos de cada perna · <b>2</b> = o mesmo, pernas maiores · <b>3</b> = só os pontos que levaram a uma quebra de estrutura (recomendado aqui) · <b>4</b> = cálculo clássico · <b>5</b> = menos pontos. Exceções por ativo: no gráfico, em ✎ Editar estrutura, botão “Pontos”</small></div><select id="setSensCtx"></select></div>
+  <div class="field uniopt"><div>Pontos — <b>gatilho</b> (4H, 1H, 15m, 5m)<small>recomendado: 1 (todos os topos e fundos). No 5m e 15m vale também o filtro “Swings mínimos” abaixo</small></div><select id="setSensTrig"></select></div>
+  <div class="field prionly"><div>Modo antigo — pontos da tendência principal: <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>1 = todos os topos e fundos · 2 = o mesmo, pernas maiores · 3 = só quebras · 4 = clássico · 5 = menos</small></div><select id="setPriCtx"></select></div>
+  <div class="field prionly"><div>Modo antigo — tendência principal: <b>meio</b> (Diário, 4H)</div><select id="setPriMid"></select></div>
+  <div class="field prionly"><div>Modo antigo — tendência principal: <b>gatilho</b> (1H, 15m, 5m)</div><select id="setPriTrig"></select></div>
   <h3 class="sethead sub">Tamanho dos swings</h3>
   <div class="field"><div>Tamanho mínimo de um swing da <b>tendência principal</b><small>recuo mínimo, em múltiplos do ATR (volatilidade média)</small></div><input id="setExt" type="number" min="0" max="10" step="0.5"></div>
   <div class="field"><div>Tamanho mínimo de um swing do <b>movimento recente</b><small>menor = mais sensível, mais swings</small></div><input id="setInt" type="number" min="0" max="10" step="0.5"></div>
@@ -1306,7 +1305,7 @@
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
           const pt = ms.side === 'H' ? { p: H(j), i: j } : { p: L(j), i: j };
-          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true });
+          res.swings.push({ type: ms.side, i: j, p: pt.p, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor });
           if (ms.side === 'H') { lastPH = pt; lastManH = pt; } else { lastPL = pt; lastManL = pt; }
           // o início já diz o sentido: num fundo começa a subir, num topo começa a descer (protegido no próprio início)
           trend = ms.side === 'H' ? -1 : 1; prot = pt; ext = pt; target = null; counter = null; kind = null;
@@ -1526,7 +1525,7 @@
     let mode0 = null;
     if (ov.start && ov.start.t != null) {
       const k = idxOf(ov.start.t);
-      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; }
+      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
     }
     // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início (manual)
     if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
@@ -1690,8 +1689,8 @@
       if (o.trace && j > 1) rec(j - 1);
       if (s0 >= 0 && j <= s0) {          // antes do ponto de partida não há estrutura
         if (j === s0) {
-          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); trend = -1; }
-          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); trend = 1; }
+          if (ms.side === 'H') { res.swings.push({ type: 'H', i: j, p: H(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor }); lastSH = { p: H(j), i: j, broken: false, swept: false }; zdir = -1; zLastH = H(j); trend = -1; }
+          else { res.swings.push({ type: 'L', i: j, p: L(j), conf: j, manual: true, manualLabel: ms.label || 'Início', start: true, anchor: !!ms.anchor }); lastSL = { p: L(j), i: j, broken: false, swept: false }; zdir = 1; zLastL = L(j); trend = 1; }
           hi = { p: H(j), i: j }; lo = { p: L(j), i: j };
         }
         continue;
@@ -1890,7 +1889,25 @@
     return { hi, lo, state, from: closed[n - 1 - W].t, to: last.t, bars: W };
   }
 
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS };
+
+  // âncora automática (estrutura única): o Semanal começa no último topo/fundo confirmado do Mensal, o Diário no último do Semanal.
+  // pres = estrutura do timeframe de cima, pc = velas fechadas dele, cc = velas fechadas deste. Devolve o início {t, side, label, mode:'auto', anchor:true} ou null.
+  function anchorFrom(pres, pc, cc, minAfter) {
+    if (!pres || !pres.swings || !pc || !pc.length || !cc || cc.length < 3) return null;
+    const sw = pres.swings.filter((s) => !s.provisional && s.i >= 0 && s.i < pc.length).sort((a, b) => a.i - b.i), need = Math.max(1, minAfter || 1);
+    // do último topo/fundo confirmado para trás: se a perna de cima ainda é tão curta que este timeframe ficava quase sem velas (ex.: um ponto recente, pequeno), recua para o anterior
+    for (let q = sw.length - 1; q >= 0; q--) {
+      const s = sw[q], a = pc[s.i].t, b = s.i + 1 < pc.length ? pc[s.i + 1].t : (pc[s.i].ct != null ? pc[s.i].ct + 1 : a + 1);
+      let k = -1;
+      for (let j = 0; j < cc.length; j++) { const c = cc[j], ce = c.ct != null ? c.ct : c.t; if (ce < a || c.t >= b) continue; if (k < 0 || (s.type === 'H' ? c.h > cc[k].h : c.l < cc[k].l)) k = j; }
+      if (k < 0) return null;   // antes do histórico deste timeframe
+      if (cc.length - 1 - k < need) continue;
+      const lab = s.manualLabel && /^(HH|HL|LH|LL)$/.test(s.manualLabel) ? s.manualLabel : s.label;
+      return { t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
+    }
+    return null;
+  }
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -2350,6 +2367,7 @@
     { const seen = new Set(); s.failByTf = String(s.failByTf || '').split(/[,;]+/).map((p) => p.trim()).filter((p) => { const k = p.split(':')[0].trim(); if (!p || seen.has(k)) return false; seen.add(k); return true; }).join(', '); }   // sem repetidos
     s.tfs = (s.tfs || []).filter((x) => TF_IDS.includes(x));
     try { window.MSS_SYNTH.monMigrate(s); } catch (e) {}   // 15m/5m só nos ativos com intraday (BTC)
+    if (!s.uniV2) { s.uniV2 = 1; s.uniStruct = true; s.uniSens = { ctx: 3, trig: 1 }; s.uniSensPer = {}; }   // uma estrutura por gráfico: contexto só quebras (3), gatilho todos os topos/fundos (1)
     return s;
   }
   let settings = migrateSettings(Object.assign({}, DEFAULT_SETTINGS, load('mss_settings4', {})));
@@ -2567,16 +2585,33 @@
   const UNI_LV = { 1: { atr: 1.5, leg: 0.4, floor: 1.25 }, 2: { atr: 2, leg: 0.5, floor: 1.5 }, 3: { atr: 2.5, leg: 0.55, floor: 1.75 }, 4: { atr: 3, leg: 0.6, floor: 2 }, 5: { atr: 3.5, leg: 0.7, floor: 2.5 } };
   const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
-  const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
+  const uniOn = (S) => S.uniStruct !== false;   // por defeito: UMA estrutura por gráfico — contexto (Anual→Diário, só quebras) e gatilho (4H→5m, todos os topos/fundos)
   // Pontos da tendência principal: 1 e 2 = todos os topos/fundos de cada perna (motor do movimento recente, com correções mínimas maiores); 3 = só as pernas que quebram estrutura, sensível; 4 = cálculo clássico; 5 = menos pontos
   // 1 e 2: [múltiplo do ATR, proporção da perna, mínimo em ATR] por tipo de timeframe — nos timeframes largos a vela é grande face às correções, por isso o limite em ATR desce
   // (BTC Mensal no 1: 25-01 HH 110k · 25-04 HL 75k · 25-10 HH 126k; Semanais ~8 pontos/ano; Diário ~30/ano)
   const PRI_LV = { 1: { zz: 1, M: [1.5, 0.3, 0.8], W: [2.5, 0.5, 1.5], D: [3, 0.6, 2] }, 2: { zz: 1, M: [2, 0.4, 1.25], W: [3, 0.6, 2], D: [3.5, 0.7, 2.5] }, 3: { m: 0.5, leg: 0.35, floor: 1 }, 5: { m: 1.4, leg: 0.6, floor: 2 } };
   const zzOf = (pl, id) => pl[['1Y', '6M', '3M', '1M'].includes(id) ? 'M' : id === '1w' ? 'W' : 'D'];
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
-  const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
+  // estrutura única: 2 grupos — contexto (zona, Fibonacci) e gatilho (sinal); Pontos na mesma escala da tendência principal (1–2 todos os topos/fundos · 3 só quebras · 4 clássico · 5 menos)
+  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI2_DEF = { ctx: 3, trig: 1 };
+  const uniG = (id) => UNI2_GRP[id] || 'trig';
+  const uniL = (id) => (uniG(id) === 'ctx' ? 'ext' : 'int');   // marcas: contexto guarda-as na camada da antiga principal, gatilho na do antigo recente
+  const uniLevel = (S, id, sym) => { const g = uniG(id), per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI2_DEF[g]); };
+  // âncora automática (estrutura única): Semanal começa no último topo/fundo confirmado do Mensal; Diário no último do Semanal — recalculada sempre, sem apagar nada
+  const rawC = {};
+  const ANCH_MIN = { '1w': 8, '1d': 15 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
+  const ANCH = { '1w': '1M', '1d': '1w' }, ANCH_NM = { '1M': 'Mensal', '1w': 'Semanal' };
+  const anchOn = () => uniOn(settings) && settings.uniAnchor !== false;
+  const withParents = (ids) => { const s = new Set(ids); if (anchOn()) { if (s.has('1d')) s.add('1w'); if (s.has('1w')) s.add('1M'); } return s; };
+  function anchorOf(id, sym, closed) {
+    const pid = ANCH[id]; if (!pid || !anchOn()) return null;
+    const pcs = rawC[sym + '|' + pid]; if (!pcs || pcs.length < 3) return null;
+    try { const pd = computeTf(pcs, pid, sym), st = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (st) st.from = pid; return st; } catch (e) { console.warn('anchor', e); return null; }
+  }
   function computeTf(cs, id, sym) {
     const now = Date.now();
+    rawC[(sym || symbol) + '|' + id] = cs;
     cs.forEach((c) => (c.tt = Math.floor(c.t / 1000)));
     const closed = cs.filter((c) => c.ct < now);
     const price = cs[cs.length - 1].c;
@@ -2590,9 +2625,12 @@
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
     if (uniOn(settings)) {   // estrutura única: a mesma estrutura serve de "principal" e de "recente" — tudo o resto da app lê-a sem mudar
-      const lv = UNI_LV[uniLevel(settings, id, sym || symbol)] || UNI_LV[3];
-      const one = layer(E.analyzeRecent, lv.atr, settings.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int), { legRatio: lv.leg, floorAtr: lv.floor });
-      const o1 = { candles: cs, closed, price, ext: one, int: one, uni: true };
+      const lvl = uniLevel(settings, id, sym || symbol), pu = PRI_LV[lvl], L = uniL(id), eL = ed && ed[L];
+      let ov = ed && Object.assign({ ignFvg: ed.fvg }, ed[L]), anc = null;
+      if (ANCH[id] && !(eL && (eL.start || eL.blank))) { anc = anchorOf(id, sym || symbol, closed); if (anc) ov = Object.assign({}, ov || {}, { start: anc, modes: [] }); }   // o teu "Início" manual manda sobre a âncora
+      const one = pu && pu.zz ? layer(E.analyzeRecent, zzOf(pu, id)[0], settings.dispInt, ov, { legRatio: zzOf(pu, id)[1], floorAtr: zzOf(pu, id)[2] })
+        : layer(E.analyze, +settings.extAtr * (pu ? pu.m : 1), settings.dispExt, ov, pu ? { legRatio: pu.leg, floorAtr: pu.floor } : null);
+      const o1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       try { o1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { o1.fibs = []; } o1.fibsI = o1.fibs;
       return o1;
     }
@@ -2942,17 +2980,18 @@
   async function loadAll() {
     const token = ++loadToken; try { sensUi(); } catch (e) {}
     if (tfHid(selectedTf)) selectedTf = '1h';
+    if (uniOn(settings)) editLayer = uniL(selectedTf);
     document.querySelectorAll('.tfbtn').forEach((b) => { b.style.display = tfHid(b.dataset.tf) ? 'none' : ''; });
     if (/^BTC(USDT|USDC|FDUSD|EUR)?$/.test(symbol)) ['TOTAL', 'STABLE.D'].forEach((x) => { if (!favData[x] || Date.now() - favData[x].at > 10 * 60e3) loadFav(x).catch(() => {}); });   // enquadramento da análise IA do BTC
     setStatus('A carregar dados…');
     try {
       const setupTfs = new Set(); (settings.setups || []).filter((x) => x.on).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); chainOf(x).forEach((id) => setupTfs.add(id)); });
-      const need = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h').filter((t) => !tfHid(t.id));
+      const need0 = TFS.filter((t) => settings.tfs.includes(t.id) || t.id === selectedTf || setupTfs.has(t.id) || (settings.prevLevels && (t.id === '1d' || t.id === '1w')) || t.id === '1h').filter((t) => !tfHid(t.id)), needS = withParents(need0.map((t) => t.id)), need = TFS.filter((t) => needS.has(t.id));   // + Semanal/Mensal para a âncora
       if (!isCrypto(symbol)) {   // ação ou rácio
         const got = isSynth(symbol) ? await synthCandles(symbol, need.map((t) => t.id)) : isRatio(symbol) ? await ratioCandles(symbol, need.map((t) => t.id)) : await stockCandles(symbol, need.map((t) => t.id));
         if (token !== loadToken) return;
         Object.keys(data).forEach((k) => delete data[k]);
-        for (const id in got) data[id] = computeTf(got[id], id);
+        for (const id of TF_IDS.filter((x) => got[x])) data[id] = computeTf(got[id], id);
         if (!data[selectedTf]) selectedTf = Object.keys(data).includes('1d') ? '1d' : Object.keys(data)[0];
         if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
         $('#price').textContent = fmt(data[selectedTf].price);
@@ -3413,10 +3452,19 @@
   const FB = window.MSS_FIB;
   const DEEP_MAX = 91.8;   // acima disto a zona está perto da invalidação: não conta como setup
   // ✔ Confirmação: na zona de um setup (Diário ou acima), o movimento recente desse timeframe virou a favor (CHoCH) depois do topo/fundo da perna
+  // devolve o timeframe onde se viu a confirmação (ou null). Duas estruturas: o recente do próprio timeframe da zona.
+  // Estrutura única: o timeframe logo abaixo da zona (ex.: zona do Diário → o 4H virou a favor, CHoCH, depois do topo/fundo da perna da zona)
   function zoneConf(dz, dir, id) {
-    if (!dz || dz.uni || !dz.int || !dz.ext || (TF_MS0[id] || 0) < 864e5) return false;
-    const n = dz.int.snap, lb = n && n.lastBreak, ex = dz.ext.res.state && dz.ext.res.state.ext;
-    return !!(lb && lb.dir === dir && n.trend === dir && lb.type === 'CHoCH' && !(ex && lb.i <= ex.i));
+    if (!dz || !dz.ext || (TF_MS0[id] || 0) < 864e5) return null;
+    const ex = dz.ext.res.state && dz.ext.res.state.ext;
+    if (dz.uni) {
+      const lo = FB.NEXT[id], dl = lo && !tfHid(lo) && data[lo]; if (!dl || !dl.ext) return null;
+      const n = dl.ext.snap, lb = n && n.lastBreak, t0 = ex && dz.closed[ex.i] ? dz.closed[ex.i].t : 0;
+      return lb && lb.dir === dir && n.trend === dir && lb.type === 'CHoCH' && dl.closed[lb.i] && dl.closed[lb.i].t >= t0 ? lo : null;
+    }
+    if (!dz.int) return null;
+    const n = dz.int.snap, lb = n && n.lastBreak;
+    return lb && lb.dir === dir && n.trend === dir && lb.type === 'CHoCH' && !(ex && lb.i <= ex.i) ? id : null;
   }
   const zoneChip = (p) => (p >= 61.8 && p <= 65 ? ' <span class="chip rf-pos2" title="Correção entre 61,8% e 65% (escala log): a zona de entrada ótima">✔ Entrada ótima</span>' : p > 78.6 && p <= DEEP_MAX ? ' <span class="chip rf-deep" title="Correção acima de 78,6%: entrada profunda, mais perto do limite">Profunda</span>' : '');
   // ⭐ um alvo do timeframe de baixo cai na zona do timeframe da zona (dm = dados por TF)
@@ -3427,6 +3475,7 @@
     const tries = [[lo1, (d) => [...(d.fibs || []), ...(d.fibsI || [])]], [lo2, (d) => d.fibs || []]];
     for (const [lo, fl] of tries) {
       const dl = lo && !tfHid(lo) && dm[lo]; if (!dl) continue;
+      if (dz.uni && !['1M', '1w', '1d', '4h'].includes(lo)) continue;   // estrutura única: só Fibonacci de pernas que contam (até ao 4H)
       const c = FB.confluence(dz.fibs[0], fl(dl));
       if (c) return Object.assign(c, { lo: c.lo, hi: c.hi, tf: lo, zone: zoneTf, txt: `⭐ ${FB.starName(c, dl, tfLabel(lo))} (${fmt(c.lo)} – ${fmt(c.hi)}) na zona do ${tfLabel(zoneTf)} (retração ${pct(c.retr)})` });
     }
@@ -3434,11 +3483,14 @@
   }
   // 💪 quebra forte: a tendência PRINCIPAL do timeframe de gatilho também quebrou a favor, depois de começar a correção da zona
   function strongBrk(dm, st, dir) {
-    const dt = dm[st.trig], dz = dm[st.zone]; if (!dt || !dz || dt.uni || !dt.ext) return null;
+    // estrutura única: não há "principal do gatilho" — conta a estrutura do timeframe logo acima do gatilho (1H → 4H, 15m → 1H, 5m → 15m)
+    const UP = { '1h': '4h', '15m': '1h', '5m': '15m' }, z0 = dm[st.zone], uni = z0 && z0.uni, tf = uni ? UP[st.trig] : st.trig;
+    const dt = tf && dm[tf], dz = z0; if (!dt || !dz || (!uni && dt.uni) || !dt.ext) return null;
     const x = dt.ext.snap, lb = x && x.lastBreak; if (!lb || lb.dir !== dir || x.trend !== dir || !dt.closed[lb.i]) return null;
     const ex = dz.ext.res.state && dz.ext.res.state.ext, t0 = ex && dz.closed[ex.i] ? dz.closed[ex.i].t : 0;
     if (dt.closed[lb.i].t < t0) return null;
-    return { type: lb.type, level: lb.level, txt: `a tendência principal do ${tfLabel(st.trig)} também quebrou a favor (${lb.type} em ${fmt(lb.level)})` };
+    return uni ? { type: lb.type, level: lb.level, lbl: `✔ Confirmada no ${tfLabel(tf)}`, txt: `a estrutura do ${tfLabel(tf)} também quebrou a favor (${lb.type} em ${fmt(lb.level)}), não só a do ${tfLabel(st.trig)}` }
+      : { type: lb.type, level: lb.level, lbl: `✔ Quebra na principal ${tfLabel(st.trig)}`, txt: `a tendência principal do ${tfLabel(st.trig)} também quebrou a favor (${lb.type} em ${fmt(lb.level)})` };
   }
   // lateralização no gatilho (5m/15m/1H): dentro da caixa as viragens não contam; o gatilho é o fecho fora dela, no sentido do setup
   function boxTrig(dt, trigTf, dir) {
@@ -3542,8 +3594,8 @@
         : `<span class="chip ${cx.trend === r.dir ? (cx.pullback > 78.6 ? 'rf-deep' : 'rf-pos2') : 'rf-bad'}" title="tendência principal do ${tfLabel(cid)}: ${cx.trend === 1 ? 'subida' : 'descida'}, recuo ${pct(cx.pullback)}">${tfLabel(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}</span>`;
       const chk = ctxChip + ' ' + items.filter((it) => !it[3]).map(([nm, ok, tip]) => `<span class="chip ${ok ? 'rf-pos2' : ok === false ? 'off' : 'rf-neu'}" title="${tip}">${ok ? '✔' : ok === false ? '✘' : '?'} ${nm}</span>`).join(' ')
         + (sweep ? ' <span class="chip rf-pos2" title="Sweep do lado oposto antes da quebra">💧 sweep antes</span>' : '') + zoneChip(r.z.pullback)
-        + (() => { const sb = r.zoneOk ? strongBrk(data, st, r.dir) : null; return sb ? ` <span class="chip rf-pos2" title="Quebra forte: ${sb.txt}, depois de começar a correção do ${tfLabel(st.zone)}. Mais do que um recuo — é uma viragem a sério no ${tfLabel(st.trig)}">✔ Quebra na principal ${tfLabel(st.trig)}</span>` : ''; })()
-        + (r.zoneOk && zoneConf(data[st.zone], r.dir, st.zone) ? ` <span class="chip rf-pos2" title="O movimento recente do ${tfLabel(st.zone)} virou a favor (CHoCH) dentro da correção: o movimento ganhou força. Não é o gatilho — esse é o ${tfLabel(st.trig)}, mais cedo e com stop mais curto">✔ Confirmação ${tfLabel(st.zone)}</span>` : '')
+        + (() => { const sb = r.zoneOk ? strongBrk(data, st, r.dir) : null; return sb ? ` <span class="chip rf-pos2" title="Quebra forte: ${sb.txt}, depois de começar a correção do ${tfLabel(st.zone)}. Mais do que um recuo — é uma viragem a sério no ${tfLabel(st.trig)}">${sb.lbl}</span>` : ''; })()
+        + (() => { const cf = r.zoneOk ? zoneConf(data[st.zone], r.dir, st.zone) : null; return cf ? ` <span class="chip rf-pos2" title="${cf === st.zone ? `O movimento recente do ${tfLabel(st.zone)}` : `A estrutura do ${tfLabel(cf)}`} virou a favor (CHoCH) dentro da correção do ${tfLabel(st.zone)}: o movimento ganhou força. Não é o gatilho — esse é o ${tfLabel(st.trig)}, mais cedo e com stop mais curto">✔ Confirmação ${tfLabel(cf)}</span>` : ''; })()
         + (r.star ? ` <span class="chip rf-pos2" title="${r.star.txt}">⭐ ${FB.starName(r.star, data[r.star.tf], tfLabel(r.star.tf))} em ${fmt(r.star.p)}</span>` : '');
       const missing = items.filter((it) => !it[3] && !it[1]).map(([nm]) => nm.toLowerCase());
       const ready = !missing.length;
@@ -3774,12 +3826,13 @@
     if (rsiMarkers) rsiMarkers.setMarkers(divs.map((v) => ({ time: d.closed[v.b.i].tt, position: v.dir === 1 ? 'belowBar' : 'aboveBar', shape: v.dir === 1 ? 'arrowUp' : 'arrowDown', color: v.live ? (v.dir === 1 ? '#26a69a' : '#ef5350') : (v.dir === 1 ? '#26a69a88' : '#ef535088'), text: v.dir === 1 ? 'Bull' : 'Bear' })));
     // swings externos com letra (os internos são desenhados no overlay)
     const sw = vE() ? d.ext.res.swings.slice(-400) : [];   // todos (a biblioteca só desenha os que estão à vista)
-    const inhM = ((getEdits(drawState ? drawState.tf : selectedTf, false) || {}).ext || {}).inh || {};
-    const edE = editMode && editLayer === 'ext';   // só a editar a principal: herdados com ↓ e preenchidos pela app esbatidos
+    const dtf = drawState ? drawState.tf : selectedTf, inhL = uniOn(settings) ? uniL(dtf) : 'ext';
+    const inhM = ((getEdits(dtf, false) || {})[inhL] || {}).inh || {};
+    const edE = editMode && (uniOn(settings) || editLayer === 'ext');   // só a editar a principal: herdados com ↓ e preenchidos pela app esbatidos
     markersApi.setMarkers(sw.map((s, k) => { const inh = s.manual && inhM[d.closed[s.i].t], fade = edE && s.filled;
       const col = s.label === 'HH' || s.label === 'HL' ? (fade ? 'rgba(38,166,154,.4)' : '#26a69a') : s.label === 'LH' || s.label === 'LL' ? (fade ? 'rgba(239,83,80,.4)' : '#ef5350') : '#aab2bd';
       return { time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar', color: col,
-        shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${inh ? (edE ? '↓' : '') : s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}` }; }));
+        shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${inh ? (edE ? '↓' : '') : s.anchor ? '⚓' : s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}` }; }));
     priceLines.forEach((p) => candleSeries.removePriceLine(p)); priceLines = [];
     const add = (price, color, title, style, w) => priceLines.push(candleSeries.createPriceLine({ price, color, title, lineWidth: w || 1, lineStyle: style, axisLabelVisible: true }));
     const x = d.ext.snap, n = d.int.snap;
@@ -3909,7 +3962,7 @@
         const x = X(s.i), y = Y(s.p); if (x == null || y == null) continue;
         const col = s.label === 'HH' || s.label === 'HL' ? '#7fd8cf' : s.label === 'LH' || s.label === 'LL' ? '#f59a98' : '#aab2bd';
         g.fillStyle = col; g.beginPath(); g.arc(x, y, 2.5, 0, Math.PI * 2); g.fill();
-        g.fillText((s.manual ? '✎' : '') + s.label, x, s.type === 'H' ? y - 6 : y + 13);
+        g.fillText((s.anchor ? '⚓' : s.manual ? '✎' : '') + s.label, x, s.type === 'H' ? y - 6 : y + 13);
       }
     }
     // POC diário / semanal: uma linha por cima das velas de cada dia / semana (só visual)
@@ -3951,11 +4004,11 @@
       }
       segs.forEach((s, k) => {
         const x = X(s.i); if (x == null || x < -2 || x > paneW + 2) return;
-        const man = s.mode === 'man', col = man ? '245,197,24' : '100,181,246';
-        g.strokeStyle = `rgba(${col},${editMode ? 0.8 : 0.4})`; g.lineWidth = 1; g.setLineDash([6, 4]);
+        const anc = k === 0 && d.anchor, man = s.mode === 'man', col = anc ? '38,198,218' : man ? '245,197,24' : '100,181,246';
+        g.strokeStyle = `rgba(${col},${editMode ? 0.8 : 0.45})`; g.lineWidth = 1; g.setLineDash(anc ? [2, 3] : [6, 4]);
         g.beginPath(); g.moveTo(x, 0); g.lineTo(x, paneH); g.stroke(); g.setLineDash([]);
-        g.fillStyle = `rgba(${col},${editMode ? 1 : 0.6})`;
-        g.fillText((k === 0 ? 'início ' : '') + (man ? '✋ manual' : '⏩ automático'), x + 4, 14);
+        g.fillStyle = `rgba(${col},${editMode ? 1 : 0.75})`;
+        g.fillText(anc ? `⚓ desde o ${d.anchor.label || (d.anchor.side === 'H' ? 'topo' : 'fundo')} do ${ANCH_NM[d.anchor.from] || ''}` : (k === 0 ? 'início ' : '') + (man ? '✋ manual' : '⏩ automático'), x + 4, 14);
       });
     }
     // sweeps de liquidez (internos; os externos com ✕ maior)
@@ -3975,39 +4028,39 @@
   let editMode = false;
   let pendingRange = null;   // primeiro clique do range manual (topo ou fundo)
   // só uma camada de cada vez no gráfico (leitura e edição): a do botão a amarelo
-  let editLayer = !uniOn(settings) && (settings.layer === 'ext' || (settings.layer == null && settings.showExt && !settings.showInt)) ? 'ext' : 'int';   // na estrutura única edita-se sempre a camada do movimento recente
+  let editLayer = !uniOn(settings) && (settings.layer === 'ext' || (settings.layer == null && settings.showExt && !settings.showInt)) ? 'ext' : 'int';   // na estrutura única a camada vem do timeframe (uniL)
   const vE = () => uniOn(settings) || editLayer === 'ext';   // estrutura única: desenhada como a principal (setas, zonas, limite)
   const vI = () => !uniOn(settings) && editLayer === 'int';
-  const layerName = (L) => (uniOn(settings) ? 'estrutura' : L === 'ext' ? 'tendência principal' : 'movimento recente');
+  const layerName = (L) => (uniOn(settings) ? (uniG(selectedTf) === 'ctx' ? 'estrutura de contexto' : 'estrutura de gatilho') : L === 'ext' ? 'tendência principal' : 'movimento recente');
   // ---------- pontos da tendência principal passam para os timeframes de baixo (até ao 1H) ----------
   // cada marca tua (HH/HL/LH/LL) num timeframe vai para a vela mais alta/baixa desse período nos de baixo, marcada como herdada (inh)
   const INH_CHAIN = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '1h'];   // até ao 1H
   function syncDown(id) {
-    if (uniOn(settings)) return;
+    const U = uniOn(settings), Ls = U ? uniL(id) : 'ext', Lt = (lo) => (U ? uniL(lo) : 'ext');
     const ci = INH_CHAIN.indexOf(id); if (ci < 0 || ci === INH_CHAIN.length - 1) return;
     const hd = data[id]; if (!hd || !hd.closed) return;
-    const eh = getEdits(id, false), hin = (eh && eh.ext.inh) || {}, hcl = hd.closed;
+    const eh = getEdits(id, false), hin = (eh && eh[Ls].inh) || {}, hcl = hd.closed;
     const idx = (cl, t) => { let lo = 0, hi = cl.length - 1; while (lo <= hi) { const m = (lo + hi) >> 1; if (cl[m].t === t) return m; if (cl[m].t < t) lo = m + 1; else hi = m - 1; } return -1; };
-    const pts = eh ? [...eh.ext.add].filter(([t]) => !hin[t]).map(([t, lab]) => { const i = idx(hcl, t); if (i < 0) return null; const top = lab === 'HH' || lab === 'LH' || lab === 'H';
+    const pts = eh ? [...eh[Ls].add].filter(([t]) => !hin[t]).map(([t, lab]) => { const i = idx(hcl, t); if (i < 0) return null; const top = lab === 'HH' || lab === 'LH' || lab === 'H';
       return { t, lab, top, t0: hcl[i].t, t1: hcl[i].ct }; }).filter(Boolean) : [];
     let any = false;
     for (const lo of INH_CHAIN.slice(ci + 1)) {
       const ld = data[lo]; if (!ld || !ld.closed || !ld.closed.length || tfHid(lo)) continue;
-      const cl = ld.closed, want = new Map();
+      const cl = ld.closed, want = new Map(), LT = Lt(lo);
       for (const p of pts) {
         if (p.t0 < cl[0].t) continue;   // mais antigo do que o histórico deste timeframe
         let b = -1; for (let k = 0; k < cl.length; k++) { const c = cl[k]; if (c.t < p.t0) continue; if (c.t > p.t1) break; if (b < 0 || (p.top ? c.h > cl[b].h : c.l < cl[b].l)) b = k; }
         if (b >= 0) want.set(cl[b].t, Object.assign({ k: b }, p));
       }
-      let e = getEdits(lo, false), ch = false; const has = (e && e.ext.inh) || {};
+      let e = getEdits(lo, false), ch = false; const has = (e && e[LT].inh) || {};
       for (const key of Object.keys(has)) { const v = has[key]; if (v.f !== id) continue; const t = +key;
-        if (!want.has(t)) { if (e.ext.add.get(t) === v.l) e.ext.add.delete(t); delete e.ext.inh[key]; ch = true; }   // apagaste o ponto lá em cima
-        else if (!v.off && !e.ext.add.has(t)) { v.off = 1; ch = true; } }   // apagaste o herdado aqui: não volta
+        if (!want.has(t)) { if (e[LT].add.get(t) === v.l) e[LT].add.delete(t); delete e[LT].inh[key]; ch = true; }   // apagaste o ponto lá em cima
+        else if (!v.off && !e[LT].add.has(t)) { v.off = 1; ch = true; } }   // apagaste o herdado aqui: não volta
       for (const [t, p] of want) {
-        if (has[t]) { const v = has[t]; if (!v.off && v.f === id && v.l !== p.lab && e.ext.add.get(t) === v.l) { e.ext.add.set(t, p.lab); v.l = p.lab; ch = true; } continue; }   // mudaste o nome lá em cima
-        if (e && e.ext.add.has(t)) continue;   // já é uma marca tua aqui
+        if (has[t]) { const v = has[t]; if (!v.off && v.f === id && v.l !== p.lab && e[LT].add.get(t) === v.l) { e[LT].add.set(t, p.lab); v.l = p.lab; ch = true; } continue; }   // mudaste o nome lá em cima
+        if (e && e[LT].add.has(t)) continue;   // já é uma marca tua aqui
         if (ld.ext.res.swings.some((x) => x.i === p.k && x.type === (p.top ? 'H' : 'L') && !x.manual)) continue;   // a app já tem esse ponto
-        e = getEdits(lo, true); e.ext.inh = e.ext.inh || {}; e.ext.ign.delete(t); e.ext.add.set(t, p.lab); e.ext.inh[t] = { f: id, s: p.t, l: p.lab }; ch = true;
+        e = getEdits(lo, true); e[LT].inh = e[LT].inh || {}; e[LT].ign.delete(t); e[LT].add.set(t, p.lab); e[LT].inh[t] = { f: id, s: p.t, l: p.lab }; ch = true;
       }
       if (ch) { data[lo] = computeTf(ld.candles, lo); any = true; }
     }
@@ -4034,7 +4087,8 @@
     const fx = $('#editWarnFix'); if (fx) fx.onclick = () => { const x = editWarn; pushUndo(x.id); const e = getEdits(x.id, true); e[x.L].add.set(x.t, x.sug); saveEdits(); editWarn = null; refreshTf(x.id); };
     $('#editWarnX').onclick = () => { editWarn = null; showEditWarn(); };
   }
-  function refreshTf(id) { data[id] = computeTf(data[id].candles, id); try { syncDown(id); } catch (e) { console.warn('syncDown', e); } renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
+  function refreshTf(id) { data[id] = computeTf(data[id].candles, id); try { syncDown(id); } catch (e) { console.warn('syncDown', e); } for (let c = Object.keys(ANCH).find((k) => ANCH[k] === id); c; c = Object.keys(ANCH).find((k) => ANCH[k] === c)) if (data[c] && data[c].candles) data[c] = computeTf(data[c].candles, c);   // a âncora do Semanal/Diário segue o Mensal/Semanal
+    renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
   function updateEditUi() {
     const nEd = editCount(selectedTf);
     $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✔ Terminar edição' : '✎ Editar estrutura';
@@ -4461,7 +4515,7 @@
       const sw = res.swings.filter(hit).sort((a, b) => Math.abs(Y(a.p) - py) - Math.abs(Y(b.p) - py))[0];
       if (sw) {
         const what = `${sw.label || (sw.type === 'H' ? 'topo' : 'fundo')} (${fmt(sw.p)})`;
-        if (sw.start) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { const e = ed()[L]; if (e.start) e.start = null; else e.add.delete(T(sw.i)); done(); } });
+        if (sw.start && !sw.anchor) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { const e = ed()[L]; if (e.start) e.start = null; else e.add.delete(T(sw.i)); done(); } });
         else if (sw.manual) { const hi = (ed()[L].inh || {})[T(sw.i)]; items.push({ label: hi ? `Remover este ponto herdado do ${tfLabel(hi.f)} ${what} — só neste timeframe` : `✎ Remover a tua marca ${what} — ${layerName(L)}`, run: () => { ed()[L].add.delete(T(sw.i)); done(); } }); }
         else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => {
           const x = ed()[L]; x.ign.add(T(sw.i));
@@ -4613,8 +4667,8 @@
   // 🔒 cadeado: um ativo trancado não pode ser recriado (nem "Voltar ao automático", nem mudar os Pontos) até tirares o cadeado
   const rcLocked = (s) => !!(settings.rcLock || {})[s];
   const rcLockMsg = (s) => `🔒 ${nm(s)} está trancado: não pode ser recriado nem mudar de Pontos. Tira o cadeado em Favoritos → ⟲ Recriar gráficos.`;
-  const rcPts = (s) => { const u = uniOn(settings), per = (settings[u ? 'uniSensPer' : 'priSensPer'] || {})[s] || {}, def = u ? Object.assign({}, UNI_DEF, settings.uniSens || {}) : Object.assign({ ctx: 1, mid: 1, trig: 1 }, settings.priSens || {});
-    const v = ['ctx', 'mid', 'trig'].map((g) => +(per[g] || def[g])), own = ['ctx', 'mid', 'trig'].some((g) => per[g]); const uq = [...new Set(v)]; return { txt: uq.length === 1 ? String(uq[0]) : v.join('/'), own }; };
+  const rcPts = (s) => { const u = uniOn(settings), per = (settings[u ? 'uniSensPer' : 'priSensPer'] || {})[s] || {}, def = u ? Object.assign({}, UNI2_DEF, settings.uniSens || {}) : Object.assign({ ctx: 1, mid: 1, trig: 1 }, settings.priSens || {}), GS = u ? ['ctx', 'trig'] : ['ctx', 'mid', 'trig'];
+    const v = GS.map((g) => +(per[g] || def[g])), own = GS.some((g) => per[g]); const uq = [...new Set(v)]; return { txt: uq.length === 1 ? String(uq[0]) : v.join('/'), own }; };
   const rcMarks = (s) => Object.keys(edits).filter((k) => k.split('|')[0] === s).length;
   function openRecreate() {
     if (editMode) { alert('Termina primeiro a edição do gráfico (✔ Terminar edição) e depois tenta outra vez.'); return; }
@@ -4626,8 +4680,9 @@
         <div class="rcq"><button type="button" class="lyr" data-rq="all">Todos</button><button type="button" class="lyr" data-rq="none">Nenhum</button><button type="button" class="lyr" data-rq="ed">Só com marcas</button><button type="button" class="lyr" data-rq="c">Cripto</button><button type="button" class="lyr" data-rq="s">Ações/futuros</button><button type="button" class="lyr" data-rq="r">Rácios</button>
           <input id="rcSearch" type="search" placeholder="Procurar…"></div>
         <div id="rcList" class="rclist"></div>
-        <div class="rcfoot"><label>Pontos da tendência principal <select id="rcLvl"><option value="">manter o que cada um tem</option><option value="1">1 — todos os topos e fundos (mais pontos)</option><option value="2">2 — todos, pernas maiores</option><option value="3">3 — só pernas que quebram estrutura</option><option value="4">4 — cálculo clássico</option><option value="5">5 — menos pontos</option></select></label>
-          <span class="muted small">vale para todos os timeframes desses ativos</span><button type="button" class="primary" id="rcGo">Recriar</button></div></div>`;
+        <div class="rcfoot"><label><span id="rcLvlLbl">Pontos</span> <select id="rcLvl"><option value="">manter o que cada um tem</option><option value="1">1 — todos os topos e fundos (mais pontos)</option><option value="2">2 — todos, pernas maiores</option><option value="3">3 — só pernas que quebram estrutura</option><option value="4">4 — cálculo clássico</option><option value="5">5 — menos pontos</option></select></label>
+          <label id="rcLvl2Box">Pontos do gatilho (4H→5m) <select id="rcLvl2"><option value="">manter o que cada um tem</option><option value="1">1 — todos os topos e fundos (mais pontos)</option><option value="2">2 — todos, pernas maiores</option><option value="3">3 — só pernas que quebram estrutura</option><option value="4">4 — cálculo clássico</option><option value="5">5 — menos pontos</option></select></label>
+          <span class="muted small" id="rcLvlNote"></span><button type="button" class="primary" id="rcGo">Recriar</button></div></div>`;
       document.body.appendChild(m);
       $('#rcX').addEventListener('click', () => m.classList.remove('open'));
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
@@ -4636,7 +4691,11 @@
       $('#rcSearch').addEventListener('input', () => { rcQ = $('#rcSearch').value.trim().toLowerCase(); rcRender(); });
       $('#rcGo').addEventListener('click', rcApply);
     }
-    rcSel = new Set(); rcQ = ''; $('#rcSearch').value = ''; $('#rcLvl').value = String((settings.priSens || {}).mid || 1);
+    rcSel = new Set(); rcQ = ''; $('#rcSearch').value = '';
+    const U = uniOn(settings), us = Object.assign({}, UNI2_DEF, settings.uniSens || {});
+    $('#rcLvlLbl').textContent = U ? 'Pontos do contexto (Anual→Diário)' : 'Pontos da tendência principal'; $('#rcLvl2Box').style.display = U ? '' : 'none';
+    $('#rcLvlNote').textContent = U ? '' : 'vale para todos os timeframes desses ativos';
+    $('#rcLvl').value = U ? String(us.ctx) : String((settings.priSens || {}).mid || 1); $('#rcLvl2').value = U ? String(us.trig) : '';
     rcRender(); m.classList.add('open');
   }
   function rcRender() {
@@ -4654,19 +4713,41 @@
   function rcCount() { const n = [...rcSel].filter((s) => (settings.favs || []).includes(s) && !rcLocked(s)).length; $('#rcGo').textContent = `Recriar ${n} ativo${n === 1 ? '' : 's'}`; $('#rcGo').disabled = !n; }
   function rcApply() {
     const syms = [...rcSel].filter((s) => (settings.favs || []).includes(s) && !rcLocked(s)); if (!syms.length) return;
-    const lvl = $('#rcLvl').value, K = uniOn(settings) ? 'uniSensPer' : 'priSensPer';
+    const lvl = $('#rcLvl').value, lvl2 = uniOn(settings) ? $('#rcLvl2').value : lvl, K = uniOn(settings) ? 'uniSensPer' : 'priSensPer';
     const keys = Object.keys(edits).filter((k) => syms.includes(k.split('|')[0]));
     if (!confirm(`Recriar ${syms.length} ativo${syms.length === 1 ? '' : 's'}${lvl ? ` com Pontos ${lvl}` : ''}?\n\n${keys.length ? `Apaga as tuas marcas à mão em ${keys.length} gráfico${keys.length === 1 ? '' : 's'} (ativo × timeframe). ` : ''}As linhas e canais ficam. Fica uma cópia de segurança e podes desfazer.`)) return;
     makeBackup(`antes de recriar ${syms.length} gráfico(s)`);
     const saved = {}, perOld = JSON.stringify(settings[K] || {});
     keys.forEach((k) => { saved[k] = edits[k]; delete edits[k]; delete undo[k]; delete redo[k]; });
-    if (lvl) { settings[K] = Object.assign({}, settings[K] || {}); syms.forEach((s) => { settings[K][s] = { ctx: +lvl, mid: +lvl, trig: +lvl }; }); }
+    if (lvl || lvl2) { settings[K] = Object.assign({}, settings[K] || {}); syms.forEach((s) => { settings[K][s] = uniOn(settings) ? Object.assign({}, settings[K][s] || {}, lvl ? { ctx: +lvl } : {}, lvl2 ? { trig: +lvl2 } : {}) : { ctx: +lvl, mid: +lvl, trig: +lvl }; }); }
     const redo1 = () => { if (syms.includes(symbol)) { for (const id in data) if (data[id] && data[id].candles) data[id] = computeTf(data[id].candles, id); try { renderTable(); renderConfluence(); renderChart(true); updateEditUi(); sensUi(); } catch (e) {} } for (const x of syms) delete favData[x]; scanFavs(true); npRender(); };
     persistEdits(); save('mss_settings4', settings); redo1(); $('#rcModal').classList.remove('open');
     let t = $('#raToast'); if (!t) { t = document.createElement('div'); t.id = 'raToast'; document.body.appendChild(t); }
     t.innerHTML = `✔ ${syms.length} ativo${syms.length === 1 ? '' : 's'} recriado${syms.length === 1 ? '' : 's'}${lvl ? ` (Pontos ${lvl})` : ''} <button id="raUndo">↶ Desfazer</button><button id="raX">✕</button>`;
     $('#raX').addEventListener('click', () => t.remove());
     $('#raUndo').addEventListener('click', () => { Object.assign(edits, saved); settings[K] = JSON.parse(perOld); persistEdits(); save('mss_settings4', settings); redo1(); t.innerHTML = '↶ Reposto como estava <button id="raX2">✕</button>'; $('#raX2').addEventListener('click', () => t.remove()); });
+  }
+  // ---------- passagem única para "uma estrutura por gráfico": apaga as marcas à mão (exceto ativos trancados), com cópia e Desfazer ----------
+  // espera pela 1.ª leitura da conta (marcas e definições), para não apagar só aqui e depois a conta as trazer de volta
+  function uniWipeMaybe() {
+    if (settings.uniWipe || uniWipeMaybe.done) return;
+    if (cloud.db && !cloud.user) { if ((uniWipeMaybe.n = (uniWipeMaybe.n || 0) + 1) < 40) setTimeout(uniWipeMaybe, 3000); return; }   // ainda a entrar na conta
+    if (cloud.db && cloud.user && !(cloud.edReady && cloud.setReady)) return;
+    if (editMode) { setTimeout(uniWipeMaybe, 5000); return; }
+    uniWipeMaybe.done = true;
+    const keys = Object.keys(edits).filter((k) => !rcLocked(k.split('|')[0]));
+    settings.uniWipe = Date.now(); save('mss_settings4', settings);
+    if (!keys.length) return;
+    makeBackup('antes de apagar as marcas (uma estrutura por gráfico)');
+    const saved = {}; keys.forEach((k) => { saved[k] = edits[k]; delete edits[k]; delete undo[k]; delete redo[k]; });
+    persistEdits();
+    const redo1 = () => { for (const id in data) if (data[id] && data[id].candles) data[id] = computeTf(data[id].candles, id); try { renderTable(); renderConfluence(); renderChart(true); updateEditUi(); } catch (e) {} for (const x in favData) delete favData[x]; scanFavs(true); npRender(); };
+    redo1();
+    const syms = new Set(keys.map((k) => k.split('|')[0])), lk = Object.keys(settings.rcLock || {}).length;
+    let t = $('#raToast'); if (!t) { t = document.createElement('div'); t.id = 'raToast'; document.body.appendChild(t); }
+    t.innerHTML = `✔ Nova organização: uma estrutura por gráfico. Apaguei as tuas marcas à mão em ${syms.size} ativo${syms.size === 1 ? '' : 's'} (${keys.length} gráficos)${lk ? (lk === 1 ? ' — o ativo trancado ficou como estava' : ` — os ${lk} ativos trancados ficaram como estavam`) : ''}; as linhas e canais ficaram. Há uma cópia de segurança. <button id="raUndo">↶ Desfazer</button><button id="raX">✕</button>`;
+    $('#raX').addEventListener('click', () => t.remove());
+    $('#raUndo').addEventListener('click', () => { Object.assign(edits, saved); persistEdits(); redo1(); t.innerHTML = '↶ As marcas voltaram como estavam <button id="raX2">✕</button>'; $('#raX2').addEventListener('click', () => t.remove()); });
   }
   // recria TODOS os favoritos em automático: apaga as marcas à mão de todos, com cópia de segurança e "↶ Desfazer" até fechares a app
   function recreateAllAuto() {
@@ -4790,12 +4871,12 @@
   // 15m e 5m (e com eles Day trade e Scalp) só nos ativos vigiados a partir desses timeframes — por defeito só o BTC
   const tfHid = (id, s) => (id === '15m' || id === '5m') && (TF_MS0[id] || 0) < monMinMs(s || symbol);
   const suHid = (st, s) => !!st && (tfHid(st.trig, s) || tfHid(st.zone, s) || tfHid(ctxOf(st), s));
-  const favTfsOf = (s) => favTfs().filter((t) => (TF_MS0[t.id] || 1e15) >= monMinMs(s));
+  const favTfsOf = (s) => { const ps = withParents(favTfs().map((t) => t.id)); return TFS.filter((t) => ps.has(t.id)).filter((t) => (TF_MS0[t.id] || 1e15) >= monMinMs(s)); };
   async function loadFav(sym) {
     if (!isCrypto(sym)) {
       const ids = favTfsOf(sym).map((t) => t.id);
       const got = isSynth(sym) ? await synthCandles(sym, ids) : isRatio(sym) ? await ratioCandles(sym, ids, true) : await stockCandles(sym, ids), out = {};
-      for (const id in got) if (ids.includes(id)) out[id] = computeTf(got[id], id, sym);
+      for (const id of TF_IDS.filter((x) => got[x])) if (ids.includes(id)) out[id] = computeTf(got[id], id, sym);
       const any = out['1d'] || Object.values(out)[0];
       favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
     }
@@ -5051,7 +5132,7 @@
     if (t === 'favs') { renderFavs(); scanFavs(false); }
     if (t === 'grafico') setTimeout(() => { try { chart.panes()[1].setHeight(window.innerWidth <= 760 ? 90 : 130); } catch (e) {} renderChart(false); }, 60);
   }
-  function selectTf(id) { const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id); closeMenu(); try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
+  function selectTf(id) { const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id); closeMenu(); if (uniOn(settings)) { editLayer = uniL(id); try { updateEditUi(); } catch (e) {} } try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
   function recomputeAll() { for (const id of Object.keys(data)) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderPrev(); renderChart(true); }
 
   // ---------- definições ----------
@@ -5072,13 +5153,14 @@
     renderBackups();
     Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll();
   }
-  const SENS_OPT = (sel, def) => [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${v === def ? ' selected' : ''}>${v}${v === 1 ? ' — mais pontos' : v === 5 ? ' — menos pontos' : ''}</option>`).join('');
+  const PTS_LBL = { 1: ' — todos os topos/fundos', 2: ' — todos, pernas maiores', 3: ' — só quebras', 4: ' — clássico', 5: ' — menos' };
+  const SENS_OPT = (sel, def) => [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${v === def ? ' selected' : ''}>${v}${PTS_LBL[v]}</option>`).join('');
   function openSettings() {
     renderBackups();
     $('#setConfirm').value = settings.confirm; $('#setLock').value = settings.lockBars;
     $('#setExt').value = settings.extAtr; $('#setInt').value = settings.intAtr; $('#setSwF').value = settings.swFloor == null ? 1 : settings.swFloor;
     { const ps = Object.assign({ ctx: 1, mid: 1, trig: 1 }, settings.priSens || {}); $('#setPriCtx').innerHTML = SENS_OPT(0, +ps.ctx); $('#setPriMid').innerHTML = SENS_OPT(0, +ps.mid); $('#setPriTrig').innerHTML = SENS_OPT(0, +ps.trig); }
-    $('#setUni').checked = uniOn(settings); document.querySelectorAll('.uniopt').forEach((x) => { x.style.display = $('#setUni').checked ? '' : 'none'; }); $('#setUni').onchange = () => document.querySelectorAll('.uniopt').forEach((x) => { x.style.display = $('#setUni').checked ? '' : 'none'; }); const us = Object.assign({}, UNI_DEF, settings.uniSens || {}); $('#setSensCtx').innerHTML = SENS_OPT(0, +us.ctx); $('#setSensMid').innerHTML = SENS_OPT(0, +us.mid); $('#setSensTrig').innerHTML = SENS_OPT(0, +us.trig);
+    $('#setUni').checked = uniOn(settings); const uniVis = () => { const on = $('#setUni').checked; document.querySelectorAll('.uniopt').forEach((x) => { x.style.display = on ? '' : 'none'; }); document.querySelectorAll('.prionly').forEach((x) => { x.style.display = on ? 'none' : ''; }); }; uniVis(); $('#setUni').onchange = uniVis; const us = Object.assign({}, UNI2_DEF, settings.uniSens || {}); $('#setSensCtx').innerHTML = SENS_OPT(0, +us.ctx); $('#setSensTrig').innerHTML = SENS_OPT(0, +us.trig);
     $('#setVol').value = settings.volMult; $('#setRecent').value = settings.recent; $('#setRefresh').checked = settings.refresh; $('#setPrev').checked = settings.prevLevels; $('#setDayStart').value = settings.dayStart || 'ny'; $('#setSess').value = settings.sessions || ''; $('#setKzProf').value = settings.kzProfile || 'cripto'; $('#setRLondon').checked = settings.showLondonR !== false; $('#setRDay').checked = settings.showDayR !== false; $('#setRWeek').checked = settings.showWeekR !== false; $('#setRAsia').checked = settings.showAsiaR !== false; $('#setKzA').checked = settings.kzAsia !== false; $('#setKzL').checked = settings.kzLondon !== false; $('#setKzN').checked = settings.kzNy !== false; $('#setDispInt').checked = settings.dispInt; $('#setDispExt').checked = settings.dispExt; $('#setDispAtr').value = settings.dispAtr; $('#setCont').value = settings.contBars; $('#setFvgMin').value = settings.fvgMinAtr; $('#setContAtr').value = settings.contAtr; $('#setMargin').value = settings.closeMarginAtr; $('#setAccept').value = settings.acceptBars; $('#setFail').value = settings.failBars; $('#setFailTf').value = settings.failByTf || ''; $('#setDivPiv').value = settings.divPivot || 5; $('#setRangeTol').value = settings.rangeTolByTf || ''; $('#setLegRatio').value = settings.legRatio; $('#setFloor').value = settings.floorAtr; $('#setMinRR').value = settings.minRR; $('#setFee').value = settings.feePct; $('#setBuf').value = settings.stopBufAtr;
     const opts = (sel) => TFS.map((t) => `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.label}</option>`).join('');
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
@@ -5122,7 +5204,7 @@
   }
   function applySettings() {
     const swOld = settings.swFloor == null ? 1 : +settings.swFloor, uniOld = JSON.stringify([uniOn(settings), settings.uniSens || null]), priOld = JSON.stringify(settings.priSens || null);
-    settings = Object.assign({}, settings, { priSens: { ctx: +$('#setPriCtx').value, mid: +$('#setPriMid').value, trig: +$('#setPriTrig').value }, uniStruct: $('#setUni').checked, uniSens: { ctx: +$('#setSensCtx').value, mid: +$('#setSensMid').value, trig: +$('#setSensTrig').value },
+    settings = Object.assign({}, settings, { priSens: { ctx: +$('#setPriCtx').value, mid: +$('#setPriMid').value, trig: +$('#setPriTrig').value }, uniStruct: $('#setUni').checked, uniSens: { ctx: +$('#setSensCtx').value, trig: +$('#setSensTrig').value },
       confirm: +$('#setConfirm').value, lockBars: +$('#setLock').value,
       extAtr: +$('#setExt').value, intAtr: +$('#setInt').value, swFloor: Math.max(0, +$('#setSwF').value || 0), volMult: +$('#setVol').value,
       recent: +$('#setRecent').value, refresh: $('#setRefresh').checked, prevLevels: $('#setPrev').checked, dayStart: $('#setDayStart').value, sessions: $('#setSess').value, kzProfile: $('#setKzProf').value, showLondonR: $('#setRLondon').checked, showDayR: $('#setRDay').checked, showWeekR: $('#setRWeek').checked, showAsiaR: $('#setRAsia').checked, kzAsia: $('#setKzA').checked, kzLondon: $('#setKzL').checked, kzNy: $('#setKzN').checked, dispInt: $('#setDispInt').checked, dispExt: $('#setDispExt').checked, dispAtr: +$('#setDispAtr').value, contBars: +$('#setCont').value, fvgMinAtr: +$('#setFvgMin').value, contAtr: +$('#setContAtr').value, closeMarginAtr: +$('#setMargin').value, acceptBars: +$('#setAccept').value, failBars: +$('#setFail').value, failByTf: $('#setFailTf').value, rangeTolByTf: $('#setRangeTol').value, divPivot: Math.max(2, Math.min(15, +$('#setDivPiv').value || 5)), legRatio: +$('#setLegRatio').value, floorAtr: +$('#setFloor').value, minRR: +$('#setMinRR').value, feePct: +$('#setFee').value, stopBufAtr: +$('#setBuf').value,
@@ -5653,7 +5735,7 @@ Nunca escrevas "pronto", "entrar" ou "evitar" sem dizer se é LONG ou SHORT. Qua
     const pano = dayPanoNames(), ld = dayLoad();
     const rat = dayRatios().map((x) => `- ${nm(x.A)} / ${nm(x.B)}: Semanal ${x.w} Diário ${x.d}${x.w === '▲' && x.d !== '▼' ? ` (${nm(x.A)} a ganhar)` : x.w === '▼' && x.d !== '▲' ? ` (${nm(x.B)} a ganhar)` : ''}`).join('\n');
     return `${ld.busy ? `⚠ DADOS INCOMPLETOS: a app ainda estava a carregar os favoritos (${ld.n} de ${ld.t}). Avisa-me disso logo no início e não tires conclusões gerais dos grupos/rácios sem dados.\n\n` : ''}Brief do dia — scanner de estrutura ICT (${dt})
-Tendência = ${uniOn(settings) ? 'a estrutura (única) de cada timeframe' : 'a estrutura PRINCIPAL de cada timeframe'}. Correção ≥ 50% = em zona. Setups sem scalp (Longo prazo, Swing, Day trade). A ordem já vem por força: estado do setup → sinais de reversão → contexto do timeframe de cima → força relativa → R:R.
+Tendência = ${uniOn(settings) ? 'a estrutura de cada timeframe (Anual→Diário: estrutura de contexto, só quebras; 4H e abaixo: estrutura de gatilho, todos os topos/fundos)' : 'a estrutura PRINCIPAL de cada timeframe'}. Correção ≥ 50% = em zona. Setups sem scalp (Longo prazo, Swing, Day trade). A ordem já vem por força: estado do setup → sinais de reversão → contexto do timeframe de cima → força relativa → R:R.
 
 PANORAMA (${uniOn(settings) ? 'estrutura' : 'tendência principal'} dos favoritos, por grupo)
 ${pano || '- (sem dados)'}
@@ -5853,7 +5935,7 @@ ${AI_DAY_FORMAT}`;
       if (v) dv = `; divergência RSI ${v.dir === 1 ? 'de alta' : 'de baixa'} ativa: ${v.dir === 1 ? 'fundo' : 'topo'} ${aiF(v.a.p)} → ${aiF(v.b.p)}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)} (há ${d.closed.length - 1 - v.b.i} velas)`;
       if (rs != null) dv += `; RSI ${rs.toFixed(0)}`; } catch (e) {}
     const sma = ['1d', '1w', '1M', '3M', '6M', '1Y'].includes(id) ? smaOfTf(d, 200) : null;   // médias só do Diário para cima
-    return `- ${tfLabel(id)}: ${d.uni ? `ESTRUTURA ${tr(x)}` : `TENDÊNCIA PRINCIPAL ${tr(x)} | MOVIMENTO RECENTE ${tr(n)}`}${lb}${disp}${fib}${d.uni ? '' : fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}${dv}`;
+    return `- ${tfLabel(id)}: ${d.uni ? `ESTRUTURA DE ${uniG(id) === 'ctx' ? 'CONTEXTO' : 'GATILHO'} ${tr(x)}` : `TENDÊNCIA PRINCIPAL ${tr(x)} | MOVIMENTO RECENTE ${tr(n)}`}${lb}${disp}${fib}${d.uni ? '' : fibI}${sma ? `; SMA 200 ${aiF(sma)} (preço ${pct((d.price - sma) / sma * 100, true)})` : ''}${dv}`;
   }
   // ---------- 📋 resumo para a IA: dados "mastigados" para decidir (obstáculos, risco/retorno, força relativa) e um formato de resposta curto ----------
   const AI_FORMAT = `Responde em português de Portugal, no máximo ~250 palavras, com este formato:
@@ -5903,7 +5985,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   }
   function aiSummary(al) {
     const N = nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol;
-    const UNI_NOTE = uniOn(settings) ? '\n\nNOTA: nesta versão cada timeframe tem UMA só estrutura (marcada "ESTRUTURA" nos dados) — onde as regras falam de tendência principal e movimento recente, usa essa estrutura e diz sempre de que timeframe falas.' : '';
+    const UNI_NOTE = uniOn(settings) ? '\n\nNOTA: nesta versão cada timeframe tem UMA só estrutura. Do Anual ao Diário é a "ESTRUTURA DE CONTEXTO" (só os topos/fundos que levaram a quebras de estrutura: dá a direção, a zona e a Fibonacci — pernas fortes). Do 4H para baixo é a "ESTRUTURA DE GATILHO" (todos os topos/fundos: dá o CHoCH/BOS de entrada). Onde as regras falam de tendência principal usa a estrutura de contexto; onde falam de movimento recente usa a estrutura de gatilho. Diz sempre qual das duas e de que timeframe falas.' : '';
     const out = [al ? `Recebi este alerta do meu scanner${al.at ? ' às ' + new Date(al.at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''} sobre ${N}:\n«${al.text}»\n\nQuero saber se ESTE alerta é uma boa oportunidade ou não: enquadra-o no contexto de todos os timeframes, da tendência maior, dos obstáculos, do risco/retorno e da força relativa que estão nos dados abaixo. Se houver uma entrada melhor (noutra zona ou noutro ativo), diz qual.\n\n${AI_FORMAT}${UNI_NOTE}` : `Analisa ${N} com estes dados do meu scanner de estrutura de mercado (ICT) e diz-me se há alguma entrada que valha a pena agora.\n\n${AI_FORMAT}${UNI_NOTE}`, ''];
     const d0 = data[selectedTf], price = d0 ? d0.price : null;
     // scalp só em cripto: nas ações, matérias-primas e rácios fica de fora o setup de Scalp e a linha do 5m
@@ -5922,7 +6004,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
           rr = ` | entrada agora ${aiF(price)}, stop além da origem ${aiF(stop)} (${pct(risk / price * 100)})` + (first ? `, 1.º obstáculo ${first.n} ${aiF(first.p)} → R:R ${(Math.abs(first.p - price) / risk).toFixed(1).replace('.', ',')}` : '') + (tgt && (up ? tgt > price : tgt < price) ? `, ${up ? 'topo' : 'fundo'} da perna ${aiF(tgt)} → R:R ${(Math.abs(tgt - price) / risk).toFixed(1).replace('.', ',')}` : ''); }
         if (r.plan && r.tgt) rr += ` | plano da app: entrada ${aiF(r.plan.entry)}, stop ${aiF(r.plan.stop)}, alvo ${r.tgt.fin.label} ${aiF(r.tgt.fin.p)} → R:R ${r.tgt.rr.toFixed(1).replace('.', ',')}`;
       }
-      return `- ${st.name} (${tfLabel(st.zone)} → ${tfLabel(st.trig)}): ${r.dir === 1 ? 'LONG' : 'SHORT'}, zona ${pct(r.z.pullback)}, ${est}${(() => { const sb = r.zoneOk ? strongBrk(data, st, r.dir) : null; return sb ? `; QUEBRA FORTE: ${sb.txt}` : ''; })()}${r.zoneOk && zoneConf(data[st.zone], r.dir, st.zone) ? `; CONFIRMAÇÃO: o movimento recente do ${tfLabel(st.zone)} já virou a favor dentro da zona (entrada mais tardia que o gatilho, mas o movimento ganhou força)` : ''}${r.star ? '; ' + r.star.txt : ''}${rr}`; }).filter(Boolean);
+      return `- ${st.name} (${tfLabel(st.zone)} → ${tfLabel(st.trig)}): ${r.dir === 1 ? 'LONG' : 'SHORT'}, zona ${pct(r.z.pullback)}, ${est}${(() => { const sb = r.zoneOk ? strongBrk(data, st, r.dir) : null; return sb ? `; QUEBRA FORTE: ${sb.txt}` : ''; })()}${(() => { const cf = r.zoneOk ? zoneConf(data[st.zone], r.dir, st.zone) : null; return cf ? `; CONFIRMAÇÃO: ${cf === st.zone ? `o movimento recente do ${tfLabel(st.zone)}` : `a estrutura do ${tfLabel(cf)}`} já virou a favor dentro da zona do ${tfLabel(st.zone)} (entrada mais tardia que o gatilho, mas o movimento ganhou força)` : ''; })()}${r.star ? '; ' + r.star.txt : ''}${rr}`; }).filter(Boolean);
     if (ev.length) out.push('', 'Setups (R:R calculado pela app):', ...ev);
     // obstáculos à volta do preço
     if (price != null) {
@@ -6204,7 +6286,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       try { npMountDetail(); npRender(); } catch (e) {}
       try { if (history.state && history.state.s) history.replaceState(Object.assign({}, history.state, { s }), ''); } catch (e) {}
       symNavUi();
-      if (wasEd) { const t0 = Date.now(); const w = setInterval(() => { if (symbol !== s || Date.now() - t0 > 20000) { clearInterval(w); return; } if (dataSym === s && data[selectedTf]) { clearInterval(w); editLayer = lay; setEdit(true); try { updateEditUi(); } catch (e) {} } }, 200); }
+      if (wasEd) { const t0 = Date.now(); const w = setInterval(() => { if (symbol !== s || Date.now() - t0 > 20000) { clearInterval(w); return; } if (dataSym === s && data[selectedTf]) { clearInterval(w); editLayer = uniOn(settings) ? uniL(selectedTf) : lay; setEdit(true); try { updateEditUi(); } catch (e) {} } }, 200); }
     };
     if (editMode && draft && draft.dirty) { pendingNav = go; $('#saveDlg').classList.add('open'); return; }
     go();
@@ -6391,10 +6473,10 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       cloud.applying = false;
       if (firstE) { firstE = false; cloudPushEdits(); }   // primeiro login: sobe o que só existia neste navegador
       for (const k of touched) { const [sym, tf] = k.split('|'); if (sym === symbol && data[tf]) refreshTf(tf); }
-      cloudUi();
+      cloudUi(); cloud.edReady = true; setTimeout(uniWipeMaybe, 0);
     }, (e) => { cloud.err = e.code || 'leitura'; cloudUi(); }));
     cloud.unsubs.push(base.collection('meta').doc('settings').onSnapshot((d) => {
-      const j = d.exists ? d.data().json : null;
+      const j = d.exists ? d.data().json : null; cloud.setReady = true; setTimeout(uniWipeMaybe, 0);
       if (!j) { if (firstS) { firstS = false; cloudPushSettings(); } return; }
       firstS = false;
       if (j === cloud.settingsJson || (cloud.mine || []).includes(j)) return;   // é o eco de uma gravação feita aqui
@@ -6402,7 +6484,8 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       try {
         // só se volta a descarregar velas quando muda o que se descarrega (timeframes, setups, monitorização); de resto só se recalcula
         const dl = (x) => JSON.stringify([x.tfs, x.setups, x.mon, x.prevLevels]), before = dl(settings);
-        const r = JSON.parse(j); cloud.applying = true; const monMig = !(r.mon && r.mon.v2);
+        const r = JSON.parse(j); cloud.applying = true; const monMig = !(r.mon && r.mon.v2) || !r.uniV2;
+        if (!r.uniV2) { delete r.uniStruct; delete r.uniSens; delete r.uniSensPer; }   // definições da conta ainda do modo antigo: ficam as desta versão (e sobem para a conta)
         Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings); applyTheme();
         cloud.applying = false; if (monMig) setTimeout(() => { try { cloudPushSettings(); } catch (e) {} }, 800);
         if (!editMode) editLayer = settings.layer === 'ext' ? 'ext' : 'int';
@@ -6432,14 +6515,15 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   // estrutura única: classe no body, camada de edição e cópia de segurança das correções (uma vez)
   function uniApply() {
     document.body.classList.toggle('uni', uniOn(settings));
-    if (uniOn(settings)) { editLayer = 'int'; if (!settings.uniBackup) { try { makeBackup('antes da estrutura única', null, true); } catch (e) {} settings.uniBackup = Date.now(); save('mss_settings4', settings); } }
+    if (uniOn(settings)) { editLayer = uniL(selectedTf); if (!settings.uniBackup) { try { makeBackup('antes da estrutura única', null, true); } catch (e) {} settings.uniBackup = Date.now(); save('mss_settings4', settings); } }
     try { sensUi(); } catch (e) {}
   }
   function sensUi() {
-    const sel = $('#sensSel'); if (!sel) return; const u = uniOn(settings), K = u ? 'uniSensPer' : 'priSensPer', g = UNI_GRP[selectedTf] || 'mid', per = (settings[K] || {})[symbol] || {}, def = u ? +((settings.uniSens || {})[g] || UNI_DEF[g]) : +((settings.priSens || {})[g] || 1);
-    const gn = { ctx: 'contexto', mid: 'meio', trig: 'gatilho' }[g];
-    sel.innerHTML = `<option value="">padrão (${def})</option>` + [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${+per[g] === v ? ' selected' : ''}>${v}${u ? (v === 1 ? ' — mais' : v === 5 ? ' — menos' : '') : ({ 1: ' — todos os topos/fundos', 2: ' — todos, pernas maiores', 3: ' — só quebras', 4: ' — clássico', 5: ' — menos' })[v]}</option>`).join('');
-    sel.title = rcLocked(symbol) ? rcLockMsg(symbol) : `Pontos da ${u ? 'estrutura' : 'tendência principal'} de ${nm(symbol)} nos timeframes de ${gn} (só este ativo): 1 = mais pontos, 5 = menos`; sel.disabled = rcLocked(symbol);
+    const sel = $('#sensSel'); if (!sel) return; const u = uniOn(settings), K = u ? 'uniSensPer' : 'priSensPer', g = u ? uniG(selectedTf) : (UNI_GRP[selectedTf] || 'mid'), per = (settings[K] || {})[symbol] || {};
+    const def = u ? +((settings.uniSens || {})[g] || UNI2_DEF[g]) : +((settings.priSens || {})[g] || 1);
+    const gn = u ? { ctx: 'contexto (Anual→Diário)', trig: 'gatilho (4H→5m)' }[g] : { ctx: 'contexto', mid: 'meio', trig: 'gatilho' }[g];
+    sel.innerHTML = `<option value="">padrão (${def})</option>` + [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${+per[g] === v ? ' selected' : ''}>${v}${PTS_LBL[v]}</option>`).join('');
+    sel.title = rcLocked(symbol) ? rcLockMsg(symbol) : `Pontos da ${u ? 'estrutura' : 'tendência principal'} de ${nm(symbol)} nos timeframes de ${gn} (só este ativo): 1 = todos os topos/fundos … 3 = só quebras … 5 = menos`; sel.disabled = rcLocked(symbol);
     $('#sensBox').title = sel.title;
   }
   function init() {
@@ -6528,8 +6612,8 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     $('#btModal').addEventListener('click', (e) => { if (e.target.id === 'btModal') $('#btModal').classList.remove('open'); });
     document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { const menuOpen = $('#editMenu').style.display === 'block'; closeMenu(); if (editMode) { if ($('#saveDlg').classList.contains('open')) $('#saveDlg').classList.remove('open'); else if (!menuOpen && !pendingRange) requestExitEdit(); } else toggleMax(false); $('#settings').classList.remove('open'); $('#btModal').classList.remove('open'); $('#alerts').classList.remove('open'); } });
     $('#tgInt').addEventListener('click', () => { editLayer = 'int'; settings.layer = 'int'; closeMenu(); updateEditUi(); save('mss_settings4', settings); renderChart(true); });
-    uniApply();
-    $('#sensSel').addEventListener('change', () => { const g = UNI_GRP[selectedTf] || 'mid', v = $('#sensSel').value, K = uniOn(settings) ? 'uniSensPer' : 'priSensPer'; settings[K] = settings[K] || {}; const per = Object.assign({}, settings[K][symbol] || {});
+    uniApply(); setTimeout(uniWipeMaybe, 3000);
+    $('#sensSel').addEventListener('change', () => { const g = uniOn(settings) ? uniG(selectedTf) : (UNI_GRP[selectedTf] || 'mid'), v = $('#sensSel').value, K = uniOn(settings) ? 'uniSensPer' : 'priSensPer'; settings[K] = settings[K] || {}; const per = Object.assign({}, settings[K][symbol] || {});
       if (v) per[g] = +v; else delete per[g]; if (Object.keys(per).length) settings[K][symbol] = per; else delete settings[K][symbol]; save('mss_settings4', settings);
       recomputeAll(); const f = favData[symbol]; if (f && f.tfs) { for (const id in f.tfs) if (f.tfs[id] && f.tfs[id].candles) f.tfs[id] = computeTf(f.tfs[id].candles, id, symbol); try { renderFavList(); npRender(); } catch (e) {} } });
     initChart(); chart.subscribeClick(onChartClick); initAutoDrag(); applyTheme();   // os cliques ao desenhar linhas são tratados só em initLines (antes contavam a dobrar)
