@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T14:13:25.254Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T14:21:17.013Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1026,7 +1026,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // timeframes de que os alertas precisam
   function neededTfs(S, A) {
     const s = new Set();
-    if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) s.add(FB.NEXT[x.zone]); });
+    if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) { s.add(FB.NEXT[x.zone]); if (FB.NEXT[FB.NEXT[x.zone]]) s.add(FB.NEXT[FB.NEXT[x.zone]]); } });
     if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) lnTfs(l).forEach((id) => s.add(id)); }));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
@@ -1125,6 +1125,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const swept = (dt.int.res.sweeps || []).some((sw) => !sw.invalid && sw.dir === -lb.dir && sw.i <= lb.i && lb.i - sw.i <= 20);
       const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price).concat(lineConf(S, sym, dt.price, now));
       const prot = t.protected;
+      // 💪 quebra forte: a principal do gatilho também quebrou a favor depois de começar a correção da zona
+      const xs = dt.ext && !dt.uni ? dt.ext.snap : null, xb = xs && xs.lastBreak, zx = dz.ext.res.state && dz.ext.res.state.ext;
+      const strong = !!(xb && xb.dir === dir && xs.trend === dir && cl[xb.i] && (!zx || !dz.closed[zx.i] || cl[xb.i].t >= dz.closed[zx.i].t));
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}`,
@@ -1132,13 +1135,15 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
       ];
+      if (strong) lines.splice(3, 0, `💪 Quebra forte: a tendência principal do ${LBL[su.trig]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})`);
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);
       // Fibonacci da zona: entrada ótima / profunda, ⭐ confluência com o timeframe de baixo, alvos
       const zf = dz.fibs && dz.fibs[0];
       if (zf) {
         const zp = z.pullback, ent = zp >= 61.8 && zp <= 65 ? ' · ✔ entrada ótima (61,8–65%)' : zp > 78.6 ? ' · profunda (> 78,6%)' : '';
         if (ent) lines[1] += ent;
-        const lo = FB.NEXT[su.zone], dl = lo && dm[lo], star = dl ? FB.confluence(zf, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        let lo = FB.NEXT[su.zone], dl = lo && dm[lo], star = dl ? FB.confluence(zf, [...(dl.fibs || []), ...(dl.fibsI || [])]) : null;
+        if (!star && lo && FB.NEXT[lo] && dm[FB.NEXT[lo]]) { const l2 = FB.NEXT[lo], d2 = dm[l2], s2 = FB.confluence(zf, d2.fibs || []); if (s2) { star = s2; lo = l2; dl = d2; } }   // 2 degraus abaixo: só a principal
         if (star) lines.push(`⭐ ${FB.starName(star, dl, LBL[lo])} (${fmt(star.lo)} – ${fmt(star.hi)}) cai na zona do ${LBL[su.zone]} (retração ${pct(star.retr)})`);
         lines.push(`Alvos (${LBL[su.zone]}): topo/fundo da perna ${fmt(zf.B)} · ${zf.targets.map((x) => `${x.name.replace('Alvo ', 'A')} ${fmt(x.lo)}–${fmt(x.hi)}`).join(' · ')}`);
         if (A.tgtOn) {
