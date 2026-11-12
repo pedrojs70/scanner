@@ -754,7 +754,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 16h10</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 17h15</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -2727,6 +2727,8 @@
     p.catch(() => { if (stockMem.get(y) && stockMem.get(y).p === p) stockMem.delete(y); });
     return p;
   }
+  // mínimo de velas para mostrar um timeframe: ativos recentes (ex.: Circle, cotada em 2025) têm poucas velas mensais/semanais
+  const minC = (id) => (Y_MAGG[id] ? 3 : id === '1M' ? 5 : id === '1w' ? 10 : 30);
   async function stockCandles(sym, tfIds) {
     const y = await yahooSym(sym);
     const ivs = new Set();
@@ -2739,7 +2741,7 @@
       let cs = yRows(got[iv].rows, iv);
       if (Y_AGG[id]) cs = aggregateSession(cs, Y_AGG[id]);
       if (Y_MAGG[id]) cs = aggregateMonths(cs, Y_MAGG[id]);
-      if (cs.length > (Y_MAGG[id] ? 5 : 30)) out[id] = cs;
+      if (cs.length > minC(id)) out[id] = cs;
     }
     return out;
   }
@@ -2784,7 +2786,7 @@
     for (const id of tfIds) {
       let cs = r[R_BASE[id]]; if (!cs) continue;
       if (id === '4h') cs = aggregate(cs, 4, 36e5); else if (Y_MAGG[id]) cs = aggregateMonths(cs, Y_MAGG[id]);
-      if (cs.length > (Y_MAGG[id] ? 5 : 30)) out[id] = cs;
+      if (cs.length > minC(id)) out[id] = cs;
     }
     if (!Object.keys(out).length) throw new Error('sem velas em comum entre ' + A + ' e ' + B);
     return out;
@@ -2850,7 +2852,7 @@
     const d = await synthData(sym);
     if (!Object.keys(d.hist).length && !d.live.length) throw new Error('ainda sem dados — importa o histórico (CSV do TradingView) com o botão 📥 na página do ' + sym);
     const got = SY.build(d.hist, d.live, tfIds), out = {};
-    for (const id of tfIds) if (got[id] && got[id].length > (Y_MAGG[id] ? 5 : 30)) out[id] = got[id];
+    for (const id of tfIds) if (got[id] && got[id].length > minC(id)) out[id] = got[id];
     if (!Object.keys(out).length) throw new Error('poucas velas para analisar — importa o histórico (CSV do TradingView)');
     return out;
   }
@@ -4769,7 +4771,7 @@
       if (tf.magg) cs = aggregateMonths(await klines(sym, '1M', 500), tf.magg);
       else if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', favN(TFS.find((t) => t.id === '1h'))); cs = aggregate(hourly, tf.agg, 3600e3); }
       else cs = await klines(sym, tf.api, favN(tf));
-      if (cs.length > (tf.magg ? 5 : 30)) out[tf.id] = computeTf(cs, tf.id, sym);
+      if (cs.length > minC(tf.id)) out[tf.id] = computeTf(cs, tf.id, sym);
     }
     const any = Object.values(out)[0];
     favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now() };
