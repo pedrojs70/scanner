@@ -709,9 +709,11 @@
   body.uni #tgExt, body.uni #tgInt, body.uni #importBtn { display:none !important; }
   .sensbox { display:inline-flex; align-items:center; gap:4px; padding:0 6px; } .sensbox select { font:inherit; font-size:12px; border:1px solid var(--np-ln, #ccc); background:transparent; padding:2px; }
   #sensBox { display:none; }
+  #saveBtn { display:none !important; }   /* grava-se só ao terminar a edição (pergunta Gravar / Descartar / Continuar) */
   .rcq { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0; } .rcq input { flex:1; min-width:140px; padding:5px 8px; }
   .rclist { max-height:52vh; overflow:auto; border:1px solid var(--line, #ddd); border-radius:6px; padding:4px 8px; } .rclist .gh { font-weight:700; margin:10px 0 4px; font-size:13px; }
-  .rcrow { display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.12); cursor:pointer; } .rcrow .rcinfo { margin-left:auto; font-size:12px; opacity:.7; }
+  .rcrow { display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.12); cursor:pointer; } .rcrow .rcinfo, .rchead .rcinfo { margin-left:auto; font-size:12px; opacity:.7; } .rcpts { width:84px; text-align:center; font-weight:600; } .rcpts small { font-weight:400; opacity:.6; } .rclk, .rclkh { width:64px; text-align:center; } .rclk { border:0; background:transparent; font-size:16px; cursor:pointer; } .rcrow.locked { opacity:.75; } .rcrow.locked b::after { content:' 🔒'; font-size:11px; }
+  .rchead { display:flex; gap:6px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; opacity:.6; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.25); } .rchead .rcpts { font-weight:400; }
   .rcfoot { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px; } .rcfoot #rcGo { margin-left:auto; }
   .chartbox.editing #maxBtn { display:none !important; }   /* a editar: sai-se só por ✔ Terminar edição (pergunta se gravas) */
 .yuni{display:none} body.uni .yuni{display:inline} body.uni .nuni{display:none}
@@ -750,7 +752,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 15h15</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 15h50</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -952,7 +954,7 @@
 <br>• <b>⤓ Importar da principal</b> (movimento recente): acrescenta os pontos da tendência principal que faltam; o movimento recente decide se são HH/HL/LH/LL.
 <br>• <b>▭ Range</b> (movimento recente): “Começar range neste topo/fundo” numa vela e depois clica no outro extremo. Um range por timeframe; para o apagar, clica na linha da caixa. A linha do meio é o EQ (50%).
 <br>• <b>🧹 Apagar</b> — limpa a camada que estás a editar, neste timeframe, até marcares o ponto de partida.
-<br>• <b>💾 Gravar</b> — as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só vão para o aparelho e para a conta quando carregas em Gravar. Ao fechar com alterações por gravar: Gravar / Descartar / Continuar a editar.
+<br>• <b>Gravar</b> — as alterações ficam em rascunho (o ecrã e as tabelas já as mostram) e só vão para o aparelho e para a conta quando carregas em <b>✔ Terminar edição</b> e escolhes Gravar (ou Descartar / Continuar a editar).
 <br>• <b>↶ Desfazer / ↷ Refazer</b> — um passo de cada vez; só desde a última gravação (ao abrir a app e depois de gravar começa vazio).
 <br>• <b>↺ Voltar ao automático</b> (fora da edição) apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha (pede confirmação e faz cópia de segurança). Para apagar as marcas de um ativo em <b>todos</b> os timeframes: nos favoritos, abre o ativo e carrega em <b>⟲ Recriar gráfico em automático</b>. Para <b>todos</b> os favoritos de uma vez: “⟲ recriar todos em automático” no cabeçalho do Quadro dos favoritos — pede confirmação, faz cópia de segurança e mostra ↶ Desfazer.</li>
     </ul>
@@ -4551,12 +4553,14 @@
   }
   function resetEdits() {
     const k = symbol + '|' + selectedTf; if (!edits[k]) return;
+    if (rcLocked(symbol)) { alert(rcLockMsg(symbol)); return; }
     if (!confirm(`Voltar ao automático no ${tfLabel(selectedTf)} de ${symbol}?\n\nApaga as tuas marcas deste timeframe (tendência principal, movimento recente, FVG escondidos e range). Os outros timeframes ficam como estão.\n\nAntes de apagar fica uma cópia de segurança (Definições → Cópias de segurança).`)) return;
     if (!draft) makeBackup(`antes de voltar ao automático: ${symbol} ${tfLabel(selectedTf)}`);
     pushUndo(selectedTf); delete edits[k]; saveEdits(); closeMenu(); refreshTf(selectedTf);
   }
   // favoritos: apaga todas as marcas de um ativo (todos os timeframes, as duas camadas, FVG escondidos e ranges)
   function recreateAuto(sym) {
+    if (rcLocked(sym)) { alert(rcLockMsg(sym)); return; }
     const keys = Object.keys(edits).filter((k) => k.startsWith(sym + '|'));
     if (!keys.length) { alert(`${sym} já está todo em automático (não tens marcas neste ativo).`); return; }
     if (editMode) { alert('Termina primeiro a edição do gráfico (✔ Terminar edição) e depois tenta outra vez.'); return; }
@@ -4565,6 +4569,11 @@
   }
   // ---------- Recriar gráficos: escolhes os favoritos e os Pontos; apaga as marcas à mão (as linhas ficam) ----------
   let rcSel = new Set(), rcQ = '';
+  // 🔒 cadeado: um ativo trancado não pode ser recriado (nem "Voltar ao automático", nem mudar os Pontos) até tirares o cadeado
+  const rcLocked = (s) => !!(settings.rcLock || {})[s];
+  const rcLockMsg = (s) => `🔒 ${nm(s)} está trancado: não pode ser recriado nem mudar de Pontos. Tira o cadeado em Favoritos → ⟲ Recriar gráficos.`;
+  const rcPts = (s) => { const u = uniOn(settings), per = (settings[u ? 'uniSensPer' : 'priSensPer'] || {})[s] || {}, def = u ? Object.assign({}, UNI_DEF, settings.uniSens || {}) : Object.assign({ ctx: 1, mid: 1, trig: 1 }, settings.priSens || {});
+    const v = ['ctx', 'mid', 'trig'].map((g) => +(per[g] || def[g])), own = ['ctx', 'mid', 'trig'].some((g) => per[g]); const uq = [...new Set(v)]; return { txt: uq.length === 1 ? String(uq[0]) : v.join('/'), own }; };
   const rcMarks = (s) => Object.keys(edits).filter((k) => k.split('|')[0] === s).length;
   function openRecreate() {
     if (editMode) { alert('Termina primeiro a edição do gráfico (✔ Terminar edição) e depois tenta outra vez.'); return; }
@@ -4572,7 +4581,7 @@
     if (!m) {
       m = document.createElement('div'); m.id = 'rcModal'; m.className = 'modal';
       m.innerHTML = `<div class="dialog" style="width:min(760px,96vw)"><button class="dlgclose" id="rcX" title="Fechar">✕</button><h2>Recriar gráficos</h2>
-        <p class="muted small" style="margin-top:0">Escolhe os favoritos a recriar. Apaga as tuas marcas à mão desses ativos em todos os timeframes (tendência principal, movimento recente, FVG escondidos e ranges) — <b>as tuas linhas e canais ficam</b>. Os ativos sem marcas só mudam de Pontos. Fica uma cópia de segurança e podes desfazer.</p>
+        <p class="muted small" style="margin-top:0">Escolhe os favoritos a recriar. Apaga as tuas marcas à mão desses ativos em todos os timeframes (tendência principal, movimento recente, FVG escondidos e ranges) — <b>as tuas linhas e canais ficam</b>. Os ativos sem marcas só mudam de Pontos. Fica uma cópia de segurança e podes desfazer. <b>🔒 Cadeado</b>: um ativo trancado não pode ser recriado (aqui, no botão do ativo ou em “Voltar ao automático”) nem mudar de Pontos — continuas a poder corrigi-lo à mão.</p>
         <div class="rcq"><button type="button" class="lyr" data-rq="all">Todos</button><button type="button" class="lyr" data-rq="none">Nenhum</button><button type="button" class="lyr" data-rq="ed">Só com marcas</button><button type="button" class="lyr" data-rq="c">Cripto</button><button type="button" class="lyr" data-rq="s">Ações/futuros</button><button type="button" class="lyr" data-rq="r">Rácios</button>
           <input id="rcSearch" type="search" placeholder="Procurar…"></div>
         <div id="rcList" class="rclist"></div>
@@ -4582,7 +4591,7 @@
       $('#rcX').addEventListener('click', () => m.classList.remove('open'));
       m.addEventListener('click', (e) => { if (e.target === m) m.classList.remove('open'); });
       m.querySelectorAll('[data-rq]').forEach((b) => b.addEventListener('click', () => { const q = b.dataset.rq, favs = settings.favs || [];
-        rcSel = new Set(q === 'none' ? [] : favs.filter((s) => q === 'all' || (q === 'ed' ? rcMarks(s) > 0 : npGroup(s) === q || (q === 's' && npGroup(s) === 's')))); rcRender(); }));
+        rcSel = new Set(q === 'none' ? [] : favs.filter((s) => !rcLocked(s)).filter((s) => q === 'all' || (q === 'ed' ? rcMarks(s) > 0 : npGroup(s) === q || (q === 's' && npGroup(s) === 's')))); rcRender(); }));
       $('#rcSearch').addEventListener('input', () => { rcQ = $('#rcSearch').value.trim().toLowerCase(); rcRender(); });
       $('#rcGo').addEventListener('click', rcApply);
     }
@@ -4594,15 +4603,16 @@
     let html = '', lg = null;
     const list = favs.filter((s) => !rcQ || s.toLowerCase().includes(rcQ) || nm(s).toLowerCase().includes(rcQ)).sort((a, b) => 'csr'.indexOf(npGroup(a)) - 'csr'.indexOf(npGroup(b)));
     for (const s of list) { const g = npGroup(s); if (g !== lg) { html += `<div class="gh">${gn[g] || g}</div>`; lg = g; }
-      const n = rcMarks(s), per = ((settings[uniOn(settings) ? 'uniSensPer' : 'priSensPer'] || {})[s]) || null;
-      html += `<label class="rcrow"><input type="checkbox" data-rs="${npEsc(s)}" ${rcSel.has(s) ? 'checked' : ''}> <b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="muted small">${npEsc(s)}</span>` : ''}<span class="rcinfo">${n ? `✎ ${n} timeframe${n === 1 ? '' : 's'} com marcas` : 'automático'}${per ? ` · Pontos ${[...new Set(Object.values(per))].join('/')}` : ''}</span></label>`; }
-    $('#rcList').innerHTML = html || '<span class="muted small">sem favoritos</span>';
+      const n = rcMarks(s), pt = rcPts(s), lk = rcLocked(s);
+      html += `<label class="rcrow${lk ? ' locked' : ''}"><input type="checkbox" data-rs="${npEsc(s)}" ${rcSel.has(s) && !lk ? 'checked' : ''} ${lk ? 'disabled' : ''}> <b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="muted small">${npEsc(s)}</span>` : ''}<span class="rcinfo">${n ? `✎ ${n} timeframe${n === 1 ? '' : 's'} com marcas` : 'automático'}</span><span class="rcpts" title="${pt.own ? 'Pontos próprios deste ativo' : 'Pontos do padrão das Definições'} (contexto/meio/gatilho quando diferem)">${pt.txt}${pt.own ? '' : ' <small>padrão</small>'}</span><button type="button" class="rclk" data-lk="${npEsc(s)}" title="${lk ? 'Trancado: não pode ser recriado nem mudar de Pontos — carrega para destrancar' : 'Trancar: impede recriar este gráfico e mudar os Pontos'}">${lk ? '🔒' : '🔓'}</button></label>`; }
+    $('#rcList').innerHTML = (html ? '<div class="rchead"><span>Ativo</span><span class="rcinfo">Marcas</span><span class="rcpts">Pontos</span><span class="rclkh">Cadeado</span></div>' : '') + (html || '<span class="muted small">sem favoritos</span>');
+    $('#rcList').querySelectorAll('[data-lk]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const s = b.dataset.lk; settings.rcLock = Object.assign({}, settings.rcLock || {}); if (settings.rcLock[s]) delete settings.rcLock[s]; else { settings.rcLock[s] = Date.now(); rcSel.delete(s); } save('mss_settings4', settings); try { sensUi(); } catch (er) {} rcRender(); }));
     $('#rcList').querySelectorAll('[data-rs]').forEach((i) => i.addEventListener('change', () => { if (i.checked) rcSel.add(i.dataset.rs); else rcSel.delete(i.dataset.rs); rcCount(); }));
     rcCount();
   }
-  function rcCount() { const n = [...rcSel].filter((s) => (settings.favs || []).includes(s)).length; $('#rcGo').textContent = `Recriar ${n} ativo${n === 1 ? '' : 's'}`; $('#rcGo').disabled = !n; }
+  function rcCount() { const n = [...rcSel].filter((s) => (settings.favs || []).includes(s) && !rcLocked(s)).length; $('#rcGo').textContent = `Recriar ${n} ativo${n === 1 ? '' : 's'}`; $('#rcGo').disabled = !n; }
   function rcApply() {
-    const syms = [...rcSel].filter((s) => (settings.favs || []).includes(s)); if (!syms.length) return;
+    const syms = [...rcSel].filter((s) => (settings.favs || []).includes(s) && !rcLocked(s)); if (!syms.length) return;
     const lvl = $('#rcLvl').value, K = uniOn(settings) ? 'uniSensPer' : 'priSensPer';
     const keys = Object.keys(edits).filter((k) => syms.includes(k.split('|')[0]));
     if (!confirm(`Recriar ${syms.length} ativo${syms.length === 1 ? '' : 's'}${lvl ? ` com Pontos ${lvl}` : ''}?\n\n${keys.length ? `Apaga as tuas marcas à mão em ${keys.length} gráfico${keys.length === 1 ? '' : 's'} (ativo × timeframe). ` : ''}As linhas e canais ficam. Fica uma cópia de segurança e podes desfazer.`)) return;
@@ -6358,7 +6368,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     const sel = $('#sensSel'); if (!sel) return; const u = uniOn(settings), K = u ? 'uniSensPer' : 'priSensPer', g = UNI_GRP[selectedTf] || 'mid', per = (settings[K] || {})[symbol] || {}, def = u ? +((settings.uniSens || {})[g] || UNI_DEF[g]) : +((settings.priSens || {})[g] || 1);
     const gn = { ctx: 'contexto', mid: 'meio', trig: 'gatilho' }[g];
     sel.innerHTML = `<option value="">padrão (${def})</option>` + [1, 2, 3, 4, 5].map((v) => `<option value="${v}"${+per[g] === v ? ' selected' : ''}>${v}${v === 1 ? ' — mais' : v === 5 ? ' — menos' : ''}</option>`).join('');
-    sel.title = `Pontos da ${u ? 'estrutura' : 'tendência principal'} de ${nm(symbol)} nos timeframes de ${gn} (só este ativo): 1 = mais pontos, 5 = menos`;
+    sel.title = rcLocked(symbol) ? rcLockMsg(symbol) : `Pontos da ${u ? 'estrutura' : 'tendência principal'} de ${nm(symbol)} nos timeframes de ${gn} (só este ativo): 1 = mais pontos, 5 = menos`; sel.disabled = rcLocked(symbol);
     $('#sensBox').title = sel.title;
   }
   function init() {
