@@ -745,7 +745,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 12h45</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 13h45</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -798,6 +798,7 @@
     <h3 class="helphead">◆ Como a app está organizada agora</h3>
     <p><b>Duas estruturas por timeframe.</b> A <b>tendência principal</b> decide a direção, a zona e a Fibonacci dos setups (as pernas grandes, com menos ruído). O <b>movimento recente</b> dá o gatilho no 1H (Swing) e no 4H (Longo prazo). No Diário, Semanal e Mensal o recente não é gatilho: quando vira a favor dentro da zona de um setup aparece <b>✔ Confirmação</b> no checklist (e um alerta ✅) — o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disso não manda alertas.</p>
     <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos, padrão = 3. Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
+    <p><b>Pontos que passam para baixo:</b> quando marcas um HH, HL, LH ou LL na tendência principal de um timeframe, a app põe esse topo/fundo também nos de baixo (até ao 4H), na vela mais alta/baixa desse período — se o timeframe de baixo ainda não o tiver. Em ✎ Editar estrutura esses pontos aparecem com ↓ (no menu: "herdado do Semanal"); se apagares a marca lá em cima, saem também em baixo; se apagares um herdado cá em baixo, não volta. Os pontos que a app pôs sozinha entre as tuas marcas (ex.: marcaste um HH sem o HL antes) aparecem esbatidos. Ao marcar, um aviso amarelo diz-te se o nome não bate com o preço (ex.: um HH abaixo do topo anterior) e corrige num clique.</p>
     <p><b>15m e 5m só nos ativos com intraday</b> (por defeito só o BTC; Definições → Monitorização → Por ativo). Nos outros desaparecem da app os timeframes de 15m e 5m, o Day trade, o Scalp e as killzones: os setups são Longo prazo e Swing.</p>
     <p><b>Estrutura única</b> (Definições, experimental, desligada): uma só estrutura por timeframe em vez de duas. Liga e desliga à vontade — as tuas correções à mão dos dois modos ficam guardadas.</p>
     <h3 class="helphead">2 · As duas camadas e as regras</h3>
@@ -952,7 +953,7 @@
   </div>
   <div class="chartbox">
     <div class="chartbar"><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><label id="sensBox" class="lyr sensbox" title="Quantos pontos tem a tendência principal deste ativo neste grupo de timeframes (só para este ativo): 1 = mais pontos, 5 = menos"><span>Pontos</span><select id="sensSel"></select></label><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
-    <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button></div>
+    <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button><div id="editWarn" style="display:none;margin-top:4px;background:#fff3cd;color:#5c4400;padding:4px 8px;border-radius:4px;font-size:12px"></div></div>
     <div id="fibInfo" class="small"></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar a linha de todos os timeframes (Delete). Para a tirar só de um timeframe, desmarca a caixa dele">🗑</button><button data-mext="1" title="Prolongar para a direita">⟶</button><span class="lnmtf"></span></div></div>
     <div id="linePanel"></div>
@@ -1318,7 +1319,7 @@
           const from = Math.max(0, s0, ref ? ref.i : prot ? prot.i : 0);
           const manOpp = nd === 1 ? lastManL : lastManH;
           let np = manOpp && manOpp.i >= from && manOpp.i < k ? manOpp : (k > from ? (nd === 1 ? lowest(from, k - 1) : highest(from, k - 1)) : null);
-          if (np) { if (!(manOpp && np === manOpp)) swing(nd === 1 ? 'L' : 'H', np); prot = np; }
+          if (np) { if (!(manOpp && np === manOpp)) { const ty = nd === 1 ? 'L' : 'H', had = res.swings.some((s) => s.i === np.i && s.type === ty); swing(ty, np); if (!had) { const fs = res.swings.find((s) => s.i === np.i && s.type === ty); if (fs) fs.filled = true; } } prot = np; }   // filled: ponto que a app pôs sozinha entre as tuas marcas
           else if (!prot) prot = nd === 1 ? { p: L(k), i: k } : { p: H(k), i: k };
           trend = nd; ext = { p: pt.p, i: k }; target = { p: pt.p, i: k }; counter = null;
         } else {
@@ -2452,17 +2453,17 @@
 
   // ---------- correções manuais (guardadas neste navegador; o botão "Repor" volta à análise do scanner) ----------
   const EDKEY = 'mss_edits1';
-  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false, range: null, hideAuto: {}, modes: [], noLvl: new Set() });
+  const newLayer = () => ({ ign: new Set(), add: new Map(), noBreak: new Set(), yesBreak: new Set(), start: null, blank: false, range: null, hideAuto: {}, modes: [], noLvl: new Set(), inh: {} });
   const edits = {};
   (function loadEdits() {
     const raw = load(EDKEY, {});
     for (const k in raw) {
-      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} });
+      const r = raw[k], L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {}, inh: (x && x.inh) || {} });
       edits[k] = { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) };
     }
   })();
-  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {}, modes: x.modes || [], noLvl: [...(x.noLvl || [])] }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
-  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
+  const serEd = (e) => { const L = (x) => ({ ign: [...x.ign], add: [...x.add], noBreak: [...x.noBreak], yesBreak: [...x.yesBreak], start: x.start, blank: !!x.blank, range: x.range || null, hideAuto: x.hideAuto || {}, modes: x.modes || [], noLvl: [...(x.noLvl || [])], inh: x.inh || {} }); return { fvg: [...e.fvg], int: L(e.int), ext: L(e.ext) }; };
+  const deserEd = (r) => { const L = (x) => ({ ign: new Set((x && x.ign) || []), add: new Map((x && x.add) || []), noBreak: new Set((x && x.noBreak) || []), yesBreak: new Set((x && x.yesBreak) || []), start: (x && x.start) || null, modes: (x && x.modes) || [], noLvl: new Set((x && x.noLvl) || []), blank: !!(x && x.blank), range: (x && x.range) || null, hideAuto: (x && x.hideAuto) || {}, inh: (x && x.inh) || {} }); return { fvg: new Set(r.fvg || []), int: L(r.int), ext: L(r.ext) }; };
   // hora da última alteração de cada gráfico (para, ao juntar com a conta, ganhar sempre a versão mais recente)
   const EDAT = 'mss_edits_at', edAt = load(EDAT, {}), edLast = {};
   for (const k in edits) edLast[k] = JSON.stringify(serEd(edits[k]));
@@ -3706,11 +3707,12 @@
     if (rsiMarkers) rsiMarkers.setMarkers(divs.map((v) => ({ time: d.closed[v.b.i].tt, position: v.dir === 1 ? 'belowBar' : 'aboveBar', shape: v.dir === 1 ? 'arrowUp' : 'arrowDown', color: v.live ? (v.dir === 1 ? '#26a69a' : '#ef5350') : (v.dir === 1 ? '#26a69a88' : '#ef535088'), text: v.dir === 1 ? 'Bull' : 'Bear' })));
     // swings externos com letra (os internos são desenhados no overlay)
     const sw = vE() ? d.ext.res.swings.slice(-400) : [];   // todos (a biblioteca só desenha os que estão à vista)
-    markersApi.setMarkers(sw.map((s, k) => ({
-      time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar',
-      color: s.label === 'HH' || s.label === 'HL' ? '#26a69a' : s.label === 'LH' || s.label === 'LL' ? '#ef5350' : '#aab2bd',
-      shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}`,
-    })));
+    const inhM = ((getEdits(drawState ? drawState.tf : selectedTf, false) || {}).ext || {}).inh || {};
+    const edE = editMode && editLayer === 'ext';   // só a editar a principal: herdados com ↓ e preenchidos pela app esbatidos
+    markersApi.setMarkers(sw.map((s, k) => { const inh = s.manual && inhM[d.closed[s.i].t], fade = edE && s.filled;
+      const col = s.label === 'HH' || s.label === 'HL' ? (fade ? 'rgba(38,166,154,.4)' : '#26a69a') : s.label === 'LH' || s.label === 'LL' ? (fade ? 'rgba(239,83,80,.4)' : '#ef5350') : '#aab2bd';
+      return { time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar', color: col,
+        shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${inh ? (edE ? '↓' : '') : s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}` }; }));
     priceLines.forEach((p) => candleSeries.removePriceLine(p)); priceLines = [];
     const add = (price, color, title, style, w) => priceLines.push(candleSeries.createPriceLine({ price, color, title, lineWidth: w || 1, lineStyle: style, axisLabelVisible: true }));
     const x = d.ext.snap, n = d.int.snap;
@@ -3910,12 +3912,68 @@
   const vE = () => uniOn(settings) || editLayer === 'ext';   // estrutura única: desenhada como a principal (setas, zonas, limite)
   const vI = () => !uniOn(settings) && editLayer === 'int';
   const layerName = (L) => (uniOn(settings) ? 'estrutura' : L === 'ext' ? 'tendência principal' : 'movimento recente');
-  function refreshTf(id) { data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
+  // ---------- pontos da tendência principal passam para os timeframes de baixo (até ao 4H) ----------
+  // cada marca tua (HH/HL/LH/LL) num timeframe vai para a vela mais alta/baixa desse período nos de baixo, marcada como herdada (inh)
+  const INH_CHAIN = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h'];
+  function syncDown(id) {
+    if (uniOn(settings)) return;
+    const ci = INH_CHAIN.indexOf(id); if (ci < 0 || ci === INH_CHAIN.length - 1) return;
+    const hd = data[id]; if (!hd || !hd.closed) return;
+    const eh = getEdits(id, false), hin = (eh && eh.ext.inh) || {}, hcl = hd.closed;
+    const idx = (cl, t) => { let lo = 0, hi = cl.length - 1; while (lo <= hi) { const m = (lo + hi) >> 1; if (cl[m].t === t) return m; if (cl[m].t < t) lo = m + 1; else hi = m - 1; } return -1; };
+    const pts = eh ? [...eh.ext.add].filter(([t]) => !hin[t]).map(([t, lab]) => { const i = idx(hcl, t); if (i < 0) return null; const top = lab === 'HH' || lab === 'LH' || lab === 'H';
+      return { t, lab, top, t0: hcl[i].t, t1: hcl[i].ct }; }).filter(Boolean) : [];
+    let any = false;
+    for (const lo of INH_CHAIN.slice(ci + 1)) {
+      const ld = data[lo]; if (!ld || !ld.closed || !ld.closed.length || tfHid(lo)) continue;
+      const cl = ld.closed, want = new Map();
+      for (const p of pts) {
+        if (p.t0 < cl[0].t) continue;   // mais antigo do que o histórico deste timeframe
+        let b = -1; for (let k = 0; k < cl.length; k++) { const c = cl[k]; if (c.t < p.t0) continue; if (c.t > p.t1) break; if (b < 0 || (p.top ? c.h > cl[b].h : c.l < cl[b].l)) b = k; }
+        if (b >= 0) want.set(cl[b].t, Object.assign({ k: b }, p));
+      }
+      let e = getEdits(lo, false), ch = false; const has = (e && e.ext.inh) || {};
+      for (const key of Object.keys(has)) { const v = has[key]; if (v.f !== id) continue; const t = +key;
+        if (!want.has(t)) { if (e.ext.add.get(t) === v.l) e.ext.add.delete(t); delete e.ext.inh[key]; ch = true; }   // apagaste o ponto lá em cima
+        else if (!v.off && !e.ext.add.has(t)) { v.off = 1; ch = true; } }   // apagaste o herdado aqui: não volta
+      for (const [t, p] of want) {
+        if (has[t]) { const v = has[t]; if (!v.off && v.f === id && v.l !== p.lab && e.ext.add.get(t) === v.l) { e.ext.add.set(t, p.lab); v.l = p.lab; ch = true; } continue; }   // mudaste o nome lá em cima
+        if (e && e.ext.add.has(t)) continue;   // já é uma marca tua aqui
+        if (ld.ext.res.swings.some((x) => x.i === p.k && x.type === (p.top ? 'H' : 'L') && !x.manual)) continue;   // a app já tem esse ponto
+        e = getEdits(lo, true); e.ext.inh = e.ext.inh || {}; e.ext.ign.delete(t); e.ext.add.set(t, p.lab); e.ext.inh[t] = { f: id, s: p.t, l: p.lab }; ch = true;
+      }
+      if (ch) { data[lo] = computeTf(ld.candles, lo); any = true; }
+    }
+    if (any) saveEdits();
+  }
+  // ---------- avisos ao marcar um ponto: o nome não bate com o preço / a app preencheu o ponto que faltava ----------
+  let editWarn = null;
+  function markCheck(id, L, t, lab) {
+    editWarn = null; const d = data[id]; if (!d) return;
+    const cl = d.closed, sw = d[L].res.swings.slice().sort((a, b) => a.i - b.i), k = sw.findIndex((x) => cl[x.i] && cl[x.i].t === t); if (k < 0) return;
+    const me = sw[k], prev = sw.slice(0, k).reverse().find((x) => x.type === me.type), before = sw[k - 1];
+    const what = { HH: 'topo', LH: 'topo', HL: 'fundo', LL: 'fundo' }[lab];
+    let sug = null;
+    if (prev) { if (lab === 'HH' && me.p <= prev.p) sug = 'LH'; else if (lab === 'LH' && me.p >= prev.p) sug = 'HH'; else if (lab === 'HL' && me.p <= prev.p) sug = 'LL'; else if (lab === 'LL' && me.p >= prev.p) sug = 'HL'; }
+    const msgs = [];
+    if (sug) msgs.push(`⚠ Este ${lab} (${fmt(me.p)}) está ${(lab === 'HH' || lab === 'HL') ? 'abaixo' : 'acima'} do ${what} anterior (${fmt(prev.p)}) — querias um ${sug}?`);
+    if (before && before.filled && before.type !== me.type) msgs.push(`ℹ Faltava um ${before.type === 'L' ? 'fundo' : 'topo'} antes deste ${what}: a app pôs o ${before.type === 'L' ? 'mais baixo' : 'mais alto'} (${before.label || ''} ${fmt(before.p)}, esbatido). Se não for esse, marca-o tu.`);
+    if (msgs.length) editWarn = { id, L, t, sug, txt: msgs.join(' ') };
+  }
+  function showEditWarn() {
+    const w = $('#editWarn'); if (!w) return;
+    if (!editWarn || !editMode || editWarn.id !== selectedTf) { w.style.display = 'none'; w.innerHTML = ''; return; }
+    w.style.display = ''; w.innerHTML = npEsc(editWarn.txt) + (editWarn.sug ? ` <button type="button" class="lyr" id="editWarnFix">Mudar para ${editWarn.sug}</button>` : '') + ' <button type="button" class="lyr" id="editWarnX" title="Fechar o aviso">✕</button>';
+    const fx = $('#editWarnFix'); if (fx) fx.onclick = () => { const x = editWarn; pushUndo(x.id); const e = getEdits(x.id, true); e[x.L].add.set(x.t, x.sug); saveEdits(); editWarn = null; refreshTf(x.id); };
+    $('#editWarnX').onclick = () => { editWarn = null; showEditWarn(); };
+  }
+  function refreshTf(id) { data[id] = computeTf(data[id].candles, id); try { syncDown(id); } catch (e) { console.warn('syncDown', e); } renderTable(); renderConfluence(); renderChart(true); updateEditUi(); }
   function updateEditUi() {
     const nEd = editCount(selectedTf);
     $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✔ Terminar edição' : '✎ Editar estrutura';
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
+    try { showEditWarn(); } catch (e) {}
     { const sb = $('#sensBox'); if (sb) sb.style.display = editMode && (uniOn(settings) || editLayer === 'ext') ? 'inline-flex' : 'none'; }   // Pontos: só a editar a tendência principal (ou a estrutura única)
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
@@ -4337,7 +4395,7 @@
       if (sw) {
         const what = `${sw.label || (sw.type === 'H' ? 'topo' : 'fundo')} (${fmt(sw.p)})`;
         if (sw.start) items.push({ label: `✎ Remover o ponto de partida — ${layerName(L)}`, run: () => { const e = ed()[L]; if (e.start) e.start = null; else e.add.delete(T(sw.i)); done(); } });
-        else if (sw.manual) items.push({ label: `✎ Remover a tua marca ${what} — ${layerName(L)}`, run: () => { ed()[L].add.delete(T(sw.i)); done(); } });
+        else if (sw.manual) { const hi = (ed()[L].inh || {})[T(sw.i)]; items.push({ label: hi ? `Remover este ponto herdado do ${tfLabel(hi.f)} ${what} — só neste timeframe` : `✎ Remover a tua marca ${what} — ${layerName(L)}`, run: () => { ed()[L].add.delete(T(sw.i)); done(); } }); }
         else items.push({ label: `Ignorar este ${what} — ${layerName(L)}`, run: () => {
           const x = ed()[L]; x.ign.add(T(sw.i));
           // um HH/LL só existe por causa da quebra que o fez: ignorá-lo = essa quebra era sweep
@@ -4417,7 +4475,7 @@
       const L = editLayer, nome = layerName(L);
       const side = (top) => {
         const q = ext(top), p = top ? cl[q].h : cl[q].l;
-        const mk = (lab, txt) => items.push({ label: `${txt} (${fmt(p)})`, run: () => { const e = ed(); e[L].ign.delete(T(q)); e[L].add.set(T(q), lab); done(); } });
+        const mk = (lab, txt) => items.push({ label: `${txt} (${fmt(p)})`, run: () => { const e = ed(); e[L].ign.delete(T(q)); e[L].add.set(T(q), lab); done(); try { markCheck(id, L, T(q), lab); showEditWarn(); } catch (er) {} } });
         if (top) { mk('HH', '▲ Topo HH — quebra para cima'); mk('LH', '▲ Topo LH — sem quebra'); }
         else { mk('HL', '▼ Fundo HL — sem quebra'); mk('LL', '▼ Fundo LL — quebra para baixo'); }
         if (L === 'int') items.push({ label: `▭ Começar range neste ${top ? 'topo' : 'fundo'} (${fmt(p)})`, nav: true, run: () => { pendingRange = { top, p, t: T(q) }; updateEditUi(); } });

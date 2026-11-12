@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T11:54:45.041Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T13:28:15.231Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -134,7 +134,7 @@
           const from = Math.max(0, s0, ref ? ref.i : prot ? prot.i : 0);
           const manOpp = nd === 1 ? lastManL : lastManH;
           let np = manOpp && manOpp.i >= from && manOpp.i < k ? manOpp : (k > from ? (nd === 1 ? lowest(from, k - 1) : highest(from, k - 1)) : null);
-          if (np) { if (!(manOpp && np === manOpp)) swing(nd === 1 ? 'L' : 'H', np); prot = np; }
+          if (np) { if (!(manOpp && np === manOpp)) { const ty = nd === 1 ? 'L' : 'H', had = res.swings.some((s) => s.i === np.i && s.type === ty); swing(ty, np); if (!had) { const fs = res.swings.find((s) => s.i === np.i && s.type === ty); if (fs) fs.filled = true; } } prot = np; }   // filled: ponto que a app pôs sozinha entre as tuas marcas
           else if (!prot) prot = nd === 1 ? { p: L(k), i: k } : { p: H(k), i: k };
           trend = nd; ext = { p: pt.p, i: k }; target = { p: pt.p, i: k }; counter = null;
         } else {
