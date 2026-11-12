@@ -754,7 +754,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 17h15</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 18h35</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -808,7 +808,7 @@
     <p><b>Duas estruturas por timeframe.</b> A <b>tendência principal</b> decide a direção, a zona e a Fibonacci dos setups (as pernas grandes, com menos ruído). O <b>movimento recente</b> dá o gatilho no 1H (Swing) e no 4H (Longo prazo). No Diário, Semanal e Mensal o recente não é gatilho: quando vira a favor dentro da zona de um setup aparece <b>✔ Confirmação</b> no checklist (e um alerta ✅) — o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disso não manda alertas.</p>
     <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos; o padrão de todos os ativos está nas Definições (vem a 1). Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
     <p><b>✔ Quebra na principal</b> (checklist, IA e “💪 Quebra forte” no alerta do setup): o gatilho é sempre a quebra do movimento recente (1H no Swing, 4H no Longo prazo); quando, depois de começar a correção da zona, a <b>tendência principal</b> desse timeframe também quebra a favor (CHoCH ou BOS), é mais do que um recuo — é uma viragem a sério. <b>⭐ Confluência</b>: além do timeframe logo abaixo da zona (ex.: 4H na zona do Diário), conta também a Fibonacci da tendência principal do seguinte (1H).</p>
-    <p><b>Pontos que passam para baixo:</b> quando marcas um HH, HL, LH ou LL na tendência principal de um timeframe, a app põe esse topo/fundo também nos de baixo (até ao 4H), na vela mais alta/baixa desse período — se o timeframe de baixo ainda não o tiver. Em ✎ Editar estrutura esses pontos aparecem com ↓ (no menu: "herdado do Semanal"); se apagares a marca lá em cima, saem também em baixo; se apagares um herdado cá em baixo, não volta. Os pontos que a app pôs sozinha entre as tuas marcas (ex.: marcaste um HH sem o HL antes) aparecem esbatidos. Ao marcar, um aviso amarelo diz-te se o nome não bate com o preço (ex.: um HH abaixo do topo anterior) e corrige num clique.</p>
+    <p><b>Pontos que passam para baixo:</b> quando marcas um HH, HL, LH ou LL na tendência principal de um timeframe, a app põe esse topo/fundo também nos de baixo (até ao 1H), na vela mais alta/baixa desse período — se o timeframe de baixo ainda não o tiver. Em ✎ Editar estrutura esses pontos aparecem com ↓ (no menu: "herdado do Semanal"); se apagares a marca lá em cima, saem também em baixo; se apagares um herdado cá em baixo, não volta. Os pontos que a app pôs sozinha entre as tuas marcas (ex.: marcaste um HH sem o HL antes) aparecem esbatidos. Ao marcar, um aviso amarelo diz-te se o nome não bate com o preço (ex.: um HH abaixo do topo anterior) e corrige num clique.</p>
     <p><b>15m e 5m só nos ativos com intraday</b> (por defeito só o BTC; Definições → Monitorização → Por ativo). Nos outros desaparecem da app os timeframes de 15m e 5m, o Day trade, o Scalp e as killzones: os setups são Longo prazo e Swing.</p>
     <p><b>Estrutura única</b> (Definições, experimental, desligada): uma só estrutura por timeframe em vez de duas. Liga e desliga à vontade — as tuas correções à mão dos dois modos ficam guardadas.</p>
     <h3 class="helphead">2 · As duas camadas e as regras</h3>
@@ -3942,9 +3942,9 @@
   const vE = () => uniOn(settings) || editLayer === 'ext';   // estrutura única: desenhada como a principal (setas, zonas, limite)
   const vI = () => !uniOn(settings) && editLayer === 'int';
   const layerName = (L) => (uniOn(settings) ? 'estrutura' : L === 'ext' ? 'tendência principal' : 'movimento recente');
-  // ---------- pontos da tendência principal passam para os timeframes de baixo (até ao 4H) ----------
+  // ---------- pontos da tendência principal passam para os timeframes de baixo (até ao 1H) ----------
   // cada marca tua (HH/HL/LH/LL) num timeframe vai para a vela mais alta/baixa desse período nos de baixo, marcada como herdada (inh)
-  const INH_CHAIN = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h'];
+  const INH_CHAIN = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '1h'];   // até ao 1H
   function syncDown(id) {
     if (uniOn(settings)) return;
     const ci = INH_CHAIN.indexOf(id); if (ci < 0 || ci === INH_CHAIN.length - 1) return;
