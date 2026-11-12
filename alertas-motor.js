@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T19:04:22.313Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T19:45:32.486Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -862,7 +862,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
   // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL (1 = mais pontos … 3 = cálculo clássico … 5 = menos)
   // Pontos da tendência principal: 1 e 2 = todos os topos/fundos de cada perna (motor do movimento recente, com correções mínimas maiores); 3 = só as pernas que quebram estrutura, sensível; 4 = cálculo clássico; 5 = menos pontos
-  const PRI_LV = { 1: { zz: 1, atr: 3, leg: 0.6, floor: 2 }, 2: { zz: 1, atr: 3.5, leg: 0.7, floor: 2.5 }, 3: { m: 0.5, leg: 0.35, floor: 1 }, 5: { m: 1.4, leg: 0.6, floor: 2 } };
+  // 1 e 2: [múltiplo do ATR, proporção da perna, mínimo em ATR] por tipo de timeframe — nos timeframes largos a vela é grande face às correções, por isso o limite em ATR desce
+  // (BTC Mensal no 1: 25-01 HH 110k · 25-04 HL 75k · 25-10 HH 126k; Semanais ~8 pontos/ano; Diário ~30/ano)
+  const PRI_LV = { 1: { zz: 1, M: [1.5, 0.3, 0.8], W: [2.5, 0.5, 1.5], D: [3, 0.6, 2] }, 2: { zz: 1, M: [2, 0.4, 1.25], W: [3, 0.6, 2], D: [3.5, 0.7, 2.5] }, 3: { m: 0.5, leg: 0.35, floor: 1 }, 5: { m: 1.4, leg: 0.6, floor: 2 } };
+  const zzOf = (pl, id) => pl[['1Y', '6M', '3M', '1M'].includes(id) ? 'M' : id === '1w' ? 'W' : 'D'];
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
   const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
   function computeTf(cs, id, S, ed, now, sym) {
@@ -884,7 +887,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       return d1;
     }
     const pl = PRI_LV[priLevel(S, id, sym)];
-    const d = { candles: cs, closed, price, ext: pl && pl.zz ? layer(E.analyzeRecent, pl.atr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), { legRatio: pl.leg, floorAtr: pl.floor }) : layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    const d = { candles: cs, closed, price, ext: pl && pl.zz ? layer(E.analyzeRecent, zzOf(pl, id)[0], S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), { legRatio: zzOf(pl, id)[1], floorAtr: zzOf(pl, id)[2] }) : layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
     return d;
   }
