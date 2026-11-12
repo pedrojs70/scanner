@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T10:20:42.261Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T11:54:45.041Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -769,7 +769,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // opções dos alertas (settings.alerts na app)
   const A_DEF = {
     on: true, tgToken: '', tgChat: '', relay: '',
-    setupOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false,
+    setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false,
     fvgOn: true,
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
     weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
@@ -781,7 +781,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
     forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
   };
-  const GRP_KEYS = { setup: ['setupOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'] };
+  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'] };
   const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
   function effA(A, sym) {
@@ -855,18 +855,35 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     return m[id] != null ? m[id] : +S.failBars;
   }
   // a mesma conta da app (computeTf): tendência principal e movimento recente, só com velas fechadas
-  function computeTf(cs, id, S, ed, now) {
+  // estrutura única: uma só estrutura por timeframe (o zigzag do "movimento recente"), com sensibilidade por grupo de timeframes (1 = mais pontos … 5 = menos pontos)
+  const UNI_LV = { 1: { atr: 1.5, leg: 0.4, floor: 1.25 }, 2: { atr: 2, leg: 0.5, floor: 1.5 }, 3: { atr: 2.5, leg: 0.55, floor: 1.75 }, 4: { atr: 3, leg: 0.6, floor: 2 }, 5: { atr: 3.5, leg: 0.7, floor: 2.5 } };
+  const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
+  const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
+  // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL por ativo (3 = padrão das Definições)
+  const PRI_LV = { 1: { m: 0.5, leg: 0.35, floor: 1 }, 2: { m: 0.7, leg: 0.45, floor: 1.25 }, 4: { m: 1.3, leg: 0.6, floor: 2 }, 5: { m: 1.7, leg: 0.7, floor: 2.5 } };
+  const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || 3); };
+  const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
+  function computeTf(cs, id, S, ed, now, sym) {
     cs.forEach((c) => (c.tt = Math.floor(c.t / 1000)));
     const closed = cs.filter((c) => c.ct < now);
     const price = cs[cs.length - 1].c;
     const base = { confirm: +S.confirm, lockBars: +S.lockBars, volMult: +S.volMult, dispAtr: +S.dispAtr, contBars: +S.contBars, fvgMinAtr: +S.fvgMinAtr, contAtr: +S.contAtr, closeMarginAtr: +S.closeMarginAtr, acceptBars: +S.acceptBars, failBars: failFor(S, id), legRatio: +S.legRatio, floorAtr: +S.floorAtr };
     // swings mínimos nos timeframes curtos (só o movimento recente): recuo >= swFloor x ATR médio de 100 velas
     const sfl = ['5m', '15m'].includes(id) ? ((S.swFloor == null ? 1 : +S.swFloor) || 0) : 0;
-    const layer = (fn, atrMult, reqDisp, ov) => {
-      const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null, slowFloor: fn === E.analyzeRecent ? sfl : 0 }));
+    const layer = (fn, atrMult, reqDisp, ov, xo) => {
+      const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null, slowFloor: fn === E.analyzeRecent ? sfl : 0 }, xo || {}));
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
-    const d = { candles: cs, closed, price, ext: layer(E.analyze, S.extAtr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    if (uniOn(S)) {   // estrutura única (igual à app)
+      const lv = UNI_LV[uniLevel(S, id, sym)] || UNI_LV[3];
+      const one = layer(E.analyzeRecent, lv.atr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int), { legRatio: lv.leg, floorAtr: lv.floor });
+      const d1 = { candles: cs, closed, price, ext: one, int: one, uni: true };
+      if (FB) { try { d1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { d1.fibs = []; } d1.fibsI = d1.fibs; }
+      return d1;
+    }
+    const pl = PRI_LV[priLevel(S, id, sym)];
+    const d = { candles: cs, closed, price, ext: layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
     return d;
   }
@@ -1142,6 +1159,29 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
   }
 
+  // ---------- 1b) confirmação: dentro da zona de um setup, o movimento recente do timeframe da zona (Diário/Semanal…) vira a favor ----------
+  // não é gatilho (esse é o 1H/4H, mais cedo e com stop mais curto): é o sinal de que o movimento ganhou força — "segunda oportunidade"
+  function confAlerts(sym, dm, S, A, st, now, out) {
+    for (const su of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false && (TF_MS[x.zone] || 0) >= TF_MS['1d'])) {
+      const dz = dm[su.zone]; if (!dz || dz.uni || !dz.ext || !dz.int) continue;
+      const z = dz.ext.snap, n = dz.int.snap; if (!z.trend) continue;
+      const dir = z.trend, lb = n.lastBreak, cl = dz.closed;
+      if (!lb || lb.dir !== dir || n.trend !== dir || lb.type !== 'CHoCH') continue;
+      const ex = dz.ext.res.state && dz.ext.res.state.ext; if (ex && lb.i <= ex.i) continue;   // a viragem tem de vir depois do topo/fundo da perna (dentro da correção)
+      const bc = cl[Math.min(cl.length - 1, lb.conf != null ? lb.conf : lb.i)]; if (!bc) continue;
+      const key = `cf|${sym}|${su.name}|${bc.t}|${dir}`; if (st.seen[key]) continue; st.seen[key] = now;
+      if (!(z.pullback >= +A.minPull) || z.pullback > 91.8) continue;
+      if (st.silent || bc.ct < now - (TF_MS[su.zone] + 2 * 36e5)) continue;
+      const up = dir === 1;
+      out.push({ kind: 'conf', sym, tf: su.zone, text: [
+        `✅ <b>Confirmação · ${esc(su.name)} ${up ? 'Long' : 'Short'} · ${esc(sym)}</b>`,
+        `Zona ${LBL[su.zone]} (tendência principal ${up ? 'em subida' : 'em descida'}): correção ${pct(z.pullback)}`,
+        `O movimento recente do ${LBL[su.zone]} virou ${up ? 'para cima' : 'para baixo'} (CHoCH em ${fmt(lb.level)}, fecho ${fmt(bc.c)}): o movimento ganhou força.`,
+        `É uma entrada mais tardia do que a do gatilho (${LBL[su.trig]}): stop mais longe, risco/retorno pior.`,
+        z.protected != null ? `Invalida ${up ? 'abaixo' : 'acima'} de ${fmt(z.protected)}` : '',
+      ].filter(Boolean).join('\n') });
+    }
+  }
   // ---------- 4) depois do alerta de setup: o preço toca num FVG do gatilho para lá dos 50% da pernada ----------
   function trackerAlerts(sym, dm, A, st, now, out, S) {
     st.trk = st.trk.filter((tr) => {
@@ -1276,7 +1316,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         const inv = kind === 'inv';
         out.push({ kind: 'near', sym, text: [
           `${inv ? '⚠️' : '↗'} <b>Perto da ${inv ? 'inversão' : 'continuação'} · ${LBL[id]} · ${esc(sym)}</b>`,
-          `Tendência principal ${up ? 'em subida' : 'em descida'}: o preço (${fmt(price)}) está a ${pct(gap / price * 100)} ${inv ? 'do limite' : (up ? 'do topo da perna' : 'do fundo da perna')} ${fmt(lvl)}.`,
+          `${d.uni ? 'Estrutura' : 'Tendência principal'} ${up ? 'em subida' : 'em descida'}: o preço (${fmt(price)}) está a ${pct(gap / price * 100)} ${inv ? 'do limite' : (up ? 'do topo da perna' : 'do fundo da perna')} ${fmt(lvl)}.`,
           inv ? `Um fecho ${up ? 'abaixo' : 'acima'} = CHoCH: a tendência do ${LBL[id]} vira para ${up ? 'baixo' : 'cima'}.` : `Um fecho ${up ? 'acima' : 'abaixo'} = BOS: a tendência do ${LBL[id]} continua.`,
         ].join('\n') });
       }
@@ -1303,7 +1343,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       rec.armed = false; rec.at = now;
       if (st.silent) continue;
       const down = rec.side === 1, d = dm[id], sn = d && d.ext && d.ext.snap;
-      const tr = sn && sn.trend ? `Tendência principal do ${LBL[id]}: ${sn.trend === 1 ? '▲ subida' : '▼ descida'}${sn.pullback != null ? ` · correção ${pct(sn.pullback)}` : ''}` : '';
+      const tr = sn && sn.trend ? `${d && d.uni ? 'Estrutura' : 'Tendência principal'} do ${LBL[id]}: ${sn.trend === 1 ? '▲ subida' : '▼ descida'}${sn.pullback != null ? ` · correção ${pct(sn.pullback)}` : ''}` : '';
       out.push({ kind: 'sma', sym, text: [
         `${down ? '💰' : '🧱'} <b>SMA 200 · ${LBL[id]} · ${esc(sym)}</b>`,
         down ? `O preço desceu até à SMA 200 (${fmt(sma)}) — está a ${pct(Math.abs(dist) * 100)} dela. Possível zona de compra.` : `O preço subiu até à SMA 200 (${fmt(sma)}) — está a ${pct(Math.abs(dist) * 100)} dela. Teste à média: resistência ou recuperação.`,
@@ -1478,9 +1518,10 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
-    for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now); } catch (e) {} }
+    for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now, sym); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out, S);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
+    if (A.setupOn && A.confOn !== false) confAlerts(sym, dm, S, A, st, now, out);
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
@@ -1633,18 +1674,27 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // grupos: c = cripto, s = ações e ETFs, f = futuros (=F), r = rácios. Exceções por ativo em S.mon.per
   const MON_TFS = ['5m', '15m', '1h', '4h'];
   const MON_MS = { '5m': 3e5, '15m': 9e5, '1h': 36e5, '4h': 144e5 };
-  const MON_DEF = { grp: { c: '5m', s: '15m', f: '15m', r: '4h' }, per: { 'ES=F': '5m' } };
+  const MON_DEF = { grp: { c: '1h', s: '1h', f: '1h', r: '4h' }, per: { BTCUSDT: '5m' }, v2: 1 };   // 15m e 5m (Day trade e Scalp) só nos "ativos com intraday" — por defeito só o BTC
+  // passagem única para o novo padrão: tudo a partir de 1H, exceto o BTC (e as exceções que já vigiavas a partir de 1H ou 4H)
+  function monMigrate(S) {
+    if (!S || (S.mon && S.mon.v2)) return false;
+    const m = S.mon || {}, grp = Object.assign({}, MON_DEF.grp, m.grp || {}), per = Object.assign({}, m.per || {});
+    ['c', 's', 'f', 'r'].forEach((g) => { if (!MON_MS[grp[g]] || MON_MS[grp[g]] < MON_MS['1h']) grp[g] = g === 'r' ? '4h' : '1h'; });
+    Object.keys(per).forEach((k) => { if (k !== 'BTCUSDT' && (!MON_MS[per[k]] || MON_MS[per[k]] < MON_MS['1h'])) delete per[k]; });
+    per.BTCUSDT = '5m';
+    S.mon = { grp, per, v2: 1 }; return true;
+  }
   const isCryptoSym = (s) => /^[A-Z0-9]{2,20}(USDT|USDC|FDUSD|BTC|ETH|BNB|EUR)$/.test(s) && !s.includes(':');
   const monGroup = (s) => (s.includes('/') ? 'r' : isCryptoSym(s) || isSynth(s) ? 'c' : /=F$/.test(s) ? 'f' : 's');
   function monOf(S, s) {
     const m = (S && S.mon) || MON_DEF, per = m.per || {};   // sem configuração ainda: os valores recomendados (ES=F em 5m)
     if (per[s] && MON_MS[per[s]]) return per[s];
     const g = Object.assign({}, MON_DEF.grp, m.grp || {})[monGroup(s)];
-    return MON_MS[g] ? g : '5m';
+    return MON_MS[g] ? g : '1h';
   }
   // de quanto em quanto tempo o vigia volta a analisar: 5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora
   const monEvery = (tf) => (tf === '5m' ? 0 : tf === '15m' ? 9e5 : 36e5);
-  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, keyOf, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
+  root.MSS_SYNTH = { MON_TFS, MON_MS, MON_DEF, monMigrate, monGroup, monOf, monEvery, NAMES, nameOf, SYN, isSynth, keyOf, HIST_TFS, parseCsv, build, buildBase, factorOf, consolidate, cgValue, bucket };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Vigia (Google Apps Script): lê as definições e marcações da conta, vai buscar as velas, corre os alertas e manda para o Telegram.
@@ -1874,6 +1924,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const a = auth(cfg.chave);
     const sj = fsGet(a, 'meta/settings');
     const S = Object.assign({}, DEF, sj ? JSON.parse(sj) : {});
+    try { SYN.monMigrate(S); } catch (e) {}   // 15m/5m só nos ativos com intraday (BTC), mesmo antes de abrires a app nova
     const A = Object.assign({}, C.A_DEF, S.alerts || {}); A.setups = A.setups || {};
     let st = loadState();
     const first = !st;
@@ -1921,9 +1972,13 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     hb.needDl = new Set([].concat(...act.map(legsOf))).size;
     const legs = [...dl], crypto = legs.filter(isCrypto);
     const synH = {}; if (syn) for (const k in syn) if (syn[k].hist) synH[k] = syn[k].hist;
-    const cdata = crypto.length ? (relay ? relayCandles(relay, crypto, ftfs, edits) : cryptoCandles(crypto, ftfs, edits)) : {};
+    // 15m e 5m só se descarregam para os ativos vigiados a partir deles (por defeito só o BTC)
+    const lowMs = {}; batch.forEach((s) => { const ms = SYN.MON_MS[SYN.monOf(S, s)] || 0; legsOf(s).forEach((x) => { lowMs[x] = Math.min(lowMs[x] == null ? 1e15 : lowMs[x], ms); }); });
+    const tfsFor = (x) => ftfs.filter((id) => !(id === '15m' || id === '5m') || (C.TF_MS[id] || 0) >= (lowMs[x] == null ? 0 : lowMs[x]));
+    const cdata = {}, cgrp = {}; crypto.forEach((x) => { const k = tfsFor(x).join(','); (cgrp[k] = cgrp[k] || []).push(x); });
+    for (const k in cgrp) { const t = k ? k.split(',') : []; Object.assign(cdata, relay ? relayCandles(relay, cgrp[k], t, edits) : cryptoCandles(cgrp[k], t, edits)); }
     const sdata = {};
-    const legData = (x) => { if (SYN.isSynth(x)) { const sy = syn && syn[x]; if (!sy) return { _err: 'sem dados' }; if (!synH[x]) synH[x] = synthHist(a, x); if (!Object.keys(synH[x]).length && !sy.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH[x], sy.live, ftfs); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, ftfs); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
+    const legData = (x) => { if (SYN.isSynth(x)) { const sy = syn && syn[x]; if (!sy) return { _err: 'sem dados' }; if (!synH[x]) synH[x] = synthHist(a, x); if (!Object.keys(synH[x]).length && !sy.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH[x], sy.live, tfsFor(x)); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, tfsFor(x)); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
     const msgs = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }
