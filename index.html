@@ -755,7 +755,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 21h15</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 21h40</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -6348,7 +6348,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   function cloudPushSettings() {
     if (!cloud.user || !cloud.db || cloud.applying) return;
     const j = JSON.stringify(settings); if (j === cloud.settingsJson) return;
-    cloud.settingsJson = j;
+    cloud.settingsJson = j; (cloud.mine = cloud.mine || []).push(j); if (cloud.mine.length > 20) cloud.mine.shift();   // ecos das nossas próprias gravações: ignorados
     cloudWrite(cloud.db.collection('users').doc(cloud.user.uid).collection('meta').doc('settings'), (r) => r.set({ json: j, at: Date.now() }));
   }
   function cloudStart() {
@@ -6386,14 +6386,16 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
       const j = d.exists ? d.data().json : null;
       if (!j) { if (firstS) { firstS = false; cloudPushSettings(); } return; }
       firstS = false;
-      if (j === cloud.settingsJson) return;
+      if (j === cloud.settingsJson || (cloud.mine || []).includes(j)) return;   // é o eco de uma gravação feita aqui
       cloud.settingsJson = j;
       try {
+        // só se volta a descarregar velas quando muda o que se descarrega (timeframes, setups, monitorização); de resto só se recalcula
+        const dl = (x) => JSON.stringify([x.tfs, x.setups, x.mon, x.prevLevels]), before = dl(settings);
         const r = JSON.parse(j); cloud.applying = true; const monMig = !(r.mon && r.mon.v2);
         Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings); applyTheme();
         cloud.applying = false; if (monMig) setTimeout(() => { try { cloudPushSettings(); } catch (e) {} }, 800);
-        editLayer = settings.layer === 'ext' ? 'ext' : 'int';
-        loadAll();
+        if (!editMode) editLayer = settings.layer === 'ext' ? 'ext' : 'int';
+        if (dl(settings) !== before || !Object.keys(data).length) loadAll(); else { try { recomputeAll(); updateEditUi(); sensUi(); } catch (e) { loadAll(); } }
       } catch (e) { cloud.applying = false; }
     }, (e) => { cloud.err = e.code || 'leitura'; cloudUi(); }));
   }
