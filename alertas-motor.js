@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-11T20:19:10.691Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T08:58:17.000Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -19,6 +19,7 @@
     acceptBars: 1,      // velas seguintes que também têm de fechar para lá do nível (aceitação); fechar de volta = sweep
     failBars: 4,
     legRatio: 0,        // swing pela proporção da perna: recuo >= legRatio x tamanho da perna que o formou (0 = só ATR)
+    logScale: true,     // recuos dos swings medidos em % (escala log), não em dólares: num ativo que caiu de 368 para 45 o ATR em dólares ficava insuflado e "apagava" swings de +150%
     holdBars: 2,        // aceitação prolongada: N fechos seguidos para lá do nível (com margem) também confirmam a quebra        // quebra falhada: se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada (0 = desligado)
   };
 
@@ -161,10 +162,11 @@
       if (pv > s0 && pv >= 0 && !ignP(pv)) { if (isPH(pv)) lastPH = { p: H(pv), i: pv }; if (isPL(pv)) lastPL = { p: L(pv), i: pv }; }
       if (trend !== 0 && !target && j - ext.i >= o.lockBars && !ignP(ext.i) && !ms.manAt(j)) {   // topo/fundo ignorado: não é alvo de quebra
 
-        const a = atr[ext.i] || atr[j] || 0;
-        const retr = counter == null ? 0 : Math.abs(ext.p - counter);
+        const LG = !!pr.atrL, f = LG ? Math.log : (x) => x;   // em escala log os recuos e a perna são medidos em %
+        const a = (LG ? pr.atrL[ext.i] || pr.atrL[j] : atr[ext.i] || atr[j]) || 0;
+        const retr = counter == null ? 0 : Math.abs(f(ext.p) - f(counter));
         const need = !(o.legRatio > 0) ? o.minRetraceAtr * a
-          : Math.max((o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(ext.p - (prot ? prot.p : ext.p))));
+          : Math.max((o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(f(ext.p) - f(prot ? prot.p : ext.p))));
         if (retr >= need) target = { p: ext.p, i: ext.i };
       }
 
@@ -281,6 +283,16 @@
       if (i < o.atrLen) { acc += tr; if (i === o.atrLen - 1) atr[i] = acc / o.atrLen; }
       else atr[i] = (atr[i - 1] * (o.atrLen - 1) + tr) / o.atrLen;
     }
+    // o mesmo ATR, mas em escala log (fração do preço), para medir recuos em %
+    let atrL = null;
+    if (o.logScale !== false && candles.every((c) => c.l > 0 && c.h > 0 && c.c > 0)) {
+      atrL = new Array(n).fill(null); let a2 = 0; const lH = (i) => Math.log(H(i)), lL = (i) => Math.log(L(i)), lC = (i) => Math.log(C(i));
+      for (let i = 0; i < n; i++) {
+        const tr = i === 0 ? lH(i) - lL(i) : Math.max(lH(i) - lL(i), Math.abs(lH(i) - lC(i - 1)), Math.abs(lL(i) - lC(i - 1)));
+        if (i < o.atrLen) { a2 += tr; if (i === o.atrLen - 1) atrL[i] = a2 / o.atrLen; }
+        else atrL[i] = (atrL[i - 1] * (o.atrLen - 1) + tr) / o.atrLen;
+      }
+    }
     let vs = 0;
     for (let i = 0; i < n; i++) {
       if (i >= o.volLen) volAvg[i] = vs / o.volLen;
@@ -300,7 +312,7 @@
         else { if (H(j) >= f.bot) f.touched = true; if (H(j) >= f.top) { f.filled = j; break; } }
       }
     }
-    return { atr, volAvg, fvgs };
+    return { atrL, atr, volAvg, fvgs };
   }
 
   // rótulos HH/HL/LH/LL
@@ -438,17 +450,19 @@
     // swing: recuo >= legRatio x perna, mas nunca menos de floorAtr x ATR nem mais de minRetraceAtr x ATR (ATR insuflado em tendências fortes)
     // swings mínimos (timeframes curtos): numa lateralização o ATR de 14 velas encolhe e qualquer repique conta como swing;
     // com slowFloor > 0 o recuo nunca pode ser menor do que slowFloor x ATR médio das últimas 100 velas (que não encolhe)
+    const LG = !!pr.atrL, F = LG ? Math.log : (x) => x, A = LG ? pr.atrL : atr;   // escala log: recuos em %
+    const HH = (i) => F(H(i)), LLw = (i) => F(L(i)), CC = (i) => F(C(i));
     const slow = new Array(n).fill(null);
-    if (o.slowFloor > 0) { let acc = 0; const q = []; for (let i = 0; i < n; i++) { const tr = i === 0 ? H(i) - L(i) : Math.max(H(i) - L(i), Math.abs(H(i) - C(i - 1)), Math.abs(L(i) - C(i - 1))); q.push(tr); acc += tr; if (q.length > 100) acc -= q.shift(); slow[i] = acc / q.length; } }
+    if (o.slowFloor > 0) { let acc = 0; const q = []; for (let i = 0; i < n; i++) { const tr = i === 0 ? HH(i) - LLw(i) : Math.max(HH(i) - LLw(i), Math.abs(HH(i) - CC(i - 1)), Math.abs(LLw(i) - CC(i - 1))); q.push(tr); acc += tr; if (q.length > 100) acc -= q.shift(); slow[i] = acc / q.length; } }
     const sf = (i, j) => (o.slowFloor > 0 ? o.slowFloor * (slow[i] || slow[j] || 0) : 0);
     const thr = (i, j, leg) => {
-      const a = atr[i] || atr[j] || (H(j) - L(j));
+      const a = A[i] || A[j] || (HH(j) - LLw(j));
       if (!(o.legRatio > 0)) return Math.max(o.minRetraceAtr * a, sf(i, j));
       return Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(leg)));
     };
     let zLastH = H(0), zLastL = L(0);   // últimos pontos do zigzag (origem da perna atual)
     // o extremo da perna que quebrou estrutura é um ponto estrutural: basta o recuo mínimo (floorAtr) para contar como swing
-    const flo = (i, j) => Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * (atr[i] || atr[j] || (H(j) - L(j))));
+    const flo = (i, j) => Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * (A[i] || A[j] || (HH(j) - LLw(j))));
     const brk = (dir, p) => o.breakSwing !== false && o.legRatio > 0 && trend === dir && lastBroken != null && dir * (p - lastBroken) > 0;
 
     let zdir = 0, hi = { p: H(0), i: 0 }, lo = { p: L(0), i: 0 };
@@ -518,10 +532,10 @@
       if (!manZone && zdir >= 0 && H(j) > hi.p) hi = { p: H(j), i: j };
       if (!manZone && zdir <= 0 && L(j) < lo.p) lo = { p: L(j), i: j };
       const isManual = (i) => !!(ov && ov.add && ov.add.has(T(i)));
-      if (zdir >= 0 && j > hi.i && hi.p - L(j) >= (brk(1, hi.p) ? flo(hi.i, j) : thr(hi.i, j, hi.p - zLastL))) {
+      if (zdir >= 0 && j > hi.i && F(hi.p) - LLw(j) >= (brk(1, hi.p) ? flo(hi.i, j) : thr(hi.i, j, F(hi.p) - F(zLastL)))) {
         if (!manZone && !ignored(hi.i) && !isManual(hi.i)) { res.swings.push({ type: 'H', i: hi.i, p: hi.p, conf: j }); lastSH = { p: hi.p, i: hi.i, broken: false, swept: false }; cntUp = 0; }
         zLastH = hi.p; zdir = -1; lo = lowest(hi.i + 1, j);
-      } else if (zdir <= 0 && j > lo.i && H(j) - lo.p >= (brk(-1, lo.p) ? flo(lo.i, j) : thr(lo.i, j, zLastH - lo.p))) {
+      } else if (zdir <= 0 && j > lo.i && HH(j) - F(lo.p) >= (brk(-1, lo.p) ? flo(lo.i, j) : thr(lo.i, j, F(zLastH) - F(lo.p)))) {
         if (!manZone && !ignored(lo.i) && !isManual(lo.i)) { res.swings.push({ type: 'L', i: lo.i, p: lo.p, conf: j }); lastSL = { p: lo.p, i: lo.i, broken: false, swept: false }; cntDn = 0; }
         zLastL = lo.p; zdir = 1; hi = highest(lo.i + 1, j);
       }
@@ -855,6 +869,76 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const d = { candles: cs, closed, price, ext: layer(E.analyze, S.extAtr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext)), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
     return d;
+  }
+  // a Yahoo às vezes devolve velas semanais quando se pedem mensais (ex.: COIN): nesse caso refaz o mensal a partir do diário (ou das semanais)
+  function monthlyFix(got) {
+    const m = got && got['1mo']; if (!m || !m.rows || m.rows.length < 3) return;
+    const r = m.rows, sp = []; for (let i = 1; i < r.length; i++) sp.push(r[i][0] - r[i - 1][0]); sp.sort((a, b) => a - b);
+    if (sp[sp.length >> 1] >= 20 * 864e5) return;
+    const d = got['1d'] && got['1d'].rows, src = d && d.length && d[0][0] <= r[0][0] + 31 * 864e5 ? d : r, out = []; let key = null, cur = null;
+    for (const q of src) { if (!(q[2] > 0)) continue; const dt = new Date(q[0]), k = dt.getUTCFullYear() * 12 + dt.getUTCMonth();
+      if (k !== key) { key = k; cur = [q[0], q[1], q[2], q[3], q[4], q[5] || 0]; out.push(cur); } else { cur[2] = Math.max(cur[2], q[2]); cur[3] = Math.min(cur[3], q[3]); cur[4] = q[4]; cur[5] += q[5] || 0; } }
+    if (out.length > 2) m.rows = out;
+  }
+  // ---------- Opção A: Semanal e Mensal das ações/futuros construídos a partir do Diário (+ verificação das velas) ----------
+  // dia local da bolsa: com o fuso que a Yahoo dá (off, em segundos) ou, sem ele, uma aproximação que serve às velas diárias (hora de abertura) e às semanais/mensais (meia-noite local)
+  const dqDay = (t, off, mid) => Math.floor((t + (off != null ? off * 1000 : (mid ? 12 : 6) * 36e5)) / 864e5);
+  const dqMonth = (day) => { const d = new Date(day * 864e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); };
+  const dqSpacingOk = (rows, minDays) => { if (!rows || rows.length < 3) return false; const sp = []; for (let i = 1; i < rows.length; i++) sp.push(rows[i][0] - rows[i - 1][0]); sp.sort((a, b) => a - b); return sp[sp.length >> 1] >= minDays * 864e5; };
+  function deriveWM(got) {
+    const dd = got && got['1d'], d = dd && dd.rows; if (!d || d.length < 30) { if (typeof monthlyFix === 'function') monthlyFix(got); return; }
+    const off = dd.off;
+    for (const kind of ['1wk', '1mo']) {
+      const wk = kind === '1wk', keyD = (t) => { const day = dqDay(t, off, false); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
+      const keyN = (t) => { const day = dqDay(t, off, true); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
+      const nat = (got[kind] && got[kind].rows) || [], natOk = dqSpacingOk(nat, wk ? 5 : 20), natBy = new Map();
+      if (natOk) for (const q of nat) natBy.set(keyN(q[0]), q);
+      const built = []; let key = null, cur = null;
+      for (const q of d) { if (!(q[2] > 0)) continue; const k = keyD(q[0]);
+        if (k !== key) { key = k; cur = [q[0], q[1], q[2], q[3], q[4], q[5] || 0, k]; built.push(cur); }
+        else { cur[2] = Math.max(cur[2], q[2]); cur[3] = Math.min(cur[3], q[3]); cur[4] = q[4]; cur[5] += q[5] || 0; } }
+      if (!built.length) continue;
+      // a 1.ª vela construída pode estar incompleta (o Diário começa a meio da semana/mês): aí vale a da Yahoo, se for boa
+      const k0 = built[0][6]; if (natBy.has(k0)) built.shift();
+      const older = natOk ? nat.filter((q) => keyN(q[0]) < (built.length ? built[0][6] : Infinity)) : [];
+      const rows = older.map((q) => q.slice(0, 6)).concat(built.map((b) => {
+        const n = natBy.get(b[6]);
+        let t = n ? n[0] : b[0];   // mesma hora da vela da Yahoo: as marcas que já fizeste continuam no sítio
+        if (!n && off != null) { const day0 = wk ? b[6] * 7 - 3 : Math.floor(Date.UTC(Math.floor(b[6] / 12), b[6] % 12, 1) / 864e5); t = day0 * 864e5 - off * 1000; }
+        return [t, b[1], b[2], b[3], b[4], b[5]];
+      }));
+      got[kind] = Object.assign({}, got[kind] || {}, { rows, built: true });
+    }
+  }
+  // verificação das velas diárias: { lvl: 'ok'|'warn'|'bad', msgs: [{ lvl, txt }] }
+  function dataCheck(dd, now) {
+    const out = { lvl: 'ok', msgs: [] }, rows = dd && dd.rows; if (!rows || rows.length < 10) return out;
+    const off = dd.off, n = rows.length, day = rows.map((q) => dqDay(q[0], off, false)), fmtD = (dy) => new Date(dy * 864e5).toISOString().slice(0, 10).split('-').reverse().join('/');
+    const add = (lvl, txt) => { out.msgs.push({ lvl, txt }); if (lvl === 'bad' || (lvl === 'warn' && out.lvl === 'ok')) out.lvl = lvl === 'bad' ? 'bad' : (out.lvl === 'bad' ? 'bad' : 'warn'); };
+    const today = dqDay(now, off, false), recentFrom = n - 60;
+    // 1) dias em falta (últimos 3 anos): mais de 4 dias seguidos sem vela
+    const gaps = []; for (let i = 1; i < n; i++) if (rows[i][0] > now - 3 * 365 * 864e5 && day[i] - day[i - 1] > 4) gaps.push([day[i - 1], day[i], i]);
+    if (gaps.length) add(gaps.some((g) => g[2] >= recentFrom) ? 'warn' : 'warn', `Diário: ${gaps.length} buraco${gaps.length > 1 ? 's' : ''} sem velas — ${gaps.slice(-3).map((g) => `${fmtD(g[0] + 1)} a ${fmtD(g[1] - 1)}`).join('; ')}`);
+    // 2) dados parados
+    if (today - day[n - 1] > 4) add('bad', `Diário parado: última vela de ${fmtD(day[n - 1])}`);
+    let same = 1; for (let i = n - 1; i > 0 && rows[i][1] === rows[i - 1][1] && rows[i][2] === rows[i - 1][2] && rows[i][3] === rows[i - 1][3] && rows[i][4] === rows[i - 1][4]; i--) same++;
+    if (same >= 5) add('bad', `Diário encravado: ${same} velas seguidas exatamente iguais`);
+    // 3) velas impossíveis
+    const imp = []; for (let i = 0; i < n; i++) { const [, o, h, l, c] = rows[i]; if (!(o > 0 && h > 0 && l > 0 && c > 0) || h < l || h < Math.max(o, c) * 0.9999 || l > Math.min(o, c) * 1.0001) imp.push(i); }
+    if (imp.length) add(imp.some((i) => i >= recentFrom) ? 'bad' : 'warn', `Diário: ${imp.length} vela${imp.length > 1 ? 's' : ''} impossíve${imp.length > 1 ? 'is' : 'l'} (máximo/mínimo/fecho incoerentes ou a zero) — ${imp.slice(-3).map((i) => fmtD(day[i])).join(', ')}`);
+    // 4) picos falsos: a vela salta para longe das vizinhas e volta logo
+    const spk = []; for (let i = 1; i < n - 1; i++) { const [, o, h, l, c] = rows[i], pc = rows[i - 1][4], no = rows[i + 1][1], nc = rows[i + 1][4];
+      const ref = Math.max(pc, no), refL = Math.min(pc, no), lo = Math.min(o, c, l), hi = Math.max(o, c, h);
+      let k = 0; if (lo > 1.4 * ref || hi < refL / 1.4) k = (lo > 2.5 * ref || hi < refL / 2.5) ? 2 : 1;
+      else { const body = [o, c, pc, nc]; if (h > 2 * Math.max(...body) || l < 0.5 * Math.min(...body)) k = (h > 4 * Math.max(...body) || l < 0.25 * Math.min(...body)) ? 2 : 1; }
+      if (k) spk.push([i, k]); }
+    if (spk.length) add(spk.some(([i, k]) => k === 2 && i >= recentFrom) ? 'bad' : 'warn', `Diário: ${spk.length} pico${spk.length > 1 ? 's' : ''} suspeito${spk.length > 1 ? 's' : ''} (vela que salta e volta no dia seguinte) — ${spk.slice(-3).map(([i]) => fmtD(day[i])).join(', ')}`);
+    // 5) histórico cortado
+    if (dd.first && rows[0][0] > dd.first * 1000 + 40 * 864e5) add('warn', `Diário começa em ${fmtD(day[0])}, mas o ativo negoceia desde ${fmtD(dqDay(dd.first * 1000, off, false))}${dd.first ? '' : ''}`);
+    else if (!dd.first && rows[0][0] > now - 5.2 * 365 * 864e5 && rows[0][0] < now - 4.8 * 365 * 864e5) add('warn', 'Diário com só 5 anos de histórico — atualiza o servidor de dados (worker da Cloudflare) para ter tudo');
+    // 6) preço atual
+    if (dd.px > 0 && Math.abs(rows[n - 1][4] - dd.px) / dd.px > 0.03) add('warn', `Último fecho do Diário (${rows[n - 1][4]}) longe da cotação atual (${dd.px})`);
+    return out;
   }
   function aggregateMonths(cs, k) {
     const out = []; let key = null, cur = null;
@@ -1406,7 +1490,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
+  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -1730,9 +1814,11 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const y = yahooSym(sym), ivs = new Set();
     tfs.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (id === '4h') ivs.add('1h'); if (C.MAGG[id]) ivs.add('1mo'); });
     if (!ivs.size) return {};
+    if (ivs.has('1mo') || ivs.has('1wk')) ivs.add('1d');   // o Semanal e o Mensal constroem-se a partir do Diário (opção A)
     const r = http(STOCK_API + '/candles?s=' + encodeURIComponent(y) + '&i=' + [...ivs].join(','));
     if (r.code !== 200) return { _err: 'Yahoo ' + r.code };
-    const got = JSON.parse(r.text)[y] || {}, out = {};
+    const got = JSON.parse(r.text)[y] || {}, out = {}; C.deriveWM(got);
+    if (got['1d'] && got['1d'].rows) { const dq = C.dataCheck(got['1d'], Date.now()); if (dq.lvl === 'bad') return { _err: 'alertas suspensos — dados suspeitos: ' + dq.msgs.filter((m) => m.lvl === 'bad').map((m) => m.txt).join(' · ') }; }
     for (const id of tfs) {
       const iv = Y_IV[id] || (id === '4h' ? '1h' : C.MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
       const rows = got[iv].rows;

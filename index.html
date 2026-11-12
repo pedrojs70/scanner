@@ -705,6 +705,7 @@
   .chartbox:not(.editing) #lineTools { display:none !important; }
   .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocDBtn, .chartbox.editing #pocWBtn, .chartbox.editing #kzBtn, .chartbox.editing #fibBtn, .chartbox.editing #lineBtn { display:none !important; }
   #lineTools [data-und] { display:none !important; }   /* o Desfazer da barra de cima já desfaz também as linhas */
+  .dq { font-size:12px; margin-left:4px; cursor:help; } .dq.ok { color:var(--np-green, #2e7d32); } .dq.warn { color:#c58a00; } .dq.bad { color:var(--np-red); font-weight:700; }
 </style>
 </head>
 <body>
@@ -740,7 +741,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 11nov 22h10</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 10h00</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -837,6 +838,7 @@
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Tudo · Ativos · Rácios:</b> ao lado de cada caixa de procura (favoritos, Quadro, Em foco e jornal) escolhe se queres ver tudo, só os ativos (ações, cripto e futuros) ou só os rácios. No jornal, o nome do ativo aparece em português com o ticker ao lado.</li>
       <li><b>Mercado cripto total (TOTAL):</b> junta-o aos favoritos (procura “total”), abre-o e importa o histórico com 📥 — no TradingView abre <i>CRYPTOCAP:TOTAL</i> e exporta o Mensal, Semanal, Diário, 4H e 1H (“Exportar dados do gráfico”), como fizeste no USDT.D + USDC.D. Daí em diante o vigia acrescenta um ponto da CoinGecko a cada 5 minutos. A análise IA do Bitcoin passa a trazer o TOTAL e o USDT.D + USDC.D como enquadramento, e diz se confirmam ou contrariam o lado escolhido.</li>
+      <li><b>Velas das ações, ETFs e futuros:</b> o Semanal e o Mensal são construídos pela app a partir das velas diárias (como no TradingView), para nunca virem com o tamanho errado; o 3M, 6M e Anual saem do Mensal. As velas diárias são verificadas sempre que chegam: buracos sem velas, dados parados, velas impossíveis, picos falsos (vela que salta e volta no dia seguinte), histórico cortado e diferença para a cotação atual. No Quadro: <b>✔</b> verificado, <b>⚠ amarelo</b> aviso (a estrutura é desenhada na mesma), <b>⚠ vermelho</b> dados suspeitos — os alertas desse ativo ficam suspensos até os dados voltarem a estar bons. Passa o rato no ⚠ para ver as datas; “velas: … ⚠” no topo do Quadro mostra só os que têm aviso. As cripto vêm da Binance e não precisam disto.</li>
       <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) para colares numa conversa com o Claude. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
       <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
       <li><b>Lateralização (5m/15m/1H):</b> quando o gatilho está dentro de uma caixa (vários toques em cima e em baixo), as viragens lá dentro não contam; o gatilho passa a ser o fecho fora da caixa no sentido do setup (“quebrou a lateralização”). No gráfico aparece a caixa tracejada “↔ lateralização”.</li>
@@ -1184,6 +1186,7 @@
     acceptBars: 1,      // velas seguintes que também têm de fechar para lá do nível (aceitação); fechar de volta = sweep
     failBars: 4,
     legRatio: 0,        // swing pela proporção da perna: recuo >= legRatio x tamanho da perna que o formou (0 = só ATR)
+    logScale: true,     // recuos dos swings medidos em % (escala log), não em dólares: num ativo que caiu de 368 para 45 o ATR em dólares ficava insuflado e "apagava" swings de +150%
     holdBars: 2,        // aceitação prolongada: N fechos seguidos para lá do nível (com margem) também confirmam a quebra        // quebra falhada: se nas N velas seguintes o preço fechar de volta para lá do nível, a quebra é anulada (0 = desligado)
   };
 
@@ -1326,10 +1329,11 @@
       if (pv > s0 && pv >= 0 && !ignP(pv)) { if (isPH(pv)) lastPH = { p: H(pv), i: pv }; if (isPL(pv)) lastPL = { p: L(pv), i: pv }; }
       if (trend !== 0 && !target && j - ext.i >= o.lockBars && !ignP(ext.i) && !ms.manAt(j)) {   // topo/fundo ignorado: não é alvo de quebra
 
-        const a = atr[ext.i] || atr[j] || 0;
-        const retr = counter == null ? 0 : Math.abs(ext.p - counter);
+        const LG = !!pr.atrL, f = LG ? Math.log : (x) => x;   // em escala log os recuos e a perna são medidos em %
+        const a = (LG ? pr.atrL[ext.i] || pr.atrL[j] : atr[ext.i] || atr[j]) || 0;
+        const retr = counter == null ? 0 : Math.abs(f(ext.p) - f(counter));
         const need = !(o.legRatio > 0) ? o.minRetraceAtr * a
-          : Math.max((o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(ext.p - (prot ? prot.p : ext.p))));
+          : Math.max((o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(f(ext.p) - f(prot ? prot.p : ext.p))));
         if (retr >= need) target = { p: ext.p, i: ext.i };
       }
 
@@ -1446,6 +1450,16 @@
       if (i < o.atrLen) { acc += tr; if (i === o.atrLen - 1) atr[i] = acc / o.atrLen; }
       else atr[i] = (atr[i - 1] * (o.atrLen - 1) + tr) / o.atrLen;
     }
+    // o mesmo ATR, mas em escala log (fração do preço), para medir recuos em %
+    let atrL = null;
+    if (o.logScale !== false && candles.every((c) => c.l > 0 && c.h > 0 && c.c > 0)) {
+      atrL = new Array(n).fill(null); let a2 = 0; const lH = (i) => Math.log(H(i)), lL = (i) => Math.log(L(i)), lC = (i) => Math.log(C(i));
+      for (let i = 0; i < n; i++) {
+        const tr = i === 0 ? lH(i) - lL(i) : Math.max(lH(i) - lL(i), Math.abs(lH(i) - lC(i - 1)), Math.abs(lL(i) - lC(i - 1)));
+        if (i < o.atrLen) { a2 += tr; if (i === o.atrLen - 1) atrL[i] = a2 / o.atrLen; }
+        else atrL[i] = (atrL[i - 1] * (o.atrLen - 1) + tr) / o.atrLen;
+      }
+    }
     let vs = 0;
     for (let i = 0; i < n; i++) {
       if (i >= o.volLen) volAvg[i] = vs / o.volLen;
@@ -1465,7 +1479,7 @@
         else { if (H(j) >= f.bot) f.touched = true; if (H(j) >= f.top) { f.filled = j; break; } }
       }
     }
-    return { atr, volAvg, fvgs };
+    return { atrL, atr, volAvg, fvgs };
   }
 
   // rótulos HH/HL/LH/LL
@@ -1603,17 +1617,19 @@
     // swing: recuo >= legRatio x perna, mas nunca menos de floorAtr x ATR nem mais de minRetraceAtr x ATR (ATR insuflado em tendências fortes)
     // swings mínimos (timeframes curtos): numa lateralização o ATR de 14 velas encolhe e qualquer repique conta como swing;
     // com slowFloor > 0 o recuo nunca pode ser menor do que slowFloor x ATR médio das últimas 100 velas (que não encolhe)
+    const LG = !!pr.atrL, F = LG ? Math.log : (x) => x, A = LG ? pr.atrL : atr;   // escala log: recuos em %
+    const HH = (i) => F(H(i)), LLw = (i) => F(L(i)), CC = (i) => F(C(i));
     const slow = new Array(n).fill(null);
-    if (o.slowFloor > 0) { let acc = 0; const q = []; for (let i = 0; i < n; i++) { const tr = i === 0 ? H(i) - L(i) : Math.max(H(i) - L(i), Math.abs(H(i) - C(i - 1)), Math.abs(L(i) - C(i - 1))); q.push(tr); acc += tr; if (q.length > 100) acc -= q.shift(); slow[i] = acc / q.length; } }
+    if (o.slowFloor > 0) { let acc = 0; const q = []; for (let i = 0; i < n; i++) { const tr = i === 0 ? HH(i) - LLw(i) : Math.max(HH(i) - LLw(i), Math.abs(HH(i) - CC(i - 1)), Math.abs(LLw(i) - CC(i - 1))); q.push(tr); acc += tr; if (q.length > 100) acc -= q.shift(); slow[i] = acc / q.length; } }
     const sf = (i, j) => (o.slowFloor > 0 ? o.slowFloor * (slow[i] || slow[j] || 0) : 0);
     const thr = (i, j, leg) => {
-      const a = atr[i] || atr[j] || (H(j) - L(j));
+      const a = A[i] || A[j] || (HH(j) - LLw(j));
       if (!(o.legRatio > 0)) return Math.max(o.minRetraceAtr * a, sf(i, j));
       return Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * a, Math.min(o.minRetraceAtr * a, o.legRatio * Math.abs(leg)));
     };
     let zLastH = H(0), zLastL = L(0);   // últimos pontos do zigzag (origem da perna atual)
     // o extremo da perna que quebrou estrutura é um ponto estrutural: basta o recuo mínimo (floorAtr) para contar como swing
-    const flo = (i, j) => Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * (atr[i] || atr[j] || (H(j) - L(j))));
+    const flo = (i, j) => Math.max(sf(i, j), (o.floorAtr == null ? 1 : o.floorAtr) * (A[i] || A[j] || (HH(j) - LLw(j))));
     const brk = (dir, p) => o.breakSwing !== false && o.legRatio > 0 && trend === dir && lastBroken != null && dir * (p - lastBroken) > 0;
 
     let zdir = 0, hi = { p: H(0), i: 0 }, lo = { p: L(0), i: 0 };
@@ -1683,10 +1699,10 @@
       if (!manZone && zdir >= 0 && H(j) > hi.p) hi = { p: H(j), i: j };
       if (!manZone && zdir <= 0 && L(j) < lo.p) lo = { p: L(j), i: j };
       const isManual = (i) => !!(ov && ov.add && ov.add.has(T(i)));
-      if (zdir >= 0 && j > hi.i && hi.p - L(j) >= (brk(1, hi.p) ? flo(hi.i, j) : thr(hi.i, j, hi.p - zLastL))) {
+      if (zdir >= 0 && j > hi.i && F(hi.p) - LLw(j) >= (brk(1, hi.p) ? flo(hi.i, j) : thr(hi.i, j, F(hi.p) - F(zLastL)))) {
         if (!manZone && !ignored(hi.i) && !isManual(hi.i)) { res.swings.push({ type: 'H', i: hi.i, p: hi.p, conf: j }); lastSH = { p: hi.p, i: hi.i, broken: false, swept: false }; cntUp = 0; }
         zLastH = hi.p; zdir = -1; lo = lowest(hi.i + 1, j);
-      } else if (zdir <= 0 && j > lo.i && H(j) - lo.p >= (brk(-1, lo.p) ? flo(lo.i, j) : thr(lo.i, j, zLastH - lo.p))) {
+      } else if (zdir <= 0 && j > lo.i && HH(j) - F(lo.p) >= (brk(-1, lo.p) ? flo(lo.i, j) : thr(lo.i, j, F(zLastH) - F(lo.p)))) {
         if (!manZone && !ignored(lo.i) && !isManual(lo.i)) { res.swings.push({ type: 'L', i: lo.i, p: lo.p, conf: j }); lastSL = { p: lo.p, i: lo.i, broken: false, swept: false }; cntDn = 0; }
         zLastL = lo.p; zdir = 1; hi = highest(lo.i + 1, j);
       }
@@ -2565,6 +2581,77 @@
   const yRows = (rows, iv) => rows.map((r, k) => ({ t: r[0], ct: (rows[k + 1] ? rows[k + 1][0] : r[0] + Y_MS[iv]) - 1, o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
   // velas de vários timeframes de uma ação: { tfId: candles }
   // cada ativo é descarregado uma só vez por atualização, mesmo que entre em vários rácios: guarda a resposta ~4 min e junta pedidos iguais em curso
+  // a Yahoo às vezes devolve velas semanais quando se pedem mensais (ex.: COIN): nesse caso refaz o mensal a partir do diário (ou das semanais)
+  function monthlyFix(got) {
+    const m = got && got['1mo']; if (!m || !m.rows || m.rows.length < 3) return;
+    const r = m.rows, sp = []; for (let i = 1; i < r.length; i++) sp.push(r[i][0] - r[i - 1][0]); sp.sort((a, b) => a - b);
+    if (sp[sp.length >> 1] >= 20 * 864e5) return;
+    const d = got['1d'] && got['1d'].rows, src = d && d.length && d[0][0] <= r[0][0] + 31 * 864e5 ? d : r, out = []; let key = null, cur = null;
+    for (const q of src) { if (!(q[2] > 0)) continue; const dt = new Date(q[0]), k = dt.getUTCFullYear() * 12 + dt.getUTCMonth();
+      if (k !== key) { key = k; cur = [q[0], q[1], q[2], q[3], q[4], q[5] || 0]; out.push(cur); } else { cur[2] = Math.max(cur[2], q[2]); cur[3] = Math.min(cur[3], q[3]); cur[4] = q[4]; cur[5] += q[5] || 0; } }
+    if (out.length > 2) m.rows = out;
+  }
+  // ---------- Opção A: Semanal e Mensal das ações/futuros construídos a partir do Diário (+ verificação das velas) ----------
+  // dia local da bolsa: com o fuso que a Yahoo dá (off, em segundos) ou, sem ele, uma aproximação que serve às velas diárias (hora de abertura) e às semanais/mensais (meia-noite local)
+  const dqDay = (t, off, mid) => Math.floor((t + (off != null ? off * 1000 : (mid ? 12 : 6) * 36e5)) / 864e5);
+  const dqMonth = (day) => { const d = new Date(day * 864e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); };
+  const dqSpacingOk = (rows, minDays) => { if (!rows || rows.length < 3) return false; const sp = []; for (let i = 1; i < rows.length; i++) sp.push(rows[i][0] - rows[i - 1][0]); sp.sort((a, b) => a - b); return sp[sp.length >> 1] >= minDays * 864e5; };
+  function deriveWM(got) {
+    const dd = got && got['1d'], d = dd && dd.rows; if (!d || d.length < 30) { if (typeof monthlyFix === 'function') monthlyFix(got); return; }
+    const off = dd.off;
+    for (const kind of ['1wk', '1mo']) {
+      const wk = kind === '1wk', keyD = (t) => { const day = dqDay(t, off, false); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
+      const keyN = (t) => { const day = dqDay(t, off, true); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
+      const nat = (got[kind] && got[kind].rows) || [], natOk = dqSpacingOk(nat, wk ? 5 : 20), natBy = new Map();
+      if (natOk) for (const q of nat) natBy.set(keyN(q[0]), q);
+      const built = []; let key = null, cur = null;
+      for (const q of d) { if (!(q[2] > 0)) continue; const k = keyD(q[0]);
+        if (k !== key) { key = k; cur = [q[0], q[1], q[2], q[3], q[4], q[5] || 0, k]; built.push(cur); }
+        else { cur[2] = Math.max(cur[2], q[2]); cur[3] = Math.min(cur[3], q[3]); cur[4] = q[4]; cur[5] += q[5] || 0; } }
+      if (!built.length) continue;
+      // a 1.ª vela construída pode estar incompleta (o Diário começa a meio da semana/mês): aí vale a da Yahoo, se for boa
+      const k0 = built[0][6]; if (natBy.has(k0)) built.shift();
+      const older = natOk ? nat.filter((q) => keyN(q[0]) < (built.length ? built[0][6] : Infinity)) : [];
+      const rows = older.map((q) => q.slice(0, 6)).concat(built.map((b) => {
+        const n = natBy.get(b[6]);
+        let t = n ? n[0] : b[0];   // mesma hora da vela da Yahoo: as marcas que já fizeste continuam no sítio
+        if (!n && off != null) { const day0 = wk ? b[6] * 7 - 3 : Math.floor(Date.UTC(Math.floor(b[6] / 12), b[6] % 12, 1) / 864e5); t = day0 * 864e5 - off * 1000; }
+        return [t, b[1], b[2], b[3], b[4], b[5]];
+      }));
+      got[kind] = Object.assign({}, got[kind] || {}, { rows, built: true });
+    }
+  }
+  // verificação das velas diárias: { lvl: 'ok'|'warn'|'bad', msgs: [{ lvl, txt }] }
+  function dataCheck(dd, now) {
+    const out = { lvl: 'ok', msgs: [] }, rows = dd && dd.rows; if (!rows || rows.length < 10) return out;
+    const off = dd.off, n = rows.length, day = rows.map((q) => dqDay(q[0], off, false)), fmtD = (dy) => new Date(dy * 864e5).toISOString().slice(0, 10).split('-').reverse().join('/');
+    const add = (lvl, txt) => { out.msgs.push({ lvl, txt }); if (lvl === 'bad' || (lvl === 'warn' && out.lvl === 'ok')) out.lvl = lvl === 'bad' ? 'bad' : (out.lvl === 'bad' ? 'bad' : 'warn'); };
+    const today = dqDay(now, off, false), recentFrom = n - 60;
+    // 1) dias em falta (últimos 3 anos): mais de 4 dias seguidos sem vela
+    const gaps = []; for (let i = 1; i < n; i++) if (rows[i][0] > now - 3 * 365 * 864e5 && day[i] - day[i - 1] > 4) gaps.push([day[i - 1], day[i], i]);
+    if (gaps.length) add(gaps.some((g) => g[2] >= recentFrom) ? 'warn' : 'warn', `Diário: ${gaps.length} buraco${gaps.length > 1 ? 's' : ''} sem velas — ${gaps.slice(-3).map((g) => `${fmtD(g[0] + 1)} a ${fmtD(g[1] - 1)}`).join('; ')}`);
+    // 2) dados parados
+    if (today - day[n - 1] > 4) add('bad', `Diário parado: última vela de ${fmtD(day[n - 1])}`);
+    let same = 1; for (let i = n - 1; i > 0 && rows[i][1] === rows[i - 1][1] && rows[i][2] === rows[i - 1][2] && rows[i][3] === rows[i - 1][3] && rows[i][4] === rows[i - 1][4]; i--) same++;
+    if (same >= 5) add('bad', `Diário encravado: ${same} velas seguidas exatamente iguais`);
+    // 3) velas impossíveis
+    const imp = []; for (let i = 0; i < n; i++) { const [, o, h, l, c] = rows[i]; if (!(o > 0 && h > 0 && l > 0 && c > 0) || h < l || h < Math.max(o, c) * 0.9999 || l > Math.min(o, c) * 1.0001) imp.push(i); }
+    if (imp.length) add(imp.some((i) => i >= recentFrom) ? 'bad' : 'warn', `Diário: ${imp.length} vela${imp.length > 1 ? 's' : ''} impossíve${imp.length > 1 ? 'is' : 'l'} (máximo/mínimo/fecho incoerentes ou a zero) — ${imp.slice(-3).map((i) => fmtD(day[i])).join(', ')}`);
+    // 4) picos falsos: a vela salta para longe das vizinhas e volta logo
+    const spk = []; for (let i = 1; i < n - 1; i++) { const [, o, h, l, c] = rows[i], pc = rows[i - 1][4], no = rows[i + 1][1], nc = rows[i + 1][4];
+      const ref = Math.max(pc, no), refL = Math.min(pc, no), lo = Math.min(o, c, l), hi = Math.max(o, c, h);
+      let k = 0; if (lo > 1.4 * ref || hi < refL / 1.4) k = (lo > 2.5 * ref || hi < refL / 2.5) ? 2 : 1;
+      else { const body = [o, c, pc, nc]; if (h > 2 * Math.max(...body) || l < 0.5 * Math.min(...body)) k = (h > 4 * Math.max(...body) || l < 0.25 * Math.min(...body)) ? 2 : 1; }
+      if (k) spk.push([i, k]); }
+    if (spk.length) add(spk.some(([i, k]) => k === 2 && i >= recentFrom) ? 'bad' : 'warn', `Diário: ${spk.length} pico${spk.length > 1 ? 's' : ''} suspeito${spk.length > 1 ? 's' : ''} (vela que salta e volta no dia seguinte) — ${spk.slice(-3).map(([i]) => fmtD(day[i])).join(', ')}`);
+    // 5) histórico cortado
+    if (dd.first && rows[0][0] > dd.first * 1000 + 40 * 864e5) add('warn', `Diário começa em ${fmtD(day[0])}, mas o ativo negoceia desde ${fmtD(dqDay(dd.first * 1000, off, false))}${dd.first ? '' : ''}`);
+    else if (!dd.first && rows[0][0] > now - 5.2 * 365 * 864e5 && rows[0][0] < now - 4.8 * 365 * 864e5) add('warn', 'Diário com só 5 anos de histórico — atualiza o servidor de dados (worker da Cloudflare) para ter tudo');
+    // 6) preço atual
+    if (dd.px > 0 && Math.abs(rows[n - 1][4] - dd.px) / dd.px > 0.03) add('warn', `Último fecho do Diário (${rows[n - 1][4]}) longe da cotação atual (${dd.px})`);
+    return out;
+  }
+  const dqMap = {};   // símbolo → resultado da verificação das velas
   const stockMem = new Map();
   async function stockFetch(y, ivs) {
     const now = Date.now(), c = stockMem.get(y);
@@ -2581,7 +2668,7 @@
     tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); if (Y_MAGG[id]) ivs.add('1mo'); });
     if (!ivs.size) return {};
     const r = await stockFetch(y, [...ivs]);
-    const got = r[y] || {}, out = {};
+    const got = r[y] || {}, out = {}; deriveWM(got); if (got['1d'] && got['1d'].rows) dqMap[sym] = dataCheck(got['1d'], Date.now());
     for (const id of tfIds) {
       const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : Y_MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
       let cs = yRows(got[iv].rows, iv);
@@ -5699,10 +5786,15 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
   }
   const BOARD_COLS = [['name', 'Ativo'], ['trend', 'Tendência principal'], ['setup', 'Setups'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['liq', 'Liquidez por varrer'], ['al', 'Último alerta']];
   function npRenderBoard() { npFQKeep('npBoardQ', npRenderBoard0); }
+  let npDqOnly = false;
   function npRenderBoard0() {
     const box = $('#npBoard'); if (!box) return;
     const so = settings.npBoardSort || 'name';
-    const rows = (settings.favs || []).filter((x) => npFavMatch(x, npFQ) && npKindOk(x, npKind)).map(npBoardRow);
+    const dqOf = (x) => { const legs = isRatio(x) ? ratioLegs(x) : [x], ds = legs.map((l) => dqMap[l]).filter(Boolean); if (!ds.length) return null;
+      const lvl = ds.some((d) => d.lvl === 'bad') ? 'bad' : ds.some((d) => d.lvl === 'warn') ? 'warn' : 'ok'; return { lvl, msgs: ds.flatMap((d, k) => d.msgs.map((m) => (legs.length > 1 ? nm(legs[k]) + ': ' : '') + m.txt)) }; };
+    const dqB = (x) => { const d = dqOf(x); if (!d) return ''; return d.lvl === 'ok' ? '<span class="dq ok" title="Velas verificadas: sem buracos, sem velas impossíveis nem picos falsos, dados em dia">✔</span>' : `<span class="dq ${d.lvl}" title="${npEsc((d.lvl === 'bad' ? 'Dados suspeitos — alertas deste ativo suspensos até ficarem bons:\n' : 'Aviso nos dados:\n') + d.msgs.join('\n'))}">⚠</span>`; };
+    const dqAll = (settings.favs || []).filter((x) => !isCrypto(x) || isRatio(x)).map(dqOf).filter(Boolean), dqW = dqAll.filter((d) => d.lvl !== 'ok').length;
+    const rows = (settings.favs || []).filter((x) => npFavMatch(x, npFQ) && npKindOk(x, npKind) && (!npDqOnly || ((dqOf(x) || {}).lvl || 'ok') !== 'ok')).map(npBoardRow);
     const cmp = { name: null, trend: null, setup: (a, b) => { for (let k = 0; k < 6; k++) if (b.ready[k] !== a.ready[k]) return b.ready[k] - a.ready[k]; return b.rank - a.rank; }, near: (a, b) => a.nearV - b.nearV, sma: (a, b) => a.smaV - b.smaV, liq: (a, b) => a.liqV - b.liqV, al: (a, b) => b.alV - a.alV }[so];
     let list;
     if (cmp) list = rows.sort(cmp);
@@ -5710,10 +5802,10 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     let body = '', lastG = null;
     for (const r of list) {
       if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="8">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
-      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}</div>${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
+      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)} ${dqB(r.s)}</div>${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
         <td data-l="Tendência principal"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
-    box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''} · <a href="#" class="npReAll" title="Apaga as tuas marcações à mão de todos os favoritos (com cópia e Desfazer)">⟲ recriar todos em automático</a></div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select></div></div>
+    box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · ${dqAll.length ? `<a href="#" class="npDq" title="Verificação das velas das ações, ETFs, futuros e rácios (as cripto vêm da Binance)">velas: ${dqAll.length - dqW} ✔${dqW ? ` · ${dqW} ⚠` : ''}${npDqOnly ? ' (a mostrar só os ⚠ — carrega para ver todos)' : ''}</a> · ` : ''}carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''} · <a href="#" class="npReAll" title="Apaga as tuas marcações à mão de todos os favoritos (com cópia e Desfazer)">⟲ recriar todos em automático</a></div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select></div></div>
       ${npFQBox('npBoardQ', 'Procurar (ex.: ouro, GC=F)…')}
       <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="7" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
@@ -5730,6 +5822,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     npAZWire(box); if (!cmp && !npFQ && npKind === 'all') npDrag(box, 'tr.row');
     box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
     box.querySelectorAll('.np-bc').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npOpenChart(b.dataset.c); }));
+    const dqa = box.querySelector('.npDq'); if (dqa) dqa.addEventListener('click', (e) => { e.preventDefault(); npDqOnly = !npDqOnly; npRenderBoard0(); });
     box.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tip]') && window.matchMedia('(hover:none)').matches) return; npOpenAsset(tr.dataset.s); }));
   }
   // estado da conta e dos dados (os mesmos textos do cabeçalho antigo)
