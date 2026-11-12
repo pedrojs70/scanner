@@ -708,7 +708,7 @@
   .dq { font-size:12px; margin-left:4px; cursor:help; } .dq.ok { color:var(--np-green, #2e7d32); } .dq.warn { color:#c58a00; } .dq.bad { color:var(--np-red); font-weight:700; }
   body.uni #tgExt, body.uni #tgInt, body.uni #importBtn { display:none !important; }
   .sensbox { display:inline-flex; align-items:center; gap:4px; padding:0 6px; } .sensbox select { font:inherit; font-size:12px; border:1px solid var(--np-ln, #ccc); background:transparent; padding:2px; }
-  .chartbox.editing #sensBox { display:none !important; }
+  #sensBox { display:none; }
 .yuni{display:none} body.uni .yuni{display:inline} body.uni .nuni{display:none}
 </style>
 </head>
@@ -745,7 +745,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 12h30</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 12h45</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -797,7 +797,7 @@
 
     <h3 class="helphead">◆ Como a app está organizada agora</h3>
     <p><b>Duas estruturas por timeframe.</b> A <b>tendência principal</b> decide a direção, a zona e a Fibonacci dos setups (as pernas grandes, com menos ruído). O <b>movimento recente</b> dá o gatilho no 1H (Swing) e no 4H (Longo prazo). No Diário, Semanal e Mensal o recente não é gatilho: quando vira a favor dentro da zona de um setup aparece <b>✔ Confirmação</b> no checklist (e um alerta ✅) — o movimento ganhou força, uma segunda oportunidade com stop mais longe. Fora disso não manda alertas.</p>
-    <p><b>Botão Pontos</b> (no gráfico): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos, padrão = 3. Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
+    <p><b>Botão Pontos</b> (aparece em ✎ Editar estrutura, com a tendência principal escolhida): ajusta quantos pontos tem a tendência principal <b>deste ativo</b> no grupo de timeframes aberto — contexto (Anual…Semanal), meio (Diário, 4H) ou gatilho (1H…). 1 = mais pontos, 5 = menos, padrão = 3. Usa-o quando a principal falha topos/fundos óbvios; corrige à mão só quando está errada, não para lhe dar mais pontos.</p>
     <p><b>15m e 5m só nos ativos com intraday</b> (por defeito só o BTC; Definições → Monitorização → Por ativo). Nos outros desaparecem da app os timeframes de 15m e 5m, o Day trade, o Scalp e as killzones: os setups são Longo prazo e Swing.</p>
     <p><b>Estrutura única</b> (Definições, experimental, desligada): uma só estrutura por timeframe em vez de duas. Liga e desliga à vontade — as tuas correções à mão dos dois modos ficam guardadas.</p>
     <h3 class="helphead">2 · As duas camadas e as regras</h3>
@@ -1145,11 +1145,11 @@
   <div class="field"><div>Quebra falhada por timeframe<small>quantas velas uma quebra que volta para trás ainda pode ser sweep, em cada timeframe. Um fecho semanal ou mensal pesa mais do que um de 15 minutos. Formato: 4h:5, 1d:2, 1w:1</small></div><input id="setFailTf" type="text" style="width:260px"></div>
   <div class="field"><div>Sweep de range por timeframe<small>quantos fechos seguidos fora de um range (Ásia, Londres, dia/semana anteriores, range manual) ainda contam como sweep se o preço voltar para dentro; um a mais é quebra e as gotas desse lado desaparecem. Formato: 5m:3, 15m:2, 1h:1, 4h:1</small></div><input id="setRangeTol" type="text" style="width:260px"></div>
   <h3 class="sethead sub">Estrutura</h3>
-  <div class="small muted" style="margin:2px 0 6px">Por defeito cada timeframe tem duas estruturas: a <b>tendência principal</b> (direção, zona e Fibonacci dos setups) e o <b>movimento recente</b> (gatilho no 1H/4H e ✔ Confirmação no Diário/Semanal). Se a principal de um ativo tiver pontos a menos ou a mais, ajusta-a no gráfico com o botão <b>Pontos</b> (1 = mais pontos … 5 = menos; vale só para esse ativo e esse grupo de timeframes: contexto, meio ou gatilho).</div>
+  <div class="small muted" style="margin:2px 0 6px">Por defeito cada timeframe tem duas estruturas: a <b>tendência principal</b> (direção, zona e Fibonacci dos setups) e o <b>movimento recente</b> (gatilho no 1H/4H e ✔ Confirmação no Diário/Semanal). Se a principal de um ativo tiver pontos a menos ou a mais, ajusta-a no gráfico em <b>✎ Editar estrutura</b> com o botão <b>Pontos</b> (com a tendência principal escolhida) (1 = mais pontos … 5 = menos; vale só para esse ativo e esse grupo de timeframes: contexto, meio ou gatilho).</div>
   <div class="field"><div>Estrutura única (experimental)<small>desligada por defeito. Ligada: uma só estrutura por timeframe (sem principal/recente) — a zona, a Fibonacci e o gatilho saem dela, e o botão Pontos passa a mexer nela. Podes ligar e desligar à vontade: as correções à mão dos dois modos ficam guardadas</small></div><input id="setUni" type="checkbox"></div>
   <div class="field uniopt"><div>Estrutura única: pontos — <b>contexto</b> (Anual, 6M, 3M, Mensal, Semanal)<small>1 = mais pontos (mais sensível) … 5 = menos pontos (só as pernas grandes)</small></div><select id="setSensCtx"></select></div>
   <div class="field uniopt"><div>Estrutura única: pontos — <b>meio</b> (Diário, 4H)</div><select id="setSensMid"></select></div>
-  <div class="field uniopt"><div>Estrutura única: pontos — <b>gatilho</b> (1H, 15m, 5m)<small>no 5m e 15m vale também o filtro “Swings mínimos” abaixo. Exceções por ativo: no gráfico, botão “Pontos”</small></div><select id="setSensTrig"></select></div>
+  <div class="field uniopt"><div>Estrutura única: pontos — <b>gatilho</b> (1H, 15m, 5m)<small>no 5m e 15m vale também o filtro “Swings mínimos” abaixo. Exceções por ativo: no gráfico, em ✎ Editar estrutura, botão “Pontos”</small></div><select id="setSensTrig"></select></div>
   <h3 class="sethead sub">Tamanho dos swings</h3>
   <div class="field"><div>Tamanho mínimo de um swing da <b>tendência principal</b><small>recuo mínimo, em múltiplos do ATR (volatilidade média)</small></div><input id="setExt" type="number" min="0" max="10" step="0.5"></div>
   <div class="field"><div>Tamanho mínimo de um swing do <b>movimento recente</b><small>menor = mais sensível, mais swings</small></div><input id="setInt" type="number" min="0" max="10" step="0.5"></div>
@@ -3916,6 +3916,7 @@
     $('#editBtn').classList.toggle('on', editMode); $('#editBtn').textContent = editMode ? '✔ Terminar edição' : '✎ Editar estrutura';
     $('#editHint').style.display = editMode ? 'block' : 'none';
     $('#editLayerName').textContent = layerName(editLayer).toUpperCase();
+    { const sb = $('#sensBox'); if (sb) sb.style.display = editMode && (uniOn(settings) || editLayer === 'ext') ? 'inline-flex' : 'none'; }   // Pontos: só a editar a tendência principal (ou a estrutura única)
     const rh = $('#rangeHint'); if (rh) { rh.style.display = pendingRange && editMode ? '' : 'none'; if (pendingRange) rh.textContent = `▭ Range: ${pendingRange.top ? 'topo' : 'fundo'} em ${fmt(pendingRange.p)}. Agora clica no ${pendingRange.top ? 'fundo' : 'topo'} do range (Esc cancela).`; }
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
     $('#clearBtn').textContent = '🧹 Apagar estrutura'; $('#importBtn').style.display = editMode && editLayer === 'int' ? '' : 'none'; $('#clearBtn').title = `Apaga a estrutura ${editLayer === 'ext' ? 'da' : 'do'} ${layerName(editLayer)} neste timeframe para a construíres de raiz`;
