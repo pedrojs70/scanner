@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T08:58:17.000Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T10:20:42.261Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -885,6 +885,13 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const dqDay = (t, off, mid) => Math.floor((t + (off != null ? off * 1000 : (mid ? 12 : 6) * 36e5)) / 864e5);
   const dqMonth = (day) => { const d = new Date(day * 864e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); };
   const dqSpacingOk = (rows, minDays) => { if (!rows || rows.length < 3) return false; const sp = []; for (let i = 1; i < rows.length; i++) sp.push(rows[i][0] - rows[i - 1][0]); sp.sort((a, b) => a - b); return sp[sp.length >> 1] >= minDays * 864e5; };
+  // a Yahoo, com range=max, troca o timeframe pedido por um mais largo (diário → semanal/mensal): velas com o espaçamento errado são recusadas
+  function validateIv(got) {
+    const EXP = { '1d': 3, '1wk': 10, '1mo': 40, '1h': 1 / 12, '15m': 1 / 48, '5m': 1 / 144 };   // espaço mediano máximo aceitável, em dias
+    for (const iv of Object.keys(EXP)) { const g = got && got[iv]; if (!g || !g.rows || g.rows.length < 5) continue;
+      const r = g.rows, sp = []; for (let i = 1; i < r.length; i++) sp.push(r[i][0] - r[i - 1][0]); sp.sort((a, b) => a - b);
+      const med = sp[sp.length >> 1] / 864e5; if (med > EXP[iv]) got[iv] = { error: `a Yahoo devolveu velas de ~${med >= 1 ? Math.round(med) + ' dias' : Math.round(med * 24) + ' h'} em vez de ${iv}`, bad: true }; }
+  }
   function deriveWM(got) {
     const dd = got && got['1d'], d = dd && dd.rows; if (!d || d.length < 30) { if (typeof monthlyFix === 'function') monthlyFix(got); return; }
     const off = dd.off;
@@ -1490,7 +1497,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
+  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -1817,7 +1824,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (ivs.has('1mo') || ivs.has('1wk')) ivs.add('1d');   // o Semanal e o Mensal constroem-se a partir do Diário (opção A)
     const r = http(STOCK_API + '/candles?s=' + encodeURIComponent(y) + '&i=' + [...ivs].join(','));
     if (r.code !== 200) return { _err: 'Yahoo ' + r.code };
-    const got = JSON.parse(r.text)[y] || {}, out = {}; C.deriveWM(got);
+    const got = JSON.parse(r.text)[y] || {}, out = {}; C.validateIv(got); C.deriveWM(got);
     if (got['1d'] && got['1d'].rows) { const dq = C.dataCheck(got['1d'], Date.now()); if (dq.lvl === 'bad') return { _err: 'alertas suspensos — dados suspeitos: ' + dq.msgs.filter((m) => m.lvl === 'bad').map((m) => m.txt).join(' · ') }; }
     for (const id of tfs) {
       const iv = Y_IV[id] || (id === '4h' ? '1h' : C.MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;

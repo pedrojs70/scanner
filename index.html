@@ -741,7 +741,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 10h00</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 10h40</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -2596,6 +2596,13 @@
   const dqDay = (t, off, mid) => Math.floor((t + (off != null ? off * 1000 : (mid ? 12 : 6) * 36e5)) / 864e5);
   const dqMonth = (day) => { const d = new Date(day * 864e5); return d.getUTCFullYear() * 12 + d.getUTCMonth(); };
   const dqSpacingOk = (rows, minDays) => { if (!rows || rows.length < 3) return false; const sp = []; for (let i = 1; i < rows.length; i++) sp.push(rows[i][0] - rows[i - 1][0]); sp.sort((a, b) => a - b); return sp[sp.length >> 1] >= minDays * 864e5; };
+  // a Yahoo, com range=max, troca o timeframe pedido por um mais largo (diário → semanal/mensal): velas com o espaçamento errado são recusadas
+  function validateIv(got) {
+    const EXP = { '1d': 3, '1wk': 10, '1mo': 40, '1h': 1 / 12, '15m': 1 / 48, '5m': 1 / 144 };   // espaço mediano máximo aceitável, em dias
+    for (const iv of Object.keys(EXP)) { const g = got && got[iv]; if (!g || !g.rows || g.rows.length < 5) continue;
+      const r = g.rows, sp = []; for (let i = 1; i < r.length; i++) sp.push(r[i][0] - r[i - 1][0]); sp.sort((a, b) => a - b);
+      const med = sp[sp.length >> 1] / 864e5; if (med > EXP[iv]) got[iv] = { error: `a Yahoo devolveu velas de ~${med >= 1 ? Math.round(med) + ' dias' : Math.round(med * 24) + ' h'} em vez de ${iv}`, bad: true }; }
+  }
   function deriveWM(got) {
     const dd = got && got['1d'], d = dd && dd.rows; if (!d || d.length < 30) { if (typeof monthlyFix === 'function') monthlyFix(got); return; }
     const off = dd.off;
@@ -2668,7 +2675,7 @@
     tfIds.forEach((id) => { if (Y_IV[id]) ivs.add(Y_IV[id]); if (Y_AGG[id]) ivs.add('1h'); if (Y_MAGG[id]) ivs.add('1mo'); });
     if (!ivs.size) return {};
     const r = await stockFetch(y, [...ivs]);
-    const got = r[y] || {}, out = {}; deriveWM(got); if (got['1d'] && got['1d'].rows) dqMap[sym] = dataCheck(got['1d'], Date.now());
+    const got = r[y] || {}, out = {}; validateIv(got); deriveWM(got); if (got['1d'] && got['1d'].rows) dqMap[sym] = dataCheck(got['1d'], Date.now()); else if (got['1d'] && got['1d'].bad) dqMap[sym] = { lvl: 'bad', msgs: [{ lvl: 'bad', txt: 'Diário: ' + got['1d'].error + ' — atualiza o worker da Cloudflare' }] };
     for (const id of tfIds) {
       const iv = Y_IV[id] || (Y_AGG[id] ? '1h' : Y_MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
       let cs = yRows(got[iv].rows, iv);
