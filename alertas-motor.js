@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T14:21:17.013Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T19:04:22.313Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -861,7 +861,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
   const uniOn = (S) => S.uniStruct === true;   // por defeito: modo das duas estruturas (principal + recente)
   // "Pontos" no modo das duas estruturas: sensibilidade da TENDÊNCIA PRINCIPAL (1 = mais pontos … 3 = cálculo clássico … 5 = menos)
-  const PRI_LV = { 1: { m: 0.5, leg: 0.35, floor: 1 }, 2: { m: 0.7, leg: 0.45, floor: 1.25 }, 4: { m: 1.3, leg: 0.6, floor: 2 }, 5: { m: 1.7, leg: 0.7, floor: 2.5 } };
+  // Pontos da tendência principal: 1 e 2 = todos os topos/fundos de cada perna (motor do movimento recente, com correções mínimas maiores); 3 = só as pernas que quebram estrutura, sensível; 4 = cálculo clássico; 5 = menos pontos
+  const PRI_LV = { 1: { zz: 1, atr: 3, leg: 0.6, floor: 2 }, 2: { zz: 1, atr: 3.5, leg: 0.7, floor: 2.5 }, 3: { m: 0.5, leg: 0.35, floor: 1 }, 5: { m: 1.4, leg: 0.6, floor: 2 } };
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
   const uniLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI_DEF[g]); };
   function computeTf(cs, id, S, ed, now, sym) {
@@ -883,7 +884,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       return d1;
     }
     const pl = PRI_LV[priLevel(S, id, sym)];
-    const d = { candles: cs, closed, price, ext: layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
+    const d = { candles: cs, closed, price, ext: pl && pl.zz ? layer(E.analyzeRecent, pl.atr, S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), { legRatio: pl.leg, floorAtr: pl.floor }) : layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
     return d;
   }
@@ -914,7 +915,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const off = dd.off;
     for (const kind of ['1wk', '1mo']) {
       const wk = kind === '1wk', keyD = (t) => { const day = dqDay(t, off, false); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
-      const keyN = (t) => { const day = dqDay(t, off, true); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
+      // velas da Yahoo à meia-noite local; com a hora de verão ficam às 23:00 do dia anterior no fuso de inverno: +6 h põe-nas sempre no dia certo
+      const keyN = (t) => { const day = dqDay(t + 6 * 36e5, off, true); return wk ? Math.floor((day + 3) / 7) : dqMonth(day); };
       const nat = (got[kind] && got[kind].rows) || [], natOk = dqSpacingOk(nat, wk ? 5 : 20), natBy = new Map();
       if (natOk) for (const q of nat) natBy.set(keyN(q[0]), q);
       const built = []; let key = null, cur = null;
