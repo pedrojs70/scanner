@@ -712,10 +712,12 @@
   #saveBtn { display:none !important; }   /* grava-se só ao terminar a edição (pergunta Gravar / Descartar / Continuar) */
   .rcq { display:flex; flex-wrap:wrap; gap:6px; align-items:center; margin:8px 0; } .rcq input { flex:1; min-width:140px; padding:5px 8px; }
   .rclist { max-height:52vh; overflow:auto; border:1px solid var(--line, #ddd); border-radius:6px; padding:4px 8px; } .rclist .gh { font-weight:700; margin:10px 0 4px; font-size:13px; }
-  .rcrow { display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.12); cursor:pointer; } .rcrow .rcinfo, .rchead .rcinfo { margin-left:auto; font-size:12px; opacity:.7; } .rcpts { width:84px; text-align:center; font-weight:600; } .rcpts small { font-weight:400; opacity:.6; } .rclk, .rclkh { width:64px; text-align:center; } .rclk { border:0; background:transparent; font-size:16px; cursor:pointer; } .rcrow.locked { opacity:.75; } .rcrow.locked b::after { content:' 🔒'; font-size:11px; }
+  .rcrow { display:flex; align-items:center; gap:6px; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.12); cursor:pointer; } .rcrow .rcinfo, .rchead .rcinfo { margin-left:auto; font-size:12px; opacity:.7; } .rcpts { width:84px; text-align:center; font-weight:600; } .rcpts small { font-weight:400; opacity:.6; } .rclk, .rclkh { width:112px; text-align:center; } .rclk { border:1px solid rgba(128,128,128,.4); background:transparent; color:inherit; font-size:12px; padding:3px 6px; border-radius:12px; cursor:pointer; opacity:.7; } .rclk:hover { opacity:1; }
+  .rcrow.locked .rclk { background:#c62828; border-color:#c62828; color:#fff; font-weight:700; opacity:1; } .rcrow.locked { background:rgba(198,40,40,.07); } .rcrow.locked b::after { content:' 🔒'; font-size:11px; }
   .rchead { display:flex; gap:6px; font-size:11px; letter-spacing:.06em; text-transform:uppercase; opacity:.6; padding:4px 0; border-bottom:1px solid rgba(128,128,128,.25); } .rchead .rcpts { font-weight:400; }
   .rcfoot { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:10px; } .rcfoot #rcGo { margin-left:auto; }
-  .chartbox.editing #maxBtn { display:none !important; }   /* a editar: sai-se só por ✔ Terminar edição (pergunta se gravas) */
+  .chartbox.editing #maxBtn { visibility:hidden; pointer-events:none; }   /* a editar: sai-se só por ✔ Terminar edição; o lugar fica, para nada saltar */
+  .chartbar #sensBox { order:6; margin-left:auto; }   /* Pontos: na 2.ª linha (com Linha/Canal), à direita */
 .yuni{display:none} body.uni .yuni{display:inline} body.uni .nuni{display:none}
 </style>
 </head>
@@ -752,7 +754,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 15h50</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 16h10</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -4604,7 +4606,7 @@
     const list = favs.filter((s) => !rcQ || s.toLowerCase().includes(rcQ) || nm(s).toLowerCase().includes(rcQ)).sort((a, b) => 'csr'.indexOf(npGroup(a)) - 'csr'.indexOf(npGroup(b)));
     for (const s of list) { const g = npGroup(s); if (g !== lg) { html += `<div class="gh">${gn[g] || g}</div>`; lg = g; }
       const n = rcMarks(s), pt = rcPts(s), lk = rcLocked(s);
-      html += `<label class="rcrow${lk ? ' locked' : ''}"><input type="checkbox" data-rs="${npEsc(s)}" ${rcSel.has(s) && !lk ? 'checked' : ''} ${lk ? 'disabled' : ''}> <b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="muted small">${npEsc(s)}</span>` : ''}<span class="rcinfo">${n ? `✎ ${n} timeframe${n === 1 ? '' : 's'} com marcas` : 'automático'}</span><span class="rcpts" title="${pt.own ? 'Pontos próprios deste ativo' : 'Pontos do padrão das Definições'} (contexto/meio/gatilho quando diferem)">${pt.txt}${pt.own ? '' : ' <small>padrão</small>'}</span><button type="button" class="rclk" data-lk="${npEsc(s)}" title="${lk ? 'Trancado: não pode ser recriado nem mudar de Pontos — carrega para destrancar' : 'Trancar: impede recriar este gráfico e mudar os Pontos'}">${lk ? '🔒' : '🔓'}</button></label>`; }
+      html += `<label class="rcrow${lk ? ' locked' : ''}"><input type="checkbox" data-rs="${npEsc(s)}" ${rcSel.has(s) && !lk ? 'checked' : ''} ${lk ? 'disabled' : ''}> <b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="muted small">${npEsc(s)}</span>` : ''}<span class="rcinfo">${n ? `✎ ${n} timeframe${n === 1 ? '' : 's'} com marcas` : 'automático'}</span><span class="rcpts" title="${pt.own ? 'Pontos próprios deste ativo' : 'Pontos do padrão das Definições'} (contexto/meio/gatilho quando diferem)">${pt.txt}${pt.own ? '' : ' <small>padrão</small>'}</span><button type="button" class="rclk" data-lk="${npEsc(s)}" title="${lk ? 'Trancado: não pode ser recriado nem mudar de Pontos — carrega para destrancar' : 'Trancar: impede recriar este gráfico e mudar os Pontos'}">${lk ? '🔒 Trancado' : '🔓 Livre'}</button></label>`; }
     $('#rcList').innerHTML = (html ? '<div class="rchead"><span>Ativo</span><span class="rcinfo">Marcas</span><span class="rcpts">Pontos</span><span class="rclkh">Cadeado</span></div>' : '') + (html || '<span class="muted small">sem favoritos</span>');
     $('#rcList').querySelectorAll('[data-lk]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); const s = b.dataset.lk; settings.rcLock = Object.assign({}, settings.rcLock || {}); if (settings.rcLock[s]) delete settings.rcLock[s]; else { settings.rcLock[s] = Date.now(); rcSel.delete(s); } save('mss_settings4', settings); try { sensUi(); } catch (er) {} rcRender(); }));
     $('#rcList').querySelectorAll('[data-rs]').forEach((i) => i.addEventListener('change', () => { if (i.checked) rcSel.add(i.dataset.rs); else rcSel.delete(i.dataset.rs); rcCount(); }));
@@ -4682,8 +4684,12 @@
     for (const id of Object.keys(data)) if (data[id] && data[id].candles) data[id] = computeTf(data[id].candles, id);
     renderTable(); renderConfluence(); renderChart(true); updateEditUi();
   }
+  function exitToast(txt) {
+    let t = $('#exToast'); if (!t) { t = document.createElement('div'); t.id = 'exToast'; t.style.cssText = 'position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#222;color:#fff;padding:8px 14px;border-radius:6px;z-index:500;font-size:13px;box-shadow:0 2px 10px rgba(0,0,0,.3)'; document.body.appendChild(t); }
+    t.textContent = txt; t.style.display = ''; clearTimeout(exitToast.tm); exitToast.tm = setTimeout(() => { t.style.display = 'none'; }, 2600);
+  }
   function requestExitEdit() {
-    if (!draft || !draft.dirty) return setEdit(false);
+    if (!draft || !draft.dirty) { clearHistory(); setEdit(false); exitToast('Sem alterações por gravar — saíste da edição.'); return; }
     $('#saveDlg').classList.add('open');
   }
   function toggleMax(force) {
@@ -6413,8 +6419,8 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     $('#editBtn').addEventListener('click', () => (editMode ? requestExitEdit() : setEdit(true)));
     $('#redoBtn').addEventListener('click', redoAll);
     $('#saveBtn').addEventListener('click', commitDraft);
-    $('#sdSave').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); commitDraft(); setEdit(false); });
-    $('#sdDiscard').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); discardDraft(); setEdit(false); });
+    $('#sdSave').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); commitDraft(); setEdit(false); exitToast('💾 Gravado.'); });
+    $('#sdDiscard').addEventListener('click', () => { $('#saveDlg').classList.remove('open'); discardDraft(); setEdit(false); exitToast('Alterações descartadas.'); });
     $('#sdStay').addEventListener('click', () => $('#saveDlg').classList.remove('open'));
     window.addEventListener('beforeunload', (ev) => { if (draft && draft.dirty) { ev.preventDefault(); ev.returnValue = ''; } });
     $('#resetBtn').addEventListener('click', resetEdits);
