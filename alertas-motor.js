@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T19:45:32.486Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T20:51:55.417Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -913,6 +913,17 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const r = g.rows, sp = []; for (let i = 1; i < r.length; i++) sp.push(r[i][0] - r[i - 1][0]); sp.sort((a, b) => a - b);
       const med = sp[sp.length >> 1] / 864e5; if (med > EXP[iv]) got[iv] = { error: `a Yahoo devolveu velas de ~${med >= 1 ? Math.round(med) + ' dias' : Math.round(med * 24) + ' h'} em vez de ${iv}`, bad: true }; }
   }
+  // velas diárias "lisas" (abertura = máximo = mínimo = fecho) que a Yahoo às vezes dá em ações pouco negociadas, quando nas velas de 1H desse dia há movimento:
+  // refaz abertura/máximo/mínimo a partir do 1H (fica o fecho oficial do dia). Devolve quantas corrigiu.
+  function dailyFix(got) {
+    const dd = got && got['1d'], d = dd && dd.rows, hr = got && got['1h'] && got['1h'].rows; if (!d || !hr || !hr.length) return 0;
+    const off = dd.off, by = new Map();
+    for (const q of hr) { if (!(q[2] > 0)) continue; const k = dqDay(q[0], off, false); const a = by.get(k); if (!a) by.set(k, [q[1], q[2], q[3], q[4]]); else { a[1] = Math.max(a[1], q[2]); a[2] = Math.min(a[2], q[3]); a[3] = q[4]; } }
+    let n = 0;
+    for (const r of d) { if (!(r[2] > 0) || r[2] - r[3] > Math.abs(r[2]) * 1e-6) continue; const a = by.get(dqDay(r[0], off, false)); if (!a || !(a[1] > a[2])) continue;
+      r[1] = a[0]; r[2] = Math.max(a[1], r[4]); r[3] = Math.min(a[2], r[4]); n++; }
+    dd.fixed = n; return n;
+  }
   function deriveWM(got) {
     const dd = got && got['1d'], d = dd && dd.rows; if (!d || d.length < 30) { if (typeof monthlyFix === 'function') monthlyFix(got); return; }
     const off = dd.off;
@@ -1548,7 +1559,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
+  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, dailyFix, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -1884,7 +1895,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (ivs.has('1mo') || ivs.has('1wk')) ivs.add('1d');   // o Semanal e o Mensal constroem-se a partir do Diário (opção A)
     const r = http(STOCK_API + '/candles?s=' + encodeURIComponent(y) + '&i=' + [...ivs].join(','));
     if (r.code !== 200) return { _err: 'Yahoo ' + r.code };
-    const got = JSON.parse(r.text)[y] || {}, out = {}; C.validateIv(got); C.deriveWM(got);
+    const got = JSON.parse(r.text)[y] || {}, out = {}; C.validateIv(got); C.dailyFix(got); C.deriveWM(got);
     if (got['1d'] && got['1d'].rows) { const dq = C.dataCheck(got['1d'], Date.now()); if (dq.lvl === 'bad') return { _err: 'alertas suspensos — dados suspeitos: ' + dq.msgs.filter((m) => m.lvl === 'bad').map((m) => m.txt).join(' · ') }; }
     for (const id of tfs) {
       const iv = Y_IV[id] || (id === '4h' ? '1h' : C.MAGG[id] ? '1mo' : null); if (!iv || !got[iv] || !got[iv].rows) continue;
