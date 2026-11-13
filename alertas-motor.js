@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T08:59:09.880Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T09:37:34.233Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -806,24 +806,27 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     fvgOn: true,
     kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true,
     weekOn: true, dayOn: false, weekSweep: true, weekClose: true,
-    nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
+    brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false,
+    nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     tgtOn: true, tgtPct: 1, lineOn: true,
     fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true },
-    forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true },
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true },
+    // rácios: só estrutura do Diário para cima e as tuas linhas (forRv2: o padrão novo substituiu o antigo uma vez)
+    forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true },
   };
-  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'] };
+  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'] };
   const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
   function effA(A, sym) {
-    const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? A.forR : A.forA) || {}), o = Object.assign({}, A);
+    const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? (A.forRv2 ? A.forR : null) : A.forA) || {}), o = Object.assign({}, A);
+    if (r) o.nearTfs = (A.nearTfsR || A_DEF.nearTfsR).slice();   // rácios: timeframes próprios no Perto da inversão
     for (const k in GRP_KEYS) if (g[k] === false) GRP_KEYS[k].forEach((x) => { o[x] = false; });
     // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
     const p = A.per && A.per[sym];
     if (p) {
-      const M = { fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
+      const M = { brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
       for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
       if (p.week === false) { o.weekOn = false; o.dayOn = false; }   // ligado: semana/dia conforme os Ajustes
       const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
@@ -835,7 +838,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function anyOn(A, sym, S) {
     const e = effA(A, sym), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
     const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
-    return !!(su || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
+    return !!(su || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -1092,7 +1095,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) lnTfs(l).forEach((id) => s.add(id)); }));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
-    if (A.nearOn) (A.nearTfs || []).forEach((id) => s.add(id));
+    if (A.nearOn) (A.nearTfs || []).concat(A.nearTfsR || A_DEF.nearTfsR).forEach((id) => s.add(id));
+    if (A.brkOn !== false) (A.brkTfs || A_DEF.brkTfs).forEach((id) => s.add(id));
     if (A.smaOn) (A.smaTfs || []).forEach((id) => s.add(id));
     const anyP = (k) => Object.values(A.per || {}).some((p) => p && p[k] === true);
     if (A.fibOn || anyP('fibz')) (A.fibTfs || A_DEF.fibTfs).forEach((id) => s.add(id));
@@ -1367,6 +1371,27 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
 
   // ---------- 5) perto da quebra da tendência principal (inversão = limite / continuação = topo-fundo da perna) ----------
+  // ---------- 4b: quebra confirmada — um fecho partiu a estrutura (CHoCH: vira; BOS opcional: continua) no Diário, Semanal ou Mensal ----------
+  function brkAlerts(sym, dm, A, st, now, out) {
+    if (!A.brkOn) return;
+    for (const id of A.brkTfs || A_DEF.brkTfs) {
+      const d = dm[id]; if (!d || !d.closed || !d.closed.length || !d.ext || !d.ext.res) continue;
+      const cl = d.closed, lb = (d.ext.res.breaks || []).filter((b) => b.type === 'CHoCH' || (A.brkBos && b.type === 'BOS')).slice(-1)[0];
+      if (!lb || lb.i == null || lb.i < 0 || lb.i >= cl.length) continue;
+      const c = cl[lb.i], end = c.ct != null ? c.ct : c.t + (TF_MS[id] || 864e5);
+      if (now - end > 4 * 864e5) continue;   // só quebras de um fecho recente (fim de semana incluído)
+      const key = `b|${sym}|${id}|${lb.type}|${lb.dir}|${c.t}`;
+      if (st.seen[key]) continue; st.seen[key] = now;
+      if (st.silent) continue;
+      const up = lb.dir === 1, ch = lb.type === 'CHoCH';
+      out.push({ kind: 'brk', sym, text: [
+        `${ch ? '🔄' : '➡️'} <b>Quebra confirmada · ${LBL[id]} · ${esc(sym)}</b>`,
+        `${lb.type} ${up ? '▲' : '▼'}: fecho ${fmt(c.c)} ${up ? 'acima' : 'abaixo'} de ${fmt(lb.level)}.`,
+        ch ? `A estrutura do ${LBL[id]} virou ${up ? 'para cima' : 'para baixo'}.` : `A ${up ? 'subida' : 'descida'} do ${LBL[id]} continua.`,
+      ].join('\n') });
+    }
+  }
+
   function nearAlerts(sym, dm, A, st, now, out) {
     if (!A.nearOn) return;
     const P = Object.assign({}, A_DEF.nearPct, A.nearPct || {});
@@ -1579,7 +1604,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     B.setups = Object.assign({}, A.setups || {});
     (S.setups || []).forEach((x) => { if (!ok(x.trig)) B.setups[x.name] = false; });
     B.kzOn = false;
-    ['nearTfs', 'fibTfs', 'smaTfs', 'kcTfs'].forEach((k) => { if (Array.isArray(A[k])) B[k] = A[k].filter(ok); });
+    ['nearTfs', 'brkTfs', 'fibTfs', 'smaTfs', 'kcTfs'].forEach((k) => { if (Array.isArray(A[k])) B[k] = A[k].filter(ok); });
     B.lineMinMs = minMs;
     return B;
   }
@@ -1588,6 +1613,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
+    if (A.brkOn) (A.brkTfs || A_DEF.brkTfs).forEach((id) => setupTfs.add(id));
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
@@ -1597,6 +1623,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.setupOn && A.confOn !== false) confAlerts(sym, dm, S, A, st, now, out);
     kzAlerts(sym, raw['5m'], raw['1h'], S, A, st, now, out);
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
+    brkAlerts(sym, dm, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
     smaAlerts(sym, raw, dm, A, st, now, out);
     targetAlerts(sym, raw, A, st, now, out);

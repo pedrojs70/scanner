@@ -755,7 +755,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 13nov 09h15</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 13nov 09h45</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -928,7 +928,8 @@
       <li><b>FVG no pullback:</b> (liga-se só no separador Por ativo — não tem nada a ajustar) depois do alerta de setup, avisa logo que o preço toca num FVG do TF de gatilho que está para lá dos 50% da pernada da quebra (da origem ao topo/fundo). Se o preço passar a origem, ou o gatilho quebrar ao contrário, chega “Invalidado” e o setup deixa de ser seguido.</li>
       <li><b>Killzones:</b> só dentro das horas de Londres e NY, avisa quando a vela de 5m apanha o topo/fundo da Ásia, do dia anterior ou (na NY) de Londres — 💧 sweep se fechou de volta para dentro.</li>
       <li><b>Liquidez da semana / do dia anteriores:</b> máximo ou mínimo apanhado (a semana vem ligada, o dia desligado); o fecho da vela de 1H diz se foi sweep ou com vela.</li>
-      <li><b>Perto da quebra:</b> na tendência principal dos timeframes escolhidos (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
+      <li><b>Quebra confirmada:</b> um fecho partiu a estrutura (CHoCH; BOS se ligares) — por defeito no Mensal, Semanal e Diário.</li>
+      <li><b>Perto da quebra:</b> no limite da estrutura dos timeframes escolhidos (os rácios têm a sua lista: Mensal, Semanal e Diário) (por defeito Mensal, Semanal, Diário e 4H), avisa quando o preço chega perto do <b>limite</b> (Mensal 5%, Semanal 3%, Diário 2%, 4H 1% — ajustável por timeframe) — o nível cuja quebra seria um CHoCH (inversão). A continuação (perto do topo/fundo da perna, BOS) vem desligada. Um aviso por nível: só volta a avisar se o preço se afastar e voltar.</li>
       <li><b>SMA 200:</b> avisa quando o preço chega à média das últimas 200 velas do timeframe (por defeito Semanal e Diário) — a descer 💰 (vinha de cima: possível zona de compra) ou a subir 🧱 (vinha de baixo: teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho; opcionalmente antes, a X% da média. Depois de avisar só volta a avisar quando o preço se afastar mais de 5% (ajustável) e voltar.</li>
       <li><b>Perto do alvo:</b> depois de um alerta de setup, a app segue os alvos do timeframe da zona — o topo/fundo da perna e as Fibonacci −0,236/−0,268 · −0,618/−0,65 · −1/−1,032 (log) — e avisa quando o preço chega a 1% (ajustável) de cada um.</li>
       <li><b>Linhas e canais:</b> (liga-se no separador Por ativo; o 🔔 e a distância em % escolhem-se em cada linha, carregando nela no gráfico) só as linhas que desenhaste com 🔔 ligado. Avisa uma vez quando o preço chega à distância escolhida (volta a avisar depois de se afastar 3× essa distância) e, num canal, quando uma vela do timeframe da linha fecha fora.</li>
@@ -1047,11 +1048,17 @@
   <label class="chk alline"><input id="alDy" type="checkbox"> topo/fundo do <b>dia</b> anterior <span class="muted small">(dá mais alertas; se for apanhado dentro de uma killzone, só chega o aviso do ponto 3)</span></label>
   <div class="alrow"><span class="muted small">Tipo:</span> <label class="chk"><input id="alWkS" type="checkbox"> 💧 sweep (fecha de volta para dentro)</label> <label class="chk"><input id="alWkC" type="checkbox"> com vela (fecha além)</label></div>
 
-  <h3 class="sethead">4 · Perto da quebra da tendência principal</h3>
+  <h3 class="sethead">4 · Perto da quebra da estrutura</h3>
   <div class="algrp" data-g="near"></div>
-  <label class="chk alline"><input id="alNear" type="checkbox"> Avisar quando o preço se aproxima do nível de quebra da tendência principal (um aviso por nível)</label>
-  <div class="alrow"><span class="muted small">Timeframes e distância ao nível (% do preço):</span><br><span id="alNearTfs"></span></div>
+  <label class="chk alline"><input id="alNear" type="checkbox"> Avisar quando o preço se aproxima do limite da estrutura do gráfico (um aviso por nível)</label>
+  <div class="alrow"><span class="muted small">Ativos — timeframes e distância ao nível (% do preço):</span><br><span id="alNearTfs"></span></div>
+  <div class="alrow"><span class="muted small">Rácios — timeframes (mesma distância):</span><br><span id="alNearTfsR"></span></div>
   <div class="alrow"><label class="chk"><input id="alNearI" type="checkbox"> inversão <span class="muted small">(perto do limite — fechar além = CHoCH)</span></label><br><label class="chk"><input id="alNearC" type="checkbox"> continuação <span class="muted small">(perto do topo/fundo da perna — fechar além = BOS)</span></label></div>
+
+  <h3 class="sethead">4b · Quebra confirmada <span class="muted small">(no fecho da vela)</span></h3>
+  <div class="algrp" data-g="brk"></div>
+  <label class="chk alline"><input id="alBrk" type="checkbox"> Avisar quando um fecho parte a estrutura do gráfico — CHoCH: a estrutura vira</label>
+  <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alBrkTfs"></span><br><label class="chk"><input id="alBrkBos" type="checkbox"> também BOS <span class="muted small">(quebra a favor — a tendência continua)</span></label></div>
 
   <h3 class="sethead">5 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
   <div class="algrp" data-g="sma"></div>
@@ -3844,10 +3851,14 @@
     const dtf = drawState ? drawState.tf : selectedTf, inhL = uniOn(settings) ? uniL(dtf) : 'ext';
     const inhM = ((getEdits(dtf, false) || {})[inhL] || {}).inh || {};
     const edE = editMode && (uniOn(settings) || editLayer === 'ext');   // só a editar a principal: herdados com ↓ e preenchidos pela app esbatidos
+    // a editar: as tuas marcas antes da âncora continuam guardadas — aparecem a cinzento, "(inativa)"
+    const inact = [];
+    if (editMode && d.anchor) { const e0 = (getEdits(dtf, false) || {})[inhL]; if (e0 && e0.add) for (const [t, lab] of e0.add) { if (t >= d.anchor.t) continue; const c = d.closed.find((x) => x.t === t); if (!c) continue; const top = lab === 'H' || /H$/.test(lab);
+      inact.push({ time: c.tt, position: top ? 'aboveBar' : 'belowBar', color: 'rgba(150,150,150,.75)', shape: top ? 'arrowDown' : 'arrowUp', text: `${lab === 'H' ? 'topo' : lab === 'L' ? 'fundo' : lab} (inativa)` }); } }
     markersApi.setMarkers(sw.map((s, k) => { const inh = s.manual && inhM[d.closed[s.i].t], fade = edE && s.filled;
       const col = s.label === 'HH' || s.label === 'HL' ? (fade ? 'rgba(38,166,154,.4)' : '#26a69a') : s.label === 'LH' || s.label === 'LL' ? (fade ? 'rgba(239,83,80,.4)' : '#ef5350') : '#aab2bd';
       return { time: d.closed[s.i].tt, position: s.type === 'H' ? 'aboveBar' : 'belowBar', color: col,
-        shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${inh ? (edE ? '↓' : '') : s.anchor ? '⚓' : s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}` }; }));
+        shape: s.type === 'H' ? 'arrowDown' : 'arrowUp', text: `${inh ? (edE ? '↓' : '') : s.anchor ? '⚓' : s.manual ? '✎' : ''}${s.label === 'H' ? 'topo' : s.label === 'L' ? 'fundo' : s.label}` }; }).concat(inact).sort((a, b) => a.time - b.time));
     priceLines.forEach((p) => candleSeries.removePriceLine(p)); priceLines = [];
     const add = (price, color, title, style, w) => priceLines.push(candleSeries.createPriceLine({ price, color, title, lineWidth: w || 1, lineStyle: style, axisLabelVisible: true }));
     const x = d.ext.snap, n = d.int.snap;
@@ -4016,6 +4027,12 @@
         g.strokeStyle = 'rgba(100,181,246,1)'; g.lineWidth = 2; g.setLineDash([6, 4]);
         g.beginPath(); g.moveTo(autoDrag.x, 0); g.lineTo(autoDrag.x, paneH); g.stroke(); g.setLineDash([]);
         g.fillStyle = 'rgba(100,181,246,1)'; g.fillText('⏩ automático a partir daqui', autoDrag.x + 4, 28);
+      }
+      // âncora: esbate tudo o que está antes da primeira vela que conta
+      if (d.anchor && segs.length) {
+        let xa = X(segs[0].i);
+        if (xa == null) { const vr = ts.getVisibleLogicalRange(); xa = vr && segs[0].i > vr.to ? paneW : null; }
+        if (xa != null && xa > 0) { let bg = '#ffffff'; try { bg = chart.options().layout.background.color || bg; } catch (e) {} g.save(); g.globalAlpha = 0.6; g.fillStyle = bg; g.fillRect(0, 0, Math.min(xa, paneW), paneH); g.restore(); }
       }
       segs.forEach((s, k) => {
         const x = X(s.i); if (x == null || x < -2 || x > paneW + 2) return;
@@ -5237,12 +5254,12 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true, fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true }, forR: { setup: true, fvg: true, kz: false, week: true, near: true, sma: false, tgt: true, line: true } };
-  const AL_CHK = { alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true }, forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true }, };
+  const AL_CHK = { alBrk: 'brkOn', alBrkBos: 'brkBos', alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
-  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, (settings.alerts || {}).forR || {}), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), fibTfs: ((settings.alerts || {}).fibTfs || AL_DEF.fibTfs).slice(), kcTfs: ((settings.alerts || {}).kcTfs || AL_DEF.kcTfs).slice(), revTfs: ((settings.alerts || {}).revTfs || AL_DEF.revTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
+  const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, ((settings.alerts || {}).forRv2 && (settings.alerts || {}).forR) || {}), forRv2: 1, brkTfs: ((settings.alerts || {}).brkTfs || AL_DEF.brkTfs).slice(), nearTfsR: ((settings.alerts || {}).nearTfsR || AL_DEF.nearTfsR).slice(), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), fibTfs: ((settings.alerts || {}).fibTfs || AL_DEF.fibTfs).slice(), kcTfs: ((settings.alerts || {}).kcTfs || AL_DEF.kcTfs).slice(), revTfs: ((settings.alerts || {}).revTfs || AL_DEF.revTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : (Math.floor(m / 1440) === 1 ? 'há 1 dia' : `há ${Math.floor(m / 1440)} dias`); };
   function alChatUi() { $('#alChatSt').innerHTML = alDraft.tgChat ? `<span class="yes">✔ ligado (chat ${alDraft.tgChat})</span>` : '<span class="warn">ainda não ligado</span>'; }
   function alertCode() {
@@ -5298,15 +5315,15 @@ function motor_() {
     catch (e) { m.innerHTML = ''; }
   }
   // ---------- alertas por ativo ----------
-  const AK_FIX = [['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
+  const AK_FIX = [['brk', 'Quebra confirmada'], ['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
   const alKeys = () => (settings.setups || []).filter((x) => x.on).map((x) => ['su:' + x.name, 'Setup · ' + x.name]).concat(AK_FIX);
   // o que vale hoje para um ativo (escolhas por ativo, senão as gerais)
   function alEff(A, sym) {
-    const p = (A.per || {})[sym] || {}, r = isRatio(sym), g = Object.assign({}, r ? AL_DEF.forR : AL_DEF.forA, (r ? A.forR : A.forA) || {}), out = {};
+    const p = (A.per || {})[sym] || {}, r = isRatio(sym), g = Object.assign({}, r ? AL_DEF.forR : AL_DEF.forA, (r ? (A.forRv2 ? A.forR : null) : A.forA) || {}), out = {};
     for (const [k] of alKeys()) {
       if (p[k] != null) { out[k] = !!p[k]; continue; }
       if (k.indexOf('su:') === 0) out[k] = !!A.setupOn && g.setup !== false && (A.setups || {})[k.slice(3)] !== false;
-      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' }[k]]) && g[k] !== false;
+      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' }[k]]) && g[k] !== false;
     }
     return out;
   }
@@ -5358,6 +5375,8 @@ function motor_() {
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
     $('#alMin').value = alDraft.minPull;
     $('#alNearTfs').innerHTML = TFS.map((t) => `<span class="alnt"><label class="chk"><input type="checkbox" data-nt="${t.id}" ${alDraft.nearTfs.includes(t.id) ? 'checked' : ''}> ${tfLabel(t.id)}</label> <input type="number" data-np="${t.id}" min="0.1" max="30" step="0.1" value="${alDraft.nearPct[t.id] != null ? alDraft.nearPct[t.id] : 0.5}"><span class="muted small">%</span></span>`).join('');
+    $('#alNearTfsR').innerHTML = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h'].map((id) => `<label class="chk"><input type="checkbox" data-ntr="${id}" ${alDraft.nearTfsR.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
+    $('#alBrkTfs').innerHTML = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h'].map((id) => `<label class="chk"><input type="checkbox" data-bkt="${id}" ${alDraft.brkTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     document.querySelectorAll('.algrp').forEach((b) => { const g = b.dataset.g; b.innerHTML = `<span>Vale para:</span><label><input type="checkbox" data-ga="${g}" ${alDraft.forA[g] !== false ? 'checked' : ''}> ativos</label><label><input type="checkbox" data-gr="${g}" ${alDraft.forR[g] !== false ? 'checked' : ''}> rácios (A÷B)</label>`; });
     $('#alFibTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-ft="${id}" ${alDraft.fibTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alRevTfs').innerHTML = ['1h', '4h', '1d', '1w', '1M'].map((id) => `<label class="chk"><input type="checkbox" data-rvt="${id}" ${alDraft.revTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
@@ -5387,6 +5406,8 @@ function motor_() {
     alDraft.minPull = Math.max(0, Math.min(100, +$('#alMin').value || 50));
     document.querySelectorAll('[data-np]').forEach((i) => { const v = +String(i.value).replace(',', '.'); if (v > 0) alDraft.nearPct[i.dataset.np] = Math.min(30, v); });
     alDraft.nearTfs = [...document.querySelectorAll('[data-nt]')].filter((i) => i.checked).map((i) => i.dataset.nt);
+    alDraft.nearTfsR = [...document.querySelectorAll('[data-ntr]')].filter((i) => i.checked).map((i) => i.dataset.ntr);
+    alDraft.brkTfs = [...document.querySelectorAll('[data-bkt]')].filter((i) => i.checked).map((i) => i.dataset.bkt); alDraft.forRv2 = 1;
     alDraft.fibTfs = [...document.querySelectorAll('[data-ft]')].filter((i) => i.checked).map((i) => i.dataset.ft);
     alDraft.revTfs = [...document.querySelectorAll('[data-rvt]')].filter((i) => i.checked).map((i) => i.dataset.rvt);
     alDraft.revMin = Math.max(1, Math.min(8, Math.round(+$('#alRevMin').value || 5)));
@@ -5518,9 +5539,9 @@ function motor_() {
   }
   // ---------- pesquisa nos favoritos (lista e Quadro): nome, ticker, nome teu, inglês dos metais; os rácios entram se uma das pernas bater ----------
   let npFQ = '', npKind = 'all', npJKind = 'all';
-  const NP_KINDS = [['all', 'Tudo'], ['a', 'Ativos'], ['r', 'Rácios']];
-  const npKindOk = (s, k) => (k === 'a' ? !isRatio(s) : k === 'r' ? isRatio(s) : true);
-  const npKindBtns = (cur, attr) => `<div class="np-kind" role="group" aria-label="Mostrar">${NP_KINDS.map(([k, t]) => `<button type="button" ${attr}="${k}" class="${cur === k ? 'on' : ''}" title="${k === 'a' ? 'Ações, cripto e futuros (sem rácios)' : k === 'r' ? 'Só rácios' : 'Tudo'}">${t}</button>`).join('')}</div>`;
+  const NP_KINDS = [['all', 'Tudo'], ['c', 'Cripto'], ['s', 'Ações'], ['r', 'Rácios']];
+  const npKindOk = (s, k) => (k === 'a' ? !isRatio(s) : k === 'c' || k === 's' || k === 'r' ? npGroup(s) === k : true);
+  const npKindBtns = (cur, attr) => `<div class="np-kind" role="group" aria-label="Mostrar">${NP_KINDS.map(([k, t]) => `<button type="button" ${attr}="${k}" class="${cur === k ? 'on' : ''}" title="${k === 'c' ? 'Só cripto' : k === 's' ? 'Ações, ETFs e futuros' : k === 'r' ? 'Só rácios' : 'Tudo'}">${t}</button>`).join('')}</div>`;
   const npNorm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
   function npFavMatch(s, q) {
     q = npNorm(q).trim(); if (!q) return true;
@@ -6113,7 +6134,7 @@ Usa só os números destes dados (correções e Fibonacci em escala log) e cita-
     return out;
   }
   const BOARD_TFS = [['1M', 'M'], ['1w', 'S'], ['1d', 'D'], ['4h', '4H']];
-  const ALK = { tgt: 'Perto do alvo', line: 'Linha / canal', setup: 'Setup', conf: 'Confirmação', rev: 'Reversão', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
+  const ALK = { brk: 'Quebra confirmada', tgt: 'Perto do alvo', line: 'Linha / canal', setup: 'Setup', conf: 'Confirmação', rev: 'Reversão', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
   function npBoardRow(s) {
     const i = npInfo(s), f = i.f, T = (f && f.tfs) || {}, price = f && f.price, A = alCfg();
     const r = { s, price, chg: i.chg, rank: i.best ? i.best.rank * 1000 + (i.best.z.pullback || 0) : -1 };
