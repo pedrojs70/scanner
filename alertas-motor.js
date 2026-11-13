@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-12T23:15:41.890Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T08:59:09.880Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -265,6 +265,7 @@
     res.segs = ms.segs;
     if (target && !ms.lastIsMan && !res.swings.some((s) => s.i === target.i)) res.swings.push({ type: trend === 1 ? 'H' : 'L', i: target.i, p: target.p, provisional: true });
     labelStructural(res.swings, res.breaks);   // um fundo abaixo do anterior só é LL se houve quebra (senão foi sweep: HL)
+    anchorRefLabel(res.swings, ms);
     enrich(res, candles, atr, volAvg, o);
     res.state = { trend, kind, prot, ext, target, lastBroken };
     markInvalidSweeps(res);
@@ -327,7 +328,7 @@
     let mode0 = null;
     if (ov.start && ov.start.t != null) {
       const k = idxOf(ov.start.t);
-      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
+      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.ref = ov.start.ref && ov.start.ref.p > 0 ? ov.start.ref : null; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
     }
     // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início (manual)
     if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
@@ -618,6 +619,7 @@
     if (o.trace && n > 1) rec(n - 1);
     if (pend) { const { sw: _x, ...rest } = pend; res.pending = Object.assign({ waited: n - 1 - pend.i, left: o.contBars - (n - 1 - pend.i) }, rest); }
     labelStructural(res.swings, res.breaks);
+    anchorRefLabel(res.swings, ms);
     enrich({ breaks: allBreaks, fvgs: res.fvgs }, candles, atr, volAvg, o);   // inclui quebras que depois falharam (para o trace)
     res.atr = atr[n - 1];
     res.dispute = dispute;
@@ -631,7 +633,10 @@
       // topo/fundo marcado à mão antes do limite e ainda por quebrar: a perna vai até ele (não só até ao extremo depois do limite)
       const opp = trend === 1 ? lastSH : lastSL, isMan = (i) => !!(ov && ov.add && ov.add.has(T(i))) || (s0 >= 0 && i === s0);
       if (opp && !opp.broken && opp.i < prot.i && (isMan(opp.i) || isMan(prot.i)) && (trend === 1 ? opp.p > ext.p : opp.p < ext.p)) ext = { p: opp.p, i: opp.i };
-      res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken };
+      // Fibonacci da estrutura de gatilho: mede só a perna que fez a última quebra (origem dessa perna → extremo), não um repique qualquer entre topos e fundos
+      let fibA = null, fibB = null;
+      if (lb && lb.dir === trend && lb.from >= 0 && lb.i >= lb.from) { fibA = trend === 1 ? lowest(lb.from, lb.i) : highest(lb.from, lb.i); fibB = trend === 1 ? highest(fibA.i, n - 1) : lowest(fibA.i, n - 1); if (trend * (fibB.p - fibA.p) <= 0) fibA = fibB = null; }
+      res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken, fibA, fibB };
     }
     markInvalidSweeps(res);
     return res;
@@ -644,15 +649,16 @@
     const d = s.trend;
     const ext = d === 1 ? Math.max(s.ext.p, price) : Math.min(s.ext.p, price);
     // correções medidas em escala logarítmica (como as Fibonacci em log do TradingView); linear só se houver preços ≤ 0
-    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0;
+    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0 && (!s.fibA || (s.fibA.p > 0 && s.fibB.p > 0));
     const F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x;
     const retr = (e, x, p0) => { const den = F(e) - F(p0); return den ? Math.max(0, (F(e) - F(x)) / den * 100) : 0; };
-    const pull = retr(ext, price, s.prot.p);
+    const fA = s.fibA || s.prot, fB = s.fibB || s.ext, fExt = d === 1 ? Math.max(fB.p, price) : Math.min(fB.p, price);   // perna da Fibonacci (gatilho: a da última quebra)
+    const pull = retr(fExt, price, fA.p);
     const invalid = d === 1 ? price < s.prot.p : price > s.prot.p;
     const newExt = d === 1 ? price > s.ext.p : price < s.ext.p;
     const recentExt = nowIdx - s.ext.i <= 1;   // novo extremo numa das 2 últimas velas fechadas
     const phase = invalid ? 'A testar o limite' : (newExt || recentExt || pull < 10) ? 'Em continuação' : 'Em correção';
-    const lvl = (f) => FI(F(ext) - f * (F(ext) - F(s.prot.p)));
+    const lvl = (f) => FI(F(fExt) - f * (F(fExt) - F(fA.p)));
     const lb = res.breaks[res.breaks.length - 1];
     const lastSweep = res.sweeps[res.sweeps.length - 1] || null;
     // viragem por confirmar que já devolveu metade ou mais do movimento = range
@@ -694,6 +700,14 @@
 
   // âncora automática (estrutura única): o Semanal começa no último topo/fundo confirmado do Mensal, o Diário no último do Semanal.
   // pres = estrutura do timeframe de cima, pc = velas fechadas dele, cc = velas fechadas deste. Devolve o início {t, side, label, mode:'auto', anchor:true} ou null.
+
+  // âncora: o 1.º topo/fundo depois dela não tem com quem comparar neste timeframe — compara com o do timeframe de cima (o anterior à âncora)
+  function anchorRefLabel(swings, ms) {
+    if (!ms || !ms.anchor || !ms.ref || ms.s0 < 0) return;
+    const ty = ms.ref.type, f = swings.filter((x) => x.i > ms.s0 && x.type === ty).sort((a, b) => a.i - b.i)[0];
+    if (!f || (f.label !== 'H' && f.label !== 'L') || f.manualLabel) return;
+    f.label = ty === 'L' ? (f.p < ms.ref.p ? 'LL' : 'HL') : (f.p > ms.ref.p ? 'HH' : 'LH'); f.refLbl = true;
+  }
   function anchorFrom(pres, pc, cc, minAfter) {
     if (!pres || !pres.swings || !pc || !pc.length || !cc || cc.length < 3) return null;
     const sw = pres.swings.filter((s) => !s.provisional && s.i >= 0 && s.i < pc.length).sort((a, b) => a.i - b.i), need = Math.max(1, minAfter || 1);
@@ -705,7 +719,8 @@
       if (k < 0) return null;   // antes do histórico deste timeframe
       if (cc.length - 1 - k < need) continue;
       const lab = s.manualLabel && /^(HH|HL|LH|LL)$/.test(s.manualLabel) ? s.manualLabel : s.label;
-      return { t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
+      const po = sw.slice(0, q).reverse().find((x) => x.type !== s.type), ref = po ? { p: po.p, type: po.type } : null;
+      return { ref, t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
     }
     return null;
   }
@@ -745,7 +760,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // as Fibonacci vivas de uma análise (res = resultado do motor; cs = velas fechadas; price = preço atual)
   function fibsOf(res, cs, price) {
     const s = res && res.state; if (!s || !s.trend || !cs || !cs.length) return [];
-    const d = s.trend, A = s.prot, ext = s.ext, out = [];
+    const d = s.trend, A = s.fibA || s.prot, ext = s.fibB || s.ext, out = [];   // gatilho: perna da última quebra
     const cur = make(A.p, ext.p, d, 'atual'); cur.Ai = A.i; cur.Bi = ext.i;
     life(cur, cs, ext.i); out.push(cur);
     // topo/fundo anterior (já ultrapassado) depois do limite: Fibonacci só de alvos

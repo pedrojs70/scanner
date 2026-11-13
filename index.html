@@ -755,7 +755,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 12nov 23h30</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 13nov 09h15</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -807,7 +807,7 @@
 
     <h3 class="helphead">◆ Como a app está organizada agora</h3>
     <p><b>Uma estrutura por gráfico.</b> Do <b>Anual ao Diário</b> é a <b>estrutura de contexto</b>: por defeito só os topos/fundos que levaram a uma quebra de estrutura (Pontos 3) — poucas pernas, as que contam. Daí saem a direção, a zona de correção (50% para cima) e a Fibonacci dos setups: com poucas pernas, cada zona é forte. Do <b>4H para baixo</b> é a <b>estrutura de gatilho</b>: todos os topos e fundos (Pontos 1) — daí sai o CHoCH/BOS de entrada (1H no Swing, 4H no Longo prazo).</p>
-    <p><b>⚓ Encadeamento automático.</b> O <b>Semanal</b> começa sempre no último topo/fundo confirmado do <b>Mensal</b>, e o <b>Diário</b> no último do <b>Semanal</b> (linha vertical ⚓ no gráfico). Quando o Mensal ou o Semanal ganham um ponto novo (ou o marcas tu), os de baixo recomeçam aí. Nada é apagado: o que está antes da âncora fica guardado mas não conta. Se a última perna de cima ainda for curta (menos de ~8 semanas no Semanal ou ~15 dias no Diário), a âncora recua para o ponto anterior. Um <b>Início</b> marcado por ti manda sobre a âncora. Mensal, 3M, 6M e Anual marcas tu.</p>
+    <p><b>⚓ Encadeamento automático.</b> O <b>Semanal</b> começa sempre no último topo/fundo confirmado do <b>Mensal</b>, e o <b>Diário</b> no último do <b>Semanal</b> (linha vertical ⚓ no gráfico). Quando o Mensal ou o Semanal ganham um ponto novo (ou o marcas tu), os de baixo recomeçam aí. Nada é apagado: o que está antes da âncora fica guardado mas não conta. Se a última perna de cima ainda for curta (menos de ~8 semanas no Semanal ou ~15 dias no Diário), a âncora recua para o ponto anterior. O primeiro topo/fundo depois da âncora é comparado com o do timeframe de cima (o anterior à âncora), para já sair como HH/LH ou HL/LL. Um <b>Início</b> marcado por ti manda sobre a âncora. Mensal, 3M, 6M e Anual marcas tu.</p>
     <p><b>✔ Confirmação</b> (checklist, IA e alerta ✅): com o preço na zona de um setup, a estrutura do timeframe logo abaixo da zona vira a favor (CHoCH) — ex.: zona do Diário e o 4H virou. <b>✔ Confirmada no 4H</b> (e “💪 Quebra forte” no alerta): a quebra do gatilho 1H também aparece na estrutura do 4H. <b>⭐ Confluência</b>: um alvo da Fibonacci do Diário ou do 4H cai dentro da zona do timeframe de cima.</p>
     <p><b>Botão Pontos</b> (em ✎ Editar estrutura): muda os pontos deste ativo no grupo do gráfico aberto — contexto ou gatilho. 1 = todos os topos/fundos · 2 = o mesmo, pernas maiores · 3 = só quebras · 4 = clássico · 5 = menos. O padrão de todos os ativos está nas Definições.</p>
     <p><b>Pontos que passam para baixo:</b> um HH/HL/LH/LL que marques passa para os timeframes de baixo (até ao 1H), na vela mais alta/baixa desse período — com ↓ na edição. Apagas em cima, sai em baixo; apagas em baixo, não volta.</p>
@@ -885,7 +885,7 @@
 
     <h3 class="helphead">ϕ Fibonacci, alvos, linhas e IA</h3>
     <ul>
-      <li><b>Fibonacci automáticas:</b> a app traça sozinha, em cada timeframe, a Fibonacci da perna em curso (limite → topo/fundo), em log. Botão <b>ϕ Fibonacci</b> no gráfico para as ver: entrada ótima (61,8–65%), 78,6% e os alvos −0,236/−0,268 · −0,618/−0,65 · −1/−1,032. A roxo, a Fibonacci anterior (do mesmo limite ao topo/fundo anterior, já ultrapassado) — só alvos; cinzento ✔ = alvo atingido.</li>
+      <li><b>Fibonacci automáticas:</b> a app traça sozinha, em cada timeframe, a Fibonacci da perna em curso (limite → topo/fundo), em log. Botão <b>ϕ Fibonacci</b> no gráfico para as ver: entrada ótima (61,8–65%), 78,6% e os alvos −0,236/−0,268 · −0,618/−0,65 · −1/−1,032. A roxo, a Fibonacci anterior (do mesmo limite ao topo/fundo anterior, já ultrapassado) — só alvos; cinzento ✔ = alvo atingido. Do <b>4H para baixo</b> (estrutura de gatilho, com todos os topos e fundos) a Fibonacci mede só a <b>perna que fez a última quebra</b> de estrutura — não um repique qualquer — e é essa a que conta nas zonas, alertas, Reversões e análise IA.</li>
       <li><b>Quando morre:</b> depois de chegar a um alvo, inverter e voltar ao nível anterior (ou à linha do 0), ou se fechar para lá da origem (1). No máximo 2 por timeframe.</li>
       <li><b>Nos setups:</b> chip “✔ Entrada ótima” (61,8–65%) ou “Profunda” (78,6–91,8%). Acima de 91,8% o setup passa a “Perto da invalidação” (não conta como pronto). <b>⭐</b> quando um alvo do timeframe de baixo (a caminhar contra o de cima) cai na zona do de cima (61,8–78,6%) — aparece no setup, no Em foco (sobe na ordem) e no Telegram.</li>
       <li><b>Desenhar e mostrar linhas:</b> “／ Diagonal” e “▱ Canal” estão sempre na barra do gráfico; “📐 Linhas” só mostra ou esconde os desenhos (escondidos continuam guardados e os alertas continuam a funcionar). Ao carregar numa linha aparecem 🔔, 🗑 e as caixas dos timeframes: marca outro timeframe para a linha aparecer também lá; desmarcar ou 🗑 tira-a só desse timeframe (no último, apaga-a). Mover a linha muda-a em todos. O alerta é um só por linha: a aproximação avisa uma vez; a quebra de um canal conta ao fecho do timeframe mais pequeno marcado. No painel “As tuas linhas”, 🗑 apaga de todos os timeframes.</li>
@@ -1463,6 +1463,7 @@
     res.segs = ms.segs;
     if (target && !ms.lastIsMan && !res.swings.some((s) => s.i === target.i)) res.swings.push({ type: trend === 1 ? 'H' : 'L', i: target.i, p: target.p, provisional: true });
     labelStructural(res.swings, res.breaks);   // um fundo abaixo do anterior só é LL se houve quebra (senão foi sweep: HL)
+    anchorRefLabel(res.swings, ms);
     enrich(res, candles, atr, volAvg, o);
     res.state = { trend, kind, prot, ext, target, lastBroken };
     markInvalidSweeps(res);
@@ -1525,7 +1526,7 @@
     let mode0 = null;
     if (ov.start && ov.start.t != null) {
       const k = idxOf(ov.start.t);
-      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
+      if (k >= 0 && k < n - 1) { r.s0 = k; r.side = ov.start.side === 'H' ? 'H' : 'L'; mode0 = ov.start.mode || 'legacy'; if (ov.start.anchor) { r.anchor = true; r.ref = ov.start.ref && ov.start.ref.p > 0 ? ov.start.ref : null; r.label = /^(HH|HL|LH|LL)$/.test(ov.start.label || '') ? ov.start.label : null; } }
     }
     // estrutura apagada e o utilizador marcou pontos sem escolher o início: a primeira marca passa a ser o início (manual)
     if (r.s0 < 0 && ov.blank && ov.add && ov.add.size) {
@@ -1816,6 +1817,7 @@
     if (o.trace && n > 1) rec(n - 1);
     if (pend) { const { sw: _x, ...rest } = pend; res.pending = Object.assign({ waited: n - 1 - pend.i, left: o.contBars - (n - 1 - pend.i) }, rest); }
     labelStructural(res.swings, res.breaks);
+    anchorRefLabel(res.swings, ms);
     enrich({ breaks: allBreaks, fvgs: res.fvgs }, candles, atr, volAvg, o);   // inclui quebras que depois falharam (para o trace)
     res.atr = atr[n - 1];
     res.dispute = dispute;
@@ -1829,7 +1831,10 @@
       // topo/fundo marcado à mão antes do limite e ainda por quebrar: a perna vai até ele (não só até ao extremo depois do limite)
       const opp = trend === 1 ? lastSH : lastSL, isMan = (i) => !!(ov && ov.add && ov.add.has(T(i))) || (s0 >= 0 && i === s0);
       if (opp && !opp.broken && opp.i < prot.i && (isMan(opp.i) || isMan(prot.i)) && (trend === 1 ? opp.p > ext.p : opp.p < ext.p)) ext = { p: opp.p, i: opp.i };
-      res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken };
+      // Fibonacci da estrutura de gatilho: mede só a perna que fez a última quebra (origem dessa perna → extremo), não um repique qualquer entre topos e fundos
+      let fibA = null, fibB = null;
+      if (lb && lb.dir === trend && lb.from >= 0 && lb.i >= lb.from) { fibA = trend === 1 ? lowest(lb.from, lb.i) : highest(lb.from, lb.i); fibB = trend === 1 ? highest(fibA.i, n - 1) : lowest(fibA.i, n - 1); if (trend * (fibB.p - fibA.p) <= 0) fibA = fibB = null; }
+      res.state = { trend, kind, prot: { p: prot.p, i: prot.i }, ext, target: null, lastBroken, fibA, fibB };
     }
     markInvalidSweeps(res);
     return res;
@@ -1842,15 +1847,16 @@
     const d = s.trend;
     const ext = d === 1 ? Math.max(s.ext.p, price) : Math.min(s.ext.p, price);
     // correções medidas em escala logarítmica (como as Fibonacci em log do TradingView); linear só se houver preços ≤ 0
-    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0;
+    const lg = ext > 0 && s.prot.p > 0 && price > 0 && s.ext.p > 0 && (!s.fibA || (s.fibA.p > 0 && s.fibB.p > 0));
     const F = lg ? Math.log : (x) => x, FI = lg ? Math.exp : (x) => x;
     const retr = (e, x, p0) => { const den = F(e) - F(p0); return den ? Math.max(0, (F(e) - F(x)) / den * 100) : 0; };
-    const pull = retr(ext, price, s.prot.p);
+    const fA = s.fibA || s.prot, fB = s.fibB || s.ext, fExt = d === 1 ? Math.max(fB.p, price) : Math.min(fB.p, price);   // perna da Fibonacci (gatilho: a da última quebra)
+    const pull = retr(fExt, price, fA.p);
     const invalid = d === 1 ? price < s.prot.p : price > s.prot.p;
     const newExt = d === 1 ? price > s.ext.p : price < s.ext.p;
     const recentExt = nowIdx - s.ext.i <= 1;   // novo extremo numa das 2 últimas velas fechadas
     const phase = invalid ? 'A testar o limite' : (newExt || recentExt || pull < 10) ? 'Em continuação' : 'Em correção';
-    const lvl = (f) => FI(F(ext) - f * (F(ext) - F(s.prot.p)));
+    const lvl = (f) => FI(F(fExt) - f * (F(fExt) - F(fA.p)));
     const lb = res.breaks[res.breaks.length - 1];
     const lastSweep = res.sweeps[res.sweeps.length - 1] || null;
     // viragem por confirmar que já devolveu metade ou mais do movimento = range
@@ -1892,6 +1898,14 @@
 
   // âncora automática (estrutura única): o Semanal começa no último topo/fundo confirmado do Mensal, o Diário no último do Semanal.
   // pres = estrutura do timeframe de cima, pc = velas fechadas dele, cc = velas fechadas deste. Devolve o início {t, side, label, mode:'auto', anchor:true} ou null.
+
+  // âncora: o 1.º topo/fundo depois dela não tem com quem comparar neste timeframe — compara com o do timeframe de cima (o anterior à âncora)
+  function anchorRefLabel(swings, ms) {
+    if (!ms || !ms.anchor || !ms.ref || ms.s0 < 0) return;
+    const ty = ms.ref.type, f = swings.filter((x) => x.i > ms.s0 && x.type === ty).sort((a, b) => a.i - b.i)[0];
+    if (!f || (f.label !== 'H' && f.label !== 'L') || f.manualLabel) return;
+    f.label = ty === 'L' ? (f.p < ms.ref.p ? 'LL' : 'HL') : (f.p > ms.ref.p ? 'HH' : 'LH'); f.refLbl = true;
+  }
   function anchorFrom(pres, pc, cc, minAfter) {
     if (!pres || !pres.swings || !pc || !pc.length || !cc || cc.length < 3) return null;
     const sw = pres.swings.filter((s) => !s.provisional && s.i >= 0 && s.i < pc.length).sort((a, b) => a.i - b.i), need = Math.max(1, minAfter || 1);
@@ -1903,7 +1917,8 @@
       if (k < 0) return null;   // antes do histórico deste timeframe
       if (cc.length - 1 - k < need) continue;
       const lab = s.manualLabel && /^(HH|HL|LH|LL)$/.test(s.manualLabel) ? s.manualLabel : s.label;
-      return { t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
+      const po = sw.slice(0, q).reverse().find((x) => x.type !== s.type), ref = po ? { p: po.p, type: po.type } : null;
+      return { ref, t: cc[k].t, side: s.type === 'H' ? 'H' : 'L', label: /^(HH|HL|LH|LL)$/.test(lab || '') ? lab : null, mode: 'auto', anchor: true, pt: a, p: s.type === 'H' ? cc[k].h : cc[k].l, back: sw.length - 1 - q };
     }
     return null;
   }
@@ -2303,7 +2318,7 @@
   // as Fibonacci vivas de uma análise (res = resultado do motor; cs = velas fechadas; price = preço atual)
   function fibsOf(res, cs, price) {
     const s = res && res.state; if (!s || !s.trend || !cs || !cs.length) return [];
-    const d = s.trend, A = s.prot, ext = s.ext, out = [];
+    const d = s.trend, A = s.fibA || s.prot, ext = s.fibB || s.ext, out = [];   // gatilho: perna da última quebra
     const cur = make(A.p, ext.p, d, 'atual'); cur.Ai = A.i; cur.Bi = ext.i;
     life(cur, cs, ext.i); out.push(cur);
     // topo/fundo anterior (já ultrapassado) depois do limite: Fibonacci só de alvos
