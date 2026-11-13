@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T14:55:43.547Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T21:22:55.323Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -810,6 +810,28 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     out.forEach((z) => { z.p = Math.sqrt(z.lo * z.hi); z.dist = price > 0 ? (z.p - price) / price : 0; });
     return out.sort((a, b) => Math.abs(a.dist) - Math.abs(b.dist)).slice(0, 4);
   }
+  // ---------- regra dos setups (a do Richy): sem zona de reversão não há trade ----------
+  // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a viragem confirma-se 2 timeframes abaixo (Mensal → Diário)
+  // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
+  // 3) nenhum em zona → sem trade. Em qualquer caso, um timeframe maior em zona no sentido contrário bloqueia (manda o maior)
+  const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
+  const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '1h', '15m', '5m'];
+  const inZone = (s) => !!(s && s.trend && s.pullback >= 50 && s.pullback <= 100);
+  function resolveSetup(su, dm, cid, ok) {
+    const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id));
+    const cx = P(cid), z = P(su.zone);
+    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
+    if (inZone(cx)) {
+      const t2 = NEXT[NEXT[cid]], t1 = NEXT[cid], trig = has(t2) ? t2 : has(t1) ? t1 : su.trig, dir = cx.trend, bl = above(cid, dir);
+      return { mode: bl ? 'blocked' : 'rev', dir, zone: cid, trig, ctx: CTX_UP[cid] || null, base: cid, block: bl || null };
+    }
+    if (!z || !z.trend) return null;
+    if (inZone(z)) {
+      const dir = z.trend, bl = above(su.zone, dir), m = cx && cx.trend && cx.trend !== dir ? 'counter' : 'with';
+      return { mode: bl ? 'blocked' : m, dir, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone, block: bl || null, room: m === 'counter' && cx.levels ? cx.levels[50] : null };
+    }
+    return { mode: 'none', dir: (cx && cx.trend) || z.trend, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone };
+  }
   // retração (log) de um preço numa Fibonacci: 0 em B, 1 em A
   const retrOf = (f, p) => (f.A > 0 && f.B > 0 && p > 0 ? (Math.log(f.B) - Math.log(p)) / (Math.log(f.B) - Math.log(f.A)) : (f.B - p) / (f.B - f.A));
   // ⭐ confluência: um alvo (por atingir) do timeframe de baixo, a andar contra a tendência do de cima, cai na zona de entrada do de cima (61,8%–78,6%)
@@ -829,7 +851,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  root.MSS_FIB = { resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Alertas do Scanner de Estrutura — a lógica (sem rede): recebe velas, definições e marcações; devolve as mensagens.
@@ -1195,10 +1217,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
 
   // ---------- 1) setups: zona com correção ≥ X% e quebra no timeframe de gatilho, no fecho da vela ----------
   function setupAlerts(sym, dm, S, A, st, now, out) {
-    for (const su of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false)) {
+    const same = new Set();   // dois setups que dão o mesmo trade (mesma zona, gatilho e lado) só avisam uma vez — o maior
+    for (const su0 of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false)) {
+      // regra dos setups (alerts/fib.js): só há trade com um timeframe em zona; reversão do contexto quando é ele que está em zona
+      const rsv = dm[su0.zone] && dm[su0.trig] && FB && FB.resolveSetup ? FB.resolveSetup(su0, dm, ctxOf(su0)) : null;
+      if (!rsv || !['rev', 'with', 'counter'].includes(rsv.mode)) continue;
+      const su = Object.assign({}, su0, { zone: rsv.zone, trig: rsv.trig, ctx: rsv.ctx || undefined });
       const dz = dm[su.zone], dt = dm[su.trig]; if (!dz || !dt) continue;
       const z = dz.ext.snap; if (!z.trend) continue;
-      const dir = z.trend, t = dt.int.snap;
+      const dir = rsv.dir, t = dt.int.snap;
+      { const k = su.zone + '|' + su.trig + '|' + dir; if (same.has(k)) continue; same.add(k); }
       let lb = t.lastBreak;
       // lateralização no gatilho (5m/15m/1H): as viragens dentro da caixa não contam; o gatilho é o fecho fora dela, no sentido do setup
       const bx = ['5m', '15m', '1h'].includes(su.trig) && E.rangeBox ? E.rangeBox(dt.closed) : null;
@@ -1219,7 +1247,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       if (st.seen[key]) continue;
       st.seen[key] = now;
       // a zona tem de estar em correção ≥ mínimo; quebras antigas (vigia desligado, 1.ª volta) ficam vistas sem aviso
-      if (!(z.pullback >= +A.minPull) || z.pullback > 91.8) continue;   // acima de 91,8% está perto da invalidação: não é setup
+      if (!(z.pullback >= Math.max(50, +A.minPull || 50)) || z.pullback > 100) continue;   // zona: dos 50% ao limite (acima de 91,8% avisa que a margem é curta)
       if (cc.ct < now - (TF_MS[su.trig] + 40 * 6e4) || st.silent) continue;
       const f = dt.int.res.fvgs.find((x) => x.dir === dir && x.mid >= lb.i - 1 && x.mid <= Math.max(lb.i, lb.conf || lb.i) + 1);
       const cid = ctxOf(su), cx = cid && dm[cid] && dm[cid].ext.snap;
@@ -1245,11 +1273,12 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const strong = !!(xb && xb.dir === dir && xs.trend === dir && scl[xb.i] && (!zx || !dz.closed[zx.i] || scl[xb.i].t >= dz.closed[zx.i].t));
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
-        `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}`,
+        `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}${z.pullback > 91.8 ? ' · ⚠ margem curta (perto do limite)' : ''}`,
+        rsv.mode === 'rev' ? `Reversão: o ${LBL[su.zone]} está em zona e o ${LBL[su.trig]} virou a favor` : rsv.mode === 'counter' ? `Contra o ${LBL[rsv.ctx]}, que ainda tem margem até à zona dele${rsv.room ? ' (' + fmt(rsv.room) + ')' : ''}` : '',
         lb.box ? `Gatilho ${LBL[su.trig]}: quebrou a lateralização ${up ? 'para cima' : 'para baixo'} — caixa ${fmt(lb.box.lo)} – ${fmt(lb.box.hi)} (${lb.box.bars} velas), fecho ${fmt(bc.c)}` : `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
-      ];
+      ].filter((x) => x !== '');
       if (strong) lines.splice(3, 0, dt.uni ? `💪 Quebra forte: a estrutura do ${LBL[sTf]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})` : `💪 Quebra forte: a tendência principal do ${LBL[su.trig]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})`);
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);
       // Fibonacci da zona: entrada ótima / profunda, ⭐ confluência com o timeframe de baixo, alvos
@@ -1283,17 +1312,20 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // ---------- 1b) confirmação: dentro da zona de um setup, o movimento recente do timeframe da zona (Diário/Semanal…) vira a favor ----------
   // não é gatilho (esse é o 1H/4H, mais cedo e com stop mais curto): é o sinal de que o movimento ganhou força — "segunda oportunidade"
   function confAlerts(sym, dm, S, A, st, now, out) {
-    for (const su of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false && (TF_MS[x.zone] || 0) >= TF_MS['1d'])) {
+    for (const su0 of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false)) {
+      const rsv = dm[su0.zone] && dm[su0.trig] && FB && FB.resolveSetup ? FB.resolveSetup(su0, dm, ctxOf(su0)) : null;
+      if (!rsv || !['with', 'counter'].includes(rsv.mode) || (TF_MS[rsv.zone] || 0) < TF_MS['1d']) continue;   // reversão: a confirmação já é o próprio gatilho
+      const su = Object.assign({}, su0, { zone: rsv.zone, trig: rsv.trig, ctx: rsv.ctx || undefined });
       const dz = dm[su.zone]; if (!dz || !dz.ext || !dz.int) continue;
       // duas estruturas: o recente do timeframe da zona; estrutura única: a estrutura do timeframe logo abaixo (zona do Diário → 4H)
       const cTf = dz.uni ? FB && FB.NEXT[su.zone] : su.zone, dc = cTf && dm[cTf]; if (!dc || !dc.ext) continue;
       const z = dz.ext.snap, n = dz.uni ? dc.ext.snap : dz.int.snap; if (!z.trend) continue;
-      const dir = z.trend, lb = n.lastBreak, cl = dc.closed;
+      const dir = rsv.dir, lb = n.lastBreak, cl = dc.closed;
       if (!lb || lb.dir !== dir || n.trend !== dir || lb.type !== 'CHoCH') continue;
       const ex = dz.ext.res.state && dz.ext.res.state.ext; if (ex && dz.closed[ex.i] && cl[lb.i] && cl[lb.i].t <= dz.closed[ex.i].t) continue;   // a viragem tem de vir depois do topo/fundo da perna (dentro da correção)
       const bc = cl[Math.min(cl.length - 1, lb.conf != null ? lb.conf : lb.i)]; if (!bc) continue;
       const key = `cf|${sym}|${su.name}|${bc.t}|${dir}`; if (st.seen[key]) continue; st.seen[key] = now;
-      if (!(z.pullback >= +A.minPull) || z.pullback > 91.8) continue;
+      if (!(z.pullback >= Math.max(50, +A.minPull || 50)) || z.pullback > 100) continue;
       if (st.silent || bc.ct < now - (TF_MS[cTf] + 2 * 36e5)) continue;
       const up = dir === 1;
       out.push({ kind: 'conf', sym, tf: su.zone, text: [
@@ -1708,7 +1740,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const A = monA(effA(A0, sym), S, sym), out = [], dm = {};
     curRaw = raw; curS = S;   // linhas medidas nas velas deste ativo
     const setupTfs = new Set();
-    (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); if (ctxOf(x)) setupTfs.add(ctxOf(x)); });
+    (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); const c = ctxOf(x); if (c) { setupTfs.add(c); if (FB && FB.NEXT[c] && FB.NEXT[FB.NEXT[c]]) setupTfs.add(FB.NEXT[FB.NEXT[c]]); if (FB && FB.CTX_UP[c]) setupTfs.add(FB.CTX_UP[c]); } if ((TF_MS[x.zone] || 0) < TF_MS['1M']) setupTfs.add('1M'); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
     if (A.brkOn) (A.brkTfs || A_DEF.brkTfs).forEach((id) => setupTfs.add(id));
     if (A.rzOn) (A.rzTfs || A_DEF.rzTfs).forEach((id) => setupTfs.add(id));
