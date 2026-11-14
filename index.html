@@ -756,6 +756,9 @@
   .np-arw{display:inline-flex;gap:4px;vertical-align:middle;margin-right:12px}
   .np-arw button{width:34px;height:34px;padding:0;font:600 22px/1 system-ui,sans-serif;border:1px solid var(--np-ink,#111);background:transparent;color:var(--np-ink,#111);cursor:pointer;border-radius:2px}
   .np-arw button:hover{background:var(--np-ink,#111);color:var(--np-bg,#fff)}
+  .c4sw { position:absolute; top:6px; left:8px; z-index:6; display:inline-flex; padding:0; border:1px solid var(--line, #888); border-radius:12px; overflow:hidden; background:var(--panel, rgba(255,255,255,.85)); cursor:pointer; font:600 11px/1 system-ui, sans-serif; }
+  .c4sw span { padding:4px 8px; color:var(--muted, #888); }
+  .c4sw span.on { background:#f5c518; color:#111; }
 </style>
 </head>
 <body>
@@ -791,7 +794,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 15h41</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 16h00</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -882,7 +885,7 @@
     <h3 class="helphead">5 · Setups e favoritos</h3>
     <ul>
       <li><b>A regra dos setups:</b> <b>sem zona de reversão não há trade.</b> Uma zona é uma correção de 50% ou mais (até ao limite; a partir de 78,6% é <b>desconto profundo</b> numa zona de compra ou <b>prémio profundo</b> numa de venda — não é mau sinal: o sítio provável da reação passa a ser o order block seguinte, que a app indica). (1) Se o timeframe de <b>contexto</b> está em zona, o setup é de <b>reversão</b> a favor dele, e a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H). (2) Senão, se o timeframe da <b>zona</b> está em zona, o setup é a favor dele; contra o contexto só vale se o contexto ainda tiver margem até à zona dele. (3) Nenhum em zona → <b>Sem trade</b>. Manda sempre o maior: um timeframe maior em zona no sentido contrário bloqueia o setup. Quando dois setups dão o mesmo trade, só conta o maior.</li>
-      <li><b>Os dois 4H.</b> O 4H tem duas estruturas sobre as mesmas velas: o <b>4H de quebra</b> (todos os topos e fundos — é onde se vê a quebra do Longo prazo) e o <b>4H de contexto</b> (só as pernas que partiram estrutura, ancorado ao último topo/fundo do Diário — é a zona do Day trade e o contexto do Scalp). No gráfico do 4H, o botão <b>“4H quebra ⇄ contexto”</b> troca a vista. Cada setup lê sempre a estrutura certa, seja qual for a que tens à vista. As marcas que fizeres numa não mexem na outra; as tuas linhas e canais são os mesmos nas duas.</li>
+      <li><b>Os dois 4H.</b> O 4H tem duas estruturas sobre as mesmas velas: o <b>4H de quebra</b> (todos os topos e fundos — é onde se vê a quebra do Longo prazo) e o <b>4H de contexto</b> (só as pernas que partiram estrutura, ancorado ao último topo/fundo do Diário — é a zona do Day trade e o contexto do Scalp). No gráfico do 4H, o interruptor <b>quebra | contexto</b> no canto de cima do gráfico troca a vista — e fica na posição que escolheres, mesmo depois de recarregar. Cada setup lê sempre a estrutura certa, seja qual for a que tens à vista. As marcas que fizeres numa não mexem na outra; as tuas linhas e canais são os mesmos nas duas.</li>
       <li><b>Setups</b> (painel no topo): cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H contexto → 15m), Scalp (4H contexto · 1H → 5m) — editáveis nas Definições. <b>Sentido</b> = a direção da tendência principal do timeframe de zona: ▲ <b>Long</b> ou ▼ <b>Short</b>.</li>
       <li><b>Checklist:</b> <b>Contexto</b> (só informação) — <b>✔ A favor</b> se o timeframe de contexto vai no mesmo sentido, ou <b>Contra (X%)</b> com o recuo atual dele (abaixo de 50% ainda há espaço até à zona dele); <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem ⚡ recente no movimento recente do timeframe de baixo (“ainda contra” = vai ao contrário; “já confirmada” = já está a favor mas sem viragem nova); <b>FVG na quebra</b>. <b>💧 sweep antes</b> = extra, torna o setup mais forte.</li>
       <li><b>Estado:</b> <b>Em formação</b> (cinzento = fora da zona; amarelo = zona cumprida), com “falta: …”; <b>✔ Pronto</b> = Zona, Quebra e FVG cumpridos, com a nota “a favor” ou “contra” o timeframe de contexto. Avisos: “topo/fundo por varrer perto” (liquidez do lado contrário que o preço ainda pode ir buscar) e “✋ … em modo manual — não atualiza”. Entrada, stop e alvos são contigo.</li>
@@ -2530,6 +2533,11 @@
     s.tfs = (s.tfs || []).filter((x) => TF_IDS.includes(x));
     try { window.MSS_SYNTH.monMigrate(s); } catch (e) {}   // 15m/5m só nos ativos com intraday (BTC)
     if (!s.uniV2) { s.uniV2 = 1; s.uniStruct = true; s.uniSens = { ctx: 3, trig: 1 }; s.uniSensPer = {}; }   // uma estrutura por gráfico: contexto só quebras (3), gatilho todos os topos/fundos (1)
+    // 4H de contexto: os "Pontos" do grupo de quebra que foram mudados à mão (para ter zona no 4H) voltam ao padrão (1), uma vez; fica uma cópia em mig4hcBak
+    if (!s.mig4hc) { s.mig4hc = 1; const per = s.uniSensPer || {}, bak = {};
+      for (const k in per) if (per[k] && per[k].trig != null && +per[k].trig !== 1) { bak[k] = per[k].trig; delete per[k].trig; if (!Object.keys(per[k]).length) delete per[k]; }
+      if (s.uniSens && +s.uniSens.trig > 1) { bak._todos = s.uniSens.trig; s.uniSens.trig = 1; }
+      if (Object.keys(bak).length) s.mig4hcBak = bak; }
     return s;
   }
   let settings = migrateSettings(Object.assign({}, DEFAULT_SETTINGS, load('mss_settings4', {})));
@@ -4033,11 +4041,14 @@
   function emaOf(v, n) { const o = new Array(v.length).fill(null); if (v.length < n) return o; let e = 0; for (let i = 0; i < n; i++) e += v[i]; e /= n; o[n - 1] = e; const k = 2 / (n + 1); for (let i = n; i < v.length; i++) { e = v[i] * k + e * (1 - k); o[i] = e; } return o; }
   function smaOf(v, n) { const o = new Array(v.length).fill(null); let s = 0; for (let i = 0; i < v.length; i++) { s += v[i]; if (i >= n) s -= v[i - n]; if (i >= n - 1) o[i] = s / n; } return o; }
   function atrOf(cs, n) { const o = new Array(cs.length).fill(null); let a = 0; for (let i = 0; i < cs.length; i++) { const c = cs[i], tr = i ? Math.max(c.h - c.l, Math.abs(c.h - cs[i - 1].c), Math.abs(c.l - cs[i - 1].c)) : c.h - c.l; if (i < n) { a += tr; if (i === n - 1) { a /= n; o[i] = a; } } else { a = (a * (n - 1) + tr) / n; o[i] = a; } } return o; }
+  // o interruptor do 4H fica na posição escolhida: ao abrir o 4H (botão, recarregar, outro ativo) mostra a estrutura gravada
+  function fix4h() { const w = settings.c4On && uniOn(settings) && data['4hc'] ? '4hc' : '4h'; if ((selectedTf === '4h' || selectedTf === '4hc') && selectedTf !== w) { selectedTf = w; if (uniOn(settings)) editLayer = uniL(w); } }
   function renderChart(keepRange) {
+    try { fix4h(); } catch (e) {}
     const d = data[selectedTf]; if (!d) return;
     try { symNavUi(); } catch (e) {}
     { const n = nm(symbol), e = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); $('#chartTitle').innerHTML = `${e(n)}${n !== symbol ? ` <span style="font-weight:400;opacity:.6;font-size:.8em">${e(symbol)}</span>` : ''} · ${tfLabel(selectedTf)}`; }
-    { const c4 = $('#c4Btn'); if (c4) { const on4 = selectedTf === '4h' || selectedTf === '4hc'; c4.style.display = on4 && data['4hc'] ? '' : 'none'; c4.innerHTML = selectedTf === '4hc' ? '<b>4H contexto</b> ⇄ quebra' : '<b>4H quebra</b> ⇄ contexto'; c4.classList.toggle('on', selectedTf === '4hc'); } }
+    { const c4 = $('#c4Sw'); if (c4) { const on4 = selectedTf === '4h' || selectedTf === '4hc'; c4.style.display = on4 && data['4hc'] ? '' : 'none'; c4.innerHTML = `<span class="${selectedTf === '4h' ? 'on' : ''}">quebra</span><span class="${selectedTf === '4hc' ? 'on' : ''}">contexto</span>`; } }
     document.querySelectorAll('.tfbtn').forEach((b) => { b.classList.toggle('on', b.dataset.tf === lnSel()); b.style.display = tfHid(b.dataset.tf) || (!isCrypto(symbol) && !Y_IV[b.dataset.tf] && !Y_AGG[b.dataset.tf] && !Y_MAGG[b.dataset.tf]) ? 'none' : ''; });   // ações: sem 3m
     $('#tgExt').classList.toggle('on', vE()); $('#tgInt').classList.toggle('on', vI());
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
@@ -5468,7 +5479,7 @@
     if (t === 'grafico') setTimeout(() => { try { chart.panes()[1].setHeight(window.innerWidth <= 760 ? 90 : 130); } catch (e) {} renderChart(false); }, 60);
   }
   const lnSel = () => (selectedTf === '4hc' ? '4h' : selectedTf);   // as tuas linhas no 4H de contexto ficam no 4H (são as mesmas velas)
-  function selectTf(id) { const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id === '4hc' ? '4h' : id); closeMenu(); if (uniOn(settings)) { editLayer = uniL(id); try { updateEditUi(); } catch (e) {} } try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
+  function selectTf(id) { if (id === '4h' && settings.c4On && uniOn(settings) && data['4hc']) id = '4hc'; const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id === '4hc' ? '4h' : id); closeMenu(); if (uniOn(settings)) { editLayer = uniL(id); try { updateEditUi(); } catch (e) {} } try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
   function recomputeAll() { for (const id of Object.keys(data)) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderPrev(); renderChart(true); }
 
   // ---------- definições ----------
@@ -7054,9 +7065,9 @@ Usa só os números destes dados.`;
       try {
         // só se volta a descarregar velas quando muda o que se descarrega (timeframes, setups, monitorização); de resto só se recalcula
         const dl = (x) => JSON.stringify([x.tfs, x.setups, x.mon, x.prevLevels]), before = dl(settings);
-        const r = JSON.parse(j); cloud.applying = true; const monMig = !(r.mon && r.mon.v2) || !r.uniV2;
+        const r = JSON.parse(j); cloud.applying = true; const m4 = !r.mig4hc, monMig = !(r.mon && r.mon.v2) || !r.uniV2 || m4;
         if (!r.uniV2) { delete r.uniStruct; delete r.uniSens; delete r.uniSensPer; }   // definições da conta ainda do modo antigo: ficam as desta versão (e sobem para a conta)
-        Object.assign(settings, r); migrateSettings(settings); save('mss_settings4', settings); applyTheme();
+        Object.assign(settings, r); if (m4) delete settings.mig4hc; migrateSettings(settings); save('mss_settings4', settings); applyTheme();
         cloud.applying = false; if (monMig) setTimeout(() => { try { cloudPushSettings(); } catch (e) {} }, 800);
         if (!editMode) editLayer = settings.layer === 'ext' ? 'ext' : 'int';
         if (dl(settings) !== before || !Object.keys(data).length) loadAll(); else { try { recomputeAll(); updateEditUi(); sensUi(); } catch (e) { loadAll(); } }
@@ -7098,8 +7109,9 @@ Usa só os números destes dados.`;
   }
   function init() {
     $('#symbol').value = symbol;
-    $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>` + (t.id === '4h' ? `<button type="button" id="c4Btn" class="lyr" style="display:none;margin-left:0" title="O 4H tem duas estruturas: a de QUEBRA (todos os topos e fundos — dá a quebra do Longo prazo) e a de CONTEXTO (só as pernas que partiram estrutura, ancorada ao Diário — dá a zona do Day trade e o contexto do Scalp). Carrega para trocar">4H quebra ⇄ contexto</button>` : '')).join('');
-    $('#c4Btn').addEventListener('click', () => selectTf(selectedTf === '4hc' ? '4h' : '4hc'));
+    $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>`).join('');
+    { const sw = document.createElement('button'); sw.type = 'button'; sw.id = 'c4Sw'; sw.className = 'c4sw'; sw.title = 'O 4H tem duas estruturas: QUEBRA (todos os topos e fundos — dá a quebra do Longo prazo) e CONTEXTO (só as pernas que partiram estrutura, ancorada ao Diário — dá a zona do Day trade e o contexto do Scalp). Fica na posição que escolheres, mesmo depois de recarregar';
+      $('#chart').appendChild(sw); sw.addEventListener('click', (e) => { e.stopPropagation(); settings.c4On = !settings.c4On; save('mss_settings4', settings); selectTf(settings.c4On ? '4hc' : '4h'); }); }
     document.querySelectorAll('.tfbtn').forEach((b) => b.addEventListener('click', () => selectTf(b.dataset.tf)));
     // caixa do par: abre o ticker exato; escrevendo um nome mostra sugestões (ações e crypto)
     const symSug = $('#symSug'); let sq = null;
