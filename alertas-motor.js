@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T16:00:06.746Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T19:38:34.697Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -314,6 +314,23 @@
       }
     }
     return { atrL, atr, volAvg, fvgs };
+  }
+
+  // FVG "vivos": guarda quanto de cada FVG já foi preenchido e encolhe-o à parte que falta; preenchido a ≥ 75% conta como preenchido (filled = vela).
+  // Corre DEPOIS da estrutura (a deteção de quebras fortes usa o tamanho original). Idempotente.
+  function fvgLive(res, candles, k) {
+    k = k == null ? 0.75 : k; if (!res || !res.fvgs) return res; const n = candles.length;
+    for (const f of res.fvgs) {
+      if (f.top0 == null) { f.top0 = f.top; f.bot0 = f.bot; }
+      const top = f.top0, bot = f.bot0, sz = top - bot; let rt = top, rb = bot, fl = null;
+      for (let j = f.created + 1; j < n && sz > 0; j++) {
+        if (f.dir === 1) { rt = Math.min(rt, candles[j].l); if ((top - rt) / sz >= k) { fl = j; break; } }
+        else { rb = Math.max(rb, candles[j].h); if ((rb - bot) / sz >= k) { fl = j; break; } }
+      }
+      f.filled = fl; f.fillPct = sz > 0 ? Math.max(0, Math.min(1, f.dir === 1 ? (top - rt) / sz : (rb - bot) / sz)) : 1;
+      f.top = fl == null ? Math.max(rt, bot) : top; f.bot = fl == null ? Math.min(rb, top) : bot;
+    }
+    return res;
   }
 
   // rótulos HH/HL/LH/LL
@@ -724,7 +741,7 @@
     }
     return null;
   }
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom };
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -1014,6 +1031,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const sfl = ['5m', '15m'].includes(id) ? ((S.swFloor == null ? 1 : +S.swFloor) || 0) : 0;
     const layer = (fn, atrMult, reqDisp, ov, xo) => {
       const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null, slowFloor: fn === E.analyzeRecent ? sfl : 0 }, xo || {}));
+      if (E.fvgLive) E.fvgLive(res, closed);   // FVG: só a parte por preencher; ≥ 75% preenchido sai
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
     if (uniOn(S)) {   // estrutura única (igual à app)

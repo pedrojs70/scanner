@@ -759,6 +759,7 @@
   .c4sw { position:absolute; top:6px; left:8px; z-index:6; display:inline-flex; padding:0; border:1px solid var(--line, #888); border-radius:12px; overflow:hidden; background:var(--panel, rgba(255,255,255,.85)); cursor:pointer; font:600 11px/1 system-ui, sans-serif; }
   .c4sw span { padding:4px 8px; color:var(--muted, #888); }
   .c4sw span.on { background:#f5c518; color:#111; }
+  .np-chi { text-decoration:none !important; margin-right:6px; font-size:14px; }
 </style>
 </head>
 <body>
@@ -794,7 +795,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 16h00</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 19h38</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -1572,6 +1573,23 @@
     return { atrL, atr, volAvg, fvgs };
   }
 
+  // FVG "vivos": guarda quanto de cada FVG já foi preenchido e encolhe-o à parte que falta; preenchido a ≥ 75% conta como preenchido (filled = vela).
+  // Corre DEPOIS da estrutura (a deteção de quebras fortes usa o tamanho original). Idempotente.
+  function fvgLive(res, candles, k) {
+    k = k == null ? 0.75 : k; if (!res || !res.fvgs) return res; const n = candles.length;
+    for (const f of res.fvgs) {
+      if (f.top0 == null) { f.top0 = f.top; f.bot0 = f.bot; }
+      const top = f.top0, bot = f.bot0, sz = top - bot; let rt = top, rb = bot, fl = null;
+      for (let j = f.created + 1; j < n && sz > 0; j++) {
+        if (f.dir === 1) { rt = Math.min(rt, candles[j].l); if ((top - rt) / sz >= k) { fl = j; break; } }
+        else { rb = Math.max(rb, candles[j].h); if ((rb - bot) / sz >= k) { fl = j; break; } }
+      }
+      f.filled = fl; f.fillPct = sz > 0 ? Math.max(0, Math.min(1, f.dir === 1 ? (top - rt) / sz : (rb - bot) / sz)) : 1;
+      f.top = fl == null ? Math.max(rt, bot) : top; f.bot = fl == null ? Math.min(rb, top) : bot;
+    }
+    return res;
+  }
+
   // rótulos HH/HL/LH/LL
 
   // ponto de partida manual e zona manual (do início até à última marca só contam as marcas do utilizador)
@@ -1980,7 +1998,7 @@
     }
     return null;
   }
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom };
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -2803,6 +2821,7 @@
     const sfl = ['5m', '15m'].includes(id) ? ((settings.swFloor == null ? 1 : +settings.swFloor) || 0) : 0;
     const layer = (fn, atrMult, reqDisp, ov, xo) => {
       const res = fn(closed, Object.assign({}, base, { minRetraceAtr: +atrMult, requireDisp: !!reqDisp, ov: ov || null, slowFloor: fn === E.analyzeRecent ? sfl : 0 }, xo || {}));
+      if (E.fvgLive) E.fvgLive(res, closed);   // FVG: só a parte por preencher; ≥ 75% preenchido sai
       return { res, snap: E.snapshot(res, price, closed.length - 1, closed.length ? closed[closed.length - 1].c : price) };
     };
     if (uniOn(settings)) {   // estrutura única: a mesma estrutura serve de "principal" e de "recente" — tudo o resto da app lê-a sem mudar
@@ -6227,30 +6246,40 @@ ${AI_DAY_FORMAT}`;
   function npSetFilter(f) { npFilter = f; document.querySelectorAll('#npFilters button').forEach((b) => b.classList.toggle('on', b.dataset.f === f)); npRenderFeed(); }
   // ---------- Reversões prováveis: ativos em zona de correção (≥ 50%) com tudo o que a app vê a favor da reversão — sem depender do gatilho ----------
   const REV_TFS = ['1h', '4h', '1d', '1w', '1M'], REV_UP = { '1h': '4h', '4h': '1d', '1d': '1w', '1w': '1M', '1M': '3M' };
-  const REV_COLS = [['fib', 'Fib', 'Dentro da entrada ótima até à 0,786 (retração 61,8–80%)'], ['star', '⭐', 'Um alvo Fibonacci do timeframe de baixo cai na zona'], ['fvg', 'FVG', 'FVG por preencher dentro da zona (entre os 50% e a origem)'],
+  const REV_COLS = [['fib', 'Fib', 'Fibonacci da perna atual deste timeframe. Em cima: a entrada ótima [0,618–0,65]; em baixo: o preço da 0,786. ✔ quando a retração está entre 61,8% e 80% (ou numa ⭐ zona de reversão)'], ['star', '⭐', 'Um alvo Fibonacci do timeframe de baixo cai na zona'], ['fvg', 'FVG', 'FVG por preencher dentro da zona (entre os 50% e a origem da perna) — só a parte que falta preencher; um FVG preenchido a 75% ou mais já não conta. Em baixo: o timeframe, a data e a distância'],
     ['sma', 'SMA 200', 'Preço a menos de 2% da SMA 200 deste timeframe'], ['kc', 'Keltner', 'Uma das 3 últimas velas passou a banda de ±3 ATR do lado da correção'], ['div', 'Diverg.', 'Divergência RSI ativa no sentido da reversão'],
-    ['sw', '💧 Sweep', 'Liquidez varrida (sombra além de um topo/fundo e fecho de volta) nas últimas 6 velas, aqui ou no timeframe de baixo'], ['ln', 'Linha', 'Uma linha ou canal teu a menos da distância escolhida nessa linha'],
-    ['fr', 'Força rel.', 'Pelos teus rácios (Semanal e Diário), o ativo ganha a mais do que perde (Long) ou perde mais do que ganha (Short)'], ['ctx', 'Contexto', 'O timeframe de cima vai no mesmo sentido']];
+    ['sw', '💧 Sweep', 'Liquidez varrida (sombra além de um topo/fundo e fecho de volta) nas últimas 6 velas, aqui ou no timeframe de baixo'], ['ln', 'Linha', 'A linha ou canal teu mais perto (só até 15% do preço); ✔ quando está a menos da distância escolhida nessa linha'],
+    ['fr', 'Força rel.', 'Pelos teus rácios onde este ativo entra, pela regra das zonas: um rácio está A FAVOR se estiver em zona do lado que ajuda este trade (ou já tiver quebrado a favor) e CONTRA se estiver em zona do lado oposto; fora de zona não conta. ✔ quando há mais a favor do que contra'],
+    ['ctx', 'Contexto', 'O timeframe de cima: zona dupla (também em zona do mesmo lado — reforça) · a favor, sem zona (vai no mesmo sentido) · ⚠ contra, com margem (vai ao contrário mas ainda longe da zona dele) · ⛔ bloqueado (está em zona do lado oposto)']];
   let npRevTf = 'all';
+  // força relativa pela regra das zonas: rácios onde o ativo entra, em zona do lado que ajuda (ou já quebrado a favor) = a favor; em zona do lado oposto = contra
+  function revFr(s, dir) {
+    const fav = [], con = []; let n = 0;
+    for (const r of settings.favs || []) { if (!isRatio(r)) continue; const lg = ratioLegs(r); if (!lg.includes(s) || !favData[r]) continue; n++;
+      const x = aiBest(r); if (!x) continue; const sg = lg[0] === s ? 1 : -1, eff = x.dir * sg, o = nm(lg[0] === s ? lg[1] : lg[0]);
+      const t = `${nm(r)} ${x.rank >= 3 ? `já quebrou ${x.dir === 1 ? 'para cima' : 'para baixo'}` : `em zona de ${x.dir === 1 ? 'compra' : 'venda'}`} no ${tfLabel(x.st.zone)} (${pct(x.z.pullback)})`;
+      (eff === dir ? fav : con).push({ o, t }); }
+    return { fav, con, n };
+  }
   function revRows() {
     const rows = [], now = Date.now(), F = (x) => aiF(x), D = (x, p) => pct((x - p) / p * 100, true);
     for (const s of settings.favs || []) {
       const dm = (favData[s] || {}).tfs || {};
+      const K4 = (x) => (x === '4h' && dm['4hc'] ? '4hc' : x);   // as zonas do 4H vêm do 4H de contexto (só quebras)
       for (const id of REV_TFS) {
-        const d = dm[id]; if (!d || !d.ext || !d.ext.snap) continue; const z = d.ext.snap;
+        const d = dm[K4(id)]; if (!d || !d.ext || !d.ext.snap) continue; const z = d.ext.snap;
         if (!z.trend || !(z.pullback >= 50 && z.pullback <= 100)) continue;
         const dir = z.trend, price = d.price, f = d.fibs && d.fibs[0], ok = {}, val = {};
         const V = (k, v, sub, title) => { val[k] = { v, d: sub || '', t: title || '' }; };
         if (f) {
           const r = FB.retrOf(f, price) * 100, zc = (d.fibConf || []).find((z) => price >= z.lo * 0.98 && price <= z.hi * 1.02); ok.fib = (r >= 61.8 && r <= 80) || !!zc;   // ⭐ zona de reversão (Fibonacci que coincidem) também conta
-          V('fib', zc ? `⭐ ${F(zc.lo)}–${F(zc.hi)}` : `${F(f.entry.lo)}–${F(f.entry.hi)}`, zc ? `zona de reversão: ${zc.parts.join(' + ')}` : `retração ${pct(r)} · 0,786 ${F(f.deep)}`, 'Entrada ótima 0,618–0,65 (✔ entre 61,8% e 80%) ou ⭐ zona de reversão: preço a menos de 2% de uma zona onde Fibonacci diferentes coincidem');
+          V('fib', zc ? `⭐ [${F(zc.lo)}–${F(zc.hi)}]` : `[${F(f.entry.lo)}–${F(f.entry.hi)}]`, zc ? `zona de reversão: ${zc.parts.join(' + ')}` : F(f.deep), 'Entrada ótima 0,618–0,65 (✔ entre 61,8% e 80%) ou ⭐ zona de reversão: preço a menos de 2% de uma zona onde Fibonacci diferentes coincidem');
           const m50 = f.A > 0 && f.B > 0 ? Math.exp((Math.log(f.A) + Math.log(f.B)) / 2) : (f.A + f.B) / 2, zl = Math.min(f.A, m50), zh = Math.max(f.A, m50);
-          const fv = [...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])].filter((x) => x.dir === dir && x.filled == null && x.top >= zl && x.bot <= zh)
+          const fv = [...new Set([...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])])].filter((x) => x.dir === dir && x.filled == null && x.top > zl && x.bot < zh)
             .sort((a, b) => Math.abs((a.top + a.bot) / 2 - price) - Math.abs((b.top + b.bot) / 2 - price))[0];
-          ok.fvg = !!fv; if (fv) { const edge = price > fv.top ? fv.top : price < fv.bot ? fv.bot : price; V('fvg', `${F(fv.bot)}–${F(fv.top)}`, edge === price ? 'o preço está dentro' : D(edge, price)); }
+          ok.fvg = !!fv; if (fv) { const edge = price > fv.top ? fv.top : price < fv.bot ? fv.bot : price, ct = d.closed[fv.mid] && new Date(d.closed[fv.mid].t), dt = ct ? `${String(ct.getMonth() + 1).padStart(2, '0')}/${ct.getFullYear()}` : '';
+            V('fvg', `${F(fv.bot)}–${F(fv.top)}`, `${tfLabel(id)}${dt ? ' · de ' + dt : ''} · ${edge === price ? 'o preço está dentro' : D(edge, price)}`, fv.fillPct > 0.02 ? `já preenchido ${Math.round(fv.fillPct * 100)}%: mostra só a parte que falta` : ''); }
           V('inv', F(f.A), D(f.A, price));
-          const risk = Math.abs(price - f.A), rw = dir === 1 ? f.B - price : price - f.B;
-          if (risk > 0 && rw > 0) { const rr = rw / risk; V('rr', rr.toFixed(1).replace('.', ','), `até ${F(f.B)}`); ok.rr = rr >= 2; }
         }
         const c = starOf(dm, id); ok.star = !!c; if (c) V('star', `${F(c.lo)}–${F(c.hi)}`, `${c.tgt} do ${tfLabel(c.tf)}`);
         const sm = smaOfTf(d, 200); ok.sma = !!(sm && Math.abs(price - sm) / sm <= 0.02); if (sm) V('sma', F(sm), D(sm, price));
@@ -6264,10 +6293,15 @@ ${AI_DAY_FORMAT}`;
         userLines(s).filter((l) => lnLive(l, now)).forEach((l) => { const pc = (+l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)) / 100, fcs = (favData[s] && favData[s].tfs && (favData[s].tfs[l.tf] || favData[s].tfs['1d'] || {}).candles) || null, a0 = lnVal(l, now, 0, fcs), a1 = l.type === 'chan' ? lnVal(l, now, l.off || 0, fcs) : null;
           [[a0, l.type === 'chan' ? (a1 != null && a0 > a1 ? 'teto do canal' : 'chão do canal') : 'diagonal'], ...(a1 != null ? [[a1, a1 > a0 ? 'teto do canal' : 'chão do canal']] : [])].forEach(([v, n]) => {
             if (!(v > 0)) return; const dd = Math.abs(price - v) / v; if (!best || dd < best.dd) best = { v, n, dd, ok: dd <= pc }; }); });
-        ok.ln = !!(best && best.ok); if (best) V('ln', `${best.n} ${F(best.v)}`, D(best.v, price));
-        if (!isRatio(s)) { const fr = aiStrength(s); if (fr.n) { const fav = dir === 1 ? fr.winN : fr.loseN, con = dir === 1 ? fr.loseN : fr.winN, cut = (a) => a.slice(0, 3).join(', ') + (a.length > 3 ? ` +${a.length - 3}` : '');
-          ok.fr = fav.length > con.length; V('fr', fav.length ? 'a favor: ' + cut(fav) : 'a favor: nenhum', con.length ? 'contra: ' + cut(con) : (fr.mixN.length ? 'misto: ' + cut(fr.mixN) : ''), `a favor: ${fav.join(', ') || '—'}\ncontra: ${con.join(', ') || '—'}${fr.mixN.length ? '\nmisto: ' + fr.mixN.join(', ') : ''}`); } }
-        const up = dm[REV_UP[id]]; ok.ctx = !!(up && up.ext.snap.trend === dir); if (up && up.ext.snap.trend) V('ctx', `${tfLabel(REV_UP[id])} ${up.ext.snap.trend === 1 ? '▲' : '▼'}`, `correção ${pct(up.ext.snap.pullback)}`);
+        if (best && best.dd > 0.15) best = null; ok.ln = !!(best && best.ok); if (best) V('ln', `${best.n} ${F(best.v)}`, D(best.v, price));
+        if (!isRatio(s)) { const fr = revFr(s, dir); if (fr.n) { const cut = (a) => a.slice(0, 3).map((x) => x.o).join(', ') + (a.length > 3 ? ` +${a.length - 3}` : ''), tl = (a) => a.map((x) => `${x.o} (${x.t})`).join('\n') || '—';
+          ok.fr = fr.fav.length > fr.con.length; if (fr.fav.length || fr.con.length) V('fr', fr.fav.length ? 'a favor: ' + cut(fr.fav) : 'a favor: nenhum', fr.con.length ? 'contra: ' + cut(fr.con) : '', `A FAVOR:\n${tl(fr.fav)}\n\nCONTRA:\n${tl(fr.con)}\n\n(${fr.n} rácio${fr.n === 1 ? '' : 's'} com ${nm(s)}; os que estão fora de zona não contam)`); } }
+        const up = dm[K4(REV_UP[id])], us = up && up.ext.snap; ok.ctx = false;
+        if (us && us.trend) { const L = tfLabel(REV_UP[id]), uz = us.pullback >= 50 && us.pullback <= 100, ar = us.trend === 1 ? '▲' : '▼';
+          if (us.trend === dir && uz) { ok.ctx = true; V('ctx', `zona dupla`, `${L} ${ar} também em zona de ${dir === 1 ? 'compra' : 'venda'} (${pct(us.pullback)})`, `O ${L} também está em zona do mesmo lado: as duas zonas somam-se — é das reversões mais fortes`); }
+          else if (us.trend === dir) { ok.ctx = true; V('ctx', `a favor, sem zona`, `${L} ${ar} · correção ${pct(us.pullback)}`, `O ${L} vai no mesmo sentido, mas não está em zona: a reversão aqui é a favor da tendência do ${L}`); }
+          else if (uz) V('ctx', `⛔ bloqueado`, `${L} ${ar} em zona de ${us.trend === 1 ? 'compra' : 'venda'} (${pct(us.pullback)})`, `O ${L} está em zona do lado oposto: pela tua regra manda o timeframe maior — este trade fica bloqueado`);
+          else { const z50 = us.protected > 0 && us.extreme > 0 ? (us.protected + us.extreme) / 2 : null; V('ctx', `⚠ contra, com margem`, `${L} ${ar} · correção ${pct(us.pullback)}${z50 ? ` · zona dele a ${D(z50, price)}` : ''}`, `O ${L} vai ao contrário e ainda não está em zona (começa nos 50%${z50 ? ', em ' + F(z50) : ''}): o trade é contra o ${L}, com o alvo na zona dele`); } }
         const su = (settings.setups || []).find((x) => x.on && x.zone === id), ev = su ? favSetup(s, su) : null;
         const gat = !ev ? '—' : ev.rank === 4 ? '✔ pronto' : ev.rank === 3 ? '⚡ falta FVG' : ev.box ? '↔ lateral' : ev.rank === 2 ? '⏳ falta quebra' : '—';
         const score = REV_COLS.filter(([k]) => ok[k]).length;
@@ -6406,7 +6440,7 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
     const chip = (txt, cls, tip) => `<span class="np-suc ${cls || ''}"${tip ? ` title="${npEsc(tip)}"` : ''}>${txt}</span>`;
     const row = (r) => { const x = r.x, st = x.st, up = x.dir === 1, lb = x.t && x.t.lastBreak, cid = ctxOf(st), cx = x.cx, fvg = lb && lb.fvg === 'sim';
       const brk = x.box ? `quebrou a lateralização ${up ? 'para cima' : 'para baixo'}` : lb ? `${lb.type || 'quebra'} ${up ? '▲' : '▼'}${lb.level ? ' em ' + fmt(lb.level) : ''}` : 'quebra feita';
-      return `<tr><td class="nm"><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px">${r.s}</div>` : ''}</td>
+      return `<tr><td class="nm"><a href="#" class="np-chi" data-chart="${r.s}" data-tf="${st.trig}" title="Abrir o gráfico no ${L(st.trig)}">📈</a><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px;margin-left:24px">${r.s}</div>` : ''}</td>
         <td style="text-align:left"><b>${npEsc(r.st0.name)}</b><div class="mu" style="font-size:11px">${cid ? L(cid) + ' · ' : ''}${L(st.zone)} → ${L(st.trig)}${x.rsv.mode === 'rev' ? ' · reversão' : x.rsv.mode === 'counter' ? ' · contra, com margem' : ''}</div></td>
         <td style="color:${up ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'};font-weight:600">${up ? '▲ Long' : '▼ Short'}</td>
         <td>${cx && cx.trend ? chip(`${L(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}`, cx.trend === x.dir ? 'ok' : 'bad') : '<span class="mu">—</span>'}</td>
@@ -6414,8 +6448,8 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
         <td style="text-align:left">${chip(`${L(st.trig)} ${brk}`, 'ok')}<div class="mu" style="font-size:11px">${suAgoTxt(r.ago, st.trig)}</div></td>
         <td style="text-align:left">${chip(fvg ? '✔ FVG na quebra' : '✘ FVG', fvg ? 'ok' : '')}${x.sweep ? chip('💧 sweep antes', 'ok') : ''}${x.star ? chip(npEsc(/⭐/.test(x.star.txt || '') ? x.star.txt : '⭐ ' + (x.star.txt || 'zona de reversão')), 'ok wrap') : ''}</td>
         <td style="text-align:left;font-size:12.5px">${npEsc(x.rsv.mode === 'rev' ? x.why.replace(/ — (à espera da quebra|o \S+ já está a favor).*$/, '') : x.why)}${x.deep && x.deepTxt ? `<div class="mu">${npEsc(x.deepTxt)}</div>` : ''}</td>
-        <td><a href="#" data-chart="${r.s}" data-tf="${st.trig}" title="Abrir o gráfico no ${L(st.trig)}">📈</a></td></tr>`; };
-    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Contexto</th><th>Zona (≥ 50%)</th><th style="text-align:left">Quebra</th><th style="text-align:left">Extras</th><th style="text-align:left">Porquê</th><th></th></tr>';
+        </tr>`; };
+    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Contexto</th><th>Zona (≥ 50%)</th><th style="text-align:left">Quebra</th><th style="text-align:left">Extras</th><th style="text-align:left">Porquê</th></tr>';
     const wl = wait.slice(0, 12).map((r) => `<li><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a> · ${npEsc(r.st0.name)} ${r.x.dir === 1 ? '▲ Long' : '▼ Short'} — em zona de ${r.x.dir === 1 ? 'compra' : 'venda'} no ${L(r.x.st.zone)} (${pct(r.x.z.pullback)}); ${npEsc(r.b.txt)}</li>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Setups prontos</h2><div class="sub">${ready.length} pronto${ready.length === 1 ? '' : 's'} nos favoritos · pronto = em zona e a quebra já feita no timeframe de quebra (o FVG é extra) · a quebra mais recente primeiro · ${favProg || ''}</div></div></div>
       ${npFQBox('npSuQ', 'Procurar (ex.: ouro, GC=F)…')}
@@ -6438,17 +6472,17 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
     const all = revRows().filter((r) => npFavMatch(r.s, npFQ) && npKindOk(r.s, npKind)), list = all.filter((r) => npRevTf === 'all' || r.id === npRevTf);
     const cnt = (id) => all.filter((r) => id === 'all' || r.id === id).length, SH = { '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M' };
     const num = settings.revMode !== 'tick';
-    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th><th title="Risco/retorno do preço atual até ao topo/fundo da perna, com stop na origem (verde se ≥ 2)">R:R</th>' : ''}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de gatilho (só informativo)">Gatilho</th><th></th></tr>`;
+    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th>' : ''}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de quebra (só informativo)">Quebra</th></tr>`;
     const cellN = (r, k) => { const x = r.val[k]; if (!x) return `<td class="nv"><span class="mu">${k === 'fr' && isRatio(r.s) ? 'n/a' : '—'}</span></td>`; return `<td class="nv ${r.ok[k] ? 'hit' : ''}"${x.t ? ` title="${npEsc(x.t)}"` : ''}><div class="v">${npEsc(x.v)}</div>${x.d ? `<div class="d">${npEsc(x.d)}</div>` : ''}</td>`; };
     const cellT = (r, k) => `<td class="ck">${r.ok[k] ? '✔' : k === 'fr' && !r.fr ? '<span class="mu">n/a</span>' : '<span class="mu">·</span>'}</td>`;
-    const body = list.map((r) => `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px">${r.s}</div>` : ''}</td><td><b>${SH[r.id]}</b></td>
+    const body = list.map((r) => `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" class="np-chi" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico no ${tfLabel(r.id)}">📈</a><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px;margin-left:24px">${r.s}</div>` : ''}</td><td><b>${SH[r.id]}</b></td>
       <td style="color:${r.dir === 1 ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'}">${r.dir === 1 ? '▲ Long' : '▼ Short'}</td><td>${pct(r.pull)}</td>
-      ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.map(([c]) => (num ? cellN : cellT)(r, c)).join('')}${num ? cellN(r, 'inv') + cellN(r, 'rr') : ''}
-      <td><b>${r.score}/${REV_COLS.length}</b></td><td style="white-space:nowrap">${r.gat}</td><td><a href="#" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico neste timeframe">📈</a></td></tr>`).join('');
+      ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.map(([c]) => (num ? cellN : cellT)(r, c)).join('')}${num ? cellN(r, 'inv') : ''}
+      <td><b>${r.score}/${REV_COLS.length}</b></td><td style="white-space:nowrap">${r.gat}</td></tr>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Reversões prováveis</h2><div class="sub">${all.length} zona${all.length === 1 ? '' : 's'} de correção (≥ 50%) nos favoritos · ordenado pelo número de sinais a favor · o gatilho é só informativo — passa o rato pelos títulos das colunas</div></div></div>
       ${npFQBox('npRevQ', 'Procurar (ex.: ouro, GC=F)…')}
       <div class="revbar"><div class="np-ff">${[['all', 'Todos'], ...REV_TFS.map((id) => [id, tfLabel(id)])].map(([id, t]) => `<button data-rt="${id}" class="${npRevTf === id ? 'on' : ''}">${t}<span>${cnt(id)}</span></button>`).join('')}</div><div class="np-kind revmode" role="group" aria-label="Ver"><button type="button" data-rmode="num" class="${num ? 'on' : ''}" title="Cada sinal com o nível e a distância ao preço">Numérico</button><button type="button" data-rmode="tick" class="${num ? '' : 'on'}" title="Só ✔ onde bate certo">Tick</button></div></div>
-      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + (num ? 10 : 7)}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
+      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + (num ? 9 : 7)}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
     npFQWire('npRevQ', npRenderRev0);
     box.querySelectorAll('[data-rmode]').forEach((b) => b.addEventListener('click', () => { settings.revMode = b.dataset.rmode; save('mss_settings4', settings); npRenderRev0(); }));
     box.querySelectorAll('[data-rt]').forEach((b) => b.addEventListener('click', () => { npRevTf = b.dataset.rt; npRenderRev0(); }));
