@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T13:34:16.361Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T14:07:59.522Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -836,7 +836,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     return c.sort((a, b) => (dir === 1 ? b.top - a.top : a.bot - b.bot))[0] || null;
   }
   // ---------- regra dos setups (a do Richy): sem zona de reversão não há trade ----------
-  // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a viragem confirma-se 2 timeframes abaixo (Mensal → Diário)
+  // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H)
   // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
   // 3) nenhum em zona → sem trade. Em qualquer caso, um timeframe maior em zona no sentido contrário bloqueia (manda o maior)
   const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
@@ -847,7 +847,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const cx = P(cid), z = P(su.zone);
     const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
     if (inZone(cx)) {
-      const t2 = NEXT[NEXT[cid]], t1 = NEXT[cid], trig = has(t2) ? t2 : has(t1) ? t1 : su.trig, dir = cx.trend, bl = above(cid, dir);
+      const t2 = NEXT[NEXT[cid]], trig = has(su.trig) ? su.trig : has(t2) ? t2 : su.trig, dir = cx.trend, bl = above(cid, dir);
       return { mode: bl ? 'blocked' : 'rev', dir, zone: cid, trig, ctx: CTX_UP[cid] || null, base: cid, block: bl || null };
     }
     if (!z || !z.trend) return null;
@@ -1301,7 +1301,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}${z.pullback > 78.6 ? (() => { const ob = FB && FB.nextOB ? FB.nextOB(dz.obs, dir, dz.price, z.protected) : null; return ` · ${up ? 'desconto' : 'prémio'} profundo${ob ? (ob.inside ? ` · dentro do order block ${fmt(ob.bot)}–${fmt(ob.top)}` : ` · possível ida ao order block em ${fmt(ob.bot)}–${fmt(ob.top)}`) : ''}`; })() : ''}`,
-        rsv.mode === 'rev' ? `Reversão: o ${LBL[su.zone]} está em zona e o ${LBL[su.trig]} virou a favor` : rsv.mode === 'counter' ? `Contra o ${LBL[rsv.ctx]}, que ainda tem margem até à zona dele${rsv.room ? ' (' + fmt(rsv.room) + ')' : ''}` : '',
+        rsv.mode === 'rev' ? `Reversão: o ${LBL[su.zone]} está em zona e o ${LBL[su.trig]} quebrou ${up ? 'para cima' : 'para baixo'}` : rsv.mode === 'counter' ? `Contra o ${LBL[rsv.ctx]}, que ainda tem margem até à zona dele${rsv.room ? ' (' + fmt(rsv.room) + ')' : ''}` : '',
         lb.box ? `Gatilho ${LBL[su.trig]}: quebrou a lateralização ${up ? 'para cima' : 'para baixo'} — caixa ${fmt(lb.box.lo)} – ${fmt(lb.box.hi)} (${lb.box.bars} velas), fecho ${fmt(bc.c)}` : `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
         `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
