@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T14:07:59.522Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T15:41:38.705Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -738,7 +738,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   'use strict';
   const ENTRY = [0.618, 0.65], DEEP = 0.786, INVAL = 0.918;
   const TGT = [[-0.236, -0.268, 'Alvo 1'], [-0.618, -0.65, 'Alvo 2'], [-1, -1.032, 'Alvo 3']];
-  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '1h': '15m', '15m': '5m' };
+  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '4hc': '1h', '1h': '15m', '15m': '5m' };
   // nível f de uma Fibonacci com 1 em A e 0 em B (negativos = para lá de B)
   const lv = (A, B, f) => (A > 0 && B > 0 ? Math.exp(Math.log(B) + f * (Math.log(A) - Math.log(B))) : B + f * (A - B));
   function make(A, B, dir, role) {
@@ -839,13 +839,16 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H)
   // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
   // 3) nenhum em zona → sem trade. Em qualquer caso, um timeframe maior em zona no sentido contrário bloqueia (manda o maior)
-  const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
-  const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '1h', '15m', '5m'];
+  const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '4hc': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
+  const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '4hc', '1h', '15m', '5m'];
   const inZone = (s) => !!(s && s.trend && s.pullback >= 50 && s.pullback <= 100);
+  // dois 4H: o 4H de quebra (todos os topos/fundos) dá a quebra do Longo prazo; o 4H de contexto ('4hc', só quebras) é a zona/contexto do Day trade e do Scalp
+  const ZID = (dm, id) => (id === '4h' && dm['4hc'] && dm['4hc'].ext ? '4hc' : id);
   function resolveSetup(su, dm, cid, ok) {
-    const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id));
+    cid = ZID(dm, cid); su = Object.assign({}, su, { zone: ZID(dm, su.zone) });
+    const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id === '4hc' ? '4h' : id));
     const cx = P(cid), z = P(su.zone);
-    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
+    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && !(id === '4h' && dm['4hc']) && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
     if (inZone(cx)) {
       const t2 = NEXT[NEXT[cid]], trig = has(su.trig) ? su.trig : has(t2) ? t2 : su.trig, dir = cx.trend, bl = above(cid, dir);
       return { mode: bl ? 'blocked' : 'rev', dir, zone: cid, trig, ctx: CTX_UP[cid] || null, base: cid, block: bl || null };
@@ -876,7 +879,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  root.MSS_FIB = { ZID, orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Alertas do Scanner de Estrutura — a lógica (sem rede): recebe velas, definições e marcações; devolve as mensagens.
@@ -885,7 +888,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   'use strict';
   const E = root.StructureEngine;
   const TF_MS = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
-  const LBL = { '1Y': 'Anual', '6M': '6M', '3M': '3M', '1M': 'Mensal', '1w': 'Semanal', '1d': 'Diário', '4h': '4H', '1h': '1H', '15m': '15m', '5m': '5m' };
+  const LBL = { '1Y': 'Anual', '6M': '6M', '3M': '3M', '1M': 'Mensal', '1w': 'Semanal', '1d': 'Diário', '4h': '4H', '4hc': '4H contexto', '1h': '1H', '15m': '15m', '5m': '5m' };
   const CTX_DEFAULT = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
   const MAGG = { '3M': 3, '6M': 6, '1Y': 12 };
   // opções dos alertas (settings.alerts na app)
@@ -994,14 +997,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const zzOf = (pl, id) => pl[['1Y', '6M', '3M', '1M'].includes(id) ? 'M' : id === '1w' ? 'W' : 'D'];
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
   // estrutura única: 2 grupos — contexto (zona, Fibonacci) e gatilho (sinal); Pontos na mesma escala da tendência principal (1–2 todos os topos/fundos · 3 só quebras · 4 clássico · 5 menos)
-  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4hc': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI2_DEF = { ctx: 3, trig: 1 };
   const uniG = (id) => UNI2_GRP[id] || 'trig';
   const uniL = (id) => (uniG(id) === 'ctx' ? 'ext' : 'int');   // marcas: contexto guarda-as na camada da antiga principal, gatilho na do antigo recente
   const uniLevel = (S, id, sym) => { const g = uniG(id), per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI2_DEF[g]); };
   // âncora automática (igual à app): Semanal começa no último topo/fundo confirmado do Mensal; Diário no último do Semanal
-  const ANCH_MIN = { '1w': 8, '1d': 15 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
-  const ANCH = { '1w': '1M', '1d': '1w' };
+  const ANCH_MIN = { '1w': 8, '1d': 15, '4hc': 20 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
+  const ANCH = { '1w': '1M', '1d': '1w', '4hc': '1d' };   // '4hc' = 4H de contexto (só quebras), ancorado ao Diário
   function computeTf(cs, id, S, ed, now, sym, par) {
     cs.forEach((c) => (c.tt = Math.floor(c.t / 1000)));
     const closed = cs.filter((c) => c.ct < now);
@@ -1017,14 +1020,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const lvl = uniLevel(S, id, sym), pu = PRI_LV[lvl], L = uniL(id), eL = ed && ed[L];
       let ov = ed && Object.assign({ ignFvg: ed.fvg }, ed[L]), anc = null;
       if (ANCH[id] && par && S.uniAnchor !== false && !(eL && (eL.start || eL.blank))) {
-        try { const pp = par(ANCH[id]); if (pp && pp.cs && pp.cs.length > 2) { const pd = computeTf(pp.cs, ANCH[id], S, pp.ed || null, now, sym, par); anc = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (anc) { anc.from = ANCH[id]; ov = Object.assign({}, ov || {}, { start: anc, modes: [] }); } } } catch (e) { anc = null; }
+        try { const pp = par(ANCH[id]); if (pp && (pp.pd || (pp.cs && pp.cs.length > 2))) { const pd = pp.pd || computeTf(pp.cs, ANCH[id], S, pp.ed || null, now, sym, par); anc = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (anc) { anc.from = ANCH[id]; ov = Object.assign({}, ov || {}, { start: anc, modes: [] }); } } } catch (e) { anc = null; }
       }
       const one = pu && pu.zz ? layer(E.analyzeRecent, zzOf(pu, id)[0], S.dispInt, ov, { legRatio: zzOf(pu, id)[1], floorAtr: zzOf(pu, id)[2] })
         : layer(E.analyze, +S.extAtr * (pu ? pu.m : 1), S.dispExt, ov, pu ? { legRatio: pu.leg, floorAtr: pu.floor } : null);
       const d1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       if (FB) { try { d1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { d1.fibs = []; } d1.fibsI = d1.fibs; }
       try { d1.obs = FB && FB.orderBlocks ? FB.orderBlocks(one.res, closed, price) : []; } catch (e) { d1.obs = []; }
-      d1.fibsX = []; d1.fibConf = []; if (FB && FB.fibsMore && ['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { d1.fibsX = FB.fibsMore(one.res, closed, price); d1.fibConf = FB.confZones(d1.fibs.concat(d1.fibsX), price); } catch (e) {}
+      d1.fibsX = []; d1.fibConf = []; if (FB && FB.fibsMore && ['1Y', '6M', '3M', '1M', '1w', '1d', '4hc'].includes(id)) try { d1.fibsX = FB.fibsMore(one.res, closed, price); d1.fibConf = FB.confZones(d1.fibs.concat(d1.fibsX), price); } catch (e) {}
       return d1;
     }
     const pl = PRI_LV[priLevel(S, id, sym)];
@@ -1775,6 +1778,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
     if (FB) [...setupTfs].forEach((id) => { if (FB.NEXT[id] && raw[FB.NEXT[id]]) setupTfs.add(FB.NEXT[id]); });
     for (const id of setupTfs) if (raw[id] && raw[id].length > (MAGG[id] ? 5 : 30)) { try { dm[id] = computeTf(raw[id], id, S, edits[sym + '|' + id] || null, now, sym, (pid) => (raw[pid] ? { cs: raw[pid], ed: edits[sym + '|' + pid] || null } : null)); } catch (e) {} }
+    // 4H de contexto (igual à app): as velas do 4H com a estrutura de contexto, ancorada ao Diário — zona do Day trade, contexto do Scalp
+    if (uniOn(S) && dm['4h'] && raw['4h']) { try { dm['4hc'] = computeTf(raw['4h'], '4hc', S, edits[sym + '|4hc'] || null, now, sym, (pid) => (pid === '1d' && dm['1d'] ? { pd: dm['1d'] } : null)); } catch (e) {} }
     trackerAlerts(sym, dm, A, st, now, out, S);   // primeiro os setups já seguidos (podem ser substituídos por uma quebra nova)
     if (A.setupOn) setupAlerts(sym, dm, S, A, st, now, out);
     if (A.setupOn && A.confOn !== false) confAlerts(sym, dm, S, A, st, now, out);

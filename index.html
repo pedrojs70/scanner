@@ -237,6 +237,33 @@
   body:not([data-npv="focus"]) #npFocusAll { display:none; }
   body[data-npv="rev"] #npFocus, body[data-npv="rev"] #npFilters, body[data-npv="rev"] #npFeedWrap, body[data-npv="rev"] #npRail { display:none; }
   body:not([data-npv="rev"]) #npRev { display:none; }
+  body[data-npv="setups"] #npFocus, body[data-npv="setups"] #npFilters, body[data-npv="setups"] #npFeedWrap, body[data-npv="setups"] #npRail { display:none; }
+  body:not([data-npv="setups"]) #npSetups { display:none; }
+  body[data-npv="ai"] #npFocus, body[data-npv="ai"] #npFilters, body[data-npv="ai"] #npFeedWrap, body[data-npv="ai"] #npRail { display:none; }
+  body:not([data-npv="ai"]) #npAiTab { display:none; }
+  #npAiTab .bhead { border-bottom:1px solid var(--np-ink); padding-bottom:8px; }
+  #npAiTab .bhead h2 { font-family:Newsreader, Georgia, serif; font-size:34px; margin:0; line-height:1; }
+  #npAiTab .bhead .sub { font-size:12.5px; color:var(--np-mu); margin-top:6px; }
+  .np-aibar { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  .np-aibar button { height:38px; padding:0 14px; border:1px solid var(--np-ink); background:var(--np-ink); color:var(--np-bg); border-radius:0; font:inherit; font-size:14px; cursor:pointer; }
+  .np-aibar button.lt { background:transparent; color:var(--np-ink); font-size:13px; }
+  .np-aibar button:disabled { opacity:.4; cursor:default; }
+  .np-aibk .bk { display:inline-flex; margin:0 6px 6px 0; } .np-aibk .bk button + button { padding:0 8px; }
+  .aitbl td { vertical-align:middle; } .aitbl tr.on td { background:rgba(245,124,0,.07); }
+  .aitbl select { font:inherit; font-size:12.5px; padding:2px 4px; }
+  body[data-np="1"][data-npv="setups"] #np { max-width:none; }
+  #npSetups .bhead { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--np-ink); padding-bottom:8px; }
+  #npSetups .bhead h2 { font-family:Newsreader, Georgia, serif; font-size:34px; margin:0; line-height:1; }
+  #npSetups .bhead .sub { font-size:12.5px; color:var(--np-mu); margin-top:6px; }
+  #npSetups .np-ff { margin:10px 0; }
+  .sutbl td { vertical-align:top; }
+  .np-suc { display:inline-block; padding:2px 8px; margin:0 4px 4px 0; font-size:12.5px; border:1px solid var(--np-ln, #ddd); border-radius:2px; white-space:nowrap; }
+  .np-suc.ok { background:rgba(46,125,50,.12); border-color:rgba(46,125,50,.35); }
+  .np-suc.wrap { white-space:normal; max-width:260px; }
+  .np-suc.zone { background:rgba(245,124,0,.14); border-color:rgba(245,124,0,.4); font-weight:600; }
+  .np-suc.bad { background:rgba(198,40,40,.10); border-color:rgba(198,40,40,.35); }
+  .np-suw { margin:0; padding-left:18px; font-size:13.5px; line-height:1.7; }
+  .np-suw a { color:var(--np-ink); }
   body[data-np="1"][data-npv="rev"] #np { max-width:none; }
   #npRev .bhead { display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap; border-bottom:1px solid var(--np-ink); padding-bottom:8px; }
   #npRev .bhead h2 { font-family:Newsreader, Georgia, serif; font-size:34px; margin:0; line-height:1; }
@@ -697,9 +724,10 @@
   .np-qx { position:absolute; right:4px; top:4px; width:28px; height:28px; border:0; background:transparent; color:var(--np-mu); font-size:15px; cursor:pointer; display:none; padding:0; }
   .np-qx:hover { color:var(--np-ink); } #npSearch.has .np-qx { display:block; }
   .np-tabs { display:flex; gap:0; border-bottom:1px solid var(--np-ink); margin:0 0 4px; overflow-x:auto; }
+  @media (max-width:760px) { .np-tabs { flex-wrap:wrap; overflow-x:visible; } .np-tabs button { padding-left:10px !important; padding-right:10px !important; } }
   .np-tabs button { background:transparent !important; border:0 !important; border-bottom:3px solid transparent; color:var(--np-ink); font:inherit; font-weight:600; font-size:14px; padding:9px 14px 7px; cursor:pointer; white-space:nowrap; border-radius:0; }
   .np-tabs button:hover { background:var(--np-hover) !important; }
-  body[data-npv="feed"] .np-tabs [data-tab="feed"], body[data-npv="board"] .np-tabs [data-tab="board"], body[data-npv="focus"] .np-tabs [data-tab="focus"], body[data-npv="rev"] .np-tabs [data-tab="rev"] { background:var(--np-ink) !important; color:var(--np-bg); }
+  body[data-npv="feed"] .np-tabs [data-tab="feed"], body[data-npv="board"] .np-tabs [data-tab="board"], body[data-npv="focus"] .np-tabs [data-tab="focus"], body[data-npv="rev"] .np-tabs [data-tab="rev"], body[data-npv="setups"] .np-tabs [data-tab="setups"], body[data-npv="ai"] .np-tabs [data-tab="ai"] { background:var(--np-ink) !important; color:var(--np-bg); }
   .np-day-ai.wait, button.np-day-ai.wait { background:#777 !important; }
   /* fora da edição: indicadores + Fibonacci + mostrar/esconder linhas; dentro da edição: só as ferramentas de desenho (Linha, Canal, Íman) */
   .chartbox:not(.editing) #lineTools { display:none !important; }
@@ -725,6 +753,9 @@
 .chartbox.max #chartTitle:hover { opacity: .75; }
 /* telemóvel: sem a legenda por baixo do gráfico (ocupa muito espaço) */
 @media (max-width: 760px) { .legend { display: none !important; } }
+  .np-arw{display:inline-flex;gap:4px;vertical-align:middle;margin-right:12px}
+  .np-arw button{width:34px;height:34px;padding:0;font:600 22px/1 system-ui,sans-serif;border:1px solid var(--np-ink,#111);background:transparent;color:var(--np-ink,#111);cursor:pointer;border-radius:2px}
+  .np-arw button:hover{background:var(--np-ink,#111);color:var(--np-bg,#fff)}
 </style>
 </head>
 <body>
@@ -760,13 +791,13 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 14h30</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 15h41</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
   <div class="np-bar"><form id="npSearch" autocomplete="off" style="position:relative"><span class="np-sic" aria-hidden="true">⌕</span><input id="npQ" type="search" placeholder="Abrir ou juntar ativo…" aria-label="Abrir ou juntar ativo" spellcheck="false" autocomplete="off" data-lpignore="true" data-1p-ignore="true"><button type="button" id="npQX" class="np-qx" title="Apagar" aria-label="Apagar">✕</button><div id="npSug" class="sug"></div></form><a href="#" id="npMulti" class="np-multi" title="Colar ou importar a lista de rácios do TradingView e juntar todos de uma vez (também serve para ativos individuais)">＋ Adicionar rácios</a>
     <div id="npFilters" class="np-filters"><button data-f="today" class="on">Hoje</button><button data-f="week">Esta semana</button></div></div>
-  <nav id="npTabs" class="np-tabs" aria-label="Páginas"><button type="button" data-tab="feed">Jornal</button><button type="button" data-tab="board">Favoritos</button><button type="button" data-tab="focus">Em foco</button><button type="button" data-tab="rev">Reversões</button></nav>
+  <nav id="npTabs" class="np-tabs" aria-label="Páginas"><button type="button" data-tab="feed">Jornal</button><button type="button" data-tab="board">Favoritos</button><button type="button" data-tab="focus">Em foco</button><button type="button" data-tab="rev">Reversões</button><button type="button" data-tab="setups">Setups</button><button type="button" data-tab="ai">Análise IA</button></nav>
   <div id="npStrip"></div>
   <div class="np-cols">
     <aside id="npRail"></aside>
@@ -776,6 +807,8 @@
       <div id="npBoard"></div>
       <div id="npFocusAll"></div>
       <div id="npRev"></div>
+      <div id="npSetups"></div>
+      <div id="npAiTab"></div>
     </section>
     <aside id="npFocus"></aside>
   </div>
@@ -849,7 +882,8 @@
     <h3 class="helphead">5 · Setups e favoritos</h3>
     <ul>
       <li><b>A regra dos setups:</b> <b>sem zona de reversão não há trade.</b> Uma zona é uma correção de 50% ou mais (até ao limite; a partir de 78,6% é <b>desconto profundo</b> numa zona de compra ou <b>prémio profundo</b> numa de venda — não é mau sinal: o sítio provável da reação passa a ser o order block seguinte, que a app indica). (1) Se o timeframe de <b>contexto</b> está em zona, o setup é de <b>reversão</b> a favor dele, e a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H). (2) Senão, se o timeframe da <b>zona</b> está em zona, o setup é a favor dele; contra o contexto só vale se o contexto ainda tiver margem até à zona dele. (3) Nenhum em zona → <b>Sem trade</b>. Manda sempre o maior: um timeframe maior em zona no sentido contrário bloqueia o setup. Quando dois setups dão o mesmo trade, só conta o maior.</li>
-      <li><b>Setups</b> (painel no topo): cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Sentido</b> = a direção da tendência principal do timeframe de zona: ▲ <b>Long</b> ou ▼ <b>Short</b>.</li>
+      <li><b>Os dois 4H.</b> O 4H tem duas estruturas sobre as mesmas velas: o <b>4H de quebra</b> (todos os topos e fundos — é onde se vê a quebra do Longo prazo) e o <b>4H de contexto</b> (só as pernas que partiram estrutura, ancorado ao último topo/fundo do Diário — é a zona do Day trade e o contexto do Scalp). No gráfico do 4H, o botão <b>“4H quebra ⇄ contexto”</b> troca a vista. Cada setup lê sempre a estrutura certa, seja qual for a que tens à vista. As marcas que fizeres numa não mexem na outra; as tuas linhas e canais são os mesmos nas duas.</li>
+      <li><b>Setups</b> (painel no topo): cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H contexto → 15m), Scalp (4H contexto · 1H → 5m) — editáveis nas Definições. <b>Sentido</b> = a direção da tendência principal do timeframe de zona: ▲ <b>Long</b> ou ▼ <b>Short</b>.</li>
       <li><b>Checklist:</b> <b>Contexto</b> (só informação) — <b>✔ A favor</b> se o timeframe de contexto vai no mesmo sentido, ou <b>Contra (X%)</b> com o recuo atual dele (abaixo de 50% ainda há espaço até à zona dele); <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem ⚡ recente no movimento recente do timeframe de baixo (“ainda contra” = vai ao contrário; “já confirmada” = já está a favor mas sem viragem nova); <b>FVG na quebra</b>. <b>💧 sweep antes</b> = extra, torna o setup mais forte.</li>
       <li><b>Estado:</b> <b>Em formação</b> (cinzento = fora da zona; amarelo = zona cumprida), com “falta: …”; <b>✔ Pronto</b> = Zona, Quebra e FVG cumpridos, com a nota “a favor” ou “contra” o timeframe de contexto. Avisos: “topo/fundo por varrer perto” (liquidez do lado contrário que o preço ainda pode ir buscar) e “✋ … em modo manual — não atualiza”. Entrada, stop e alvos são contigo.</li>
       <li><b>Liquidez do dia / semana anteriores</b> (barra por baixo dos setups): máximos e mínimos e se já foram varridos. Só informação.</li>
@@ -863,6 +897,8 @@
       <li><b>Ordem:</b> “Cripto primeiro” ou “Ações primeiro”, sempre A–Z dentro de cada grupo. 📈 abre o gráfico; ✕ tira dos favoritos (e apaga as marcas desse ativo).</li>
       <li><b>Em foco:</b> o ativo mais perto de precisar de ti — primeiro um pronto, depois “falta FVG”, depois em zona com a correção mais funda; estar perto da inversão desempata. Em “Também a ver”, os dois seguintes.</li>
       <li><b>Pesquisa:</b> carregar no nome abre o ativo; o <b>＋</b> junta-o logo aos favoritos.</li>
+      <li><b>Aba Setups:</b> só os setups <b>prontos</b> de todos os favoritos (em zona e com a quebra já feita no timeframe de quebra; o FVG é extra). Uma linha por ativo e setup, a quebra mais recente primeiro. Filtra por Longo prazo / Swing / Day trade / Scalp e por Cripto / Ações; carrega no nome para abrir o ativo. Em baixo: os que estão mais perto de ficar prontos.</li>
+      <li><b>Aba Análise IA:</b> marca os ativos. <b>Análise individual</b> = a mesma análise da folha de cada ativo, umas atrás das outras (até ~5 de cada vez). <b>Análise conjunta</b> = marca o ativo principal com ⚓; os outros são contexto. Para cada um a app diz se anda com ou contra a âncora (os rácios sabe sozinha; o resto mede pela correlação dos últimos 60 dias e podes trocar à mão) e classifica-o: <b>a favor</b> (sinal forte), <b>⚠ contra</b> (alerta) ou neutro. <b>💾 gravar como cesto</b> guarda a seleção com um nome.</li>
       <li><b>Quadro dos favoritos:</b> carrega no título “Favoritos” — uma linha por ativo com a tendência principal (M/S/D/4H), os setups, a distância à inversão, à SMA 200 e à liquidez por varrer, e o último alerta. Ordena carregando no título de uma coluna.</li>
       <li><b>Tudo · Ativos · Rácios:</b> ao lado de cada caixa de procura (favoritos, Quadro, Em foco e jornal) escolhe se queres ver tudo, só os ativos (ações, cripto e futuros) ou só os rácios. No jornal, o nome do ativo aparece em português com o ticker ao lado.</li>
       <li><b>Mercado cripto total (TOTAL):</b> junta-o aos favoritos (procura “total”), abre-o e importa o histórico com 📥 — no TradingView abre <i>CRYPTOCAP:TOTAL</i> e exporta o Mensal, Semanal, Diário, 4H e 1H (“Exportar dados do gráfico”), como fizeste no USDT.D + USDC.D. Daí em diante o vigia acrescenta um ponto da CoinGecko a cada 5 minutos. A análise IA do Bitcoin passa a trazer o TOTAL e o USDT.D + USDC.D como enquadramento, e diz se confirmam ou contrariam o lado escolhido.</li>
@@ -2315,7 +2351,7 @@
   'use strict';
   const ENTRY = [0.618, 0.65], DEEP = 0.786, INVAL = 0.918;
   const TGT = [[-0.236, -0.268, 'Alvo 1'], [-0.618, -0.65, 'Alvo 2'], [-1, -1.032, 'Alvo 3']];
-  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '1h': '15m', '15m': '5m' };
+  const NEXT = { '1Y': '6M', '6M': '3M', '3M': '1M', '1M': '1w', '1w': '1d', '1d': '4h', '4h': '1h', '4hc': '1h', '1h': '15m', '15m': '5m' };
   // nível f de uma Fibonacci com 1 em A e 0 em B (negativos = para lá de B)
   const lv = (A, B, f) => (A > 0 && B > 0 ? Math.exp(Math.log(B) + f * (Math.log(A) - Math.log(B))) : B + f * (A - B));
   function make(A, B, dir, role) {
@@ -2416,13 +2452,16 @@
   // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H)
   // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
   // 3) nenhum em zona → sem trade. Em qualquer caso, um timeframe maior em zona no sentido contrário bloqueia (manda o maior)
-  const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
-  const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '1h', '15m', '5m'];
+  const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '4hc': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
+  const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '4hc', '1h', '15m', '5m'];
   const inZone = (s) => !!(s && s.trend && s.pullback >= 50 && s.pullback <= 100);
+  // dois 4H: o 4H de quebra (todos os topos/fundos) dá a quebra do Longo prazo; o 4H de contexto ('4hc', só quebras) é a zona/contexto do Day trade e do Scalp
+  const ZID = (dm, id) => (id === '4h' && dm['4hc'] && dm['4hc'].ext ? '4hc' : id);
   function resolveSetup(su, dm, cid, ok) {
-    const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id));
+    cid = ZID(dm, cid); su = Object.assign({}, su, { zone: ZID(dm, su.zone) });
+    const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id === '4hc' ? '4h' : id));
     const cx = P(cid), z = P(su.zone);
-    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
+    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && !(id === '4h' && dm['4hc']) && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
     if (inZone(cx)) {
       const t2 = NEXT[NEXT[cid]], trig = has(su.trig) ? su.trig : has(t2) ? t2 : su.trig, dir = cx.trend, bl = above(cid, dir);
       return { mode: bl ? 'blocked' : 'rev', dir, zone: cid, trig, ctx: CTX_UP[cid] || null, base: cid, block: bl || null };
@@ -2453,7 +2492,7 @@
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  root.MSS_FIB = { ZID, orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function () {
@@ -2707,7 +2746,7 @@
   }
   // estrutura única: uma só estrutura por timeframe (o zigzag do "movimento recente"), com sensibilidade por grupo de timeframes (1 = mais pontos … 5 = menos pontos)
   const UNI_LV = { 1: { atr: 1.5, leg: 0.4, floor: 1.25 }, 2: { atr: 2, leg: 0.5, floor: 1.5 }, 3: { atr: 2.5, leg: 0.55, floor: 1.75 }, 4: { atr: 3, leg: 0.6, floor: 2 }, 5: { atr: 3.5, leg: 0.7, floor: 2.5 } };
-  const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'mid', '4h': 'mid', '4hc': 'mid', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI_DEF = { ctx: 4, mid: 3, trig: 2 };
   const uniOn = (S) => S.uniStruct !== false;   // por defeito: UMA estrutura por gráfico — contexto (Anual→Diário, só quebras) e gatilho (4H→5m, todos os topos/fundos)
   // Pontos da tendência principal: 1 e 2 = todos os topos/fundos de cada perna (motor do movimento recente, com correções mínimas maiores); 3 = só as pernas que quebram estrutura, sensível; 4 = cálculo clássico; 5 = menos pontos
@@ -2717,21 +2756,31 @@
   const zzOf = (pl, id) => pl[['1Y', '6M', '3M', '1M'].includes(id) ? 'M' : id === '1w' ? 'W' : 'D'];
   const priLevel = (S, id, sym) => { const g = UNI_GRP[id] || 'mid', per = sym && S.priSensPer && S.priSensPer[sym]; return +((per && per[g]) || (S.priSens && S.priSens[g]) || 1); };   // padrão: 1 (mais pontos) em todos os grupos — Definições
   // estrutura única: 2 grupos — contexto (zona, Fibonacci) e gatilho (sinal); Pontos na mesma escala da tendência principal (1–2 todos os topos/fundos · 3 só quebras · 4 clássico · 5 menos)
-  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
+  const UNI2_GRP = { '1Y': 'ctx', '6M': 'ctx', '3M': 'ctx', '1M': 'ctx', '1w': 'ctx', '1d': 'ctx', '4hc': 'ctx', '4h': 'trig', '1h': 'trig', '15m': 'trig', '5m': 'trig' };
   const UNI2_DEF = { ctx: 3, trig: 1 };
   const uniG = (id) => UNI2_GRP[id] || 'trig';
   const uniL = (id) => (uniG(id) === 'ctx' ? 'ext' : 'int');   // marcas: contexto guarda-as na camada da antiga principal, gatilho na do antigo recente
   const uniLevel = (S, id, sym) => { const g = uniG(id), per = sym && S.uniSensPer && S.uniSensPer[sym]; return +((per && per[g]) || (S.uniSens && S.uniSens[g]) || UNI2_DEF[g]); };
   // âncora automática (estrutura única): Semanal começa no último topo/fundo confirmado do Mensal; Diário no último do Semanal — recalculada sempre, sem apagar nada
   const rawC = {};
-  const ANCH_MIN = { '1w': 8, '1d': 15 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
-  const ANCH = { '1w': '1M', '1d': '1w' }, ANCH_NM = { '1M': 'Mensal', '1w': 'Semanal' };
+  const ANCH_MIN = { '1w': 8, '1d': 15, '4hc': 20 };   // mínimo de velas depois da âncora (Semanal ~2 meses, Diário ~3 semanas); com menos, recua para o ponto anterior
+  const ANCH = { '1w': '1M', '1d': '1w', '4hc': '1d' }, ANCH_NM = { '1M': 'Mensal', '1w': 'Semanal', '1d': 'Diário' };
   const anchOn = () => uniOn(settings) && settings.uniAnchor !== false;
-  const withParents = (ids) => { const s = new Set(ids); if (anchOn()) { if (s.has('1d')) s.add('1w'); if (s.has('1w')) s.add('1M'); } return s; };
+  const withParents = (ids) => { const s = new Set(ids); if (anchOn()) { if (s.has('4h')) s.add('1d'); if (s.has('1d')) s.add('1w'); if (s.has('1w')) s.add('1M'); } return s; };
   function anchorOf(id, sym, closed) {
     const pid = ANCH[id]; if (!pid || !anchOn()) return null;
+    if (pid === '1d') {   // 4H de contexto: ancora no Diário já calculado deste ativo
+      const pd = (parDm && parDm[pid]) || (sym === symbol && data[pid]) || (favData[sym] && favData[sym].tfs && favData[sym].tfs[pid]); if (!pd || !pd.ext) return null;
+      try { const st = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (st) st.from = pid; return st; } catch (e) { console.warn('anchor', e); return null; }
+    }
     const pcs = rawC[sym + '|' + pid]; if (!pcs || pcs.length < 3) return null;
     try { const pd = computeTf(pcs, pid, sym), st = E.anchorFrom(pd.ext.res, pd.closed, closed, ANCH_MIN[id]); if (st) st.from = pid; return st; } catch (e) { console.warn('anchor', e); return null; }
+  }
+  // 4H de contexto ('4hc'): as mesmas velas do 4H, com a estrutura de contexto (só quebras, ancorada ao Diário) — zona do Day trade e contexto do Scalp
+  let parDm = null;
+  function mk4hc(dm, sym) {
+    if (!uniOn(settings) || !dm['4h'] || !dm['4h'].candles) { delete dm['4hc']; return; }
+    parDm = dm; try { dm['4hc'] = computeTf(dm['4h'].candles, '4hc', sym); } catch (e) { console.warn('4hc', e); delete dm['4hc']; } finally { parDm = null; }
   }
   function computeTf(cs, id, sym) {
     const now = Date.now();
@@ -2757,7 +2806,7 @@
       const o1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       try { o1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { o1.fibs = []; } o1.fibsI = o1.fibs;
       try { o1.obs = FB.orderBlocks(one.res, closed, price); } catch (e) { o1.obs = []; }
-      o1.fibsX = []; o1.fibConf = []; if (['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { o1.fibsX = FB.fibsMore(one.res, closed, price); o1.fibConf = FB.confZones(o1.fibs.concat(o1.fibsX), price); } catch (e) {}   // Diário para cima: perna anterior, tendência, ⭐ zonas
+      o1.fibsX = []; o1.fibConf = []; if (['1Y', '6M', '3M', '1M', '1w', '1d', '4hc'].includes(id)) try { o1.fibsX = FB.fibsMore(one.res, closed, price); o1.fibConf = FB.confZones(o1.fibs.concat(o1.fibsX), price); } catch (e) {}   // Diário para cima: perna anterior, tendência, ⭐ zonas
       return o1;
     }
     const pl = PRI_LV[priLevel(settings, id, sym || symbol)];
@@ -3126,6 +3175,7 @@
         if (token !== loadToken) return;
         Object.keys(data).forEach((k) => delete data[k]);
         for (const id of TF_IDS.filter((x) => got[x])) data[id] = computeTf(got[id], id);
+        mk4hc(data, symbol);
         if (!data[selectedTf]) selectedTf = Object.keys(data).includes('1d') ? '1d' : Object.keys(data)[0];
         if (!Object.keys(data).length) throw new Error('sem dados para ' + symbol);
         $('#price').textContent = fmt(data[selectedTf].price);
@@ -3149,6 +3199,7 @@
       }));
       if (token !== loadToken) return;
       for (const [id, cs] of results) data[id] = computeTf(cs, id);
+      mk4hc(data, symbol);
       const last = data[selectedTf] || data[results[results.length - 1][0]];
       $('#price').textContent = fmt(last.price);
       setStatus('Atualizado às ' + new Date().toLocaleTimeString('pt-PT'));
@@ -3339,7 +3390,7 @@
   const candleInSess = (h, durH, s) => inSess(h, s) || (durH > 0 && [s[0]].some((x) => { const dx = ((x - h) % 24 + 24) % 24; return dx > 0 && dx < durH; }));
   // em que killzone caiu uma vela (para etiquetar sweeps)
   function kzOf(t, durH) { const sc = sessionsCfg(), h = nyParts(t).h; return candleInSess(h, durH, sc.londres) ? 'Londres' : candleInSess(h, durH, sc.ny) ? 'NY' : null; }
-  const TF_MS0 = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
+  const TF_MS0 = { '1Y': 365 * 864e5, '6M': 182 * 864e5, '3M': 91 * 864e5, '1M': 30 * 864e5, '1w': 7 * 864e5, '1d': 864e5, '4h': 144e5, '4hc': 144e5, '1h': 36e5, '15m': 9e5, '5m': 3e5 };
   // ranges automáticos (a partir das velas de 1H)
   // cor de cada tipo de liquidez (caixa do range e respetivas gotas de sweep)
   const SWCOL = { asia: '245,197,24', london: '255,145,0', day: '129,212,250', week: '236,239,241', manual: '165,214,167' };
@@ -3581,7 +3632,7 @@
     if (ti < 0 || ci < 0 || ci >= ti) return [];
     return TFS.slice(ci, ti).map((t) => t.id).reverse();
   }
-  const tfLabel = (id) => (TFS.find((t) => t.id === id) || { label: id }).label;
+  const tfLabel = (id) => (id === '4hc' ? '4H contexto' : (TFS.find((t) => t.id === id) || { label: id }).label);
   // ---------- Fibonacci automáticas (alerts/fib.js) ----------
   const FB = window.MSS_FIB;
   const DEEP_MAX = 91.8;
@@ -3651,6 +3702,40 @@
     if (t.trend !== dir) return { txt: `à espera da quebra ${lado} no ${L}: fecho ${ac} de ${F(t.protected)}${D(t.protected)}`, lv: t.protected, fav: false };
     const far = P > 0 && Math.abs(t.extreme - P) / P > 0.15;   // nada a mais de 15%
     return { txt: far ? `o ${L} já está a favor (sem quebra nova a menos de 15%)` : `o ${L} já está a favor; a próxima quebra ${lado} é um fecho ${ac} de ${F(t.extreme)}${D(t.extreme)}`, lv: far ? null : t.extreme, fav: true };
+  }
+  // obstáculos e vento a favor de UM setup: o que está no caminho até à quebra que falta e daí até ao topo/fundo da perna da zona (o 1.º alvo natural),
+  // o que segura o preço do lado de trás (perto), e as divergências que contam (só dos timeframes do de quebra para cima, recentes)
+  function suPath(dm, sym, st, dir, price, F) {
+    F = F || fmt; const P = price > 0 ? price : dm[st.trig] && dm[st.trig].price; if (!(P > 0)) return null;
+    const up = dir === 1, D = (x) => pct((x - P) / P * 100, true), b = brkTxt(dm, st.trig, dir, P, F), lv = b.lv;
+    const zs = dm[st.zone] && dm[st.zone].ext.snap, tgt = zs && zs.trend === dir && zs.extreme > 0 ? zs.extreme : null;
+    const ahead = (p) => (up ? p > P : p < P), near = (p, k) => Math.abs(p - P) / P <= k, L = [];
+    const add = (p, n, side) => { if (p > 0 && isFinite(p)) L.push({ p, n, side }); };   // side: 1 = do lado do trade (segura/ajuda), -1 = contra (trava)
+    const ids = [...new Set([ctxOf(st), st.zone, (TF_MS0[st.trig] || 0) >= 144e5 ? st.trig : null].filter((id) => id && dm[id]))];   // order blocks e FVG só dos timeframes que pesam (do 4H para cima)
+    for (const id of ids) { const d = dm[id], lb = tfLabel(id);
+      (d.obs || []).forEach((o) => { if (o.dir === dir) add(up ? o.top : o.bot, `order block de ${up ? 'compra' : 'venda'} ${lb} ${F(o.bot)}–${F(o.top)}`, 1); else add(up ? o.bot : o.top, `order block de ${up ? 'venda' : 'compra'} ${lb} ${F(o.bot)}–${F(o.top)}`, -1); });
+      ((d.ext && d.ext.res.fvgs) || []).filter((g) => g.filled == null).forEach((g) => { if (g.dir === dir) add(up ? g.top : g.bot, `FVG ${up ? 'de compra' : 'de venda'} ${lb} ${F(g.bot)}–${F(g.top)}`, 1); else add(up ? g.bot : g.top, `FVG ${up ? 'de venda' : 'de compra'} ${lb} ${F(g.bot)}–${F(g.top)}`, -1); }); }
+    try { const now = Date.now();
+      for (const l of userLines(sym).filter((l) => lnLive(l, now))) { const cs = (dm[l.tf] || dm[lnTfsOf(l)[0]] || {}).candles, tl = lnTfsOf(l).map(tfLabel).join('/');
+        if (l.type === 'chan') { const a = lnVal(l, now, 0, cs), c = lnVal(l, now, l.off || 0, cs); add(Math.max(a, c), `teto do teu canal ${tl}`, 0); add(Math.min(a, c), `chão do teu canal ${tl}`, 0); }
+        else add(lnVal(l, now, 0, cs), `a tua diagonal ${tl}`, 0); } } catch (e) {}
+    for (const id of ['1d', '1w', '1M']) { const d = dm[id]; if (d && d.candles && d.candles.length > 200) { const sm = smaOfTf(d, 200); if (sm && near(sm, 0.15)) add(sm, `SMA 200 ${tfLabel(id)}`, 0); } }
+    const mg = (arr) => arr.sort((a, c) => (up ? a.p - c.p : c.p - a.p)).reduce((acc, x) => { const q = acc[acc.length - 1]; if (q && Math.abs(x.p - q.p) / P < 0.0015) { if (!q.n.includes(x.n)) q.n += ' + ' + x.n; } else acc.push(Object.assign({}, x)); return acc; }, []);
+    const inS1 = (p) => lv && ahead(p) && (up ? p < lv : p > lv), inS2 = (p) => tgt && ahead(p) && !inS1(p) && (up ? p < tgt : p > tgt) && near(p, 0.15);
+    const s1 = mg(L.filter((x) => x.side !== 1 && inS1(x.p))), s2 = mg(L.filter((x) => x.side !== 1 && inS2(x.p)));
+    const fav = mg(L.filter((x) => x.side !== -1 && !ahead(x.p) && near(x.p, 0.03))).reverse();   // atrás do preço, perto: o que o segura
+    const dv = { fav: [], con: [] };
+    for (const id of Object.keys(dm)) { const d = dm[id]; if (!d || !d.closed || id === '4hc' || (TF_MS0[id] || 0) < (TF_MS0[st.trig] || 0) || tfHid(id, sym)) continue;
+      try { const v = divergences(d).filter((q) => q.live).pop(), ago = v ? d.closed.length - 1 - v.b.i : 999; if (v && ago <= 30) (v.dir === dir ? dv.fav : dv.con).push(`divergência RSI ${v.dir === 1 ? 'de alta' : 'de baixa'} no ${tfLabel(id)} (há ${ago} velas)`); } catch (e) {} }
+    return { P, lv, tgt, s1, s2, fav, dv, D, F, up };
+  }
+  function suPathTxt(o, pre) {
+    if (!o) return []; const out = [], it = (a) => a.slice(0, 4).map((x) => `${o.F(x.p)} (${o.D(x.p)}) ${x.n}`).join('; ');
+    if (o.lv) out.push(`${pre}no caminho até à quebra (fecho ${o.up ? 'acima' : 'abaixo'} de ${o.F(o.lv)}, ${o.D(o.lv)}): ${o.s1.length ? it(o.s1) : 'nada'}`);
+    if (o.tgt && (o.s2.length || !o.lv)) out.push(`${pre}depois, até ao ${o.up ? 'topo' : 'fundo'} da perna (${o.F(o.tgt)}, ${o.D(o.tgt)}): ${o.s2.length ? it(o.s2) : 'nada pelo meio'}`);
+    if (o.fav.length) out.push(`${pre}vento a favor (segura o preço, perto): ${it(o.fav)}`);
+    if (o.dv.fav.length || o.dv.con.length) out.push(`${pre}divergências: ${[...o.dv.fav.map((t) => 'a favor — ' + t), ...o.dv.con.map((t) => '⚠ contra — ' + t)].join('; ')}`);
+    return out;
   }
   // uma frase: porque há (ou não há) trade neste setup
   function suWhy(rs, dm) {
@@ -3951,8 +4036,9 @@
   function renderChart(keepRange) {
     const d = data[selectedTf]; if (!d) return;
     try { symNavUi(); } catch (e) {}
-    { const n = nm(symbol), e = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); $('#chartTitle').innerHTML = `${e(n)}${n !== symbol ? ` <span style="font-weight:400;opacity:.6;font-size:.8em">${e(symbol)}</span>` : ''} · ${TFS.find((t) => t.id === selectedTf).label}`; }
-    document.querySelectorAll('.tfbtn').forEach((b) => { b.classList.toggle('on', b.dataset.tf === selectedTf); b.style.display = tfHid(b.dataset.tf) || (!isCrypto(symbol) && !Y_IV[b.dataset.tf] && !Y_AGG[b.dataset.tf] && !Y_MAGG[b.dataset.tf]) ? 'none' : ''; });   // ações: sem 3m
+    { const n = nm(symbol), e = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;'); $('#chartTitle').innerHTML = `${e(n)}${n !== symbol ? ` <span style="font-weight:400;opacity:.6;font-size:.8em">${e(symbol)}</span>` : ''} · ${tfLabel(selectedTf)}`; }
+    { const c4 = $('#c4Btn'); if (c4) { const on4 = selectedTf === '4h' || selectedTf === '4hc'; c4.style.display = on4 && data['4hc'] ? '' : 'none'; c4.innerHTML = selectedTf === '4hc' ? '<b>4H contexto</b> ⇄ quebra' : '<b>4H quebra</b> ⇄ contexto'; c4.classList.toggle('on', selectedTf === '4hc'); } }
+    document.querySelectorAll('.tfbtn').forEach((b) => { b.classList.toggle('on', b.dataset.tf === lnSel()); b.style.display = tfHid(b.dataset.tf) || (!isCrypto(symbol) && !Y_IV[b.dataset.tf] && !Y_AGG[b.dataset.tf] && !Y_MAGG[b.dataset.tf]) ? 'none' : ''; });   // ações: sem 3m
     $('#tgExt').classList.toggle('on', vE()); $('#tgInt').classList.toggle('on', vI());
     $('#tgExt').classList.toggle('editing', editLayer === 'ext'); $('#tgInt').classList.toggle('editing', editLayer === 'int');
     { const u = uniOn(settings), set = (id, h) => { const e = document.getElementById(id); if (e) e.innerHTML = h; };   // legenda: no modo de uma estrutura não há tendência principal / movimento recente
@@ -4448,7 +4534,7 @@
   const userLines = (sym) => ((settings.lines || {})[sym || symbol] || []);
   // uma linha pode aparecer em vários timeframes (l.tfs); l.tf é o timeframe onde foi desenhada
   const lnTfsOf = (l) => (Array.isArray(l.tfs) && l.tfs.length ? l.tfs : [l.tf]);
-  const lnHere = (l) => lnTfsOf(l).includes(selectedTf);
+  const lnHere = (l) => lnTfsOf(l).includes(lnSel());
   // segmento (fim no 2.º ponto) ou prolongada para a direita; linhas antigas (sem ext) continuam prolongadas
   const lnExt = (l) => l.ext !== false;
   const lnLive = (l, t) => lnExt(l) || (t || Date.now()) <= Math.max(l.t1, l.t2);
@@ -4456,7 +4542,7 @@
   const LN_TFS = () => TFS.map((t) => t.id).filter((id) => !['1Y', '6M'].includes(id) && !tfHid(id) && (isCrypto(symbol) || Y_IV[id] || Y_AGG[id] || Y_MAGG[id]));
   // tira a linha só deste timeframe; se era o último, apaga-a
   function lineRemoveHere(id) {
-    setLines(userLines().map((l) => { if (l.id !== id) return l; const t = lnTfsOf(l).filter((x) => x !== selectedTf); return t.length ? Object.assign({}, l, { tfs: t }) : null; }).filter(Boolean));
+    setLines(userLines().map((l) => { if (l.id !== id) return l; const t = lnTfsOf(l).filter((x) => x !== lnSel()); return t.length ? Object.assign({}, l, { tfs: t }) : null; }).filter(Boolean));
   }
   // apaga a linha de vez (de todos os timeframes); para a tirar só de um timeframe desmarca a caixa dele
   function lineDelete(id) { setLines(userLines().filter((l) => l.id !== id)); }
@@ -4563,8 +4649,8 @@
   function linePreview() {
     if (!lineMode || lineMode === 'del' || !lineHover || !linePts.length) return null;
     const a = linePts[0];
-    if (linePts.length === 1) { if (lineHover.t === a.t) return null; return { id: '_pv', type: 'line', tf: selectedTf, t1: a.t, p1: a.p, t2: lineHover.t, p2: lineHover.p, ext: false }; }
-    const b = linePts[1], l = { id: '_pv', type: 'chan', tf: selectedTf, t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false }; const [F] = lnF(l); l.off = F(lineHover.p) - F(lnVal(l, lineHover.t, 0)); return l;
+    if (linePts.length === 1) { if (lineHover.t === a.t) return null; return { id: '_pv', type: 'line', tf: lnSel(), t1: a.t, p1: a.p, t2: lineHover.t, p2: lineHover.p, ext: false }; }
+    const b = linePts[1], l = { id: '_pv', type: 'chan', tf: lnSel(), t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false }; const [F] = lnF(l); l.off = F(lineHover.p) - F(lnVal(l, lineHover.t, 0)); return l;
   }
   const LINE_HINT = { line: ['Diagonal: carrega no 1.º ponto', 'Diagonal: mexe o rato e carrega no 2.º ponto'], chan: ['Canal: carrega no 1.º ponto da linha de base', 'Canal: carrega no 2.º ponto da linha de base', 'Canal: mexe o rato até ao outro lado do canal e carrega'] };
   function lineHintUi() {
@@ -4595,7 +4681,7 @@
     if (linePts.length < need) { lineHintUi(); return; }
     const [a, b, c] = linePts;
     if (b.t === a.t) { linePts = [a]; return; }
-    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: selectedTf, tfs: [selectedTf], t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false, alert: false, pct: null, at: Date.now() };
+    const l = { id: 'l' + Date.now().toString(36), type: lineMode, tf: lnSel(), tfs: [lnSel()], t1: a.t, p1: a.p, t2: b.t, p2: b.p, ext: false, alert: false, pct: null, at: Date.now() };
     if (lineMode === 'chan') { const [F] = lnF(l); l.off = F(c.p) - F(lnVal(l, c.t, 0)); }
     setLines(userLines().concat(l)); lineSel = l.id; setLineMode(null); lineSel = l.id; lineHintUi();
   }
@@ -4614,8 +4700,8 @@
     const m = $('#lineMenu'); if (!m) return;
     const l = lineSel && !lineMode && linesOn() && userLines().find((x) => x.id === lineSel && lnHere(x));
     if (!l || lineDrag) { m.style.display = 'none'; m.dataset.for = ''; return; }
-    if (m.dataset.for !== l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf) {   // caixas dos timeframes (só redesenha quando muda)
-      m.dataset.for = l.id + '|' + lnTfsOf(l).join(',') + '|' + selectedTf;
+    if (m.dataset.for !== l.id + '|' + lnTfsOf(l).join(',') + '|' + lnSel()) {   // caixas dos timeframes (só redesenha quando muda)
+      m.dataset.for = l.id + '|' + lnTfsOf(l).join(',') + '|' + lnSel();
       m.querySelector('.lnmtf').innerHTML = `<label class="lnpc" title="Distância do preço à linha para o aviso">a <input type="number" step="0.1" min="0.1" max="20" data-mpc="${l.id}" value="${l.pct || (TF_MS0[l.tf] >= 864e5 ? 1 : 0.5)}">%</label>${lnTfBoxes(l, 'data-mtf')}<span class="lnsaved"></span>`;
       m.querySelectorAll('[data-mtf]').forEach((i) => i.addEventListener('change', () => lineToggleTf(i.dataset.mtf, i.dataset.ltf, i.checked)));
       const pc = m.querySelector('[data-mpc]'); pc.addEventListener('change', () => setLines(userLines().map((x) => (x.id === pc.dataset.mpc ? Object.assign({}, x, { pct: Math.max(0.1, Math.min(20, +String(pc.value).replace(',', '.') || 1)) }) : x)), false));
@@ -5108,13 +5194,18 @@
   const tfHid = (id, s) => (id === '15m' || id === '5m') && (TF_MS0[id] || 0) < monMinMs(s || symbol);
   const suHid = (st, s) => !!st && (tfHid(st.trig, s) || tfHid(st.zone, s) || tfHid(ctxOf(st), s));
   const favTfsOf = (s) => { const ps = withParents(favTfs().map((t) => t.id)); return TFS.filter((t) => ps.has(t.id)).filter((t) => (TF_MS0[t.id] || 1e15) >= monMinMs(s)); };
+  // num refresco, um timeframe que falhou fica com os dados da vez anterior (não volta a "a carregar")
+  function favKeep(sym, out, ids) { const pv = favData[sym] && favData[sym].tfs; if (!pv) return; for (const id of ids) if (!out[id] && pv[id]) out[id] = Object.assign(pv[id], { stale: true }); }
+  // timeframes que falharam várias vezes seguidas (para dizer "sem dados do 4H" em vez de "a carregar" para sempre)
+  function favMiss(sym, out, ids) { const o = Object.assign({}, (favData[sym] && favData[sym].miss) || {}); for (const id of ids) { if (out[id] && !out[id].stale) delete o[id]; else o[id] = (o[id] || 0) + 1; } return o; }
   async function loadFav(sym) {
     if (!isCrypto(sym)) {
       const ids = favTfsOf(sym).map((t) => t.id);
       const got = isSynth(sym) ? await synthCandles(sym, ids) : isRatio(sym) ? await ratioCandles(sym, ids, true) : await stockCandles(sym, ids), out = {};
       for (const id of TF_IDS.filter((x) => got[x])) if (ids.includes(id)) out[id] = computeTf(got[id], id, sym);
+      favKeep(sym, out, ids); mk4hc(out, sym);
       const any = out['1d'] || Object.values(out)[0];
-      favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true }; return;
+      favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), stock: true, miss: favMiss(sym, out, ids) }; return;
     }
     const tfs = favTfsOf(sym), out = {};
     // orçamento de velas: até 30 favoritos, a história toda do ativo aberto; acima disso reduz (mínimo 1000)
@@ -5122,20 +5213,27 @@
     const favN = (tf) => Math.round(Math.min(tf.total || 1000, Math.max(1000, (tf.total || 1000) * Math.min(1, 30 / nFav))));
     let hourly = null;
     for (const tf of tfs) {
+      for (let w = 0; userLoading > 0 && w < 120; w++) await new Promise((r) => setTimeout(r, 250));   // o ativo que abriste passa à frente
       let cs;
+      try {
       if (tf.magg) cs = aggregateMonths(await klines(sym, '1M', 500), tf.magg);
       else if (tf.agg) { if (!hourly) hourly = await klines(sym, '1h', favN(TFS.find((t) => t.id === '1h'))); cs = aggregate(hourly, tf.agg, 3600e3); }
       else cs = await klines(sym, tf.api, favN(tf));
-      if (cs.length > minC(tf.id)) out[tf.id] = computeTf(cs, tf.id, sym);
+      } catch (e) { cs = null; }   // um timeframe que falha não deita fora os outros
+      if (cs && cs.length > minC(tf.id)) out[tf.id] = computeTf(cs, tf.id, sym);
     }
+    const ids = tfs.map((t) => t.id);
+    if (!Object.keys(out).length && !favData[sym]) throw new Error('sem dados para ' + sym);
+    favKeep(sym, out, ids); mk4hc(out, sym);
     const any = Object.values(out)[0];
-    favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now() };
+    favData[sym] = { tfs: out, price: any ? any.price : null, at: Date.now(), miss: favMiss(sym, out, ids) };
   }
   // avaliação de um setup num ativo dos favoritos (mesmas regras do painel de setups)
   // porque é que um setup não pode ser avaliado (dados em falta ou tendência principal da zona sem sentido)
   function setupWhy(dm, st) {
     const dz = dm[st.zone], dt = dm[st.trig];
-    if (!dz || !dt) return { short: 'a carregar…', long: `a carregar dados de ${tfLabel(st.zone)} / ${tfLabel(st.trig)}…` };
+    if (!dz || !dt) { const m = [[st.zone, dz], [st.trig, dt]].filter(([, d]) => !d).map(([id]) => tfLabel(id)), loaded = Object.keys(dm || {}).length > 0;
+      return loaded ? { short: `sem dados do ${m.join('/')}`, long: `sem dados do ${m.join(' / ')} (o servidor não respondeu; tenta de novo no próximo refresco)` } : { short: 'a carregar…', long: `a carregar dados de ${tfLabel(st.zone)} / ${tfLabel(st.trig)}…` }; }
     const lab = dz.ext.snap.label || 'sem sentido definido';
     return { short: `sem tendência no ${tfLabel(st.zone)}`, long: `${tfLabel(st.zone)}: a tendência principal não tem sentido definido (${lab}) — sem isso o setup não é avaliado` };
   }
@@ -5154,7 +5252,7 @@
     const disp = [st.zone, st.trig].some((id) => dm[id] && dm[id].int.snap.dispute);
     const rank = !missing.length ? 4 : zOk && trigOk ? 3 : zOk ? 2 : 1;
     const ctx = cx && cx.trend ? { fav: cx.trend === dir, pull: cx.pullback } : null;
-    return { st, rsv, why: suWhy(rsv, dm), dir, z, missing, rank, disp, ctx, box: bt ? bt.bx : null, sweep: trigOk && !bt && sweepBeforeBreak(dt), deep: zOk && z.pullback > DEEP_FROM, deepTxt: zOk && z.pullback > DEEP_FROM ? deepTxt(dm, st.zone, dir, z) : '', star: zOk ? starOf(dm, st.zone) : null };
+    return { st, rsv, why: suWhy(rsv, dm), dir, z, missing, rank, disp, ctx, t, trigOk, cx, box: bt ? bt.bx : null, sweep: trigOk && !bt && sweepBeforeBreak(dt), deep: zOk && z.pullback > DEEP_FROM, deepTxt: zOk && z.pullback > DEEP_FROM ? deepTxt(dm, st.zone, dir, z) : '', star: zOk ? starOf(dm, st.zone) : null };
   }
   // ---- página dos favoritos: lista sempre visível; o ativo aberto mostra-se por baixo da sua linha ----
   let favOpen = null;            // ativo aberto na lista
@@ -5323,7 +5421,7 @@
     const list = (settings.favs || []).filter((s) => force || !favData[s] || Date.now() - favData[s].at > 4.5 * 60e3);
     let done = 0;
     const work = list.slice();
-    const worker = async () => { while (work.length) { for (let w = 0; userLoading > 0 && w < 120; w++) await new Promise((r) => setTimeout(r, 250)); const s = work.shift(); if (!s) break; try { await loadFav(s); } catch (e) { favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavList(); npRender(); } };
+    const worker = async () => { while (work.length) { for (let w = 0; userLoading > 0 && w < 120; w++) await new Promise((r) => setTimeout(r, 250)); const s = work.shift(); if (!s) break; try { await loadFav(s); } catch (e) { if (favData[s] && Object.keys(favData[s].tfs || {}).length) favData[s].errAt = Date.now(); else favData[s] = { tfs: {}, price: null, at: Date.now(), err: true }; } done++; favProg = `a atualizar ${done}/${list.length}`; renderFavList(); npRender(); } };
     await Promise.all([worker(), worker(), worker()]);
     favProg = 'atualizado ' + new Date().toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' });
     favBusy = false; renderFavList(); npRender();
@@ -5369,7 +5467,8 @@
     if (t === 'favs') { renderFavs(); scanFavs(false); }
     if (t === 'grafico') setTimeout(() => { try { chart.panes()[1].setHeight(window.innerWidth <= 760 ? 90 : 130); } catch (e) {} renderChart(false); }, 60);
   }
-  function selectTf(id) { const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id); closeMenu(); if (uniOn(settings)) { editLayer = uniL(id); try { updateEditUi(); } catch (e) {} } try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
+  const lnSel = () => (selectedTf === '4hc' ? '4h' : selectedTf);   // as tuas linhas no 4H de contexto ficam no 4H (são as mesmas velas)
+  function selectTf(id) { const changed = id !== selectedTf; selectedTf = id; save('mss_tf', id === '4hc' ? '4h' : id); closeMenu(); if (uniOn(settings)) { editLayer = uniL(id); try { updateEditUi(); } catch (e) {} } try { sensUi(); } catch (e) {} if (changed && chart) { try { chart.priceScale('right').applyOptions({ autoScale: true }); } catch (e) {} } if (!data[id]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); } updateEditUi(); }
   function recomputeAll() { for (const id of Object.keys(data)) data[id] = computeTf(data[id].candles, id); renderTable(); renderConfluence(); renderPrev(); renderChart(true); }
 
   // ---------- definições ----------
@@ -5995,13 +6094,13 @@ Formato:
 4) SE JÁ ESTÁS DENTRO: onde uma posição aberta está a entrar numa zona do lado contrário (ex.: "se estás short no Cobre, ele está em zona de compra no Mensal").
 5) CONTEXTO (2–3 linhas, só o que muda a decisão): cripto (BTC/TOTAL e stablecoins) e os rácios em zona. Para cada sinal diz A AÇÃO que ele desencadeia (ex.: "se o STABLE.D fechar abaixo de X no 4H (−7,6%), é dinheiro a sair das stablecoins: reforça os longs em BTC e TOTAL").
 6) EM QUE MOMENTO ESTAMOS: copia as % por grupo calculadas pela app e explica-as numa frase.
-REGRAS: cada preço vem com o que é e a distância ao preço; nada a mais de ~15% exceto o limite que invalida; alvos de Fibonacci só se vierem marcados como ativos; ativos sem zona não se mencionam. Nos índices de domínio (.D) diz numa frase o que esse lado significa. Usa só os números destes dados.`;
+REGRAS: cada preço vem com o que é e a distância ao preço; nada a mais de ~15% exceto o limite que invalida; OBSTÁCULOS: menciona um obstáculo só se estiver "no caminho" (vem nos dados de cada setup) ou a menos de ~5% do preço; VENTO A FAVOR só o que vem marcado como tal (segura o preço perto da zona); divergências "⚠ contra" são um aviso a dizer sempre; alvos de Fibonacci só se vierem marcados como ativos; ativos sem zona não se mencionam. Nos índices de domínio (.D) diz numa frase o que esse lado significa. Usa só os números destes dados.`;
   function daySummary() {
     const rows = dayRows(), dt = new Date().toLocaleString('pt-PT', { dateStyle: 'full', timeStyle: 'short' });
     const D = (x, p) => pct((x - p) / p * 100, true);
     const mode = (x) => (x.rsv && x.rsv.mode === 'rev' ? ' (reversão)' : x.rsv && x.rsv.mode === 'counter' ? ' (contra o timeframe de cima, com margem)' : '');
     const sub = (r) => { const x = r.x, p = r.price, w = dayWarn(r);
-      return `   ${r.st0.name}: ${x.dir === 1 ? 'LONG' : 'SHORT'}${mode(x)} · ${dayPhase(r, aiF)} · invalida com fecho ${x.dir === 1 ? 'abaixo' : 'acima'} de ${aiF(x.z.protected)} (${D(x.z.protected, p)})${x.deep && x.deepTxt ? ` · ${x.deepTxt.replace(/^[^·]*· /, '')}` : ''}${r.conf.length ? ` · confluências perto: ${r.conf.join('; ')}` : ''}${w.length ? ` · atenção: ${w.join(', ')}` : ''}`; };
+      return `   ${r.st0.name}: ${x.dir === 1 ? 'LONG' : 'SHORT'}${mode(x)} · ${dayPhase(r, aiF)} · invalida com fecho ${x.dir === 1 ? 'abaixo' : 'acima'} de ${aiF(x.z.protected)} (${D(x.z.protected, p)})${x.deep && x.deepTxt ? ` · ${x.deepTxt.replace(/^[^·]*· /, '')}` : ''}${r.conf.length ? ` · confluências perto: ${r.conf.join('; ')}` : ''}${w.length ? ` · atenção: ${w.join(', ')}` : ''}${(() => { const t = suPathTxt(suPath((favData[r.s] || {}).tfs || {}, r.s, r.st, x.dir, p, aiF), '      ').join('\n'); return t ? '\n' + t : ''; })()}`; };
     const line = (r, k) => `${k + 1}. ${nm(r.s)} (${r.s}) · preço ${aiF(r.price)}${dayIdxNote(r.s, r.x.dir)}
 ${[r].concat(r.alts || []).map(sub).join('\n')}${r.frN ? `\n   rácios a favor de ${nm(r.s)}: ${r.fav.join(', ') || 'nenhum'}; contra: ${r.con.join(', ') || 'nenhum'}` : ''}`;
     const ld = dayLoad(), pano = dayPanorama();
@@ -6166,6 +6265,157 @@ ${AI_DAY_FORMAT}`;
     }
     return rows.sort((a, b) => b.score - a.score || b.pull - a.pull);
   }
+  // ---------- aba Análise IA: várias análises individuais seguidas, ou uma análise conjunta (ativo âncora ⚓ + contexto) ----------
+  function npShowAiTab() {
+    if (editMode) { requestExitEdit(); if (editMode) return; }
+    npView = 'ai'; document.body.dataset.npv = 'ai'; clearInterval(npPxTimer);
+    npRender(); window.scrollTo(0, 0); scanFavs(false); navPush({ v: 'ai' });
+  }
+  // corre a análise de um favorito como se estivesse aberto (troca os dados por um instante, sem desenhar nada)
+  function aiWithSym(s, fn) {
+    if (s === symbol && data[selectedTf]) return fn();
+    const f = favData[s]; if (!f || !f.tfs || !Object.keys(f.tfs).length) return null;
+    const sv = Object.assign({}, data), s0 = symbol, t0 = selectedTf;
+    try { Object.keys(data).forEach((k) => delete data[k]); Object.assign(data, f.tfs); symbol = s; selectedTf = f.tfs['1d'] ? '1d' : Object.keys(f.tfs)[0]; return fn(); }
+    finally { Object.keys(data).forEach((k) => delete data[k]); Object.assign(data, sv); symbol = s0; selectedTf = t0; }
+  }
+  // correlação dos retornos diários (últimos ~60 dias em comum)
+  function aiCorr(a, b) {
+    const k = (t) => new Date(t + 6 * 36e5).toISOString().slice(0, 10), mp = (s) => { const d = favData[s] && favData[s].tfs && favData[s].tfs['1d']; const m = new Map(); (d ? d.closed : []).forEach((c) => m.set(k(c.t), c.c)); return m; };
+    const A = mp(a), B = mp(b), ks = [...A.keys()].filter((x) => B.has(x)).sort().slice(-61); if (ks.length < 25) return null;
+    const ra = [], rb = []; for (let i = 1; i < ks.length; i++) { ra.push(Math.log(A.get(ks[i]) / A.get(ks[i - 1]))); rb.push(Math.log(B.get(ks[i]) / B.get(ks[i - 1]))); }
+    const m = (v) => v.reduce((x, y) => x + y, 0) / v.length, ma = m(ra), mb = m(rb); let c = 0, va = 0, vb = 0;
+    for (let i = 0; i < ra.length; i++) { c += (ra[i] - ma) * (rb[i] - mb); va += (ra[i] - ma) ** 2; vb += (rb[i] - mb) ** 2; }
+    return va && vb ? { r: c / Math.sqrt(va * vb), n: ra.length } : null;
+  }
+  // relação de um ativo de contexto com a âncora: +1 anda com, −1 anda contra (rácios: pela posição da âncora; resto: a tua escolha ou a correlação)
+  function aiRelOf(anc, c) {
+    if (isRatio(c)) { const [A, B] = ratioLegs(c); if (A === anc) return { v: 1, src: `rácio com ${nm(anc)} em cima: ▲ = ${nm(anc)} a ganhar a ${nm(B)}` }; if (B === anc) return { v: -1, src: `rácio com ${nm(anc)} em baixo: ▲ = ${nm(anc)} a perder para ${nm(A)}` }; }
+    const man = ((settings.aiRel || {})[anc] || {})[c], cr = aiCorr(anc, c);
+    if (man === 1 || man === -1) return { v: man, src: `escolha tua${cr ? ` (correlação ${cr.r.toFixed(2).replace('.', ',')})` : ''}`, cr };
+    if (/^(STABLE|USDT|USDC)\.D$/i.test(c) && isCrypto(anc)) return { v: -1, src: 'domínio das stablecoins: anda contra a cripto', cr };
+    if (!cr) return { v: 0, src: 'sem dados para medir a relação', cr };
+    return { v: cr.r >= 0 ? 1 : -1, src: `correlação ${cr.r.toFixed(2).replace('.', ',')} em ${cr.n} dias${Math.abs(cr.r) < 0.3 ? ' — fraca: pesa pouco' : ''}`, cr, weak: Math.abs(cr.r) < 0.3 };
+  }
+  // o melhor setup em zona de um favorito (o mais avançado; depois o timeframe maior)
+  const aiBest = (s) => (settings.setups || []).filter((x) => x.on && !suHid(x, s)).map((st0) => { const x = favSetup(s, st0); return x && x.rank >= 2 ? Object.assign(x, { st0 }) : null; }).filter(Boolean).sort((a, b) => b.rank - a.rank || (TF_MS0[b.st.zone] || 0) - (TF_MS0[a.st.zone] || 0))[0] || null;
+  const aiPhase = (s, x) => { const up = x.dir === 1, z = `em zona de ${up ? 'compra' : 'venda'} no ${tfLabel(x.st.zone)} (${pct(x.z.pullback)})`; if (x.rank >= 3) return `${z}, já quebrou ${up ? 'para cima' : 'para baixo'} no ${tfLabel(x.st.trig)}`; return `${z}, ${brkTxt(favData[s].tfs, x.st.trig, x.dir, (favData[s].tfs[x.st.trig] || {}).price, aiF).txt}`; };
+  const AI_MULTI_HEAD = (n) => `Análise INDIVIDUAL de ${n} ativo${n === 1 ? '' : 's'} do meu scanner. Responde a CADA UM EM SEPARADO, pela ordem dos dados, com um título por ativo e o formato abaixo (no máximo ~250 palavras por ativo). Não os mistures nem os compares.`;
+  function aiMultiBrief(sel) {
+    const parts = sel.map((s) => aiWithSym(s, () => aiSummary(null, { noFmt: true }))).filter(Boolean);
+    const NOTE = uniOn(settings) ? '\n\nNOTA: cada timeframe tem UMA só estrutura (do Anual ao Diário: só os topos/fundos que quebraram estrutura; do 4H para baixo: todos). O 4H tem duas: o "4H" (quebra do Longo prazo) e o "4H contexto" (zona do Day trade).' : '';
+    return `${AI_MULTI_HEAD(parts.length)}\n\n${AI_FORMAT}${NOTE}\n\n${parts.join('\n\n')}`;
+  }
+  const AI_JOINT_FORMAT = `Responde em português de Portugal, numa linguagem simples e direta, no máximo ~450 palavras. O meu método (ICT): só há trade quando um timeframe está em zona (correção de 50% ou mais, até ao limite); os timeframes de baixo confirmam com uma quebra a favor.
+ESTA É UMA ANÁLISE CONJUNTA: o foco é SÓ o ativo âncora ⚓. Os outros ativos são CONTEXTO: servem para empurrar ou travar o trade na âncora, nunca o contrário. A app já classificou cada um (a favor / ⚠ contra / neutro) — explica, não contraries.
+Formato:
+1) A ÂNCORA: cada setup da âncora em separado (Longo prazo, Swing…), com a fase e a quebra que falta (timeframe, preço, distância).
+2) O CONTEXTO: uma frase por ativo de contexto — está a favor, contra ou neutro e porquê (em que zona está, de que lado), e a quebra a vigiar nesse ativo com A AÇÃO que ela desencadeia na âncora (ex.: "se o WTI fechar abaixo de X no 4H (−2%), é sinal contra o long na BP: espera").
+3) OS RÁCIOS (se houver): o veredicto da app numa ou duas frases (ex.: "a âncora está em zona de compra, mas os rácios mostram-na fraca face a X e Y: nos rácios o trade certo seria vender a âncora e comprar X").
+4) CONCLUSÃO: sinal forte (âncora e contexto em sintonia), com alerta (contexto contra) ou sem trade; e o que tinha de acontecer no contexto para mudar isso.
+VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho acima/abaixo de <preço> (<distância>)", "em zona de compra/venda", "pronto", "sem zona". PALAVRAS PROIBIDAS: "viragem", "virar", "gatilho", "zona aberta", "em alta", "em baixa". Cada preço vem com o que é e a distância. Usa só os números destes dados.`;
+  function aiJointBrief(anc, ctx) {
+    const head = aiWithSym(anc, () => aiSummary(null, { noFmt: true })) || `=== ${nm(anc)} === (sem dados)`, ax = aiBest(anc), ad = ax ? ax.dir : 0, lines = [], rat = { fav: [], con: [] };
+    for (const c of ctx) {
+      const f = favData[c]; if (!f || !f.tfs || !Object.keys(f.tfs).length) { lines.push(`- ${nm(c)}: sem dados`); continue; }
+      const rel = aiRelOf(anc, c), x = aiBest(c), eff = x && rel.v ? x.dir * rel.v : 0, rl = rel.v === 1 ? 'anda com' : rel.v === -1 ? 'anda contra' : 'relação desconhecida';
+      const v = !x ? 'NEUTRO (sem zona)' : !ad ? `empurra ${eff === 1 ? 'para LONG' : 'para SHORT'} na âncora (a âncora não tem zona)` : eff === ad ? 'A FAVOR — sinal forte' : '⚠ CONTRA — alerta';
+      const sts = (settings.setups || []).filter((y) => y.on && !suHid(y, c)).map((st0) => { const y = favSetup(c, st0); return y && y.rank >= 2 ? `${st0.name} ${y.dir === 1 ? 'LONG' : 'SHORT'}: ${aiPhase(c, y)}` : null; }).filter(Boolean);
+      lines.push(`- ${nm(c)} (${c}) · ${rl} a âncora (${rel.src}) · ${v}${rel.weak ? ' (pesa pouco)' : ''}\n   ${sts.join('\n   ') || 'sem zona em nenhum setup'}${dayIdxNote(c, x ? x.dir : 1)}`);
+      if (isRatio(c) && x) (eff === (ad || eff) ? rat.fav : rat.con).push(`${nm(c)} (${x.dir === 1 ? 'em zona de compra' : 'em zona de venda'} no ${tfLabel(x.st.zone)})`);
+    }
+    const [aSide, aTxt] = ax ? [ax.dir === 1 ? 'LONG' : 'SHORT', `${ax.st0.name} ${ax.dir === 1 ? 'LONG' : 'SHORT'} — ${aiPhase(anc, ax)}`] : ['', 'sem zona em nenhum setup'];
+    const rv = rat.fav.length || rat.con.length ? `\nVEREDICTO DOS RÁCIOS (calculado pela app): ${rat.con.length ? `a âncora ${ax ? `está para ${aSide}` : ''}, mas os rácios ${rat.con.join(', ')} mostram ${nm(anc)} ${ad === 1 || !ad ? 'fraco' : 'forte'} face a esses ativos${ad === 1 ? ` — nos rácios, o trade certo seria vender ${nm(anc)} e comprar o outro lado` : ''}` : 'os rácios confirmam a âncora'}${rat.fav.length ? `; a favor: ${rat.fav.join(', ')}` : ''}.` : '';
+    return `Análise CONJUNTA — ativo âncora ⚓ ${nm(anc)} (${anc}), à luz de: ${ctx.map(nm).join(', ')}.\nMELHOR SETUP DA ÂNCORA (app): ${aTxt}\n\n${head}\n\nCONTEXTO (classificado pela app em relação à âncora):\n${lines.join('\n')}${rv}\n\n${AI_JOINT_FORMAT}`;
+  }
+  function aiCopyTxt(txt) { let ok = false; const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;left:-9999px'; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) {} ta.remove(); if (!ok) { try { navigator.clipboard.writeText(txt); ok = true; } catch (e) {} } return ok; }
+  function npRenderAiTab() { npFQKeep('npAiQ', npRenderAiTab0); }
+  function npRenderAiTab0() {
+    const box = $('#npAiTab'); if (!box) return;
+    const sel = (settings.aiSel || []).filter((x) => (settings.favs || []).includes(x)), anc = sel.includes(settings.aiAnchor) ? settings.aiAnchor : null, bs = settings.aiBaskets || [];
+    const favs = (settings.favs || []).filter((x) => npFavMatch(x, npFQ) && npKindOk(x, npKind));
+    const ancRat = anc ? (settings.favs || []).filter((r) => isRatio(r) && ratioLegs(r).includes(anc) && !sel.includes(r)) : [];
+    const relSel = (c) => { const r = aiRelOf(anc, c), man = ((settings.aiRel || {})[anc] || {})[c]; if (isRatio(c) && ratioLegs(c).includes(anc)) return `<span class="mu" style="font-size:12px">${npEsc(r.src)}</span>`;
+      return `<select data-rel="${npEsc(c)}" title="Como este ativo se relaciona com a âncora"><option value="0"${!man ? ' selected' : ''}>auto: ${r.v === 1 ? 'anda com' : r.v === -1 ? 'anda contra' : '?'}${r.cr ? ` (${r.cr.r.toFixed(2).replace('.', ',')})` : ''}</option><option value="1"${man === 1 ? ' selected' : ''}>anda com</option><option value="-1"${man === -1 ? ' selected' : ''}>anda contra</option></select>${r.weak && !man ? ' <span class="mu" style="font-size:11px">fraca</span>' : ''}`; };
+    const row = (s) => { const on = sel.includes(s), x = favData[s] ? aiBest(s) : null;
+      return `<tr class="${on ? 'on' : ''}"><td><input type="checkbox" data-ais="${npEsc(s)}"${on ? ' checked' : ''}></td><td class="nm" style="text-align:left"><b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="mu" style="font-size:11px">${s}</span>` : ''}</td>
+        <td style="text-align:left;font-size:12.5px">${!favData[s] ? '<span class="mu">a carregar…</span>' : x ? `${x.st0.name} <b style="color:${x.dir === 1 ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'}">${x.dir === 1 ? '▲' : '▼'}</b> ${x.rank >= 3 ? 'pronto' : `em zona no ${tfLabel(x.st.zone)} ${pct(x.z.pullback)}`}` : '<span class="mu">sem zona</span>'}</td>
+        <td>${on ? `<label title="Ativo principal da análise conjunta"><input type="radio" name="aiAnc" data-anc="${npEsc(s)}"${anc === s ? ' checked' : ''}> ⚓</label>` : ''}</td>
+        <td style="text-align:left">${on && anc && anc !== s ? relSel(s) : ''}</td></tr>`; };
+    const n = sel.length, ctx = sel.filter((x) => x !== anc);
+    box.innerHTML = `<div class="bhead"><div><h2>Análise IA</h2><div class="sub">escolhe os ativos · <b>individual</b> = uma análise por ativo, seguidas · <b>conjunta</b> = escolhe o ativo principal ⚓ e os outros servem de contexto · copia e cola numa conversa com o Claude</div></div></div>
+      <div class="np-aibar"><button type="button" id="aiIndiv" ${n ? '' : 'disabled'}>🤖 Análise individual (${n})</button><button type="button" id="aiJoint" ${anc && ctx.length ? '' : 'disabled'} title="${anc ? '' : 'Marca o ativo principal com ⚓'}">🔗 Análise conjunta${anc ? ` ⚓ ${npEsc(nm(anc))} + ${ctx.length}` : ''}</button>${n ? '<button type="button" id="aiClr" class="lt">limpar seleção</button>' : ''}${n ? '<button type="button" id="aiSave" class="lt">💾 gravar como cesto</button>' : ''}${ancRat.length ? `<button type="button" id="aiRat" class="lt">+ rácios de ${npEsc(nm(anc))} (${ancRat.length})</button>` : ''}</div>
+      <div id="aiMsg" class="mu" style="font-size:12.5px;min-height:18px;margin:4px 0">${n > 5 ? '⚠ Mais de 5 ativos na análise individual: a resposta fica longa e superficial — divide em grupos.' : ''}</div>
+      ${bs.length ? `<div class="np-ff np-aibk">${bs.map((b, k) => `<span class="bk"><button type="button" data-bk="${k}" title="${npEsc(b.sel.map(nm).join(', '))}">${npEsc(b.n)}</button><button type="button" data-bkx="${k}" title="Apagar este cesto" aria-label="Apagar">✕</button></span>`).join('')}</div>` : ''}
+      ${npFQBox('npAiQ', 'Procurar (ex.: ouro, GC=F)…')}
+      <div class="revwrap"><table class="revtbl aitbl"><tr><th></th><th style="text-align:left">Ativo</th><th style="text-align:left">Melhor setup em zona</th><th>Âncora</th><th style="text-align:left">Relação com a âncora</th></tr>${favs.map(row).join('')}</table></div>`;
+    npFQWire('npAiQ', npRenderAiTab0);
+    const put = (k, v) => { settings[k] = v; save('mss_settings4', settings); npRenderAiTab0(); };
+    box.querySelectorAll('[data-ais]').forEach((i) => i.addEventListener('change', () => { const s0 = i.dataset.ais, a = (settings.aiSel || []).filter((x) => x !== s0); if (i.checked) a.push(s0); put('aiSel', a); }));
+    box.querySelectorAll('[data-anc]').forEach((i) => i.addEventListener('change', () => put('aiAnchor', i.dataset.anc)));
+    box.querySelectorAll('[data-rel]').forEach((i) => i.addEventListener('change', () => { const R0 = Object.assign({}, settings.aiRel || {}), m = Object.assign({}, R0[anc] || {}); if (+i.value) m[i.dataset.rel] = +i.value; else delete m[i.dataset.rel]; R0[anc] = m; put('aiRel', R0); }));
+    const b = (id, fn) => { const e = $('#' + id); if (e) e.addEventListener('click', fn); };
+    b('aiClr', () => put('aiSel', []));
+    b('aiRat', () => put('aiSel', sel.concat(ancRat)));
+    b('aiSave', () => { const nmB = prompt('Nome do cesto (ex.: Petróleo: BP + WTI):', anc ? nm(anc) + ' + ' + ctx.map(nm).join(' + ') : sel.map(nm).join(' + ')); if (!nmB) return; put('aiBaskets', bs.concat([{ n: nmB.slice(0, 60), sel: sel.slice(), anchor: anc }])); });
+    box.querySelectorAll('[data-bk]').forEach((e) => e.addEventListener('click', () => { const k = bs[+e.dataset.bk]; settings.aiAnchor = k.anchor || null; put('aiSel', k.sel.filter((x) => (settings.favs || []).includes(x))); }));
+    box.querySelectorAll('[data-bkx]').forEach((e) => e.addEventListener('click', () => { if (confirm('Apagar o cesto “' + bs[+e.dataset.bkx].n + '”?')) put('aiBaskets', bs.filter((_, k) => k !== +e.dataset.bkx)); }));
+    const done = (ok, t) => { const m = $('#aiMsg'); if (m) m.textContent = ok ? `Copiado ✔ ${t} — cola numa conversa com o Claude (Ctrl+V ou manter o dedo → Colar) e envia.` : 'Não consegui copiar — tenta outra vez.'; };
+    b('aiIndiv', () => { const miss = sel.filter((x) => !favData[x]); done(aiCopyTxt(aiMultiBrief(sel)), `(${sel.length - miss.length} ativo${sel.length - miss.length === 1 ? '' : 's'}${miss.length ? `; sem dados ainda: ${miss.map(nm).join(', ')}` : ''})`); });
+    b('aiJoint', () => done(aiCopyTxt(aiJointBrief(anc, ctx)), `(⚓ ${nm(anc)} + ${ctx.length} de contexto)`));
+  }
+  // ---------- aba Setups: os setups PRONTOS de todos os favoritos (em zona + quebra feita; o FVG é extra) ----------
+  function npShowSetups() {
+    if (editMode) { requestExitEdit(); if (editMode) return; }
+    npView = 'setups'; document.body.dataset.npv = 'setups'; clearInterval(npPxTimer);
+    npRender(); window.scrollTo(0, 0); scanFavs(false); navPush({ v: 'setups' });
+  }
+  const suAgo = (x) => { const lb = x.t && x.t.lastBreak; return lb && lb.barsAgo != null ? lb.barsAgo : x.box ? 0 : 999; };
+  const suAgoTxt = (n, id) => { if (n >= 999) return ''; const ms = n * (TF_MS0[id] || 0), h = ms / 36e5; return `há ${n} vela${n === 1 ? '' : 's'}${ms ? ` (${h < 1 ? Math.round(ms / 6e4) + ' min' : h < 48 ? Math.round(h) + ' h' : Math.round(h / 24) + ' dias'})` : ''}`; };
+  function suRowsAll() {
+    const ready = [], wait = [], on = (settings.setups || []).filter((x) => x.on), F = settings.npSuF || {};
+    for (const s of settings.favs || []) {
+      if (!favData[s] || !npFavMatch(s, npFQ) || !npKindOk(s, npKind)) continue;
+      const seen = new Set();
+      for (const st0 of on) {
+        if (F[st0.name] === false || suHid(st0, s)) continue;
+        const x = favSetup(s, st0); if (!x || x.rank < 2) continue;
+        const k = x.st.zone + x.st.trig + x.dir; if (seen.has(k)) continue; seen.add(k);   // o mesmo trade em dois setups: só o maior
+        const r = { s, st0, x, price: (favData[s].tfs[x.st.trig] || {}).price };
+        if (x.rank >= 3) { r.ago = suAgo(x); r.ms = r.ago * (TF_MS0[x.st.trig] || 0); ready.push(r); }
+        else { const b = brkTxt(favData[s].tfs, x.st.trig, x.dir, r.price); r.b = b; r.dist = b.lv && r.price ? Math.abs(b.lv - r.price) / r.price * 100 : 999; wait.push(r); }
+      }
+    }
+    return { ready: ready.sort((a, b) => a.ms - b.ms), wait: wait.sort((a, b) => a.dist - b.dist) };
+  }
+  function npRenderSetups() { npFQKeep('npSuQ', npRenderSetups0); }
+  function npRenderSetups0() {
+    const box = $('#npSetups'); if (!box) return;
+    const on = (settings.setups || []).filter((x) => x.on), F = settings.npSuF || {}, { ready, wait } = suRowsAll(), L = tfLabel;
+    const chip = (txt, cls, tip) => `<span class="np-suc ${cls || ''}"${tip ? ` title="${npEsc(tip)}"` : ''}>${txt}</span>`;
+    const row = (r) => { const x = r.x, st = x.st, up = x.dir === 1, lb = x.t && x.t.lastBreak, cid = ctxOf(st), cx = x.cx, fvg = lb && lb.fvg === 'sim';
+      const brk = x.box ? `quebrou a lateralização ${up ? 'para cima' : 'para baixo'}` : lb ? `${lb.type || 'quebra'} ${up ? '▲' : '▼'}${lb.level ? ' em ' + fmt(lb.level) : ''}` : 'quebra feita';
+      return `<tr><td class="nm"><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px">${r.s}</div>` : ''}</td>
+        <td style="text-align:left"><b>${npEsc(r.st0.name)}</b><div class="mu" style="font-size:11px">${cid ? L(cid) + ' · ' : ''}${L(st.zone)} → ${L(st.trig)}${x.rsv.mode === 'rev' ? ' · reversão' : x.rsv.mode === 'counter' ? ' · contra, com margem' : ''}</div></td>
+        <td style="color:${up ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'};font-weight:600">${up ? '▲ Long' : '▼ Short'}</td>
+        <td>${cx && cx.trend ? chip(`${L(cid)} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}`, cx.trend === x.dir ? 'ok' : 'bad') : '<span class="mu">—</span>'}</td>
+        <td>${chip(`${L(st.zone)} ${up ? '▲' : '▼'} ${pct(x.z.pullback)} ✔`, 'zone', x.deepTxt || '')}${x.deep ? `<div class="mu" style="font-size:11px">${up ? 'desconto' : 'prémio'} profundo</div>` : ''}</td>
+        <td style="text-align:left">${chip(`${L(st.trig)} ${brk}`, 'ok')}<div class="mu" style="font-size:11px">${suAgoTxt(r.ago, st.trig)}</div></td>
+        <td style="text-align:left">${chip(fvg ? '✔ FVG na quebra' : '✘ FVG', fvg ? 'ok' : '')}${x.sweep ? chip('💧 sweep antes', 'ok') : ''}${x.star ? chip(npEsc(/⭐/.test(x.star.txt || '') ? x.star.txt : '⭐ ' + (x.star.txt || 'zona de reversão')), 'ok wrap') : ''}</td>
+        <td style="text-align:left;font-size:12.5px">${npEsc(x.rsv.mode === 'rev' ? x.why.replace(/ — (à espera da quebra|o \S+ já está a favor).*$/, '') : x.why)}${x.deep && x.deepTxt ? `<div class="mu">${npEsc(x.deepTxt)}</div>` : ''}</td>
+        <td><a href="#" data-chart="${r.s}" data-tf="${st.trig}" title="Abrir o gráfico no ${L(st.trig)}">📈</a></td></tr>`; };
+    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Contexto</th><th>Zona (≥ 50%)</th><th style="text-align:left">Quebra</th><th style="text-align:left">Extras</th><th style="text-align:left">Porquê</th><th></th></tr>';
+    const wl = wait.slice(0, 12).map((r) => `<li><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a> · ${npEsc(r.st0.name)} ${r.x.dir === 1 ? '▲ Long' : '▼ Short'} — em zona de ${r.x.dir === 1 ? 'compra' : 'venda'} no ${L(r.x.st.zone)} (${pct(r.x.z.pullback)}); ${npEsc(r.b.txt)}</li>`).join('');
+    box.innerHTML = `<div class="bhead"><div><h2>Setups prontos</h2><div class="sub">${ready.length} pronto${ready.length === 1 ? '' : 's'} nos favoritos · pronto = em zona e a quebra já feita no timeframe de quebra (o FVG é extra) · a quebra mais recente primeiro · ${favProg || ''}</div></div></div>
+      ${npFQBox('npSuQ', 'Procurar (ex.: ouro, GC=F)…')}
+      <div class="np-ff">${on.map((x) => `<button data-suf="${npEsc(x.name)}" class="${F[x.name] === false ? '' : 'on'}" title="Mostrar / esconder os setups ${npEsc(x.name)}">${npEsc(x.name)}</button>`).join('')}</div>
+      <div class="revwrap"><table class="revtbl sutbl">${head}${ready.map(row).join('') || `<tr><td colspan="9" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum setup pronto nestes filtros.'}</td></tr>`}</table></div>
+      ${wl ? `<h3 class="np-h2" style="margin-top:22px;font-size:20px">Mais perto de ficar prontos</h3><p class="mu" style="font-size:12.5px;margin:4px 0 8px">em zona, à espera da quebra — a mais perto primeiro</p><ul class="np-suw">${wl}</ul>` : ''}`;
+    npFQWire('npSuQ', npRenderSetups0);
+    box.querySelectorAll('[data-suf]').forEach((b) => b.addEventListener('click', () => { const F2 = Object.assign({}, settings.npSuF || {}), k = b.dataset.suf; F2[k] = F2[k] === false; if (F2[k]) delete F2[k]; settings.npSuF = F2; save('mss_settings4', settings); npRenderSetups0(); }));
+    box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
+    box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); if (a.dataset.tf) { selectedTf = a.dataset.tf; save('mss_tf', selectedTf); npKeepTf = true; } npOpenChart(a.dataset.chart); }));
+  }
   function npShowRev() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     npView = 'rev'; document.body.dataset.npv = 'rev'; clearInterval(npPxTimer);
@@ -6194,11 +6444,13 @@ ${AI_DAY_FORMAT}`;
     box.querySelectorAll('[data-open]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); npOpenAsset(a.dataset.open); }));
     box.querySelectorAll('[data-chart]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); selectedTf = a.dataset.tf; save('mss_tf', selectedTf); npKeepTf = true; npOpenChart(a.dataset.chart); }));
   }
-  function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else if (npView === 'rev') npRenderRev(); else npRenderAssetHead(); npSyncStatus(); }
+  function npRender() { if (document.body.dataset.np !== '1') return; if (npView === 'feed') { npRenderRail(); npRenderFocus(); } else if (npView === 'board') npRenderBoard(); else if (npView === 'focus') npRenderFocusAll(); else if (npView === 'rev') npRenderRev(); else if (npView === 'setups') npRenderSetups(); else if (npView === 'ai') npRenderAiTab(); else npRenderAssetHead(); npSyncStatus(); }
   function npBack() {
     if (npFrom === 'board') { npShowBoard(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
     else if (npFrom === 'focus') { npShowFocusAll(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
     else if (npFrom === 'rev') { npShowRev(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
+    else if (npFrom === 'ai') { npShowAiTab(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
+    else if (npFrom === 'setups') { npShowSetups(); setTimeout(() => window.scrollTo(0, npBoardY), 30); }
     else npShowFeed();
   }
   // ---------- 📋 Copiar para IA: resumo do ativo aberto (e dos rácios em que entra) para colar numa conversa com o Claude ----------
@@ -6246,6 +6498,7 @@ REGRAS:
 - Cada preço que citares vem com O QUE É e a distância ao preço (ex.: "4,29 (+14%), o limite do 4H: um fecho acima vira o 4H para cima"). Nunca números soltos.
 - Não cites preços a mais de ~15% do preço atual, exceto o limite que invalida o cenário. Nada de "esperar por" preços muito longe.
 - Alvos de Fibonacci só se estiverem ATIVOS (marcados assim nos dados); antes disso são distração.
+- OBSTÁCULOS E VENTO A FAVOR: em cada setup, usa as linhas "no caminho até à quebra", "depois, até ao topo/fundo da perna", "vento a favor" e "divergências" que vêm nos dados. Um obstáculo só se menciona se estiver no caminho ou a menos de ~5% do preço; diz o que é (ex.: "o teto do teu canal 4H em 70 900 (+2%) está antes da quebra: pode travar aí"). Uma divergência "⚠ contra" diz-se sempre, como aviso.
 - Médias: só a SMA 200 e só quando estiver perto (vem nos dados quando está).
 - Nunca comeces por "LONG" ou "SHORT" em maiúsculas nem escolhas um lado a partir da tendência dos timeframes de baixo.
 - Se os dados trouxerem ENQUADRAMENTO DO MERCADO CRIPTO, acaba com 7) ENQUADRAMENTO CRIPTO: uma linha para o TOTAL e uma para o USDT.D + USDC.D, e se confirmam ou contrariam a leitura.
@@ -6284,16 +6537,16 @@ Usa só os números destes dados.`;
     });
     return { win, lose, mix, winN, loseN, mixN, n: win.length + lose.length + mix.length };
   }
-  function aiSummary(al) {
+  function aiSummary(al, o) {
     const N = nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol;
-    const UNI_NOTE = uniOn(settings) ? '\n\nNOTA: cada timeframe tem UMA só estrutura (do Anual ao Diário: só os topos/fundos que quebraram estrutura; do 4H para baixo: todos os topos/fundos). Diz sempre de que timeframe falas.' : '';
-    const out = [al ? `Recebi este alerta do meu scanner${al.at ? ' às ' + new Date(al.at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''} sobre ${N}:\n«${al.text}»\n\nQuero saber se ESTE alerta é uma boa oportunidade ou não: enquadra-o no contexto de todos os timeframes, da tendência maior, dos obstáculos, do risco/retorno e da força relativa que estão nos dados abaixo. Se houver uma entrada melhor (noutra zona ou noutro ativo), diz qual.\n\n${AI_FORMAT}${UNI_NOTE}` : `Analisa ${N} com estes dados do meu scanner de estrutura de mercado (ICT) e diz-me se há alguma entrada que valha a pena agora.\n\n${AI_FORMAT}${UNI_NOTE}`, ''];
+    const UNI_NOTE = uniOn(settings) ? '\n\nNOTA: cada timeframe tem UMA só estrutura (do Anual ao Diário: só os topos/fundos que quebraram estrutura; do 4H para baixo: todos os topos/fundos). O 4H tem duas: o "4H" (todos os topos/fundos — dá a quebra do Longo prazo) e o "4H contexto" (só quebras, ancorado ao Diário — dá a zona do Day trade). Diz sempre de que timeframe falas.' : '';
+    const out = [o && o.noFmt ? `=== ${N} ===` : al ? `Recebi este alerta do meu scanner${al.at ? ' às ' + new Date(al.at).toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }) : ''} sobre ${N}:\n«${al.text}»\n\nQuero saber se ESTE alerta é uma boa oportunidade ou não: enquadra-o no contexto de todos os timeframes, da tendência maior, dos obstáculos, do risco/retorno e da força relativa que estão nos dados abaixo. Se houver uma entrada melhor (noutra zona ou noutro ativo), diz qual.\n\n${AI_FORMAT}${UNI_NOTE}` : `Analisa ${N} com estes dados do meu scanner de estrutura de mercado (ICT) e diz-me se há alguma entrada que valha a pena agora.\n\n${AI_FORMAT}${UNI_NOTE}`, ''];
     const d0 = data[selectedTf], price = d0 ? d0.price : null;
     // scalp só em cripto: nas ações, matérias-primas e rácios fica de fora o setup de Scalp e a linha do 5m
     const cry = !isRatio(symbol) && isCrypto(symbol) && !tfHid('5m'), noScalp = (st) => !suHid(st) && (cry || !(st.trig === '5m' || /scalp/i.test(st.name || '')));
     out.push(cry ? 'Foco: Longo prazo e Swing primeiro; Day trade e Scalp como afinação dentro da zona.' : 'Foco: Longo prazo e Swing (este ativo não tem Day trade nem Scalp).');
     out.push(`${N} — preço ${price != null ? aiF(price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
-    TFS.forEach((t) => { if (data[t.id] && !tfHid(t.id) && (cry || t.id !== '5m')) out.push(aiTfLine(t.id, data[t.id])); });
+    TFS.forEach((t) => { if (data[t.id] && !tfHid(t.id) && (cry || t.id !== '5m')) { out.push(aiTfLine(t.id, data[t.id])); if (t.id === '4h' && data['4hc']) out.push(aiTfLine('4hc', data['4hc'])); } });
     // VEREDICTO DA APP por setup (a regra das zonas): a IA explica, não decide
     const evs = (settings.setups || []).filter((x) => x.on && noScalp(x)).map((st0) => ({ st0, r: evalSetup(st0) })).filter((e) => e.r);
     const ev = evs.map(({ st0, r }, k) => {
@@ -6304,7 +6557,8 @@ Usa só os números destes dados.`;
       const turned = ts && ts.trend === r.dir, lvl = ts && ts.trend && ts.trend !== r.dir ? ts.protected : null;
       const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
       const lado = up ? 'para cima' : 'para baixo', state = r.trig && r.trig.ok ? (fvg ? `PRONTO: o ${tfLabel(st.trig)} já quebrou ${lado}, com FVG` : `o ${tfLabel(st.trig)} já quebrou ${lado} (falta o FVG)`) : brkTxt(data, st.trig, r.dir, price, aiF).txt;
-      return `- ${st0.name}: ${up ? 'possível LONG' : 'possível SHORT'} (${r.rsv.mode === 'rev' ? 'reversão' : r.rsv.mode === 'counter' ? 'contra o timeframe de cima, que ainda tem margem' : 'a favor do timeframe de cima'}) — ${r.rsv.mode === 'rev' ? r.why.replace(/ — (à espera da quebra|o \S+ já está a favor).*$/, '') : r.why}; zona no ${tfLabel(st.zone)} (correção ${pct(r.z.pullback)}${r.zDeep ? ', ' + deepTxt(data, st.zone, r.dir, r.z) : ''}); ${state}${r.star ? '; ' + r.star.txt : ''}`;
+      const pth = suPathTxt(suPath(data, symbol, st, r.dir, dt && dt.price, aiF), '   ').join('\n');
+      return `- ${st0.name}: ${up ? 'possível LONG' : 'possível SHORT'} (${r.rsv.mode === 'rev' ? 'reversão' : r.rsv.mode === 'counter' ? 'contra o timeframe de cima, que ainda tem margem' : 'a favor do timeframe de cima'}) — ${r.rsv.mode === 'rev' ? r.why.replace(/ — (à espera da quebra|o \S+ já está a favor).*$/, '') : r.why}; zona no ${tfLabel(st.zone)} (correção ${pct(r.z.pullback)}${r.zDeep ? ', ' + deepTxt(data, st.zone, r.dir, r.z) : ''}); ${state}${r.star ? '; ' + r.star.txt : ''}${pth ? '\n' + pth : ''}`;
     });
     if (ev.length) out.push('', 'VEREDICTO DA APP POR SETUP (regra das zonas — não contrariar):', ...ev);
     // em que momento estamos: % calculadas pela app a partir dos setups (peso: Longo prazo 3, Swing 2, Day trade 1, Scalp 0,5; pronto 1 · virou 0,75 · em zona 0,35)
@@ -6494,10 +6748,12 @@ Usa só os números destes dados.`;
       <div class="acts"><button id="npStar">${on ? '★ Nos favoritos' : '☆ Juntar aos favoritos'}</button>${on ? '<button id="npReauto" title="Apaga todas as tuas marcas deste ativo e volta ao automático">⟲ Recriar gráfico em automático</button>' : ''}<button id="npAI" title="Copia um resumo completo deste ativo (todos os timeframes, setups, Fibonacci, liquidez, as tuas linhas e os rácios em que entra) para colares numa conversa com o Claude">📋 Copiar para IA</button> ${isSynth(symbol) ? '<button id="npImp" title="Escolhe os CSV exportados do TradingView (Mensal, Semanal, Diário, 4H, 1H) — podes escolher vários de uma vez">📥 Importar histórico (CSV)</button><input type="file" id="npImpF" accept=".csv,text/csv" multiple hidden>' : ''}${isRatio(symbol) ? `<button id="npInv" title="Abre o rácio ao contrário (${ratioLegs(symbol).reverse().join(' ÷ ')})">⇅ Inverter</button>` : ''}<button id="npBack" class="dark">← Voltar ${npFrom === 'board' ? 'aos favoritos' : npFrom === 'focus' ? 'ao Em foco' : npFrom === 'rev' ? 'às Reversões' : 'ao jornal'}</button></div>`;
     $('#npBack').addEventListener('click', npBack);
     { const ord = npSorted(), k = ord.indexOf(symbol);
-      if (k >= 0 && ord.length > 1) { const nv = document.createElement('div'); nv.className = 'np-prevnext';
-        const pv = ord[(k - 1 + ord.length) % ord.length], nx = ord[(k + 1) % ord.length];
-        nv.innerHTML = `<button data-go="${pv}" title="Ativo anterior (tecla ←)">◀ ${npEsc(nm(pv))}</button><span>${k + 1} de ${ord.length}</span><button data-go="${nx}" title="Ativo seguinte (tecla →)">${npEsc(nm(nx))} ▶</button>`;
-        h.firstElementChild.appendChild(nv); nv.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => npOpenAsset(b.dataset.go))); } }
+      if (k >= 0 && ord.length > 1) {   // setas fixas antes do nome (como no gráfico): nada muda de tamanho nem de lugar ao avançar
+        const pv = ord[(k - 1 + ord.length) % ord.length], nx = ord[(k + 1) % ord.length], h2 = h.querySelector('h2'), kick = h.querySelector('.np-kick');
+        const nv = document.createElement('span'); nv.className = 'np-arw';
+        nv.innerHTML = `<button data-go="${pv}" title="Ativo anterior: ${npEsc(nm(pv))} (tecla ←)" aria-label="Ativo anterior">‹</button><button data-go="${nx}" title="Ativo seguinte: ${npEsc(nm(nx))} (tecla →)" aria-label="Ativo seguinte">›</button>`;
+        if (h2) h2.insertBefore(nv, h2.firstChild); if (kick) kick.textContent = `ATIVO · ${k + 1} de ${ord.length}`;
+        nv.querySelectorAll('[data-go]').forEach((b) => b.addEventListener('click', () => npOpenAsset(b.dataset.go))); } }
     $('#npAI').addEventListener('click', aiCopy);
     $('#npRen').addEventListener('click', () => renameAsset(symbol));
     $('#npMaxGo').addEventListener('click', () => { npChartDirect = false; const mb = $('#maxBtn'); const box = $('.chartbox'); if (mb && box && !box.classList.contains('max')) mb.click(); });
@@ -6540,6 +6796,8 @@ Usa só os números destes dados.`;
       if (st.v === 'feed') { if (npView !== 'feed') npShowFeed(); }
       else if (st.v === 'board') { if (npView !== 'board') npShowBoard(); }
       else if (st.v === 'focus') { if (npView !== 'focus') npShowFocusAll(); }
+      else if (st.v === 'setups') { if (npView !== 'setups') npShowSetups(); }
+      else if (st.v === 'ai') { if (npView !== 'ai') npShowAiTab(); }
       else if (st.v === 'rev') { if (npView !== 'rev') npShowRev(); }
       else if (st.s) {
         if (npView !== 'asset' || symbol !== st.s) npOpenAsset(st.s);
@@ -6565,7 +6823,7 @@ Usa só os números destes dados.`;
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const sameSym = symbol === s, wantTf = npKeepTf ? selectedTf : '1d'; npKeepTf = false;
     if (selectedTf !== wantTf) { selectedTf = wantTf; save('mss_tf', wantTf); if (sameSym) setTimeout(() => { try { if (!data[wantTf]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); updateEditUi(); } } catch (e) {} }, 0); }
-    if (npView !== 'asset') { npFrom = npView; if (npView === 'board' || npView === 'focus' || npView === 'rev') npBoardY = window.scrollY; }
+    if (npView !== 'asset') { npFrom = npView; if (npView === 'board' || npView === 'focus' || npView === 'rev' || npView === 'setups' || npView === 'ai') npBoardY = window.scrollY; }
     if (symbol !== s) { symbol = s; $('#symbol').value = s; save('mss_symbol', s); Object.keys(data).forEach((k) => delete data[k]); drawState = null; loadAll(); updateStar(); }
     npView = 'asset'; document.body.dataset.npv = 'asset';
     npMountDetail(); npRender(); window.scrollTo(0, 0);
@@ -6666,7 +6924,7 @@ Usa só os números destes dados.`;
     if (npView !== 'asset' || document.body.dataset.np !== '1' || e.altKey || e.ctrlKey || e.metaKey || editMode || lineMode) return;
     if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || '') || document.querySelector('.modal.open')) return;
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    const b = document.querySelectorAll('.np-prevnext [data-go]')[e.key === 'ArrowLeft' ? 0 : 1]; if (b) { e.preventDefault(); b.click(); }
+    const b = document.querySelectorAll('.np-arw [data-go]')[e.key === 'ArrowLeft' ? 0 : 1]; if (b) { e.preventDefault(); b.click(); }
   });
   function npEnter() {
     if (favOpen) closeFav();
@@ -6683,7 +6941,7 @@ Usa só os números destes dados.`;
     $('#npHome').addEventListener('click', (e) => { e.preventDefault(); npShowFeed(); });
     document.querySelectorAll('#npFilters button').forEach((b) => b.addEventListener('click', () => npSetFilter(b.dataset.f)));
     const q = $('#npQ'), sug = $('#npSug');
-    document.querySelectorAll('#npTabs [data-tab]').forEach((b) => b.addEventListener('click', () => { const t = b.dataset.tab; if (t === 'board') npShowBoard(); else if (t === 'focus') npShowFocusAll(); else if (t === 'rev') npShowRev(); else npShowFeed(); }));
+    document.querySelectorAll('#npTabs [data-tab]').forEach((b) => b.addEventListener('click', () => { const t = b.dataset.tab; if (t === 'board') npShowBoard(); else if (t === 'focus') npShowFocusAll(); else if (t === 'rev') npShowRev(); else if (t === 'setups') npShowSetups(); else if (t === 'ai') npShowAiTab(); else npShowFeed(); }));
     const qx = $('#npQX'), qxSync = () => $('#npSearch').classList.toggle('has', !!q.value);
     q.addEventListener('input', qxSync); qx.addEventListener('mousedown', (e) => e.preventDefault());
     qx.addEventListener('click', () => { clearTimeout(tq); q.value = ''; sug.style.display = 'none'; qxSync(); q.focus(); });
@@ -6840,7 +7098,8 @@ Usa só os números destes dados.`;
   }
   function init() {
     $('#symbol').value = symbol;
-    $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>`).join('');
+    $('#tfbar').innerHTML = TFS.map((t) => `<button class="tfbtn" data-tf="${t.id}">${t.label}</button>` + (t.id === '4h' ? `<button type="button" id="c4Btn" class="lyr" style="display:none;margin-left:0" title="O 4H tem duas estruturas: a de QUEBRA (todos os topos e fundos — dá a quebra do Longo prazo) e a de CONTEXTO (só as pernas que partiram estrutura, ancorada ao Diário — dá a zona do Day trade e o contexto do Scalp). Carrega para trocar">4H quebra ⇄ contexto</button>` : '')).join('');
+    $('#c4Btn').addEventListener('click', () => selectTf(selectedTf === '4hc' ? '4h' : '4hc'));
     document.querySelectorAll('.tfbtn').forEach((b) => b.addEventListener('click', () => selectTf(b.dataset.tf)));
     // caixa do par: abre o ticker exato; escrevendo um nome mostra sugestões (ações e crypto)
     const symSug = $('#symSug'); let sq = null;
@@ -6972,7 +7231,7 @@ Usa só os números destes dados.`;
       setTimeout(() => { const e = $('#gateEmail'); if (e && !e.value) e.focus(); }, 50);
     });
   }
-  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary(), _day: () => daySummary() };
+  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary(), _day: () => daySummary(), _scan: (f) => scanFavs(f), _aiM: (a) => aiMultiBrief(a), _aiJ: (a, c) => aiJointBrief(a, c) };
 })();
 </script>
 <script>MSS.boot(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
