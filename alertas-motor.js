@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-13T21:22:55.323Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T13:34:16.361Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -810,6 +810,31 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     out.forEach((z) => { z.p = Math.sqrt(z.lo * z.hi); z.dist = price > 0 ? (z.p - price) / price : 0; });
     return out.sort((a, b) => Math.abs(a.dist) - Math.abs(b.dist)).slice(0, 4);
   }
+  // ---------- order blocks: a última vela contrária antes do impulso que partiu estrutura (inclui o de origem da perna); só os por mitigar ----------
+  // de compra: última vela de descida antes da subida que fez um BOS/CHoCH para cima; mitigado quando um fecho passa abaixo dele. De venda: o contrário.
+  function orderBlocks(res, cs, price) {
+    if (!res || !cs || cs.length < 5) return [];
+    const out = [], seen = new Set(), n = cs.length;
+    const add = (dir, from, to) => {   // impulso de 'from' (origem) até 'to' (quebra)
+      let o = from; for (let j = from; j <= to; j++) if (dir === 1 ? cs[j].l < cs[o].l : cs[j].h > cs[o].h) o = j;   // origem = extremo antes do impulso
+      let k = -1; for (let j = o; j >= Math.max(0, o - 6); j--) if (Math.sign(cs[j].c - cs[j].o) === -dir) { k = j; break; }
+      if (k < 0 || seen.has(k)) return; seen.add(k);
+      const top = cs[k].h, bot = cs[k].l; if (!(top > bot)) return;
+      for (let j = k + 1; j < n; j++) if (dir === 1 ? cs[j].c < bot : cs[j].c > top) return;   // mitigado (um fecho atravessou-o)
+      out.push({ dir, top, bot, i: k, t: cs[k].t, brk: to, origin: false });
+    };
+    for (const b of res.breaks || []) if (b.i != null && b.from != null && b.i > b.from && b.i < n) add(b.dir, b.from, b.i);
+    const s = res.state;   // origem da perna atual (o limite), mesmo que ainda não tenha partido nada
+    if (s && s.trend && s.prot && s.prot.i != null && s.prot.i < n - 1) { const d = s.trend; add(d, s.prot.i, Math.min(n - 1, (s.ext && s.ext.i) || n - 1)); const o = out.find((x) => x.dir === d && x.i <= s.prot.i && x.i >= s.prot.i - 6); if (o) o.origin = true; }
+    return out.sort((a, b) => a.i - b.i);
+  }
+  // o próximo order block por mitigar no sentido do recuo (abaixo do preço numa zona de compra, acima numa de venda), antes do limite
+  function nextOB(obs, dir, price, limit) {
+    const inn = (obs || []).filter((o) => o.dir === dir && price <= o.top && price >= o.bot).pop();   // o preço já está dentro de um
+    if (inn) return Object.assign({ inside: true }, inn);
+    const c = (obs || []).filter((o) => o.dir === dir && (dir === 1 ? o.top < price && (!(limit > 0) || o.top >= limit * 0.999) : o.bot > price && (!(limit > 0) || o.bot <= limit * 1.001)));
+    return c.sort((a, b) => (dir === 1 ? b.top - a.top : a.bot - b.bot))[0] || null;
+  }
   // ---------- regra dos setups (a do Richy): sem zona de reversão não há trade ----------
   // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a viragem confirma-se 2 timeframes abaixo (Mensal → Diário)
   // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
@@ -851,7 +876,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  root.MSS_FIB = { orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Alertas do Scanner de Estrutura — a lógica (sem rede): recebe velas, definições e marcações; devolve as mensagens.
@@ -998,12 +1023,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         : layer(E.analyze, +S.extAtr * (pu ? pu.m : 1), S.dispExt, ov, pu ? { legRatio: pu.leg, floorAtr: pu.floor } : null);
       const d1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       if (FB) { try { d1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { d1.fibs = []; } d1.fibsI = d1.fibs; }
+      try { d1.obs = FB && FB.orderBlocks ? FB.orderBlocks(one.res, closed, price) : []; } catch (e) { d1.obs = []; }
       d1.fibsX = []; d1.fibConf = []; if (FB && FB.fibsMore && ['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { d1.fibsX = FB.fibsMore(one.res, closed, price); d1.fibConf = FB.confZones(d1.fibs.concat(d1.fibsX), price); } catch (e) {}
       return d1;
     }
     const pl = PRI_LV[priLevel(S, id, sym)];
     const d = { candles: cs, closed, price, ext: pl && pl.zz ? layer(E.analyzeRecent, zzOf(pl, id)[0], S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), { legRatio: zzOf(pl, id)[1], floorAtr: zzOf(pl, id)[2] }) : layer(E.analyze, +S.extAtr * (pl ? pl.m : 1), S.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, S.intAtr, S.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     if (FB) { try { d.fibs = FB.fibsOf(d.ext.res, closed, price); d.fibsI = FB.fibsOf(d.int.res, closed, price); } catch (e) { d.fibs = []; d.fibsI = []; } }
+    try { d.obs = FB && FB.orderBlocks ? FB.orderBlocks(d.ext.res, closed, price) : []; } catch (e) { d.obs = []; }
     d.fibsX = []; d.fibConf = []; if (FB && FB.fibsMore && ['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { d.fibsX = FB.fibsMore(d.ext.res, closed, price); d.fibConf = FB.confZones(d.fibs.concat(d.fibsX), price); } catch (e) {}
     return d;
   }
@@ -1273,7 +1300,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const strong = !!(xb && xb.dir === dir && xs.trend === dir && scl[xb.i] && (!zx || !dz.closed[zx.i] || scl[xb.i].t >= dz.closed[zx.i].t));
       const lines = [
         `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
-        `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}${z.pullback > 91.8 ? ' · ⚠ margem curta (perto do limite)' : ''}`,
+        `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}${z.pullback > 78.6 ? (() => { const ob = FB && FB.nextOB ? FB.nextOB(dz.obs, dir, dz.price, z.protected) : null; return ` · ${up ? 'desconto' : 'prémio'} profundo${ob ? (ob.inside ? ` · dentro do order block ${fmt(ob.bot)}–${fmt(ob.top)}` : ` · possível ida ao order block em ${fmt(ob.bot)}–${fmt(ob.top)}`) : ''}`; })() : ''}`,
         rsv.mode === 'rev' ? `Reversão: o ${LBL[su.zone]} está em zona e o ${LBL[su.trig]} virou a favor` : rsv.mode === 'counter' ? `Contra o ${LBL[rsv.ctx]}, que ainda tem margem até à zona dele${rsv.room ? ' (' + fmt(rsv.room) + ')' : ''}` : '',
         lb.box ? `Gatilho ${LBL[su.trig]}: quebrou a lateralização ${up ? 'para cima' : 'para baixo'} — caixa ${fmt(lb.box.lo)} – ${fmt(lb.box.hi)} (${lb.box.bars} velas), fecho ${fmt(bc.c)}` : `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,

@@ -116,7 +116,7 @@
   .chartbar { display:flex; flex-wrap:wrap; gap:6px; align-items:center; padding:8px 10px; border-bottom:1px solid var(--line); }
   /* 1.ª linha: timeframes, camadas e edição, com o Fechar/Gráfico maior à direita; 2.ª linha: indicadores */
   .chartbar .cbreak { flex-basis:100%; height:0; order:5; }
-  .chartbar #rngBtn, .chartbar #emaBtn, .chartbar #smaBtn, .chartbar #kcBtn, .chartbar #pocDBtn, .chartbar #pocWBtn, .chartbar #kzBtn { order:6; }
+  .chartbar #rngBtn, .chartbar #emaBtn, .chartbar #smaBtn, .chartbar #kcBtn, .chartbar #pocDBtn, .chartbar #pocWBtn, .chartbar #obBtn, .chartbar #kzBtn { order:6; }
   .chartbar #maxBtn { order:4; margin-left:auto; }
   .chartbar #fibBtn, .chartbar #lineBtn, .chartbar #lineTools { order:6; }   /* sempre na 2.ª linha: nada salta de sítio */
   #lineTools { display:inline-flex; gap:4px; }
@@ -703,7 +703,7 @@
   .np-day-ai.wait, button.np-day-ai.wait { background:#777 !important; }
   /* fora da edição: indicadores + Fibonacci + mostrar/esconder linhas; dentro da edição: só as ferramentas de desenho (Linha, Canal, Íman) */
   .chartbox:not(.editing) #lineTools { display:none !important; }
-  .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocDBtn, .chartbox.editing #pocWBtn, .chartbox.editing #kzBtn, .chartbox.editing #fibBtn, .chartbox.editing #lineBtn { display:none !important; }
+  .chartbox.editing #rngBtn, .chartbox.editing #emaBtn, .chartbox.editing #smaBtn, .chartbox.editing #kcBtn, .chartbox.editing #pocDBtn, .chartbox.editing #pocWBtn, .chartbox.editing #obBtn, .chartbox.editing #kzBtn, .chartbox.editing #fibBtn, .chartbox.editing #lineBtn { display:none !important; }
   #lineTools [data-und] { display:none !important; }   /* o Desfazer da barra de cima já desfaz também as linhas */
   .dq { font-size:12px; margin-left:4px; cursor:help; } .dq.ok { color:var(--np-green, #2e7d32); } .dq.warn { color:#c58a00; } .dq.bad { color:var(--np-red); font-weight:700; }
   body.uni #tgExt, body.uni #tgInt, body.uni #importBtn { display:none !important; }
@@ -760,7 +760,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 13nov 21h30</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 13h40</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -848,7 +848,7 @@
 
     <h3 class="helphead">5 · Setups e favoritos</h3>
     <ul>
-      <li><b>A regra dos setups:</b> <b>sem zona de reversão não há trade.</b> Uma zona é uma correção de 50% ou mais (até ao limite; acima de 91,8% a margem é curta). (1) Se o timeframe de <b>contexto</b> está em zona, o setup é de <b>reversão</b> a favor dele, e a viragem confirma-se dois timeframes abaixo (Mensal → Diário). (2) Senão, se o timeframe da <b>zona</b> está em zona, o setup é a favor dele; contra o contexto só vale se o contexto ainda tiver margem até à zona dele. (3) Nenhum em zona → <b>Sem trade</b>. Manda sempre o maior: um timeframe maior em zona no sentido contrário bloqueia o setup. Quando dois setups dão o mesmo trade, só conta o maior.</li>
+      <li><b>A regra dos setups:</b> <b>sem zona de reversão não há trade.</b> Uma zona é uma correção de 50% ou mais (até ao limite; a partir de 78,6% é <b>desconto profundo</b> numa zona de compra ou <b>prémio profundo</b> numa de venda — não é mau sinal: o sítio provável da reação passa a ser o order block seguinte, que a app indica). (1) Se o timeframe de <b>contexto</b> está em zona, o setup é de <b>reversão</b> a favor dele, e a viragem confirma-se dois timeframes abaixo (Mensal → Diário). (2) Senão, se o timeframe da <b>zona</b> está em zona, o setup é a favor dele; contra o contexto só vale se o contexto ainda tiver margem até à zona dele. (3) Nenhum em zona → <b>Sem trade</b>. Manda sempre o maior: um timeframe maior em zona no sentido contrário bloqueia o setup. Quando dois setups dão o mesmo trade, só conta o maior.</li>
       <li><b>Setups</b> (painel no topo): cada setup tem um timeframe de <b>contexto</b>, um de <b>zona</b> e um de <b>quebra</b>: Longo prazo (Mensal · Semanal → 4H), Swing (Semanal · Diário → 1H), Day trade (Diário · 4H → 15m), Scalp (4H · 1H → 5m) — editáveis nas Definições. <b>Sentido</b> = a direção da tendência principal do timeframe de zona: ▲ <b>Long</b> ou ▼ <b>Short</b>.</li>
       <li><b>Checklist:</b> <b>Contexto</b> (só informação) — <b>✔ A favor</b> se o timeframe de contexto vai no mesmo sentido, ou <b>Contra (X%)</b> com o recuo atual dele (abaixo de 50% ainda há espaço até à zona dele); <b>Zona</b> — correção ≥ 50% no timeframe de zona; <b>Quebra</b> — viragem ⚡ recente no movimento recente do timeframe de baixo (“ainda contra” = vai ao contrário; “já confirmada” = já está a favor mas sem viragem nova); <b>FVG na quebra</b>. <b>💧 sweep antes</b> = extra, torna o setup mais forte.</li>
       <li><b>Estado:</b> <b>Em formação</b> (cinzento = fora da zona; amarelo = zona cumprida), com “falta: …”; <b>✔ Pronto</b> = Zona, Quebra e FVG cumpridos, com a nota “a favor” ou “contra” o timeframe de contexto. Avisos: “topo/fundo por varrer perto” (liquidez do lado contrário que o preço ainda pode ir buscar) e “✋ … em modo manual — não atualiza”. Entrada, stop e alvos são contigo.</li>
@@ -950,7 +950,7 @@
     <ul>
       <li><b>Camada:</b> o gráfico mostra uma camada de cada vez — a do botão a amarelo (“Tendência principal” ou “Movimento recente”).</li>
       <li><b>Escala:</b> ao mudar de timeframe a escala dos preços volta ao ajuste automático. Se as velas ficarem pequenas ou fora do ecrã: <b>duplo clique</b> ou <b>clique direito</b> na escala dos preços (à direita). Duplo clique na escala do tempo repõe o zoom horizontal.</li>
-      <li><b>Botões (2.ª linha):</b> <b>▭ Dia/Sem ant.</b> — caixas do dia e da semana anteriores (as da Ásia e de Londres aparecem sempre no 1H e abaixo); <b>EMA 8/21</b>, <b>SMA 50/100/200</b>, <b>Keltner ±3ATR</b> (EMA 20 ± 3 × ATR de 10); <b>POC D / POC S</b> — preço com mais volume de cada dia / semana; <b>⏱ Killzones</b> (1H e abaixo). Tudo só visual. <b>⤢ Gráfico maior</b> abre em ecrã inteiro; o <b>✕ Fechar</b> fica no fim da 1.ª linha, à direita.</li>
+      <li><b>Botões (2.ª linha):</b> <b>▭ Dia/Sem ant.</b> — caixas do dia e da semana anteriores (as da Ásia e de Londres aparecem sempre no 1H e abaixo); <b>EMA 8/21</b>, <b>SMA 50/100/200</b>, <b>Keltner ±3ATR</b> (EMA 20 ± 3 × ATR de 10); <b>POC D / POC S</b> — preço com mais volume de cada dia / semana; <b>⏱ Killzones</b> (1H e abaixo). Tudo só visual. <b>⤢ Gráfico maior</b> abre em ecrã inteiro; o <b>✕ Fechar</b> fica no fim da 1.ª linha, à direita. <b>▭ OB</b> — order blocks por mitigar deste timeframe a menos de 15% do preço (a última vela contrária antes do impulso que partiu estrutura; azul = compra, roxo = venda, “origem” = o da base da perna). Contam como confluência nas zonas, na Top do dia e na análise IA.</li>
       <li><b>Divergências RSI</b> (painel do RSI): como o “RSI Divergence” do TradingView. <span style="color:#26a69a">Bull</span> = dois fundos do RSI a subir com o preço a fazer fundo mais baixo; <span style="color:#ef5350">Bear</span> = dois topos do RSI a descer com o preço a fazer topo mais alto; entre 5 e 60 velas e com a linha limpa. Cheia enquanto viva; esbatida depois.</li>
       <li><b>FVG da perna nova:</b> só os FVGs que nenhuma vela atravessou com o fecho. Se houver vários, o que está na zona ≥ 50%; senão o mais próximo, marcado “antes dos 50%”. <b>Por mitigar</b> / <b>já tocado</b>.</li>
     </ul>
@@ -972,7 +972,7 @@
     </ul>
   </div>
   <div class="chartbox">
-    <div class="chartbar"><span id="symNav"><button type="button" class="lyr" id="prevSym" title="Ativo anterior">‹</button><button type="button" class="lyr" id="nextSym" title="Ativo seguinte">›</button></span><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><label id="sensBox" class="lyr sensbox" title="Quantos pontos tem a tendência principal deste ativo neste grupo de timeframes (só para este ativo): 1 = mais pontos, 5 = menos"><span>Pontos</span><select id="sensSel"></select></label><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
+    <div class="chartbar"><span id="symNav"><button type="button" class="lyr" id="prevSym" title="Ativo anterior">‹</button><button type="button" class="lyr" id="nextSym" title="Ativo seguinte">›</button></span><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="obBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder os order blocks por mitigar deste timeframe (só os que estão a menos de 15% do preço): a última vela contrária antes do impulso que partiu estrutura. Azul = de compra, roxo = de venda; “origem” = o da base da perna"><span style="color:#4287f5">▭</span> OB</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><label id="sensBox" class="lyr sensbox" title="Quantos pontos tem a tendência principal deste ativo neste grupo de timeframes (só para este ativo): 1 = mais pontos, 5 = menos"><span>Pontos</span><select id="sensSel"></select></label><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button><div id="editWarn" style="display:none;margin-top:4px;background:#fff3cd;color:#5c4400;padding:4px 8px;border-radius:4px;font-size:12px"></div></div>
     <div id="fibInfo" class="small"></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar a linha de todos os timeframes (Delete). Para a tirar só de um timeframe, desmarca a caixa dele">🗑</button><button data-mext="1" title="Prolongar para a direita">⟶</button><span class="lnmtf"></span></div></div>
@@ -2387,6 +2387,31 @@
     out.forEach((z) => { z.p = Math.sqrt(z.lo * z.hi); z.dist = price > 0 ? (z.p - price) / price : 0; });
     return out.sort((a, b) => Math.abs(a.dist) - Math.abs(b.dist)).slice(0, 4);
   }
+  // ---------- order blocks: a última vela contrária antes do impulso que partiu estrutura (inclui o de origem da perna); só os por mitigar ----------
+  // de compra: última vela de descida antes da subida que fez um BOS/CHoCH para cima; mitigado quando um fecho passa abaixo dele. De venda: o contrário.
+  function orderBlocks(res, cs, price) {
+    if (!res || !cs || cs.length < 5) return [];
+    const out = [], seen = new Set(), n = cs.length;
+    const add = (dir, from, to) => {   // impulso de 'from' (origem) até 'to' (quebra)
+      let o = from; for (let j = from; j <= to; j++) if (dir === 1 ? cs[j].l < cs[o].l : cs[j].h > cs[o].h) o = j;   // origem = extremo antes do impulso
+      let k = -1; for (let j = o; j >= Math.max(0, o - 6); j--) if (Math.sign(cs[j].c - cs[j].o) === -dir) { k = j; break; }
+      if (k < 0 || seen.has(k)) return; seen.add(k);
+      const top = cs[k].h, bot = cs[k].l; if (!(top > bot)) return;
+      for (let j = k + 1; j < n; j++) if (dir === 1 ? cs[j].c < bot : cs[j].c > top) return;   // mitigado (um fecho atravessou-o)
+      out.push({ dir, top, bot, i: k, t: cs[k].t, brk: to, origin: false });
+    };
+    for (const b of res.breaks || []) if (b.i != null && b.from != null && b.i > b.from && b.i < n) add(b.dir, b.from, b.i);
+    const s = res.state;   // origem da perna atual (o limite), mesmo que ainda não tenha partido nada
+    if (s && s.trend && s.prot && s.prot.i != null && s.prot.i < n - 1) { const d = s.trend; add(d, s.prot.i, Math.min(n - 1, (s.ext && s.ext.i) || n - 1)); const o = out.find((x) => x.dir === d && x.i <= s.prot.i && x.i >= s.prot.i - 6); if (o) o.origin = true; }
+    return out.sort((a, b) => a.i - b.i);
+  }
+  // o próximo order block por mitigar no sentido do recuo (abaixo do preço numa zona de compra, acima numa de venda), antes do limite
+  function nextOB(obs, dir, price, limit) {
+    const inn = (obs || []).filter((o) => o.dir === dir && price <= o.top && price >= o.bot).pop();   // o preço já está dentro de um
+    if (inn) return Object.assign({ inside: true }, inn);
+    const c = (obs || []).filter((o) => o.dir === dir && (dir === 1 ? o.top < price && (!(limit > 0) || o.top >= limit * 0.999) : o.bot > price && (!(limit > 0) || o.bot <= limit * 1.001)));
+    return c.sort((a, b) => (dir === 1 ? b.top - a.top : a.bot - b.bot))[0] || null;
+  }
   // ---------- regra dos setups (a do Richy): sem zona de reversão não há trade ----------
   // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a viragem confirma-se 2 timeframes abaixo (Mensal → Diário)
   // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
@@ -2428,7 +2453,7 @@
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  root.MSS_FIB = { orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function () {
@@ -2731,12 +2756,14 @@
         : layer(E.analyze, +settings.extAtr * (pu ? pu.m : 1), settings.dispExt, ov, pu ? { legRatio: pu.leg, floorAtr: pu.floor } : null);
       const o1 = { candles: cs, closed, price, ext: one, int: one, uni: true, anchor: anc };
       try { o1.fibs = FB.fibsOf(one.res, closed, price); } catch (e) { o1.fibs = []; } o1.fibsI = o1.fibs;
+      try { o1.obs = FB.orderBlocks(one.res, closed, price); } catch (e) { o1.obs = []; }
       o1.fibsX = []; o1.fibConf = []; if (['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { o1.fibsX = FB.fibsMore(one.res, closed, price); o1.fibConf = FB.confZones(o1.fibs.concat(o1.fibsX), price); } catch (e) {}   // Diário para cima: perna anterior, tendência, ⭐ zonas
       return o1;
     }
     const pl = PRI_LV[priLevel(settings, id, sym || symbol)];
     const out = { candles: cs, closed, price, ext: pl && pl.zz ? layer(E.analyzeRecent, zzOf(pl, id)[0], settings.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), { legRatio: zzOf(pl, id)[1], floorAtr: zzOf(pl, id)[2] }) : layer(E.analyze, +settings.extAtr * (pl ? pl.m : 1), settings.dispExt, ed && Object.assign({ ignFvg: ed.fvg }, ed.ext), pl ? { legRatio: pl.leg, floorAtr: pl.floor } : null), int: layer(E.analyzeRecent, settings.intAtr, settings.dispInt, ed && Object.assign({ ignFvg: ed.fvg }, ed.int)) };
     try { out.fibs = FB.fibsOf(out.ext.res, closed, price); out.fibsI = FB.fibsOf(out.int.res, closed, price); } catch (e) { out.fibs = []; out.fibsI = []; }
+    try { out.obs = FB.orderBlocks(out.ext.res, closed, price); } catch (e) { out.obs = []; }
     out.fibsX = []; out.fibConf = []; if (['1Y', '6M', '3M', '1M', '1w', '1d'].includes(id)) try { out.fibsX = FB.fibsMore(out.ext.res, closed, price); out.fibConf = FB.confZones(out.fibs.concat(out.fibsX), price); } catch (e) {}
     return out;
   }
@@ -3557,7 +3584,12 @@
   const tfLabel = (id) => (TFS.find((t) => t.id === id) || { label: id }).label;
   // ---------- Fibonacci automáticas (alerts/fib.js) ----------
   const FB = window.MSS_FIB;
-  const DEEP_MAX = 91.8;   // acima disto a zona está perto da invalidação: não conta como setup
+  const DEEP_MAX = 91.8;
+  const DEEP_FROM = 78.6;   // a partir daqui: desconto profundo (zona de compra) / prémio profundo (zona de venda) — não é sinal negativo; o sítio provável da reação passa a ser o order block seguinte
+  function deepTxt(dm, zid, dir, z, html) {
+    const d = dm[zid], ob = d && FB.nextOB(d.obs, dir, d.price, z.protected), nm = dir === 1 ? 'desconto profundo' : 'prémio profundo';
+    return `${nm} · ${ob ? (ob.inside ? `o preço está dentro do order block${ob.origin ? ' de origem' : ''} ${fmt(ob.bot)}–${fmt(ob.top)}` : `possível ida ao order block${ob.origin ? ' de origem' : ''} em ${fmt(ob.bot)}–${fmt(ob.top)}`) : `invalida ${dir === 1 ? 'abaixo' : 'acima'} de ${fmt(z.protected)}`}`;
+  }
   // ✔ Confirmação: na zona de um setup (Diário ou acima), o movimento recente desse timeframe virou a favor (CHoCH) depois do topo/fundo da perna
   // devolve o timeframe onde se viu a confirmação (ou null). Duas estruturas: o recente do próprio timeframe da zona.
   // Estrutura única: o timeframe logo abaixo da zona (ex.: zona do Diário → o 4H virou a favor, CHoCH, depois do topo/fundo da perna da zona)
@@ -3631,7 +3663,7 @@
     if (!z.trend) return null;
     // sentido: o do timeframe em zona (regra dos setups)
     const dir = rsv.dir;
-    const zoneOk = (rsv.mode === 'rev' || rsv.mode === 'with' || rsv.mode === 'counter') && z.pullback >= 50 && z.pullback <= 100, zDeep = zoneOk && z.pullback > DEEP_MAX;
+    const zoneOk = (rsv.mode === 'rev' || rsv.mode === 'with' || rsv.mode === 'counter') && z.pullback >= 50 && z.pullback <= 100, zDeep = zoneOk && z.pullback > DEEP_FROM;
     const rs = recentState(t);
     let trig = null, entry = null;
     if (t.pending && t.pending.dir === dir) trig = { txt: `⏳ a confirmar · faltam ${Math.max(0, t.pending.left)} velas`, ok: false };
@@ -3726,7 +3758,7 @@
       const ready = !missing.length;
       const ctxNote = cx && cx.trend && cx.trend !== r.dir ? ` <span class="muted small">· contra o ${tfLabel(cid)} (${pct(cx.pullback)})</span>` : cx && cx.trend ? ` <span class="muted small">· a favor do ${tfLabel(cid)}</span>` : '';
       const why = `<div class="small" style="margin-top:3px">${r.why}</div>`;
-      const estado = !r.zoneOk ? `<span class="stg s0">Sem trade</span>${why}` : (r.zDeep ? `<span class="stg s1">Em zona, margem curta</span><br><span class="muted small">já corrigiu ${pct(r.z.pullback)} — perto do limite (${fmt(r.z.protected)})</span>` : ready ? `<span class="stg s3">✔ Pronto</span>${ctxNote}` : `<span class="stg s1">Em zona</span><br><span class="muted small">falta: ${missing.join(', ')}</span>`) + why;
+      const estado = !r.zoneOk ? `<span class="stg s0">Sem trade</span>${why}` : (r.zDeep && !ready ? `<span class="stg s1">Em zona · ${r.dir === 1 ? 'desconto' : 'prémio'} profundo</span><br><span class="muted small">corrigiu ${pct(r.z.pullback)} · ${deepTxt(data, st.zone, r.dir, r.z).replace(/^[^·]*· /, '')}${missing.length ? ' · falta: ' + missing.join(', ') : ''}</span>` : ready ? `<span class="stg s3">✔ Pronto</span>${ctxNote}` : `<span class="stg s1">Em zona</span><br><span class="muted small">falta: ${missing.join(', ')}</span>`) + why;
       return `<tr class="${ready ? (up ? 'su-ok' : 'sd-ok') : ''} ${!r.zoneOk ? 'dim' : ''}">
         <td class="tf">${st.name} <span class="muted small">${cid ? tfLabel(cid) + ' · ' : ''}${tfLabel(st.zone)} → ${tfLabel(st.trig)}</span></td>
         <td>${noTr ? '<span class="muted">—</span>' : `<span class="${up ? 'upc' : 'dnc'}">${up ? '▲ Long' : '▼ Short'}</span>`}</td>
@@ -4038,6 +4070,15 @@
       g.fillStyle = f.dir === 1 ? 'rgba(38,166,154,0.16)' : 'rgba(239,83,80,0.16)';
       g.fillRect(x1, Math.min(y1, y2), paneW - x1, Math.abs(y2 - y1) || 1);
     }
+    // order blocks por mitigar (botão OB): caixas com contorno, só a ±15% do preço; o de origem da perna leva "origem"
+    if (settings.obOn && !editMode && d.obs && d.price > 0) for (const o of d.obs.filter((o) => Math.abs((o.top + o.bot) / 2 - d.price) / d.price <= 0.15).slice(-10)) {
+      let x1 = X(o.i); if (x1 == null) { const vr = ts.getVisibleLogicalRange(); if (!vr || o.i > vr.to) continue; x1 = 0; }
+      const y1 = Y(o.top), y2 = Y(o.bot); if (y1 == null || y2 == null) continue;
+      const col = o.dir === 1 ? '66,135,245' : '171,71,188';
+      g.fillStyle = `rgba(${col},0.13)`; g.fillRect(x1, Math.min(y1, y2), paneW - x1, Math.abs(y2 - y1) || 1);
+      g.strokeStyle = `rgba(${col},0.7)`; g.lineWidth = 1; g.setLineDash([]); g.strokeRect(x1 + 0.5, Math.min(y1, y2) + 0.5, paneW - x1 - 1, (Math.abs(y2 - y1) || 1) - 1);
+      g.fillStyle = `rgba(${col},0.95)`; g.font = '10px Inter, system-ui, sans-serif'; g.textBaseline = 'top'; g.fillText(`OB ${o.dir === 1 ? 'compra' : 'venda'}${o.origin ? ' · origem' : ''}`, Math.max(x1, 0) + 4, Math.min(y1, y2) + 2); g.textBaseline = 'alphabetic';
+    }
     const xs = d.ext.snap;
     if (vE() && xs.trend && !editMode) {
       const x0 = X(d.ext.res.state.ext.i), y50 = Y(xs.levels[50]), y65 = Y(xs.levels[65]), y92 = Y(xs.levels[918]), yp = Y(xs.protected);
@@ -4238,7 +4279,7 @@
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', linesOn()); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
+    $('#obBtn').classList.toggle('on', !!settings.obOn); $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', linesOn()); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -5100,7 +5141,7 @@
     const disp = [st.zone, st.trig].some((id) => dm[id] && dm[id].int.snap.dispute);
     const rank = !missing.length ? 4 : zOk && trigOk ? 3 : zOk ? 2 : 1;
     const ctx = cx && cx.trend ? { fav: cx.trend === dir, pull: cx.pullback } : null;
-    return { st, rsv, why: suWhy(rsv, dm), dir, z, missing, rank, disp, ctx, box: bt ? bt.bx : null, sweep: trigOk && !bt && sweepBeforeBreak(dt), deep: zOk && z.pullback > DEEP_MAX, star: zOk ? starOf(dm, st.zone) : null };
+    return { st, rsv, why: suWhy(rsv, dm), dir, z, missing, rank, disp, ctx, box: bt ? bt.bx : null, sweep: trigOk && !bt && sweepBeforeBreak(dt), deep: zOk && z.pullback > DEEP_FROM, deepTxt: zOk && z.pullback > DEEP_FROM ? deepTxt(dm, st.zone, dir, z) : '', star: zOk ? starOf(dm, st.zone) : null };
   }
   // ---- página dos favoritos: lista sempre visível; o ativo aberto mostra-se por baixo da sua linha ----
   let favOpen = null;            // ativo aberto na lista
@@ -5647,7 +5688,7 @@ function motor_() {
   // estado de um setup em texto (o mesmo da página antiga dos favoritos)
   function npSetupTxt(x) {
     if (!x) return 'sem dados';
-    const st = x.deep ? `perto da invalidação (zona a ${pct(x.z.pullback)})` : x.rank === 4 ? 'Pronto' : 'falta: ' + x.missing.join(', ');
+    const st = (x.rank === 4 ? 'Pronto' : 'falta: ' + x.missing.join(', ')) + (x.deep ? ` · ${x.deepTxt}` : '');
     const ctx = x.ctx ? (x.ctx.fav ? (x.ctx.pull > 78.6 ? ` · contexto a favor mas fundo (${pct(x.ctx.pull)})` : ' · contexto a favor') : ` · contexto contra (${pct(x.ctx.pull)})`) : '';
     return `${x.st.name} ${x.dir === 1 ? '▲ Long' : '▼ Short'}: ${st} · zona ${pct(x.z.pullback)}${ctx}${x.sweep ? ' · 💧 quebra depois de sweep' : ''}${x.disp ? ' · ⚖ disputa por decidir' : ''}${x.star ? ' · ' + x.star.txt : ''}`;
   }
@@ -5843,31 +5884,50 @@ function motor_() {
   }
   // ---------- 📅 Top do dia: os setups mais fortes (sem scalp) para Long e Short + resumo para a IA ----------
   const DAY_MIN_ZONE = 144e5;   // só setups com zona ≥ 4H (fica de fora o Scalp)
+  // confluências perto do preço na zona de um setup (para ordenar e para explicar): order block, FVG, as tuas linhas, ⭐ zonas, divergência a favor
+  function dayConf(s, x) {
+    const dm = (favData[s] || {}).tfs || {}, d = dm[x.st.zone], P = d && d.price, out = []; if (!d || !(P > 0)) return out;
+    const near = (lo, hi, k) => (P >= lo * (1 - k) && P <= hi * (1 + k));
+    const ob = (d.obs || []).filter((o) => o.dir === x.dir && near(o.bot, o.top, 0.03)).pop(); if (ob) out.push(`order block${ob.origin ? ' de origem' : ''} ${fmt(ob.bot)}–${fmt(ob.top)}`);
+    const fv = (d.ext.res.fvgs || []).filter((g) => g.dir === x.dir && g.filled == null && near(g.bot, g.top, 0.02)).pop(); if (fv) out.push(`FVG ${fmt(fv.bot)}–${fmt(fv.top)}`);
+    const zc = (d.fibConf || []).find((z) => near(z.lo, z.hi, 0.03)); if (zc) out.push(`⭐ zona de reversão ${fmt(zc.lo)}–${fmt(zc.hi)}`);
+    try {   // as tuas linhas e canais a menos de 2% do preço
+      const now = Date.now(), fcs = (dm[x.st.zone] && dm[x.st.zone].candles) || null;
+      for (const l of ((settings.lines || {})[s] || []).filter((l) => lnLive(l, now))) {
+        const vs = l.type === 'chan' ? [[lnVal(l, now, 0, fcs), 'o teu canal'], [lnVal(l, now, l.off || 0, fcs), 'o teu canal']] : [[lnVal(l, now, 0, fcs), 'a tua linha']];
+        const h = vs.find(([v]) => v > 0 && Math.abs(v - P) / P <= 0.02); if (h) { out.push(`${h[1]} em ${fmt(h[0])}`); break; }
+      }
+    } catch (e) {}
+    try { const v = divergences(d).filter((q) => q.live && q.dir === x.dir).pop(); if (v) out.push(`divergência RSI ${x.dir === 1 ? 'de alta' : 'de baixa'}`); } catch (e) {}
+    return out;
+  }
   function dayRows() {
-    const rev = {}; revRows().forEach((r) => { rev[r.s + '|' + r.id] = r; });
-    const out = [];
+    const out = [], TFW = { '1M': 50, '1w': 40, '1d': 30, '4h': 20, '1h': 10 };
     for (const s of settings.favs || []) {
       if (isRatio(s) || !favData[s]) continue;
-      const dm = favData[s].tfs || {}; let best = null; const others = [];
-      for (const st of (settings.setups || []).filter((x) => x.on && (TF_MS0[x.zone] || 0) >= DAY_MIN_ZONE && !suHid(x, s))) {
-        const x = favSetup(s, st); if (!x || x.rank < 2 || x.deep) continue;
-        const d = dm[st.zone], f = d && d.fibs && d.fibs[0], price = d.price, rv = rev[s + '|' + st.zone];
-        let rr = null; if (f) { const risk = Math.abs(price - f.A), rw = x.dir === 1 ? f.B - price : price - f.B; if (risk > 0 && rw > 0) rr = rw / risk; }
-        const fr = aiStrength(s), fav = x.dir === 1 ? fr.winN : fr.loseN, con = x.dir === 1 ? fr.loseN : fr.winN;
-        const sc = x.rank * 100 + (rv ? rv.score * 8 : 0) + (x.ctx ? (x.ctx.fav ? 12 : -12) : 0) + (fr.n ? (fav.length > con.length ? 6 : con.length > fav.length ? -6 : 0) : 0) + Math.min(rr || 0, 4) * 3 + (x.sweep ? 5 : 0) + (x.star ? 5 : 0) + (TF_MS0[st.zone] >= 864e5 ? 3 : 0);
-        const row = { s, x, st, f, price, rr, rv, fav, con, frN: fr.n, sc };
-        if (!best || sc > best.sc) { if (best) others.push(best.st.name); best = row; } else others.push(st.name);
+      let best = null; const others = [];
+      for (const st0 of (settings.setups || []).filter((x) => x.on && !suHid(x, s))) {
+        const x = favSetup(s, st0); if (!x || x.rank < 2 || (TF_MS0[x.st.zone] || 0) < DAY_MIN_ZONE) continue;
+        const st = x.st, conf = dayConf(s, x), fr = aiStrength(s), fav = x.dir === 1 ? fr.winN : fr.loseN, con = x.dir === 1 ? fr.loseN : fr.winN;
+        // ordem: prontos primeiro, depois em zona; dentro disso o timeframe maior; depois as confluências perto; os rácios desempatam
+        const sc = x.rank * 1000 + (TFW[st.zone] || 0) * 4 + conf.length * 25 + (x.sweep ? 10 : 0) + (fr.n ? (fav.length > con.length ? 8 : con.length > fav.length ? -8 : 0) : 0);
+        const row = { s, x, st, st0, conf, fav, con, frN: fr.n, sc, price: (favData[s].tfs[st.zone] || {}).price };
+        if (!best || sc > best.sc) { if (best) others.push(best.st0.name); best = row; } else others.push(st0.name);
       }
       if (best) { best.others = others; out.push(best); }
     }
     return out.sort((a, b) => b.sc - a.sc);
   }
-  const dayState = (x) => (x.rank === 4 ? '✔ pronto' : x.rank === 3 ? '⚡ falta FVG' : x.box ? '↔ lateral' : '⏳ falta quebra');
-  function dayWarn(r) { const w = []; if (r.x.ctx && !r.x.ctx.fav) w.push(`contra o ${tfLabel(ctxOf(r.st))}`); if (r.frN && r.con.length > r.fav.length) w.push('força rel. contra'); return w; }
+  // a fase em palavras (vocabulário fixo): pronto · em zona, à espera de viragem · desconto/prémio profundo
+  const dayPhase = (r) => { const x = r.x, up = x.dir === 1, z = `em zona de ${up ? 'compra' : 'venda'} no ${tfLabel(r.st.zone)} (${pct(x.z.pullback)}${x.deep ? `, ${up ? 'desconto' : 'prémio'} profundo` : ''})`;
+    return x.rank === 4 ? `Pronto — ${z}; o ${tfLabel(r.st.trig)} já virou ${up ? 'para cima' : 'para baixo'}, com FVG` : x.rank === 3 ? `Quase pronto — ${z}; o ${tfLabel(r.st.trig)} já virou, falta o FVG` : (() => { const dm = (favData[r.s] || {}).tfs || {}, ts = dm[r.st.trig] && dm[r.st.trig].ext.snap; return ts && ts.trend === x.dir ? `À espera de confirmação — ${z}; o ${tfLabel(r.st.trig)} já está a favor, falta a quebra que o confirma` : `À espera de viragem — ${z}; falta o ${tfLabel(r.st.trig)} virar ${up ? 'para cima' : 'para baixo'}`; })(); };
+  const dayState = (x) => (x.rank === 4 ? '✔ pronto' : x.rank === 3 ? '⚡ quase pronto' : x.box ? '↔ lateral' : '⏳ à espera de viragem');
+  function dayWarn(r) { const w = []; if (r.x.rsv && r.x.rsv.mode === 'counter') w.push(`contra o ${tfLabel(r.x.rsv.ctx)} (com margem)`); if (r.frN && r.con.length > r.fav.length) w.push('rácios contra'); return w; }
+  // resumo por grupo: quantos favoritos têm um setup em zona de compra / de venda (e quantos prontos)
   function dayPanorama() {
-    const g = {}; for (const s of settings.favs || []) { if (isRatio(s) || !favData[s]) continue; const k = SY.monGroup(s), dm = favData[s].tfs || {};
-      const o = g[k] = g[k] || { n: 0, d: [0, 0], w: [0, 0] }; o.n++;
-      [['1d', 'd'], ['1w', 'w']].forEach(([id, kk]) => { const t = dm[id] && dm[id].ext.snap && dm[id].ext.snap.trend; if (t === 1) o[kk][0]++; else if (t === -1) o[kk][1]++; }); }
+    const g = {}; for (const s of settings.favs || []) { if (isRatio(s) || !favData[s]) continue; const k = SY.monGroup(s), o = g[k] = g[k] || { n: 0, b: 0, v: 0, pb: 0, pv: 0 }; o.n++;
+      let best = null; for (const st0 of (settings.setups || []).filter((x) => x.on && !suHid(x, s))) { const x = favSetup(s, st0); if (x && x.rank >= 2 && (!best || x.rank > best.rank)) best = x; }
+      if (best) { if (best.dir === 1) { o.b++; if (best.rank === 4) o.pb++; } else { o.v++; if (best.rank === 4) o.pv++; } } }
     return ['c', 's', 'f'].filter((k) => g[k]).map((k) => ({ k, name: MON_GN[k].split(' (')[0], ...g[k] }));
   }
   function dayPanoNames() {
@@ -5898,45 +5958,55 @@ function motor_() {
     if (!Object.keys(favData).length) return '';
     const ld = dayLoad();
     const rows = dayRows(), L = rows.filter((r) => r.x.dir === 1).slice(0, 5), S = rows.filter((r) => r.x.dir === -1).slice(0, 5);
-    const li = (r, i) => { const w = dayWarn(r); return `<a href="#" data-open="${r.s}" class="np-day-i"><span class="n">${i + 1}</span><span><b>${npEsc(nm(r.s))}</b> · ${r.st.name} <span class="np-day-st s${r.x.rank}">${dayState(r.x)}</span><br><small>zona ${tfLabel(r.st.zone)} ${pct(r.x.z.pullback)}${r.rr ? ` · R:R ${r.rr.toFixed(1).replace('.', ',')}` : ''}${r.rv ? ` · ${r.rv.score}/${REV_COLS.length} sinais` : ''}${w.length ? ` · <span style="color:var(--np-red)">⚠ ${w.join(', ')}</span>` : ''}</small></span></a>`; };
+    const li = (r, i) => { const w = dayWarn(r); return `<a href="#" data-open="${r.s}" class="np-day-i"><span class="n">${i + 1}</span><span><b>${npEsc(nm(r.s))}</b> · ${r.st.name} <span class="np-day-st s${r.x.rank}">${dayState(r.x)}</span><br><small>em zona no ${tfLabel(r.st.zone)} ${pct(r.x.z.pullback)}${r.x.deep ? (r.x.dir === 1 ? ' · desconto profundo' : ' · prémio profundo') : ''}${r.conf.length ? ` · ${npEsc(r.conf.slice(0, 2).join(' · '))}` : ''}${w.length ? ` · <span style="color:var(--np-red)">⚠ ${w.join(', ')}</span>` : ''}</small></span></a>`; };
     const col = (t, c, a) => `<div class="np-day-c"><div class="np-day-h" style="color:${c}">${t}</div>${a.map(li).join('') || '<p class="np-why" style="color:var(--np-mu);font-size:13px">nada em zona</p>'}</div>`;
-    const pano = dayPanorama().map((p) => `${p.name}: D ${p.d[0]}▲ ${p.d[1]}▼`).join(' · ');
-    return `<div class="np-box" id="npDay"><div class="np-kick">TOP DO DIA</div><div style="font-size:12px;color:var(--np-mu);margin:2px 0 8px">${pano} · sem scalp · ordem: estado do setup, sinais de reversão, contexto e R:R</div>
+    const pano = dayPanorama().map((p) => `${p.name}: ${p.b} em zona de compra${p.pb ? ` (${p.pb} pronto${p.pb > 1 ? 's' : ''})` : ''} · ${p.v} de venda${p.pv ? ` (${p.pv} pronto${p.pv > 1 ? 's' : ''})` : ''}`).join(' | ');
+    return `<div class="np-box" id="npDay"><div class="np-kick">TOP DO DIA</div><div style="font-size:12px;color:var(--np-mu);margin:2px 0 8px">${pano} · ordem: prontos primeiro, depois o timeframe maior em zona e as confluências perto</div>
       <div class="np-day">${col('▲ LONG', 'var(--np-green, #2e7d32)', L)}${col('▼ SHORT', 'var(--np-red)', S)}</div>
       <button type="button" id="npDayAi" class="np-day-ai${ld.busy ? ' wait' : ''}" title="${ld.busy ? 'Ainda a carregar os favoritos — se carregares agora, o brief avisa a IA de que os dados estão incompletos' : 'Copia o brief do dia para colares numa conversa com o Claude'}">${ld.busy ? `⏳ a carregar ${ld.n} de ${ld.t}… (Análise IA do dia)` : '🤖 Análise IA do dia'}</button><div id="npDayMsg" style="font-size:12px;color:var(--np-mu);margin-top:6px"></div></div>`;
   }
-  const AI_DAY_FORMAT = `Responde em português de Portugal, de leitura fácil (~400 palavras no máximo), com este formato:
-1) CENÁRIO GERAL, uma linha por grupo: diz QUAIS ativos estão em alta e QUAIS em baixa (nomes, não só contagens) e tira a conclusão prática — que lado está a favor da maré nesse grupo (ex.: "Ações: Semanal em baixa em X, Y, Z; em alta só A e B → Shorts a favor; Longs só em A e B"). Depois uma linha com o que os rácios dizem (o que está a ganhar a quê). Se um grupo não tiver dados, diz só "sem dados".
-2) TOP LONG e TOP SHORT: no máximo 5 cada, por ordem de força. CADA linha começa pelo lado e pelo veredicto: "LONG <ativo> (<setup>) — Entrar já" / "— Esperar por <zona ou fecho> (<distância %>)" / "— Evitar". Depois: estado em palavras (ex.: "pronto: quebra no 15m com FVG"), entrada, invalida, alvo, R:R e porquê (2–3 sinais com números). Se discordares da ordem que te dou, reordena e diz porquê numa frase.
-3) A VIGIAR: no mesmo formato ("SHORT <ativo> (<setup>) — Esperar pela quebra no <TF> …"), só os que merecem atenção hoje.
-4) CUIDADO: no mesmo formato, com o lado e o veredicto ("SHORT <ativo> (<setup>) — Evitar: <razão com números>"). Inclui os que vão contra o timeframe de cima, contra a força relativa, com R:R abaixo de 1,5 ou stop muito largo (aí diz "só com posição pequena").
-5) O QUE MUDARIA O DIA: 1–2 níveis, cada um com o ativo, o lado afetado e o fecho que o muda (ex.: "fecho do Níquel acima de 14,425 (+3,4%) anula o SHORT").
-Nunca escrevas "pronto", "entrar" ou "evitar" sem dizer se é LONG ou SHORT. Quando citares uma tendência, diz se é a tendência principal ou o movimento recente, e de que TF. Médias (SMA/EMA): só as do Diário para cima. Nos índices de domínio (.D) diz em uma frase o que esse lado significa na prática. Usa só os números destes dados e cita-os; diz a distância ao preço em % em cada nível. Não inventes ativos que não estejam aqui.`;
+  const AI_DAY_FORMAT = `Responde em português de Portugal, numa linguagem simples e direta (como um colega experiente), no máximo ~400 palavras. O meu método (ICT): SÓ HÁ TRADE QUANDO UM TIMEFRAME ESTÁ EM ZONA (correção de 50% ou mais, até ao limite). Os timeframes de baixo servem para levar o preço à zona e depois confirmar a viragem. Não quero stops nem risco/retorno.
+VOCABULÁRIO (usa sempre este, com o timeframe): "pronto" (em zona e o timeframe de baixo já virou a favor), "à espera de viragem" (em zona, falta a confirmação), "desconto profundo / prémio profundo" (fundo da zona; diz o order block se vier nos dados), "sem zona". NUNCA digas "em alta" ou "em baixa" sozinho — não diz o que fazer.
+Formato:
+0) Primeira linha: data e hora dos dados.
+1) A MELHOR OPORTUNIDADE DE HOJE: o 1.º da lista (a ordem já vem calculada pela app). Diz o ativo, o lado (LONG/SHORT), o setup, a fase e PORQUÊ é o mais completo (as confluências), e o que fazer: onde procurar a entrada (só se estiver a menos de ~15%) e o que a invalida.
+2) A SEGUIR: os 2–3 seguintes, uma ou duas frases cada, com a mesma lógica.
+3) A VIGIAR (próximos dias): os que estão à espera de viragem — o preço da viragem e a distância.
+4) SE JÁ ESTÁS DENTRO: onde uma posição aberta está a entrar numa zona do lado contrário (ex.: "se estás short no Cobre, ele está em zona de compra no Mensal").
+5) CONTEXTO (2 linhas, só o que muda a decisão): cripto (BTC/TOTAL e stablecoins, em fases de zona) e os rácios em zona que pesam a favor ou contra os candidatos.
+6) EM QUE MOMENTO ESTAMOS: copia as % por grupo calculadas pela app e explica-as numa frase.
+REGRAS: cada preço vem com o que é e a distância ao preço; nada a mais de ~15% exceto o limite que invalida; alvos de Fibonacci só se vierem marcados como ativos; ativos sem zona não se mencionam. Nos índices de domínio (.D) diz numa frase o que esse lado significa. Usa só os números destes dados.`;
   function daySummary() {
     const rows = dayRows(), dt = new Date().toLocaleString('pt-PT', { dateStyle: 'full', timeStyle: 'short' });
     const D = (x, p) => pct((x - p) / p * 100, true);
-    const line = (r) => { const f = r.f, p = r.price, w = dayWarn(r), rv = r.rv;
-      const sig = rv ? REV_COLS.filter(([k]) => rv.ok[k] && !(k === 'sma' && TF_MS0[r.st.zone] < 864e5)).map(([k]) => { const v = rv.val[k]; return `${k === 'fr' ? 'força rel.' : REV_COLS.find((c) => c[0] === k)[1]}${v ? ' ' + v.v + (v.d ? ' (' + v.d + ')' : '') : ''}`; }).join('; ') : '';
-      return `- ${r.x.dir === 1 ? 'LONG' : 'SHORT'} ${nm(r.s)} (${r.s}) · ${r.st.name} (zona ${tfLabel(r.st.zone)}, quebra ${tfLabel(r.st.trig)}) · ${dayStateLong(r)}${dayIdxNote(r.s, r.x.dir)}
-  preço ${aiF(p)} · correção ${pct(r.x.z.pullback)}${f ? ` · entrada ótima ${aiF(f.entry.lo)}–${aiF(f.entry.hi)} · invalida ${aiF(f.A)} (${D(f.A, p)}) · alvo ${aiF(f.B)} (${D(f.B, p)})` : ''}${r.rr ? ` · R:R ${r.rr.toFixed(1)}` : ''}
-  sinais de reversão ${rv ? rv.score + '/' + REV_COLS.length : '—'}${sig ? ': ' + sig : ''}${r.x.ctx ? ` · contexto ${tfLabel(ctxOf(r.st))} ${r.x.ctx.fav ? 'a favor' : 'CONTRA'}` : ''}${r.frN ? ` · força rel. a favor: ${r.fav.join(', ') || 'nenhum'}; contra: ${r.con.join(', ') || 'nenhum'}` : ' · sem rácios'}${r.x.star ? ` · ${r.x.star.txt}` : ''}${r.others.length ? ` · também em zona: ${r.others.join(', ')}` : ''}${w.length ? ` · ATENÇÃO: ${w.join(', ')}` : ''}`; };
-    const L = rows.filter((r) => r.x.dir === 1), S = rows.filter((r) => r.x.dir === -1);
-    const pano = dayPanoNames(), ld = dayLoad();
-    const rat = dayRatios().map((x) => `- ${nm(x.A)} / ${nm(x.B)}: Semanal ${x.w} Diário ${x.d}${x.w === '▲' && x.d !== '▼' ? ` (${nm(x.A)} a ganhar)` : x.w === '▼' && x.d !== '▲' ? ` (${nm(x.B)} a ganhar)` : ''}`).join('\n');
-    return `${ld.busy ? `⚠ DADOS INCOMPLETOS: a app ainda estava a carregar os favoritos (${ld.n} de ${ld.t}). Avisa-me disso logo no início e não tires conclusões gerais dos grupos/rácios sem dados.\n\n` : ''}Brief do dia — scanner de estrutura ICT (${dt})
-Tendência = ${uniOn(settings) ? 'a estrutura de cada timeframe (Anual→Diário: estrutura de contexto, só quebras; 4H e abaixo: estrutura de gatilho, todos os topos/fundos)' : 'a estrutura PRINCIPAL de cada timeframe'}. Correção ≥ 50% = em zona. Setups sem scalp (Longo prazo, Swing, Day trade). A ordem já vem por força: estado do setup → sinais de reversão → contexto do timeframe de cima → força relativa → R:R.
+    const line = (r, k) => { const x = r.x, p = r.price, w = dayWarn(r), dm = (favData[r.s] || {}).tfs || {}, ts = dm[r.st.trig] && dm[r.st.trig].ext.snap;
+      const lv = x.rank < 3 && ts && ts.trend && ts.trend !== x.dir ? ts.protected : null;
+      return `${k + 1}. ${x.dir === 1 ? 'LONG' : 'SHORT'} ${nm(r.s)} (${r.s}) · ${r.st0.name}${x.rsv && x.rsv.mode === 'rev' ? ' (reversão)' : x.rsv && x.rsv.mode === 'counter' ? ' (contra o timeframe de cima, com margem)' : ''} · ${dayPhase(r)}${dayIdxNote(r.s, x.dir)}
+   preço ${aiF(p)}${lv ? ` · viragem com fecho ${x.dir === 1 ? 'acima' : 'abaixo'} de ${aiF(lv)} (${D(lv, p)}), o limite do ${tfLabel(r.st.trig)}` : ''} · invalida com fecho ${x.dir === 1 ? 'abaixo' : 'acima'} de ${aiF(x.z.protected)} (${D(x.z.protected, p)})${x.deep && x.deepTxt ? ` · ${x.deepTxt.replace(/^[^·]*· /, '')}` : ''}
+   confluências perto: ${r.conf.join('; ') || 'nenhuma'}${r.frN ? ` · rácios a favor: ${r.fav.join(', ') || 'nenhum'}; contra: ${r.con.join(', ') || 'nenhum'}` : ''}${w.length ? ` · atenção: ${w.join(', ')}` : ''}${r.others.length ? ` · também em zona: ${r.others.join(', ')}` : ''}`; };
+    const ld = dayLoad(), pano = dayPanorama();
+    // rácios em zona: o que significam
+    const rat = (settings.favs || []).filter((r) => isRatio(r) && favData[r]).map((r) => { let b = null; for (const st0 of (settings.setups || []).filter((x) => x.on && !suHid(x, r))) { const x = favSetup(r, st0); if (x && x.rank >= 2 && (!b || x.rank > b.x.rank || (x.rank === b.x.rank && TF_MS0[x.st.zone] > TF_MS0[b.x.st.zone]))) b = { x, st0 }; }
+      if (!b) return null; const [A, B] = ratioLegs(r), up = b.x.dir === 1, win = up ? nm(A) : nm(B), lose = up ? nm(B) : nm(A);
+      return `- ${nm(A)}/${nm(B)}: ${b.x.rank === 4 ? 'pronto' : 'à espera de viragem'} — em zona de ${up ? 'compra' : 'venda'} no ${tfLabel(b.x.st.zone)} (${pct(b.x.z.pullback)})${b.x.rank === 4 ? `, já virou: ${win} a ganhar a ${lose}` : `; se virar no ${tfLabel(b.x.st.trig)}, ${win} passa a ganhar a ${lose}`}`; }).filter(Boolean).join('\n');
+    // em que momento estamos, por grupo (pronto 1 · quase 0,75 · em zona 0,35 por ativo)
+    const pc = ['c', 's', 'f'].map((k) => { const fs = (settings.favs || []).filter((s) => !isRatio(s) && favData[s] && SY.monGroup(s) === k); if (!fs.length) return null; let b = 0, v = 0;
+      fs.forEach((s) => { const r = rows.find((q) => q.s === s); if (!r) return; const w = r.x.rank === 4 ? 1 : r.x.rank === 3 ? 0.75 : 0.35; if (r.x.dir === 1) b += w; else v += w; });
+      const B = Math.round(b / fs.length * 100), V = Math.round(v / fs.length * 100); return `- ${MON_GN[k].split(' (')[0]}: Comprar ${B}% · Vender ${V}% · Não fazer nada ${100 - B - V}%`; }).filter(Boolean).join('\n');
+    return `${ld.busy ? `⚠ DADOS INCOMPLETOS: a app ainda estava a carregar os favoritos (${ld.n} de ${ld.t}). Avisa-me disso logo no início.\n\n` : ''}Brief do dia — scanner de estrutura ICT (${dt})
+Cada timeframe tem uma só estrutura. Zona = correção de 50% ou mais (até ao limite). A LISTA JÁ VEM ORDENADA PELA APP (prontos primeiro, depois o timeframe maior em zona, depois as confluências perto) — não a reordenes.
 
-PANORAMA (${uniOn(settings) ? 'estrutura' : 'tendência principal'} dos favoritos, por grupo)
-${pano || '- (sem dados)'}
+RESUMO POR GRUPO
+${pano.map((p) => `- ${p.name}: ${p.b} em zona de compra (${p.pb} prontos) · ${p.v} em zona de venda (${p.pv} prontos) · ${p.n - p.b - p.v} sem zona`).join('\n') || '- (sem dados)'}
 
-RÁCIOS (▲ = o primeiro está a ganhar ao segundo)
-${rat || '- (sem rácios nos favoritos)'}
+OPORTUNIDADES POR ORDEM (${rows.length})
+${rows.slice(0, 10).map(line).join('\n') || '- nenhum favorito em zona'}
 
-CANDIDATOS LONG (${L.length})
-${L.slice(0, 8).map(line).join('\n') || '- nenhum em zona'}
+RÁCIOS EM ZONA
+${rat || '- nenhum rácio em zona'}
 
-CANDIDATOS SHORT (${S.length})
-${S.slice(0, 8).map(line).join('\n') || '- nenhum em zona'}
+EM QUE MOMENTO ESTAMOS (calculado pela app)
+${pc || '- (sem dados)'}
 
 ${AI_DAY_FORMAT}`;
   }
@@ -6037,7 +6107,7 @@ ${AI_DAY_FORMAT}`;
       const dm = (favData[s] || {}).tfs || {};
       for (const id of REV_TFS) {
         const d = dm[id]; if (!d || !d.ext || !d.ext.snap) continue; const z = d.ext.snap;
-        if (!z.trend || !(z.pullback >= 50 && z.pullback <= DEEP_MAX)) continue;
+        if (!z.trend || !(z.pullback >= 50 && z.pullback <= 100)) continue;
         const dir = z.trend, price = d.price, f = d.fibs && d.fibs[0], ok = {}, val = {};
         const V = (k, v, sub, title) => { val[k] = { v, d: sub || '', t: title || '' }; };
         if (f) {
@@ -6119,7 +6189,7 @@ ${AI_DAY_FORMAT}`;
   function aiTfLine(id, d) {
     const x = d.ext.snap, n = d.int.snap, f = d.fibs && d.fibs[0], P = d.price, near = (p, k) => p > 0 && P > 0 && Math.abs(p - P) / P <= (k || AI_NEAR);
     const dd = (p) => (P > 0 && p > 0 ? ` (${pct((p - P) / P * 100, true)})` : '');
-    const tr = (sn) => (!sn || !sn.trend ? 'sem estrutura' : `${sn.trend === 1 ? '▲ SUBIDA' : '▼ DESCIDA'}${/virar/i.test(sn.label || '') ? ' (acabou de virar: CHoCH, ainda sem BOS)' : ''}, correção ${pct(sn.pullback)}${sn.pullback >= 50 && sn.pullback <= 100 ? ` — EM ZONA de ${sn.trend === 1 ? 'compra' : 'venda'}${sn.pullback > 91.8 ? ', margem curta' : ''}` : ' — fora de zona (a zona começa nos 50%)'}; limite ${aiF(sn.protected)}${dd(sn.protected)} (fecho para lá dele parte a estrutura)${near(sn.extreme) ? `; ${sn.trend === 1 ? 'topo' : 'fundo'} da perna ${aiF(sn.extreme)}${dd(sn.extreme)}` : ''}`);
+    const tr = (sn) => (!sn || !sn.trend ? 'sem estrutura' : `${sn.trend === 1 ? '▲ SUBIDA' : '▼ DESCIDA'}${/virar/i.test(sn.label || '') ? ' (acabou de virar: CHoCH, ainda sem BOS)' : ''}, correção ${pct(sn.pullback)}${sn.pullback >= 50 && sn.pullback <= 100 ? ` — EM ZONA de ${sn.trend === 1 ? 'compra' : 'venda'}${sn.pullback > DEEP_FROM ? (sn.trend === 1 ? ', desconto profundo' : ', prémio profundo') : ''}` : ' — fora de zona (a zona começa nos 50%)'}; limite ${aiF(sn.protected)}${dd(sn.protected)} (fecho para lá dele parte a estrutura)${near(sn.extreme) ? `; ${sn.trend === 1 ? 'topo' : 'fundo'} da perna ${aiF(sn.extreme)}${dd(sn.extreme)}` : ''}`);
     const lb = n && n.lastBreak && n.lastBreak.barsAgo <= 30 ? `; última quebra ${n.lastBreak.type} ${n.lastBreak.dir === 1 ? '▲' : '▼'} em ${aiF(n.lastBreak.level)} há ${n.lastBreak.barsAgo} velas` : '';
     const live = (g) => g.Bi != null && d.closed && g.Bi >= d.closed.length - 3;   // a perna está a esticar agora: o preço anda à procura dos alvos
     const tg = (g, act) => (act ? g.targets.filter((t) => !t.hit && near(t.near)).map((t) => `${t.name} ${aiF(t.lo)}–${aiF(t.hi)}${dd(t.near)}`).join(', ') : '');
@@ -6132,19 +6202,21 @@ ${AI_DAY_FORMAT}`;
     const fX = (d.fibsX || []).map((g) => g.role === 'tendencia' ? fl(g, 'Fibonacci da tendência')
       : ((g.dir === 1 ? P > g.B : P < g.B) ? (tg(g, true) ? `; alvos ATIVOS da perna anterior (o preço já passou ${aiF(g.B)}): ${tg(g, true)}` : '') : '')).join('')
       + ((d.fibConf || []).filter((z) => near(z.p)).length ? `; ⭐ zonas de reversão perto (Fibonacci que coincidem): ${d.fibConf.filter((z) => near(z.p)).map((z) => `${aiF(z.lo)}–${aiF(z.hi)}${dd(z.p)} [${z.parts.join(' + ')}]`).join('; ')}` : '');
+    const obs = (d.obs || []).filter((o) => near(o.top) || near(o.bot)).slice(-3).map((o) => `${o.dir === 1 ? 'de compra' : 'de venda'}${o.origin ? ' (origem da perna)' : ''} ${aiF(o.bot)}–${aiF(o.top)}${dd((o.top + o.bot) / 2)}`);
     const fvg = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h'].includes(id) ? (d.ext.res.fvgs || []).filter((g) => g.filled == null && (near(g.top) || near(g.bot))).slice(-3).map((g) => `${g.dir === 1 ? 'de compra' : 'de venda'} ${aiF(g.bot)}–${aiF(g.top)}${dd((g.top + g.bot) / 2)}`) : [];
     let dv = ''; try { const v = divergences(d).filter((q) => q.live).pop(), rs = d._rsi && d._rsi[d._rsi.length - 1];
       if (v) dv = `; divergência RSI ${v.dir === 1 ? 'de alta (a favor de subida)' : 'de baixa (a favor de descida)'} ativa, há ${d.closed.length - 1 - v.b.i} velas`;
       if (rs != null) dv += `; RSI ${rs.toFixed(0)}`; } catch (e) {}
     const sma = ['1d', '1w', '1M', '3M', '6M', '1Y'].includes(id) ? smaOfTf(d, 200) : null;   // médias só do Diário para cima e só quando perto
-    return `- ${tfLabel(id)}: ${tr(x)}${lb}${fib}${fX}${fvg.length ? `; gaps/FVG por preencher perto: ${fvg.join(', ')}` : ''}${sma && near(sma, 0.1) ? `; SMA 200 perto: ${aiF(sma)}${dd(sma)}` : ''}${dv}`;
+    return `- ${tfLabel(id)}: ${tr(x)}${lb}${fib}${fX}${obs.length ? `; order blocks por mitigar perto: ${obs.join(', ')}` : ''}${fvg.length ? `; gaps/FVG por preencher perto: ${fvg.join(', ')}` : ''}${sma && near(sma, 0.1) ? `; SMA 200 perto: ${aiF(sma)}${dd(sma)}` : ''}${dv}`;
   }
   // ---------- 📋 resumo para a IA: dados "mastigados" para decidir (obstáculos, risco/retorno, força relativa) e um formato de resposta curto ----------
   const AI_FORMAT = `Responde em português de Portugal, numa linguagem simples e direta (como um colega experiente a explicar), no máximo ~350 palavras. O meu método (ICT): SÓ HÁ TRADE QUANDO UM TIMEFRAME ESTÁ EM ZONA DE REVERSÃO (correção de 50% ou mais, até ao limite). O timeframe em zona dá o lado; os timeframes de baixo só servem para levar o preço à zona e, depois, para CONFIRMAR a viragem (CHoCH a favor). Correções de 20–30% não são sinal de nada. Manda sempre o timeframe maior em zona. Um trade contra o timeframe de cima só existe se este ainda tiver margem até à zona dele. Não quero stops nem risco/retorno: quero saber se há zona, o que falta e o que se junta à zona.
+VOCABULÁRIO (usa sempre este, com o timeframe): "pronto" (em zona e o de baixo já virou a favor), "à espera de viragem" (em zona, falta a confirmação), "desconto profundo / prémio profundo" (fundo da zona — NÃO é desvantagem: muitas reversões fazem-se no order block lá em baixo; diz qual, se vier nos dados), "a caminho da zona", "sem zona". NUNCA digas "em alta" ou "em baixa" sozinho: não diz o que fazer.
 Formato:
 0) Primeira linha: o PREÇO ATUAL (com a hora).
 1) ONDE ESTAMOS: 2–3 frases simples sobre o momento (que timeframe está em zona, o que estão a fazer os de baixo, o que falta acontecer). Começa pelo timeframe maior.
-2) SETUPS (um parágrafo curto por setup, pela ordem dos dados, usando o VEREDICTO DA APP sem o contrariar): se há trade ou não e porquê; se há, o que falta (a viragem em que timeframe e acima/abaixo de que preço) e as CONFLUÊNCIAS que reforçam a zona (Fibonacci, ⭐ zonas de reversão, gaps/FVG, as minhas linhas e canais, divergências, SMA 200 perto).
+2) SETUPS (um parágrafo curto por setup, pela ordem dos dados, usando o VEREDICTO DA APP sem o contrariar): se há trade ou não e porquê; se há, o que falta (a viragem em que timeframe e acima/abaixo de que preço) e as CONFLUÊNCIAS que reforçam a zona (Fibonacci, ⭐ zonas de reversão, order blocks, gaps/FVG, as minhas linhas e canais, divergências, SMA 200 perto).
 3) SE JÁ ESTÁS LONG: manter, realizar parte ou sair, e porquê; e o que pode vir contra (zonas de venda perto, linhas, divergências, alvos ativos).
 4) SE JÁ ESTÁS SHORT: o mesmo.
 5) EM QUE MOMENTO ESTAMOS: copia as percentagens da app (Comprar / Vender / Não fazer nada) e explica-as numa frase.
@@ -6211,7 +6283,7 @@ Usa só os números destes dados.`;
       const turned = ts && ts.trend === r.dir, lvl = ts && ts.trend && ts.trend !== r.dir ? ts.protected : null;
       const fvg = r.t.lastBreak && r.t.lastBreak.fvg === 'sim';
       const state = r.trig && r.trig.ok ? (fvg ? 'PRONTO: o ' + tfLabel(st.trig) + ' já virou a favor, com FVG' : 'o ' + tfLabel(st.trig) + ' já virou a favor (falta o FVG)') : turned ? `o ${tfLabel(st.trig)} já está a favor` : `falta o ${tfLabel(st.trig)} virar ${up ? 'para cima' : 'para baixo'}${lvl ? ` (fecho ${up ? 'acima' : 'abaixo'} de ${aiF(lvl)}${price ? ' (' + pct((lvl - price) / price * 100, true) + ')' : ''}, o limite do ${tfLabel(st.trig)})` : ''}`;
-      return `- ${st0.name}: ${up ? 'possível LONG' : 'possível SHORT'} (${r.rsv.mode === 'rev' ? 'reversão' : r.rsv.mode === 'counter' ? 'contra o timeframe de cima, que ainda tem margem' : 'a favor do timeframe de cima'}) — ${r.why}; zona no ${tfLabel(st.zone)} (correção ${pct(r.z.pullback)}${r.zDeep ? ', margem curta: perto do limite ' + aiF(r.z.protected) : ''}); ${state}${r.star ? '; ' + r.star.txt : ''}`;
+      return `- ${st0.name}: ${up ? 'possível LONG' : 'possível SHORT'} (${r.rsv.mode === 'rev' ? 'reversão' : r.rsv.mode === 'counter' ? 'contra o timeframe de cima, que ainda tem margem' : 'a favor do timeframe de cima'}) — ${r.why}; zona no ${tfLabel(st.zone)} (correção ${pct(r.z.pullback)}${r.zDeep ? ', ' + deepTxt(data, st.zone, r.dir, r.z) : ''}); ${state}${r.star ? '; ' + r.star.txt : ''}`;
     });
     if (ev.length) out.push('', 'VEREDICTO DA APP POR SETUP (regra das zonas — não contrariar):', ...ev);
     // em que momento estamos: % calculadas pela app a partir dos setups (peso: Longo prazo 3, Swing 2, Day trade 1, Scalp 0,5; pronto 1 · virou 0,75 · em zona 0,35)
@@ -6316,7 +6388,7 @@ Usa só os números destes dados.`;
     const r = { s, price, chg: i.chg, rank: i.best ? i.best.rank * 1000 + (i.best.z.pullback || 0) : -1 };
     // ordem "mais prontos": n.º de prontos → falta FVG/quebra → em zona; desempata ⭐, 💧 e timeframe maior (Longo prazo pesa mais que Scalp)
     { const n = [0, 0, 0, 0, 0]; let star = 0, sw = 0, tfw = 0;
-      i.setups.forEach((st, k) => { const x = i.ev[k]; if (!x) return; const rk = x.deep ? 1 : Math.max(0, Math.min(4, x.rank || 0)); n[rk]++; if (rk >= 2) { if (x.star) star++; if (x.sweep) sw++; tfw += (rk * 10) * (i.setups.length - k); } });
+      i.setups.forEach((st, k) => { const x = i.ev[k]; if (!x) return; const rk = Math.max(0, Math.min(4, x.rank || 0)); n[rk]++; if (rk >= 2) { if (x.star) star++; if (x.sweep) sw++; tfw += (rk * 10) * (i.setups.length - k); } });
       r.ready = [n[4], n[3] + n[2], n[1], star, sw, tfw]; }
     // tendência principal por timeframe
     r.trend = BOARD_TFS.map(([id, lb]) => { const sn = T[id] && T[id].ext.snap; if (!sn || !sn.trend) return `<span><b>${lb}</b><span class="mu">—</span></span>`; const deep = sn.pullback > 78.6;
@@ -6324,7 +6396,7 @@ Usa só os números destes dados.`;
     // setups
     r.setups = i.setups.map((st, k) => { if (suHid(st, s)) return ''; const x = i.ev[k]; if (!x) return `<div class="su"><span class="k">${npEsc(st.name)}</span> <span class="mu">${npNv(s, st) ? '— não vigiado' : 'sem dados'}</span></div>`;
       const t = x.rank === 4 ? 'pronto' : x.rank === 3 ? 'falta FVG' : x.rank === 2 ? 'falta quebra' : 'sem trade';
-      return `<div class="su" data-tip="${npEsc(npSetupTxt(x))}"><span class="k">${npEsc(st.name)}</span> <span class="r${x.rank}">${x.dir === 1 ? '▲ Long' : '▼ Short'} · ${x.deep ? 'perto da invalidação' : t}${x.sweep && x.rank >= 3 ? ' 💧' : ''}${x.star ? ' ⭐' : ''}</span></div>`; }).join('');
+      return `<div class="su" data-tip="${npEsc(npSetupTxt(x))}"><span class="k">${npEsc(st.name)}</span> <span class="r${x.rank}">${x.dir === 1 ? '▲ Long' : '▼ Short'} · ${t}${x.deep ? (x.dir === 1 ? ' · desconto profundo' : ' · prémio profundo') : ''}${x.sweep && x.rank >= 3 ? ' 💧' : ''}${x.star ? ' ⭐' : ''}</span></div>`; }).join('');
     // perto da inversão: o timeframe com o limite mais perto (a vermelho dentro da distância do alerta 5)
     let nb = null;
     for (const [id] of BOARD_TFS) { const d = T[id], sn = d && d.ext.snap; if (!sn || !sn.trend || sn.protected == null) continue; const gap = (sn.trend === 1 ? d.price - sn.protected : sn.protected - d.price) / d.price * 100; if (gap >= 0 && (!nb || gap < nb.gap)) nb = { id, gap, lvl: sn.protected, hot: gap <= (A.nearPct[id] != null ? A.nearPct[id] : 0.5) }; }
@@ -6800,6 +6872,7 @@ Usa só os números destes dados.`;
     initLines();
     for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn'], ['#fibBtn', 'fibOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
+    $('#obBtn').addEventListener('click', () => { settings.obOn = !settings.obOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
     $('#clearBtn').addEventListener('click', () => {
@@ -6878,7 +6951,7 @@ Usa só os números destes dados.`;
       setTimeout(() => { const e = $('#gateEmail'); if (e && !e.value) e.focus(); }, 50);
     });
   }
-  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary() };
+  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary(), _day: () => daySummary() };
 })();
 </script>
 <script>MSS.boot(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
