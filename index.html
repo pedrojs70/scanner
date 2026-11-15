@@ -270,10 +270,10 @@
   #npRev .bhead .sub { font-size:12.5px; color:var(--np-mu); margin-top:6px; }
   #npRev .bhead button { height:36px; padding:0 14px; border:1px solid var(--np-ink); background:var(--np-ink); color:var(--np-bg); border-radius:0; font:inherit; font-size:13.5px; cursor:pointer; }
   .revwrap { overflow-x:auto; }
-  .revtbl { width:100%; border-collapse:collapse; font-size:13.5px; }
-  .revtbl th { text-align:center; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--np-mu); padding:8px 6px; border-bottom:1px solid var(--np-ink); cursor:help; white-space:nowrap; }
+  .revtbl { width:100%; border-collapse:collapse; font-size:13px; }
+  .revtbl th { text-align:center; font-size:10.5px; letter-spacing:.03em; text-transform:uppercase; color:var(--np-mu); padding:8px 6px; border-bottom:1px solid var(--np-ink); cursor:help; white-space:nowrap; }
   .revtbl th:first-child, .revtbl td:first-child { text-align:left; }
-  .revtbl td { text-align:center; padding:8px 6px; border-bottom:1px solid var(--np-ln, #ddd); }
+  .revtbl td { text-align:center; padding:7px 4px; border-bottom:1px solid var(--np-ln, #ddd); }
   .revtbl td.ck { color:var(--np-green, #2e7d32); font-weight:700; }
   .revtbl .mu { color:var(--np-mu); font-weight:400; }
   .revtbl a { color:inherit; text-decoration:none; }
@@ -703,7 +703,7 @@
   #raToast { position:fixed; left:50%; bottom:18px; transform:translateX(-50%); z-index:210; background:#111; color:#fff; padding:10px 12px; display:flex; gap:10px; align-items:center; font-size:14px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
   #raToast button { background:#f5c518 !important; color:#111 !important; border:0 !important; font-weight:700; padding:6px 10px; border-radius:0; cursor:pointer; }
   #raToast #raX, #raToast #raX2 { background:transparent !important; color:#fff !important; font-weight:400; }
-  .revtbl td.nv { font-size:12px; line-height:1.25; color:var(--np-mu); min-width:74px; }
+  .revtbl td.nv { font-size:12px; line-height:1.25; color:var(--np-mu); }
   .revtbl td.nv .v { white-space:nowrap; }
   .revtbl td.nv .d { font-size:11px; opacity:.85; white-space:nowrap; }
   .revtbl td.nv.hit { color:var(--np-green, #2e7d32); font-weight:700; background:color-mix(in srgb, var(--np-green, #2e7d32) 8%, transparent); }
@@ -760,6 +760,7 @@
   .c4sw span { padding:4px 8px; color:var(--muted, #888); }
   .c4sw span.on { background:#f5c518; color:#111; }
   .np-chi { text-decoration:none !important; margin-right:6px; font-size:14px; }
+  .np-dot { font-size:15px; line-height:1; } .np-dot.g { color:#2e9e4f; } .np-dot.r { color:#d0453b; }
 </style>
 </head>
 <body>
@@ -795,7 +796,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 19h38</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 14nov 23h41</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -1111,6 +1112,10 @@
   <div class="algrp" data-g="rz"></div>
   <label class="chk alline"><input id="alRz" type="checkbox"> Avisar quando o preço se aproxima de uma zona onde Fibonacci diferentes coincidem (perna atual, perna anterior, tendência)</label>
   <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alRzTfs"></span><br><span class="muted small">Distância à zona:</span> <input id="alRzPct" type="number" step="0.1" min="0.2" max="20" style="width:64px"> %</div>
+
+  <h3 class="sethead">4d · Cruzamento EMA 8/21 <span class="muted small">(Diário, no fecho da vela)</span></h3>
+  <div class="algrp" data-g="ema"></div>
+  <label class="chk alline"><input id="alEma" type="checkbox"> Avisar quando a EMA 8 cruza a EMA 21 no Diário — 🟢 cruzamento de alta (bull: a 8 passa para cima da 21) ou 🔴 de baixa (bear: passa para baixo)</label>
 
   <h3 class="sethead">5 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
   <div class="algrp" data-g="sma"></div>
@@ -5588,10 +5593,10 @@
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false, rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false, rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2, emaOn: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true, fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true }, forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false }, };
-  const AL_CHK = { alRz: 'rzOn', alBrk: 'brkOn', alBrkBos: 'brkBos', alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true }, forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false }, };
+  const AL_CHK = { alEma: 'emaOn', alRz: 'rzOn', alBrk: 'brkOn', alBrkBos: 'brkBos', alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, ((settings.alerts || {}).forRv2 && (settings.alerts || {}).forR) || {}), forRv2: 1, brkTfs: ((settings.alerts || {}).brkTfs || AL_DEF.brkTfs).slice(), rzTfs: ((settings.alerts || {}).rzTfs || AL_DEF.rzTfs).slice(), nearTfsR: ((settings.alerts || {}).nearTfsR || AL_DEF.nearTfsR).slice(), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), fibTfs: ((settings.alerts || {}).fibTfs || AL_DEF.fibTfs).slice(), kcTfs: ((settings.alerts || {}).kcTfs || AL_DEF.kcTfs).slice(), revTfs: ((settings.alerts || {}).revTfs || AL_DEF.revTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : (Math.floor(m / 1440) === 1 ? 'há 1 dia' : `há ${Math.floor(m / 1440)} dias`); };
@@ -5649,7 +5654,7 @@ function motor_() {
     catch (e) { m.innerHTML = ''; }
   }
   // ---------- alertas por ativo ----------
-  const AK_FIX = [['brk', 'Quebra confirmada'], ['rz', 'Zona de reversão ⭐'], ['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
+  const AK_FIX = [['brk', 'Quebra confirmada'], ['rz', 'Zona de reversão ⭐'], ['ema', 'Cruzamento EMA 8/21 (Diário)'], ['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
   const alKeys = () => (settings.setups || []).filter((x) => x.on).map((x) => ['su:' + x.name, 'Setup · ' + x.name]).concat(AK_FIX);
   // o que vale hoje para um ativo (escolhas por ativo, senão as gerais)
   function alEff(A, sym) {
@@ -5657,7 +5662,7 @@ function motor_() {
     for (const [k] of alKeys()) {
       if (p[k] != null) { out[k] = !!p[k]; continue; }
       if (k.indexOf('su:') === 0) out[k] = !!A.setupOn && g.setup !== false && (A.setups || {})[k.slice(3)] !== false;
-      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' }[k]]) && g[k] !== false;
+      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' }[k]]) && g[k] !== false;
     }
     return out;
   }
@@ -6245,11 +6250,18 @@ ${AI_DAY_FORMAT}`;
   }
   function npSetFilter(f) { npFilter = f; document.querySelectorAll('#npFilters button').forEach((b) => b.classList.toggle('on', b.dataset.f === f)); npRenderFeed(); }
   // ---------- Reversões prováveis: ativos em zona de correção (≥ 50%) com tudo o que a app vê a favor da reversão — sem depender do gatilho ----------
+  // EMA 8/21 do Diário (informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo; diz há quantas velas foi o último cruzamento
+  function emaD(dm) {
+    const d = dm && dm['1d']; if (!d || !d.closed || d.closed.length < 30) return null;
+    if (d._ema && d._ema.n === d.closed.length) return d._ema;
+    const cl = d.closed.map((c) => c.c), a = emaOf(cl, 8), b = emaOf(cl, 21), n = cl.length, sg = (i) => Math.sign(a[i] - b[i]);
+    let ago = 0; for (let i = n - 1; i > 21 && sg(i) === sg(n - 1); i--) ago++;
+    return (d._ema = { n, up: a[n - 1] > b[n - 1], e8: a[n - 1], e21: b[n - 1], ago });
+  }
+  const emaDot = (dm) => { const e = emaD(dm); return e ? `<span class="np-dot ${e.up ? 'g' : 'r'}" title="Diário: EMA 8 ${e.up ? 'acima' : 'abaixo'} da EMA 21 (${fmt(e.e8)} / ${fmt(e.e21)}) — cruzou há ${e.ago} vela${e.ago === 1 ? '' : 's'}">●</span>` : '<span class="mu">—</span>'; };
   const REV_TFS = ['1h', '4h', '1d', '1w', '1M'], REV_UP = { '1h': '4h', '4h': '1d', '1d': '1w', '1w': '1M', '1M': '3M' };
   const REV_COLS = [['fib', 'Fib', 'Fibonacci da perna atual deste timeframe. Em cima: a entrada ótima [0,618–0,65]; em baixo: o preço da 0,786. ✔ quando a retração está entre 61,8% e 80% (ou numa ⭐ zona de reversão)'], ['star', '⭐', 'Um alvo Fibonacci do timeframe de baixo cai na zona'], ['fvg', 'FVG', 'FVG por preencher dentro da zona (entre os 50% e a origem da perna) — só a parte que falta preencher; um FVG preenchido a 75% ou mais já não conta. Em baixo: o timeframe, a data e a distância'],
-    ['sma', 'SMA 200', 'Preço a menos de 2% da SMA 200 deste timeframe'], ['kc', 'Keltner', 'Uma das 3 últimas velas passou a banda de ±3 ATR do lado da correção'], ['div', 'Diverg.', 'Divergência RSI ativa no sentido da reversão'],
-    ['sw', '💧 Sweep', 'Liquidez varrida (sombra além de um topo/fundo e fecho de volta) nas últimas 6 velas, aqui ou no timeframe de baixo'], ['ln', 'Linha', 'A linha ou canal teu mais perto (só até 15% do preço); ✔ quando está a menos da distância escolhida nessa linha'],
-    ['fr', 'Força rel.', 'Pelos teus rácios onde este ativo entra, pela regra das zonas: um rácio está A FAVOR se estiver em zona do lado que ajuda este trade (ou já tiver quebrado a favor) e CONTRA se estiver em zona do lado oposto; fora de zona não conta. ✔ quando há mais a favor do que contra'],
+    ['sma', 'SMA 200', 'Preço a menos de 2% da SMA 200 deste timeframe'], ['div', 'Diverg.', 'Divergência RSI ativa neste timeframe: 🟢 de alta (positiva) · 🔴 de baixa (negativa). Conta para o score só quando é a favor da reversão'], ['ln', 'Linha', 'A linha ou canal teu mais perto (só até 15% do preço); ✔ quando está a menos da distância escolhida nessa linha'],
     ['ctx', 'Contexto', 'O timeframe de cima: zona dupla (também em zona do mesmo lado — reforça) · a favor, sem zona (vai no mesmo sentido) · ⚠ contra, com margem (vai ao contrário mas ainda longe da zona dele) · ⛔ bloqueado (está em zona do lado oposto)']];
   let npRevTf = 'all';
   // força relativa pela regra das zonas: rácios onde o ativo entra, em zona do lado que ajuda (ou já quebrado a favor) = a favor; em zona do lado oposto = contra
@@ -6273,19 +6285,19 @@ ${AI_DAY_FORMAT}`;
         const V = (k, v, sub, title) => { val[k] = { v, d: sub || '', t: title || '' }; };
         if (f) {
           const r = FB.retrOf(f, price) * 100, zc = (d.fibConf || []).find((z) => price >= z.lo * 0.98 && price <= z.hi * 1.02); ok.fib = (r >= 61.8 && r <= 80) || !!zc;   // ⭐ zona de reversão (Fibonacci que coincidem) também conta
-          V('fib', zc ? `⭐ [${F(zc.lo)}–${F(zc.hi)}]` : `[${F(f.entry.lo)}–${F(f.entry.hi)}]`, zc ? `zona de reversão: ${zc.parts.join(' + ')}` : F(f.deep), 'Entrada ótima 0,618–0,65 (✔ entre 61,8% e 80%) ou ⭐ zona de reversão: preço a menos de 2% de uma zona onde Fibonacci diferentes coincidem');
+          V('fib', zc ? `⭐ [${F(zc.lo)}–${F(zc.hi)}]` : `[${F(f.entry.lo)}–${F(f.entry.hi)}]`, zc ? '' : F(f.deep), zc ? `⭐ zona de reversão: ${zc.parts.join(' + ')}` : `Em cima: entrada ótima 0,618–0,65 · em baixo: 0,786 · retração ${pct(r)}`);
           const m50 = f.A > 0 && f.B > 0 ? Math.exp((Math.log(f.A) + Math.log(f.B)) / 2) : (f.A + f.B) / 2, zl = Math.min(f.A, m50), zh = Math.max(f.A, m50);
           const fv = [...new Set([...(d.ext.res.fvgs || []), ...(d.int.res.fvgs || [])])].filter((x) => x.dir === dir && x.filled == null && x.top > zl && x.bot < zh)
             .sort((a, b) => Math.abs((a.top + a.bot) / 2 - price) - Math.abs((b.top + b.bot) / 2 - price))[0];
           ok.fvg = !!fv; if (fv) { const edge = price > fv.top ? fv.top : price < fv.bot ? fv.bot : price, ct = d.closed[fv.mid] && new Date(d.closed[fv.mid].t), dt = ct ? `${String(ct.getMonth() + 1).padStart(2, '0')}/${ct.getFullYear()}` : '';
-            V('fvg', `${F(fv.bot)}–${F(fv.top)}`, `${tfLabel(id)}${dt ? ' · de ' + dt : ''} · ${edge === price ? 'o preço está dentro' : D(edge, price)}`, fv.fillPct > 0.02 ? `já preenchido ${Math.round(fv.fillPct * 100)}%: mostra só a parte que falta` : ''); }
+            V('fvg', `${F(fv.bot)}–${F(fv.top)}`, '', `FVG ${tfLabel(id)}${dt ? ' · de ' + dt : ''} · ${edge === price ? 'o preço está dentro' : D(edge, price)}${fv.fillPct > 0.02 ? ` · já preenchido ${Math.round(fv.fillPct * 100)}% (mostra só a parte que falta)` : ''}`); }
           V('inv', F(f.A), D(f.A, price));
         }
-        const c = starOf(dm, id); ok.star = !!c; if (c) V('star', `${F(c.lo)}–${F(c.hi)}`, `${c.tgt} do ${tfLabel(c.tf)}`);
+        const c = starOf(dm, id); ok.star = !!c; if (c) V('star', `${F(c.lo)}–${F(c.hi)}`, '', `${c.tgt} do ${tfLabel(c.tf)}`);
         const sm = smaOfTf(d, 200); ok.sma = !!(sm && Math.abs(price - sm) / sm <= 0.02); if (sm) V('sma', F(sm), D(sm, price));
         try { const cl = d.closed.map((x) => x.c), m = emaOf(cl, 20).pop(), a = atrOf(d.closed, 10).pop(), last3 = d.closed.slice(-3);
           if (m && a) { const band = dir === 1 ? m - 3 * a : m + 3 * a; ok.kc = dir === 1 ? Math.min(...last3.map((x) => x.l)) <= band : Math.max(...last3.map((x) => x.h)) >= band; V('kc', `${dir === 1 ? '−' : '+'}3ATR ${F(band)}`, D(band, price)); } } catch (e) {}
-        try { const v = divergences(d).filter((x) => x.live && x.dir === dir).pop(); ok.div = !!v; if (v) V('div', `RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}`, `há ${d.closed.length - 1 - v.b.i} velas`); } catch (e) {}
+        try { const v = divergences(d).filter((x) => x.live).pop(); ok.div = !!(v && v.dir === dir); if (v) { V('div', '●', '', `Divergência RSI ${v.dir === 1 ? 'de alta (positiva)' : 'de baixa (negativa)'}: ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}, há ${d.closed.length - 1 - v.b.i} velas${v.dir === dir ? ' — a favor' : ' — contra este trade'}`); val.div.dot = v.dir === 1 ? 'g' : 'r'; } } catch (e) {}
         const swOf = (x) => x && [...(x.int.res.sweeps || []), ...(x.ext.res.sweeps || [])].filter((w) => !w.invalid && w.dir === -dir && w.i >= x.closed.length - 6).sort((a, b) => b.i - a.i)[0];
         const lo = FB.NEXT[id], w1 = swOf(d), w2 = swOf(dm[lo]), w = w1 || w2, wx = w1 ? d : dm[lo];
         ok.sw = !!w; if (w) V('sw', `varreu ${F(w.level)}`, `${tfLabel(w1 ? id : lo)} · há ${wx.closed.length - 1 - w.i} velas`);
@@ -6297,11 +6309,11 @@ ${AI_DAY_FORMAT}`;
         if (!isRatio(s)) { const fr = revFr(s, dir); if (fr.n) { const cut = (a) => a.slice(0, 3).map((x) => x.o).join(', ') + (a.length > 3 ? ` +${a.length - 3}` : ''), tl = (a) => a.map((x) => `${x.o} (${x.t})`).join('\n') || '—';
           ok.fr = fr.fav.length > fr.con.length; if (fr.fav.length || fr.con.length) V('fr', fr.fav.length ? 'a favor: ' + cut(fr.fav) : 'a favor: nenhum', fr.con.length ? 'contra: ' + cut(fr.con) : '', `A FAVOR:\n${tl(fr.fav)}\n\nCONTRA:\n${tl(fr.con)}\n\n(${fr.n} rácio${fr.n === 1 ? '' : 's'} com ${nm(s)}; os que estão fora de zona não contam)`); } }
         const up = dm[K4(REV_UP[id])], us = up && up.ext.snap; ok.ctx = false;
-        if (us && us.trend) { const L = tfLabel(REV_UP[id]), uz = us.pullback >= 50 && us.pullback <= 100, ar = us.trend === 1 ? '▲' : '▼';
-          if (us.trend === dir && uz) { ok.ctx = true; V('ctx', `zona dupla`, `${L} ${ar} também em zona de ${dir === 1 ? 'compra' : 'venda'} (${pct(us.pullback)})`, `O ${L} também está em zona do mesmo lado: as duas zonas somam-se — é das reversões mais fortes`); }
-          else if (us.trend === dir) { ok.ctx = true; V('ctx', `a favor, sem zona`, `${L} ${ar} · correção ${pct(us.pullback)}`, `O ${L} vai no mesmo sentido, mas não está em zona: a reversão aqui é a favor da tendência do ${L}`); }
-          else if (uz) V('ctx', `⛔ bloqueado`, `${L} ${ar} em zona de ${us.trend === 1 ? 'compra' : 'venda'} (${pct(us.pullback)})`, `O ${L} está em zona do lado oposto: pela tua regra manda o timeframe maior — este trade fica bloqueado`);
-          else { const z50 = us.protected > 0 && us.extreme > 0 ? (us.protected + us.extreme) / 2 : null; V('ctx', `⚠ contra, com margem`, `${L} ${ar} · correção ${pct(us.pullback)}${z50 ? ` · zona dele a ${D(z50, price)}` : ''}`, `O ${L} vai ao contrário e ainda não está em zona (começa nos 50%${z50 ? ', em ' + F(z50) : ''}): o trade é contra o ${L}, com o alvo na zona dele`); } }
+        if (us && us.trend) { const L = { '3M': '3M', '1M': 'M', '1w': 'S', '1d': 'D', '4h': '4H' }[REV_UP[id]] || tfLabel(REV_UP[id]), uz = us.pullback >= 50 && us.pullback <= 100, ar = us.trend === 1 ? '▲' : '▼';
+          if (us.trend === dir && uz) { ok.ctx = true; V('ctx', `zona dupla`, `${L} ${ar} ${pct(us.pullback)}`, `O ${L} também está em zona do mesmo lado: as duas zonas somam-se — é das reversões mais fortes`); }
+          else if (us.trend === dir) { ok.ctx = true; V('ctx', `a favor, sem zona`, `${L} ${ar} ${pct(us.pullback)}`, `O ${L} vai no mesmo sentido, mas não está em zona: a reversão aqui é a favor da tendência do ${L}`); }
+          else if (uz) V('ctx', `⛔ bloqueado`, `${L} ${ar} ${pct(us.pullback)}`, `O ${L} está em zona do lado oposto: pela tua regra manda o timeframe maior — este trade fica bloqueado`);
+          else { const z50 = us.protected > 0 && us.extreme > 0 ? (us.protected + us.extreme) / 2 : null; V('ctx', `⚠ contra, c/ margem`, `${L} ${ar} ${pct(us.pullback)}${z50 ? ` · zona a ${D(z50, price)}` : ''}`, `O ${L} vai ao contrário e ainda não está em zona (começa nos 50%${z50 ? ', em ' + F(z50) : ''}): o trade é contra o ${L}, com o alvo na zona dele`); } }
         const su = (settings.setups || []).find((x) => x.on && x.zone === id), ev = su ? favSetup(s, su) : null;
         const gat = !ev ? '—' : ev.rank === 4 ? '✔ pronto' : ev.rank === 3 ? '⚡ falta FVG' : ev.box ? '↔ lateral' : ev.rank === 2 ? '⏳ falta quebra' : '—';
         const score = REV_COLS.filter(([k]) => ok[k]).length;
@@ -6447,9 +6459,10 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
         <td>${chip(`${L(st.zone)} ${up ? '▲' : '▼'} ${pct(x.z.pullback)} ✔`, 'zone', x.deepTxt || '')}${x.deep ? `<div class="mu" style="font-size:11px">${up ? 'desconto' : 'prémio'} profundo</div>` : ''}</td>
         <td style="text-align:left">${chip(`${L(st.trig)} ${brk}`, 'ok')}<div class="mu" style="font-size:11px">${suAgoTxt(r.ago, st.trig)}</div></td>
         <td style="text-align:left">${chip(fvg ? '✔ FVG na quebra' : '✘ FVG', fvg ? 'ok' : '')}${x.sweep ? chip('💧 sweep antes', 'ok') : ''}${x.star ? chip(npEsc(/⭐/.test(x.star.txt || '') ? x.star.txt : '⭐ ' + (x.star.txt || 'zona de reversão')), 'ok wrap') : ''}</td>
+        <td>${emaDot((favData[r.s] || {}).tfs)}</td>
         <td style="text-align:left;font-size:12.5px">${npEsc(x.rsv.mode === 'rev' ? x.why.replace(/ — (à espera da quebra|o \S+ já está a favor).*$/, '') : x.why)}${x.deep && x.deepTxt ? `<div class="mu">${npEsc(x.deepTxt)}</div>` : ''}</td>
         </tr>`; };
-    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Contexto</th><th>Zona (≥ 50%)</th><th style="text-align:left">Quebra</th><th style="text-align:left">Extras</th><th style="text-align:left">Porquê</th></tr>';
+    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Contexto</th><th>Zona (≥ 50%)</th><th style="text-align:left">Quebra</th><th style="text-align:left">Extras</th><th title="EMA 8/21 do Diário (só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D</th><th style="text-align:left">Porquê</th></tr>';
     const wl = wait.slice(0, 12).map((r) => `<li><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a> · ${npEsc(r.st0.name)} ${r.x.dir === 1 ? '▲ Long' : '▼ Short'} — em zona de ${r.x.dir === 1 ? 'compra' : 'venda'} no ${L(r.x.st.zone)} (${pct(r.x.z.pullback)}); ${npEsc(r.b.txt)}</li>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Setups prontos</h2><div class="sub">${ready.length} pronto${ready.length === 1 ? '' : 's'} nos favoritos · pronto = em zona e a quebra já feita no timeframe de quebra (o FVG é extra) · a quebra mais recente primeiro · ${favProg || ''}</div></div></div>
       ${npFQBox('npSuQ', 'Procurar (ex.: ouro, GC=F)…')}
@@ -6472,17 +6485,17 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
     const all = revRows().filter((r) => npFavMatch(r.s, npFQ) && npKindOk(r.s, npKind)), list = all.filter((r) => npRevTf === 'all' || r.id === npRevTf);
     const cnt = (id) => all.filter((r) => id === 'all' || r.id === id).length, SH = { '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M' };
     const num = settings.revMode !== 'tick';
-    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th>' : ''}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de quebra (só informativo)">Quebra</th></tr>`;
-    const cellN = (r, k) => { const x = r.val[k]; if (!x) return `<td class="nv"><span class="mu">${k === 'fr' && isRatio(r.s) ? 'n/a' : '—'}</span></td>`; return `<td class="nv ${r.ok[k] ? 'hit' : ''}"${x.t ? ` title="${npEsc(x.t)}"` : ''}><div class="v">${npEsc(x.v)}</div>${x.d ? `<div class="d">${npEsc(x.d)}</div>` : ''}</td>`; };
+    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}<th title="EMA 8/21 do Diário (sempre do Diário, só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D</th>${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th>' : ''}<th title="Quantos sinais batem certo">Score</th><th title="Estado da quebra no timeframe de quebra (só informativo)">Quebra</th></tr>`;
+    const cellN = (r, k) => { const x = r.val[k]; if (x && x.dot) return `<td class="nv"><span class="np-dot ${x.dot}" title="${npEsc(x.t)}">●</span></td>`; if (!x) return `<td class="nv"><span class="mu">${k === 'fr' && isRatio(r.s) ? 'n/a' : '—'}</span></td>`; return `<td class="nv ${r.ok[k] ? 'hit' : ''}"${x.t ? ` title="${npEsc(x.t)}"` : ''}><div class="v">${npEsc(x.v)}</div>${x.d ? `<div class="d">${npEsc(x.d)}</div>` : ''}</td>`; };
     const cellT = (r, k) => `<td class="ck">${r.ok[k] ? '✔' : k === 'fr' && !r.fr ? '<span class="mu">n/a</span>' : '<span class="mu">·</span>'}</td>`;
     const body = list.map((r) => `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" class="np-chi" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico no ${tfLabel(r.id)}">📈</a><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px;margin-left:24px">${r.s}</div>` : ''}</td><td><b>${SH[r.id]}</b></td>
       <td style="color:${r.dir === 1 ? 'var(--np-green, #2e7d32)' : 'var(--np-red)'}">${r.dir === 1 ? '▲ Long' : '▼ Short'}</td><td>${pct(r.pull)}</td>
-      ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.map(([c]) => (num ? cellN : cellT)(r, c)).join('')}${num ? cellN(r, 'inv') : ''}
+      ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.map(([c]) => (num ? cellN : cellT)(r, c)).join('')}<td>${emaDot((favData[r.s] || {}).tfs)}</td>${num ? cellN(r, 'inv') : ''}
       <td><b>${r.score}/${REV_COLS.length}</b></td><td style="white-space:nowrap">${r.gat}</td></tr>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Reversões prováveis</h2><div class="sub">${all.length} zona${all.length === 1 ? '' : 's'} de correção (≥ 50%) nos favoritos · ordenado pelo número de sinais a favor · o gatilho é só informativo — passa o rato pelos títulos das colunas</div></div></div>
       ${npFQBox('npRevQ', 'Procurar (ex.: ouro, GC=F)…')}
       <div class="revbar"><div class="np-ff">${[['all', 'Todos'], ...REV_TFS.map((id) => [id, tfLabel(id)])].map(([id, t]) => `<button data-rt="${id}" class="${npRevTf === id ? 'on' : ''}">${t}<span>${cnt(id)}</span></button>`).join('')}</div><div class="np-kind revmode" role="group" aria-label="Ver"><button type="button" data-rmode="num" class="${num ? 'on' : ''}" title="Cada sinal com o nível e a distância ao preço">Numérico</button><button type="button" data-rmode="tick" class="${num ? '' : 'on'}" title="Só ✔ onde bate certo">Tick</button></div></div>
-      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + (num ? 9 : 7)}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
+      <div class="revwrap"><table class="revtbl">${head}${body || `<tr><td colspan="${REV_COLS.length + (num ? 10 : 8)}" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum favorito em zona de correção neste filtro.'}</td></tr>`}</table></div>`;
     npFQWire('npRevQ', npRenderRev0);
     box.querySelectorAll('[data-rmode]').forEach((b) => b.addEventListener('click', () => { settings.revMode = b.dataset.rmode; save('mss_settings4', settings); npRenderRev0(); }));
     box.querySelectorAll('[data-rt]').forEach((b) => b.addEventListener('click', () => { npRevTf = b.dataset.rt; npRenderRev0(); }));
@@ -6702,7 +6715,7 @@ Usa só os números destes dados.`;
     return out;
   }
   const BOARD_TFS = [['1M', 'M'], ['1w', 'S'], ['1d', 'D'], ['4h', '4H']];
-  const ALK = { rz: 'Zona de reversão ⭐', brk: 'Quebra confirmada', tgt: 'Perto do alvo', line: 'Linha / canal', setup: 'Setup', conf: 'Confirmação', rev: 'Reversão', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
+  const ALK = { ema: 'Cruzamento EMA 8/21', rz: 'Zona de reversão ⭐', brk: 'Quebra confirmada', tgt: 'Perto do alvo', line: 'Linha / canal', setup: 'Setup', conf: 'Confirmação', rev: 'Reversão', fvg: 'FVG', invalid: 'Invalidado', kz: 'Killzone', week: 'Liquidez', day: 'Liquidez', near: 'Perto da inversão', sma: 'SMA 200' };
   function npBoardRow(s) {
     const i = npInfo(s), f = i.f, T = (f && f.tfs) || {}, price = f && f.price, A = alCfg();
     const r = { s, price, chg: i.chg, rank: i.best ? i.best.rank * 1000 + (i.best.z.pullback || 0) : -1 };
@@ -6736,7 +6749,7 @@ Usa só os números destes dados.`;
     r.al = la ? `${agoTxt(la.at)}<div class="mu">${npEsc(ALK[la.kind] || la.kind)}</div>` : '<span class="mu">—</span>';
     return r;
   }
-  const BOARD_COLS = [['name', 'Ativo'], ['trend', 'Tendência principal'], ['setup', 'Setups'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['liq', 'Liquidez por varrer'], ['al', 'Último alerta']];
+  const BOARD_COLS = [['name', 'Ativo'], ['trend', 'Tendência principal'], ['setup', 'Setups'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['liq', 'Liquidez por varrer'], ['ema', 'EMA D'], ['al', 'Último alerta']];
   function npRenderBoard() { npFQKeep('npBoardQ', npRenderBoard0); }
   let npDqOnly = false;
   function npRenderBoard0() {
@@ -6753,13 +6766,13 @@ Usa só os números destes dados.`;
     else { const ord = npSorted(); list = rows.sort((a, b) => ord.indexOf(a.s) - ord.indexOf(b.s)); }
     let body = '', lastG = null;
     for (const r of list) {
-      if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="8">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
+      if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="9">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
       body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)} ${dqB(r.s)}</div>${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
-        <td data-l="${uniOn(settings) ? 'Estrutura' : 'Tendência principal'}"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
+        <td data-l="${uniOn(settings) ? 'Estrutura' : 'Tendência principal'}"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="EMA 8/21 Diário">${emaDot((favData[r.s] || {}).tfs)}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · ${dqAll.length ? `<a href="#" class="npDq" title="Verificação das velas das ações, ETFs, futuros e rácios (as cripto vêm da Binance)">velas: ${dqAll.length - dqW} ✔${dqW ? ` · ${dqW} ⚠` : ''}${npDqOnly ? ' (a mostrar só os ⚠ — carrega para ver todos)' : ''}</a> · ` : ''}carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''} · <a href="#" class="npReAll" title="Escolhe os favoritos a recriar em automático e com quantos Pontos (com cópia e Desfazer)">⟲ Recriar gráficos</a></div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select></div></div>
       ${npFQBox('npBoardQ', 'Procurar (ex.: ouro, GC=F)…')}
-      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${k === 'trend' && uniOn(settings) ? 'Estrutura' : t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="7" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
+      <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${k === 'trend' && uniOn(settings) ? 'Estrutura' : t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="8" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
       <div class="mu" style="margin-top:10px">Tendência principal: M = Mensal, S = Semanal, D = Diário, 4H — seta = sentido, % = correção (laranja acima de 78,6%). Perto da inversão: o limite mais perto entre esses timeframes (a vermelho dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     npFQWire('npBoardQ', npRenderBoard0);
     const setSort = (k) => { if (k === so) return; if (so !== 'name' || k !== 'name') settings.npBoardPrevSort = so; settings.npBoardSort = k; save('mss_settings4', settings); npRenderBoard(); };
@@ -7277,7 +7290,7 @@ Usa só os números destes dados.`;
       setTimeout(() => { const e = $('#gateEmail'); if (e && !e.value) e.focus(); }, 50);
     });
   }
-  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary(), _day: () => daySummary(), _scan: (f) => scanFavs(f), _aiM: (a) => aiMultiBrief(a), _aiJ: (a, c) => aiJointBrief(a, c) };
+  window.MSS = { init, boot, _data: data, _recompute: recomputeAll, _dbg: () => ({ chart, candleSeries, drawState }), _ai: () => aiSummary(), _day: () => daySummary(), _scan: (f) => scanFavs(f), _aiM: (a) => aiMultiBrief(a), _aiJ: (a, c) => aiJointBrief(a, c), _openAl: () => openAlerts() };
 })();
 </script>
 <script>MSS.boot(); if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});</script>
