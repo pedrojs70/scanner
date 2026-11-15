@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-14T23:41:23.611Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-15T17:12:52.065Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -930,24 +930,32 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'], rz: ['rzOn'], ema: ['emaOn'] };
   const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
-  function effA(A, sym) {
+  // WATCH LIST: os ativos vigiados usam as definições PRIORITÁRIAS (A.pri.on — mesmas chaves das escolhas por ativo), que substituem as normais
+  const isW = (S, sym) => !!(S && (S.watch || []).indexOf(sym) >= 0 && (S.favs || []).indexOf(sym) >= 0);
+  function applyP(o, p) {
+    const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
+    for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
+    if (p.week === false) { o.weekOn = false; o.dayOn = false; } else if (p.week === true && !o.weekOn && !o.dayOn) { o.weekOn = true; o.dayOn = true; }
+    const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
+    if (sus.length) { o.setups = Object.assign({}, o.setups); sus.forEach((k) => { o.setups[k.slice(3)] = !!p[k]; }); o.setupOn = sus.some((k) => p[k]); }
+    if (p.pos != null) o.posOn = !!p.pos;
+  }
+  function effA(A, sym, S) {
     const r = /^[^/\s]+\/[^/\s]+$/.test(String(sym || '')), g = Object.assign({}, r ? A_DEF.forR : A_DEF.forA, (r ? (A.forRv2 ? A.forR : null) : A.forA) || {}), o = Object.assign({}, A);
     if (r) o.nearTfs = (A.nearTfsR || A_DEF.nearTfsR).slice();   // rácios: timeframes próprios no Perto da inversão
     for (const k in GRP_KEYS) if (g[k] === false) GRP_KEYS[k].forEach((x) => { o[x] = false; });
     // escolhas por ativo (página Alertas → Por ativo): mandam sobre o resto
     const p = A.per && A.per[sym];
-    if (p) {
-      const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
-      for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
-      if (p.week === false) { o.weekOn = false; o.dayOn = false; }   // ligado: semana/dia conforme os Ajustes
-      const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
-      if (sus.length) { o.setups = Object.assign({}, o.setups); sus.forEach((k) => { o.setups[k.slice(3)] = !!p[k]; }); o.setupOn = sus.some((k) => p[k]); }
-    }
+    if (p) { const q = Object.assign({}, p); if (q.week === true) delete q.week; applyP(o, q); }
+    // watch list: as definições prioritárias substituem tudo o resto para este ativo
+    o._pri = isW(S, sym); o.posOn = o.posOn !== false;
+    if (o._pri && A.pri && A.pri.on) applyP(o, A.pri.on);
     return o;
   }
   // este ativo tem algum alerta ligado? (senão o vigia nem o analisa)
   function anyOn(A, sym, S) {
-    const e = effA(A, sym), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
+    if (isW(S, sym) || ((S && S.pos) || []).some((p) => p.sym === sym)) return true;
+    const e = effA(A, sym, S), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
     const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
     return !!(su || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
@@ -1207,6 +1215,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   // timeframes de que os alertas precisam
   function neededTfs(S, A) {
     const s = new Set();
+    if (!A._np && A.pri && A.pri.on && (S.watch || []).length) { const B = Object.assign({}, A, { _np: 1 }); applyP(B, A.pri.on); neededTfs(S, B).forEach((id) => s.add(id)); }
+    if ((S.pos || []).length) ['1M', '1w', '1d'].concat((S.pos || []).map((p) => p.zone), (S.pos || []).map((p) => p.trig)).filter(Boolean).forEach((id) => s.add(id === '4hc' ? '4h' : id));
     if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) { s.add(FB.NEXT[x.zone]); if (FB.NEXT[FB.NEXT[x.zone]]) s.add(FB.NEXT[FB.NEXT[x.zone]]); } });
     if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) lnTfs(l).forEach((id) => s.add(id)); }));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
@@ -1543,6 +1553,28 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
   }
 
+  // posições abertas (declaradas na app): o que está a acontecer contra / a favor — avisos só uma vez por acontecimento
+  function posAlerts(sym, dm, P, st, now, out) {
+    const Z = (id) => (id === '4h' && dm['4hc'] ? '4hc' : id), anyD = dm['1d'] || dm[Object.keys(dm)[0]], px = (P[0] && dm[P[0].trig] && dm[P[0].trig].price) || (anyD && anyD.price);
+    if (!px) return;
+    for (const p of P) {
+      const side = p.dir === 1 ? 'LONG' : 'SHORT', head = `📌 <b>Posição ${side} · ${esc(sym)}</b> (entrada ${fmt(p.px)} · ${pctS(p.dir * (px - p.px) / p.px * 100)})`;
+      const say = (key, line) => { if (st.seen[key]) return; st.seen[key] = now; if (st.silent) return; out.push({ kind: 'pos', sym, text: head + '\n' + line }); };
+      for (const id of ['1M', '1w', '1d', Z(p.zone)]) { const d = dm[id], z = d && d.ext && d.ext.snap; if (!z || z.trend !== -p.dir || !(z.pullback >= 50 && z.pullback <= 100)) continue;
+        say(`pz|${p.id}|${id}|${z.extreme}`, `⚠ O preço entrou em zona de ${p.dir === 1 ? 'VENDA' : 'COMPRA'} no ${LBL[id] || id} (correção ${z.pullback.toFixed(1).replace('.', ',')}%) — contra a tua posição.`); }
+      const tz = dm[p.trig] && dm[p.trig].ext && dm[p.trig].ext.snap, lb = tz && tz.lastBreak;
+      if (tz && tz.trend === -p.dir && lb) say(`pb|${p.id}|${p.trig}|${lb.level}`, `⚠ Quebra contra no ${LBL[p.trig] || p.trig}: ${lb.type || 'quebra'} ${p.dir === 1 ? 'para baixo' : 'para cima'}${lb.level ? ' em ' + fmt(lb.level) : ''}.`);
+      const zd = dm[Z(p.zone)], zz = zd && zd.ext && zd.ext.snap;
+      if (zz && zz.trend === p.dir) {
+        if (zz.extreme && (p.dir === 1 ? px >= zz.extreme * 0.997 : px <= zz.extreme * 1.003)) say(`pe|${p.id}|${zz.extreme}`, `🎯 Chegou ao ${p.dir === 1 ? 'topo' : 'fundo'} da perna do ${LBL[Z(p.zone)] || p.zone} (${fmt(zz.extreme)}).`);
+        if (zz.protected && Math.abs(zz.protected - px) / px < 0.02) say(`pl|${p.id}|${zz.protected}`, `⚠ Perto do limite da zona do ${LBL[Z(p.zone)] || p.zone} (${fmt(zz.protected)}, ${pctS((zz.protected - px) / px * 100)}): um fecho para lá dele invalida a zona.`);
+      }
+      if (p.stop && Math.abs(p.stop - px) / px < 0.01) say(`ps|${p.id}`, `⚠ Perto do teu stop (${fmt(p.stop)}, ${pctS((p.stop - px) / px * 100)}).`);
+      if (p.tgt && Math.abs(p.tgt - px) / px < 0.01) say(`pt|${p.id}`, `🎯 Perto do teu alvo (${fmt(p.tgt)}, ${pctS((p.tgt - px) / px * 100)}).`);
+    }
+  }
+  const pctS = (v) => (v >= 0 ? '+' : '') + v.toFixed(1).replace('.', ',') + '%';
+
   // cruzamento da EMA 8 com a EMA 21 no fecho da vela diária (de alta ou de baixa)
   function emaArr(v, n) { const o = new Array(v.length).fill(null); if (v.length < n) return o; let e = 0; for (let i = 0; i < n; i++) e += v[i]; e /= n; o[n - 1] = e; const k = 2 / (n + 1); for (let i = n; i < v.length; i++) { e = v[i] * k + e * (1 - k); o[i] = e; } return o; }
   function emaAlerts(sym, dm, A, st, now, out) {
@@ -1802,13 +1834,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     return B;
   }
   function evaluateAsset(sym, raw, S, A0, edits, st, now) {
-    const A = monA(effA(A0, sym), S, sym), out = [], dm = {};
+    const A = monA(effA(A0, sym, S), S, sym), out = [], dm = {}, myPos = ((S && S.pos) || []).filter((p) => p.sym === sym);
     curRaw = raw; curS = S;   // linhas medidas nas velas deste ativo
     const setupTfs = new Set();
     (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { setupTfs.add(x.zone); setupTfs.add(x.trig); const c = ctxOf(x); if (c) { setupTfs.add(c); if (FB && FB.NEXT[c] && FB.NEXT[FB.NEXT[c]]) setupTfs.add(FB.NEXT[FB.NEXT[c]]); if (FB && FB.CTX_UP[c]) setupTfs.add(FB.CTX_UP[c]); } if ((TF_MS[x.zone] || 0) < TF_MS['1M']) setupTfs.add('1M'); });
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
     if (A.brkOn) (A.brkTfs || A_DEF.brkTfs).forEach((id) => setupTfs.add(id));
     if (A.emaOn) setupTfs.add('1d');
+    if (A.posOn && myPos.length) myPos.forEach((p) => { ['1M', '1w', '1d'].forEach((id) => setupTfs.add(id)); if (p.zone) setupTfs.add(p.zone); if (p.trig) setupTfs.add(p.trig); });
     if (A.rzOn) (A.rzTfs || A_DEF.rzTfs).forEach((id) => setupTfs.add(id));
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
     if (A.revOn) (A.revTfs || []).forEach((id) => { setupTfs.add(id); if (FB && FB.NEXT[id]) setupTfs.add(FB.NEXT[id]); if (REV_UP[id] && REV_UP[id] !== '3M') setupTfs.add(REV_UP[id]); });
@@ -1823,6 +1856,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     weekAlerts(sym, raw['1h'], raw['5m'], S, A, st, now, out);
     brkAlerts(sym, dm, A, st, now, out);
     emaAlerts(sym, dm, A, st, now, out);
+    if (A.posOn && myPos.length) posAlerts(sym, dm, myPos, st, now, out);
     rzAlerts(sym, dm, A, st, now, out);
     nearAlerts(sym, dm, A, st, now, out);
     smaAlerts(sym, raw, dm, A, st, now, out);
@@ -1831,6 +1865,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     revAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
+    if (A._pri) out.forEach((m) => { if (m.text && m.text.indexOf('ALERTA PRIORITÁRIO') < 0) m.text = '🚨 <b>ALERTA PRIORITÁRIO</b>\n' + m.text; m.pri = true; });
     return out;
   }
   function pruneState(st, now) {
