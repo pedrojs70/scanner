@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-15T17:12:52.065Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-16T11:00:18.903Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -852,10 +852,12 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const c = (obs || []).filter((o) => o.dir === dir && (dir === 1 ? o.top < price && (!(limit > 0) || o.top >= limit * 0.999) : o.bot > price && (!(limit > 0) || o.bot <= limit * 1.001)));
     return c.sort((a, b) => (dir === 1 ? b.top - a.top : a.bot - b.bot))[0] || null;
   }
-  // ---------- regra dos setups (a do Richy): sem zona de reversão não há trade ----------
-  // 1) o timeframe de contexto está em zona (correção ≥ 50%, até ao limite) → setup de REVERSÃO a favor dele; a quebra confirma-se no timeframe de quebra do próprio setup (Longo prazo → 4H, Swing → 1H)
-  // 2) senão, o timeframe da zona está em zona → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
-  // 3) nenhum em zona → sem trade. Em qualquer caso, um timeframe maior em zona no sentido contrário bloqueia (manda o maior)
+  // ---------- regra dos setups (a do Richy): sem zona não há trade ----------
+  // Cada setup tem SEMPRE a mesma sequência (contexto · zona → quebra) — a app nunca sobe a zona.
+  // 1) o timeframe da zona está em zona (correção ≥ 50%, até ao limite) → setup a favor dele; se for contra o contexto, só vale porque o contexto ainda tem margem (não está em zona)
+  // 2) bloqueio: um dos DOIS timeframes imediatamente acima da zona (nunca acima do Mensal) está em zona no sentido contrário → sem trade (manda o maior)
+  // 3) a zona não está em zona mas o contexto está → 'ctxzone': sem trade aqui, possível reversão do contexto (ver Reversões)
+  // 4) nenhum em zona → sem trade
   const CTX_UP = { '1M': '6M', '1w': '1M', '1d': '1w', '4h': '1d', '4hc': '1d', '1h': '4h', '15m': '1h', '5m': '15m' };
   const ORDER = ['1Y', '6M', '3M', '1M', '1w', '1d', '4h', '4hc', '1h', '15m', '5m'];
   const inZone = (s) => !!(s && s.trend && s.pullback >= 50 && s.pullback <= 100);
@@ -865,16 +867,15 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     cid = ZID(dm, cid); su = Object.assign({}, su, { zone: ZID(dm, su.zone) });
     const P = (id) => id && dm[id] && dm[id].ext && dm[id].ext.snap, has = (id) => id && dm[id] && dm[id].ext && (!ok || ok(id === '4hc' ? '4h' : id));
     const cx = P(cid), z = P(su.zone);
-    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && !(id === '4h' && dm['4hc']) && has(id) && inZone(P(id)) && P(id).trend !== dir)[0];   // até ao Mensal
-    if (inZone(cx)) {
-      const t2 = NEXT[NEXT[cid]], trig = has(su.trig) ? su.trig : has(t2) ? t2 : su.trig, dir = cx.trend, bl = above(cid, dir);
-      return { mode: bl ? 'blocked' : 'rev', dir, zone: cid, trig, ctx: CTX_UP[cid] || null, base: cid, block: bl || null };
-    }
-    if (!z || !z.trend) return null;
-    if (inZone(z)) {
+    // os dois timeframes imediatamente acima da zona (até ao Mensal) que estão em zona do lado contrário
+    const above = (tf, dir) => ORDER.slice(Math.max(ORDER.indexOf('1M'), 0), ORDER.indexOf(tf)).filter((id) => id !== tf && !(id === '4h' && dm['4hc']) && has(id)).slice(-2).filter((id) => inZone(P(id)) && P(id).trend !== dir)[0];
+    const cxz = inZone(cx);
+    if (z && z.trend && inZone(z)) {
       const dir = z.trend, bl = above(su.zone, dir), m = cx && cx.trend && cx.trend !== dir ? 'counter' : 'with';
-      return { mode: bl ? 'blocked' : m, dir, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone, block: bl || null, room: m === 'counter' && cx.levels ? cx.levels[50] : null };
+      return { mode: bl ? 'blocked' : m, dir, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone, block: bl || null, room: m === 'counter' && cx.levels ? cx.levels[50] : null, ctxZone: cxz };
     }
+    if (cxz) return { mode: 'ctxzone', dir: cx.trend, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone, ctxZone: true };
+    if (!z || !z.trend) return null;
     return { mode: 'none', dir: (cx && cx.trend) || z.trend, zone: su.zone, trig: su.trig, ctx: cid, base: su.zone };
   }
   // retração (log) de um preço numa Fibonacci: 0 em B, 1 em A
@@ -1321,7 +1322,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const vela = lb.candle === 'forte' ? 'vela forte' : lb.candle === 'fraca' ? 'vela fraca' : 'vela normal';
       const vol = lb.volRatio ? `vol ${lb.volRatio.toFixed(1).replace('.', ',')}×${lb.volume === 'sim' ? ' (alto)' : ''}` : '';
       const fecho = lb.closeAtr == null ? '' : lb.closeTight ? 'fecho colado ⚠' : `fecho ${lb.closeAtr.toFixed(1).replace('.', ',')} ATR além`;
-      const ctxTxt = !(cx && cx.trend) ? 'sem dados' : ctxFav ? (cx.pullback > 78.6 ? `a favor, mas fundo (${pct(cx.pullback)}) — perto de virar` : 'a favor') : `contra (${pct(cx.pullback)})`;
+      const ctxTxt = !(cx && cx.trend) ? 'sem dados' : ctxFav ? (cx.pullback > 78.6 ? `✔ a favor · ${LBL[cid]} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)} — fundo, perto de virar` : `✔ a favor · ${LBL[cid]} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}`) : `⚠ contra, com margem · ${LBL[cid]} ${cx.trend === 1 ? '▲' : '▼'} ${pct(cx.pullback)}${rsv.room ? ' — alvo na zona dele (' + fmt(rsv.room) + ')' : ''}`;
       // 💧 a quebra veio depois de um sweep do lado oposto (até 20 velas antes), como na app
       const swept = (dt.int.res.sweeps || []).some((sw) => !sw.invalid && sw.dir === -lb.dir && sw.i <= lb.i && lb.i - sw.i <= 20);
       const conf = confluence(dm, [...new Set([su.zone, cid].filter(Boolean))], dt.price).concat(lineConf(S, sym, dt.price, now));
@@ -1332,12 +1333,11 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       const xs = ds && ds.ext && (dt.uni || !ds.uni) ? ds.ext.snap : null, xb = xs && xs.lastBreak, zx = dz.ext.res.state && dz.ext.res.state.ext, scl = ds ? ds.closed : cl;
       const strong = !!(xb && xb.dir === dir && xs.trend === dir && scl[xb.i] && (!zx || !dz.closed[zx.i] || scl[xb.i].t >= dz.closed[zx.i].t));
       const lines = [
-        `${up ? '🟢' : '🔴'} <b>${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
+        `${up ? '🟢' : '🔴'} <b>PRONTO · ${side} · ${esc(su.name)} · ${esc(sym)}</b>${rsv.mode === 'counter' && cx ? ' ⚠ contra o ' + LBL[cid] : ''}`,
         `Zona ${LBL[su.zone]}: ${up ? 'Zona de Long' : 'Zona de Short'} · correção ${pct(z.pullback)}${z.pullback > 78.6 ? (() => { const ob = FB && FB.nextOB ? FB.nextOB(dz.obs, dir, dz.price, z.protected) : null; return ` · ${up ? 'desconto' : 'prémio'} profundo${ob ? (ob.inside ? ` · dentro do order block ${fmt(ob.bot)}–${fmt(ob.top)}` : ` · possível ida ao order block em ${fmt(ob.bot)}–${fmt(ob.top)}`) : ''}`; })() : ''}`,
-        rsv.mode === 'rev' ? `Reversão: o ${LBL[su.zone]} está em zona e o ${LBL[su.trig]} quebrou ${up ? 'para cima' : 'para baixo'}` : rsv.mode === 'counter' ? `Contra o ${LBL[rsv.ctx]}, que ainda tem margem até à zona dele${rsv.room ? ' (' + fmt(rsv.room) + ')' : ''}` : '',
         lb.box ? `Gatilho ${LBL[su.trig]}: quebrou a lateralização ${up ? 'para cima' : 'para baixo'} — caixa ${fmt(lb.box.lo)} – ${fmt(lb.box.hi)} (${lb.box.bars} velas), fecho ${fmt(bc.c)}` : `Gatilho ${LBL[su.trig]}: ${lb.type} ${up ? 'para cima' : 'para baixo'} em ${fmt(lb.level)} (fecho ${fmt(bc.c)})`,
         `Extra: ${[swept ? '💧 depois de sweep' : '', fvgTxt, vela, vol, fecho].filter(Boolean).join(' · ')}`,
-        `Contexto ${cid ? '(' + LBL[cid] + ')' : ''}: ${ctxTxt}`,
+        `Contexto: ${ctxTxt}`,
       ].filter((x) => x !== '');
       if (strong) lines.splice(3, 0, dt.uni ? `💪 Quebra forte: a estrutura do ${LBL[sTf]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})` : `💪 Quebra forte: a tendência principal do ${LBL[su.trig]} também quebrou a favor (${xb.type} em ${fmt(xb.level)})`);
       if (conf.length) lines.push(`Confluência: ${conf.join(' · ')}`);
