@@ -784,7 +784,7 @@
   .c4sw span { padding:4px 8px; color:var(--muted, #888); }
   .c4sw span.on { background:#f5c518; color:#111; }
   .np-chi { text-decoration:none !important; margin-right:6px; font-size:14px; }
-  .np-dot { font-size:15px; line-height:1; } .np-dot.g { color:#2e9e4f; } .np-dot.r { color:#d0453b; }
+  .np-dot { font-size:15px; line-height:1; } .np-dot.g { color:var(--c-up, #2e9e4f); } .np-dot.r { color:var(--c-dn, #d0453b); } .np-dot.g, .np-dot.r { width:auto; height:auto; background:none; border-radius:0; }
   .alpri { columns:2 260px; } .alpri label { display:block; margin:4px 0; break-inside:avoid; }
   .np-earn { display:inline-block; font-size:12px; padding:1px 7px; border:1px solid var(--np-ln, #ccc); border-radius:2px; color:var(--np-mu); white-space:nowrap; margin-top:3px; font-weight:400; }
   .np-earn.hot { color:#b3261e; border-color:#e6a19b; background:rgba(198,40,40,.07); font-weight:600; }
@@ -810,7 +810,9 @@
   td.ctxcol, th.ctxcol { font-size:11.5px; max-width:230px; text-align:left; }
   .suw { font-size:12px; margin-top:5px; line-height:1.4; max-width:440px; white-space:normal; }
   .tfrole { font-size:10.5px; font-weight:400; color:var(--muted, #888); font-family:Inter, system-ui, sans-serif; letter-spacing:0; margin-top:2px; }
-  .sutbl td:nth-child(8) { white-space:normal; min-width:260px; max-width:360px; text-align:left; } .sutbl td.ctxcol { white-space:normal; min-width:150px; }
+  .sutbl td:nth-child(9) { white-space:normal; min-width:260px; max-width:360px; text-align:left; } .sutbl td.ctxcol { white-space:normal; min-width:150px; }
+  td.fvgc, th.fvgc { width:46px; text-align:center; } td.divc, th.divc { width:40px; text-align:center; } .fvgp { white-space:nowrap; font-weight:700; }
+  .mttbl td { white-space:nowrap; padding:4px 3px; } .mtc { font-size:11px; padding:1px 5px; margin:0 1px; border:1px solid var(--evm); background:transparent; color:var(--evm); border-radius:3px; cursor:pointer; } .mtc.on { background:var(--evf); color:var(--prf); border-color:var(--evf); } .mtc:disabled { opacity:.35; cursor:default; }
   .np-only { margin:6px 0 12px; padding:9px 12px; background:var(--evb); border-radius:3px; font-size:13.5px; }
   body.uni .nunirow, body.uni .nunicell { display:none; }
   /* as classes antigas passam a seguir o dicionário */
@@ -865,7 +867,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 16nov 11h00</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 17nov 14h50</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -899,9 +901,10 @@
   <div class="tablewrap">
     <table>
       <thead>
-        <tr class="grp nunirow"><th></th><th colspan="4" class="gl"><span class="nuni">TENDÊNCIA PRINCIPAL</span><span class="yuni">ESTRUTURA</span> <span class="muted">· onde estamos</span></th><th colspan="7" class="gl"><span class="nuni">MOVIMENTO RECENTE</span><span class="yuni">ESTRUTURA</span> <span class="muted">· quebra e entrada</span></th></tr>
-        <tr><th>TF</th><th class="gl">Estrutura</th><th>Fase</th><th>Correção</th><th>Range <span class="muted">(limite · topo/fundo)</span></th>
-        <th class="gl"><span class="nuni">Estado</span><span class="yuni" title="Só aparece quando há algo novo: 🎯 zona de entrada depois de uma viragem, ⚡ quebrou, ⚖ em disputa">Evento</span></th><th class="nunicell">Correção<br>da perna</th><th>Última<br>quebra</th><th title="Divergência RSI nos swings do movimento recente: ▲ de alta, ▼ de baixa">Div.</th><th title="Ranges: o teu range manual, dia e semana anteriores e sessão asiática. ⚠ a tocar o limite · 💧 sweep · ⚖ possível quebra · quebrou">Range</th><th>Vela da quebra<br><span class="muted">força · volume · fecho</span></th><th>Liquidez <span class="muted">(por varrer)</span></th></tr>
+        <tr><th>TF</th><th>Estrutura</th><th>Fase</th><th>Correção</th><th>Range <span class="muted">(limite · topo/fundo)</span></th>
+        <th title="Fibonacci da perna atual: em cima a entrada ótima [0,618–0,65], em baixo a 0,786. ✔ quando a retração está entre 61,8% e 80%">Fib</th>
+        <th class="fvgc" title="FVG de subida nascidos na perna que fez estrutura (HL → HH ou LH → LL). Por baixo, “corr.” = os que nasceram na correção depois dela">FVG <span class="np-dot g">●</span></th><th class="fvgc" title="FVG de descida nascidos na perna que fez estrutura. Por baixo, “corr.” = os da correção">FVG <span class="np-dot r">●</span></th>
+        <th><span class="nuni">Estado</span><span class="yuni" title="Só aparece quando há algo novo: 🎯 zona de entrada depois de uma viragem, ⚡ quebrou, ⚖ em disputa">Evento</span></th><th class="nunicell">Correção<br>da perna</th><th>Última quebra<br><span class="muted">e a vela da quebra</span></th><th class="divc" title="Divergência RSI: ● verde de alta, ● vermelha de baixa">Div.</th><th title="A tua linha ou canal mais perto do preço neste timeframe">A tua linha<br><span class="muted">mais perto</span></th><th title="Topos e fundos por varrer da estrutura e os ranges (o teu, dia e semana anteriores, Ásia, manhã de Londres): ⚠ a tocar · 💧 sweep · ⚖ possível quebra · quebrou">Liquidez e ranges</th></tr>
       </thead>
       <tbody id="tbody"></tbody>
     </table>
@@ -939,6 +942,10 @@
     <h3 class="helphead">3 · Quadro de estrutura</h3>
     <ul>
       <li><b>Uma linha por estrutura.</b> Com “Uma estrutura por gráfico” ligado (o normal), cada timeframe tem uma só estrutura, por isso o quadro é um só: à esquerda onde estamos (estrutura, fase, correção, range), à direita a quebra (evento, última quebra, divergência, range, vela, liquidez). O <b>Evento</b> só aparece quando há algo novo (🎯 zona de entrada depois de uma viragem, ⚡ quebrou, ⚖ em disputa). O 4H tem <b>duas linhas</b>: <b>4H contexto</b> (zona do Day trade) e <b>4H gatilho</b> (quebra do Longo prazo). As cores seguem o dicionário da secção 5: verde/vermelho = direção, fundo colorido = profundidade.</li>
+      <li><b>Por baixo do nome</b> de cada timeframe: para que serve nos setups (ex.: “zona do Longo prazo · contexto do Swing”). No Diário, Semanal e Mensal, a bolinha ao lado do nome é a <b>EMA 8/21</b> desse timeframe (verde = EMA 8 acima da 21).</li>
+      <li><b>Fib</b>: a entrada ótima [0,618–0,65] da perna e, por baixo, a 0,786 (✔ quando a retração está entre 61,8% e 80%). <b>SMA 200</b> aparece por baixo do Range no Diário, Semanal e Mensal quando o preço está a menos de 3%.</li>
+      <li><b>FVG ● verde / ● vermelho</b>: quantos FVG de subida e de descida nasceram na <b>perna que fez estrutura</b> (do HL ao HH, ou do LH ao LL). 3 · 0 = perna forte, de um lado só; 3 · 2 = perna disputada. Por baixo, “corr.” = os que já nasceram na correção. O <b>primeiro FVG contra</b> depois de uma perna limpa pode ser sinal de esgotamento (há um alerta para isso).</li>
+      <li><b>Última quebra</b> traz por baixo a vela da quebra (força · volume · fecho). <b>Div.</b> = divergência RSI (● verde de alta, ● vermelha de baixa). <b>A tua linha mais perto</b> = a tua diagonal ou o teto/chão do teu canal mais perto do preço neste timeframe (“colado” a menos de 1%). <b>Liquidez e ranges</b> = os topos/fundos por varrer e, por baixo, os ranges (o teu, dia e semana anteriores, Ásia, manhã de Londres): ▭ % dentro da caixa · ⚠ a tocar · 💧 sweep · ⚖ possível quebra · quebrou.</li>
       <li><b>Estrutura:</b> ▲ Subida / ▼ Descida; “por confirmar” = a viragem (CHoCH) ainda não fez um BOS na nova direção.</li>
       <li><b>Fase e Correção:</b> <b>Em correção</b> + quanto o preço já recuou da perna atual. A cor diz a profundidade: <span class="ph-b0">&lt; 50%</span> (fora da zona), <span class="ph-b50">50–65%</span>, <span class="ph-b65">65–91,8%</span>, <span class="ph-b92">&gt; 91,8%</span> (muito perto do limite). Um recuo pequeno (ex.: 3%) = o preço está colado ao topo/fundo da perna, mais perto de continuar do que de reverter. <b>A testar o limite</b> = passou o limite sem fecho a confirmar.</li>
       <li><b>Range:</b> os dois extremos da perna atual — o <b>limite</b> (o nível cujo fecho inverte a estrutura) e o <b>topo/fundo da perna</b> — com o preço e a distância a cada um; por baixo, a amarelo suave, o nível dos <b>50%</b> (onde começa a zona). Etiquetas no limite: <span class="badge near">perto</span> = a menos de 1× o ATR; <span class="warn">💧 varrido</span> = um pavio já passou o limite e fechou dentro; <span class="badge disp" style="padding:0 5px">⚖ em disputa</span> = fechou para lá sem confirmar.</li>
@@ -983,6 +990,7 @@
       <li><b>Lateralização (5m/15m/1H):</b> quando o gatilho está dentro de uma caixa (vários toques em cima e em baixo), as viragens lá dentro não contam; o gatilho passa a ser o fecho fora da caixa no sentido do setup (“quebrou a lateralização”). No gráfico aparece a caixa tracejada “↔ lateralização”.</li>
       <li><b>Swings mínimos nos 5m e 15m:</b> nas Definições, um topo/fundo do movimento recente só conta se o recuo for pelo menos N × a volatilidade média das últimas 100 velas (1 = recomendado, 0 = desligado). Acaba com os HH/LH de uma vela nas lateralizações.</li>
       <li><b>Pesquisa nos favoritos:</b> a caixa por cima da lista dos Favoritos e no Quadro filtra na hora — pelo nome (ouro), pelo ticker (GC=F), pelo nome que deste com ✎ ou, nos metais, em inglês (gold). Os rácios em que esse ativo entra também aparecem. Enquanto filtras não dá para arrastar.</li>
+      <li><b>Monitorização → Por timeframe (Definições):</b> para cada ativo e cada timeframe (Mensal, Semanal, Diário, 4H contexto, 4H gatilho, 1H): <b>👁 Monitorizar</b> (desligado = sai dos alertas, dos setups e da análise IA desse ativo), <b>IA</b> (os FVG desse timeframe vão para a análise IA) e <b>🔔 Alertas</b>. 📋 copia as regras de um ativo, 📥 cola noutro ou em todos.</li>
       <li><b>Monitorização (Definições):</b> escolhe a partir de que timeframe cada ativo é seguido — por grupo (por defeito tudo a partir de 1H, Rácios 4H) e, no separador “Por ativo”, exceções para um ativo só (por defeito o BTC em 5m: é o único com 15m e 5m, Day trade, Scalp e killzones). Os 15m e 5m dos outros ativos nem aparecem na app. Abaixo desse timeframe nada é vigiado: os setups com gatilho mais baixo aparecem como “não vigiado” (sem alerta nem destaque) e as killzones só existem com 5m. O vigia vê os ativos de 5m a cada volta, os de 15m depois de cada fecho de 15m, os de 1H/4H de hora a hora — assim cabem muitos mais favoritos no plano grátis. No gráfico continuas a poder abrir qualquer timeframe.</li>
       <li><b>Ordenar por prontos:</b> no Quadro, o link “ordenar por prontos” mostra todos os ativos numa só lista (sem grupos), do mais pronto para o menos: primeiro quem tem mais setups prontos, depois falta FVG / falta quebra, depois em zona; desempatam a ⭐, o 💧 e o timeframe maior. O grupo de cada ativo aparece por baixo do nome. Arruma no momento em que carregas (não salta sozinho). “↶ voltar à ordem anterior” regressa à vista de antes.</li>
       <li><b>Repor A–Z:</b> volta à ordem alfabética dentro de cada grupo; logo a seguir aparece “↶ voltar à ordem anterior” para desfazer (até voltares a arrastar).</li>
@@ -1188,6 +1196,24 @@
   <div class="algrp" data-g="ema"></div>
   <label class="chk alline"><input id="alEma" type="checkbox"> Avisar quando a EMA 8 cruza a EMA 21 no Diário — 🟢 cruzamento de alta (bull: a 8 passa para cima da 21) ou 🔴 de baixa (bear: passa para baixo)</label>
 
+  <h3 class="sethead">4e · Primeiro FVG contrário <span class="muted small">(no fecho da vela)</span></h3>
+  <div class="algrp" data-g="fvgx"></div>
+  <label class="chk alline"><input id="alFvgx" type="checkbox"> Avisar quando, depois de uma perna limpa (só FVG a favor), nasce o primeiro FVG contra — dentro da perna ou na correção, antes de o preço partir o limite. Pode ser sinal de que a subida/descida está a esgotar-se. O aviso diz também a contagem dos timeframes de baixo.</label>
+  <div class="alrow"><span class="muted small">Timeframes:</span> <span id="alFvgxTfs"></span><br><span class="muted small">Mínimo de FVG a favor na perna antes de avisar:</span> <select id="alFvgxMin"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+
+  <h3 class="sethead">4f · FVG colado a uma linha tua</h3>
+  <div class="algrp" data-g="fvgl"></div>
+  <label class="chk alline"><input id="alFvgl" type="checkbox"> Avisar quando o preço entra num FVG por preencher que está colado a (ou atravessado por) uma das tuas linhas ou canais — a confluência mais forte. Um aviso por FVG.</label>
+  <div class="alrow"><span class="muted small">Timeframes do FVG:</span> <span id="alFvglTfs"></span><br><span class="muted small">“Colado” = a linha a menos de</span> <input id="alFvglPct" type="number" min="0.1" max="3" step="0.1" style="width:64px"> <span class="muted small">% do FVG</span></div>
+
+  <h3 class="sethead">4g · Resultados das empresas <span class="muted small">(ações dos favoritos)</span></h3>
+  <label class="chk alline"><input id="alEarn" type="checkbox"> Avisar antes da apresentação de resultados de qualquer ação dos favoritos</label>
+  <div class="alrow"><span class="muted small">Avisar</span> <input id="alEarnD" type="number" min="1" max="10" step="1" style="width:64px"> <span class="muted small">dias antes · a data vem da Yahoo (diz se ainda é estimativa)</span></div>
+
+  <h3 class="sethead">4h · As tuas linhas e canais <span class="muted small">(aproximação, fecho fora do canal / do outro lado da diagonal)</span></h3>
+  <label class="chk alline"><input id="alLineAll" type="checkbox"> Vigiar <b>todas</b> as linhas e canais dos favoritos (sem precisar do 🔔 em cada uma)</label>
+  <div class="alrow"><span class="muted small">Distância por defeito:</span> <input id="alLinePct" type="number" min="0" max="10" step="0.1" style="width:64px"> <span class="muted small">% · 0 = automática (1% do Diário para cima, 0,5% abaixo) · uma linha com a sua própria distância usa a dela</span></div>
+
   <h3 class="sethead">5 · SMA 200 <span class="muted small">(o preço chega à média das últimas 200 velas)</span></h3>
   <div class="algrp" data-g="sma"></div>
   <label class="chk alline"><input id="alSma" type="checkbox"> Avisar quando o preço chega à SMA 200 — a descer 💰 (possível zona de compra) ou a subir 🧱 (teste à média). Avisa logo que um pavio toca, sem esperar pelo fecho.</label>
@@ -1275,9 +1301,10 @@
   <div class="field"><div>Quebra “recente”<small>até quantas velas atrás uma quebra do movimento recente ainda acende o gatilho ⚡ (caixa “Quebra” do checklist)</small></div><input id="setRecent" type="number" min="1" max="50"></div>
   <h3 class="sethead">Monitorização e ativos com intraday <span class="muted small">(a partir de que timeframe cada ativo é seguido)</span></h3>
   <div class="small muted"><b>15m e 5m só existem nos ativos com intraday</b> — por defeito só o BTC (exceção em “Por ativo”). Nos outros, os timeframes de 15m e 5m desaparecem da app (gráfico, tabela, IA), tal como o Day trade, o Scalp e as killzones; o gatilho mais curto passa a ser o 1H (Swing) e o 4H (Longo prazo). Para dar intraday a outro ativo, põe-no em “Por ativo” a partir de 15m ou 5m. Abaixo do timeframe escolhido nada é vigiado, e o vigia vê o ativo menos vezes — 5m a cada volta (5 min), 15m depois de cada fecho de 15m, 1H e 4H de hora a hora.</div>
-  <div class="altabs" id="monTabs"><button type="button" data-mt="g" class="on">Por grupo</button><button type="button" data-mt="a">Por ativo (exceções)</button></div>
+  <div class="altabs" id="monTabs"><button type="button" data-mt="g" class="on">Por grupo</button><button type="button" data-mt="a">Por ativo (exceções)</button><button type="button" data-mt="t">Por timeframe (por ativo)</button></div>
   <div id="monG"></div>
   <div id="monA" hidden><input id="monQ" type="search" placeholder="Procurar (nome ou ticker)…" style="width:100%;margin:6px 0"><div id="monAList"></div></div>
+  <div id="monT" hidden><p class="small muted" style="margin:6px 0">Para cada ativo e timeframe: <b>👁 Monitorizar</b> (desligado = este timeframe sai dos alertas, dos setups e da análise IA desse ativo) · <b>IA</b> = os FVG deste timeframe vão para a análise IA · <b>🔔</b> = alertas deste timeframe. Escuro = ligado. <b>📋</b> copia as regras de um ativo e <b>📥</b> cola-as noutro (ou em todos os da lista).</p><input id="monTQ" type="search" placeholder="Procurar (nome ou ticker)…" style="width:100%;margin:6px 0"><div id="monTList"></div></div>
 
   <h3 class="sethead">Conta e dados</h3>
   <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
@@ -2023,7 +2050,7 @@
       phase, pullback: pull,
       fromBroken: s.lastBroken ? (price - s.lastBroken) / s.lastBroken * 100 : null,
       toInvalid: (price - s.prot.p) / price * 100,
-      protected: s.prot.p, extreme: ext,
+      protected: s.prot.p, extreme: ext, protI: s.prot.i, extI: s.ext.i,
       levels: { 50: lvl(0.5), 618: lvl(0.618), 65: lvl(0.65), 786: lvl(0.786), 918: lvl(0.918) }, logScale: lg,
       lastBreak: lb ? Object.assign({ barsAgo: nowIdx - lb.i }, lb) : null,
       pending: res.pending || null,
@@ -2074,7 +2101,19 @@
     }
     return null;
   }
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive };
+  // força da perna pelos FVG: quantos FVG nasceram na perna que fez estrutura (limite → topo/fundo: HL→HH ou LH→LL) e na correção depois dela
+  // fav = no sentido da estrutura, con = contra. Contam os criados (mesmo os já preenchidos). firstCon = o 1.º FVG contrário depois do limite (perna ou correção).
+  function fvgCount(res) {
+    const s = res && res.state; if (!s || !s.trend || !s.prot || !res.fvgs) return null;
+    const a = s.prot.i, b = s.ext && s.ext.i != null ? s.ext.i : Infinity, d = s.trend, o = { dir: d, legF: 0, legC: 0, corF: 0, corC: 0, firstCon: null, a, b };
+    for (const f of res.fvgs) {
+      if (a == null || f.created <= a) continue; const fav = f.dir === d;
+      if (f.created <= b) { if (fav) o.legF++; else o.legC++; } else if (fav) o.corF++; else o.corC++;
+      if (!fav && (!o.firstCon || f.created < o.firstCon.created)) o.firstCon = f;
+    }
+    return o;
+  }
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive, fvgCount };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -3660,7 +3699,7 @@
     const v = divergences(d).filter((x) => x.live).pop();
     if (!v) return '<span class="muted">·</span>';
     const t = `Divergência ${v.dir === 1 ? 'de alta' : 'de baixa'}: ${v.dir === 1 ? 'fundo' : 'topo'} ${fmt(v.a.p)} → ${fmt(v.b.p)}, RSI ${v.ra.toFixed(0)} → ${v.rb.toFixed(0)}`;
-    return `<span title="${t}" style="font-size:16px;color:${v.dir === 1 ? '#26a69a' : '#ef5350'}">${v.dir === 1 ? '▲' : '▼'}</span>`;
+    return `<span title="${t}" class="np-dot ${v.dir === 1 ? 'g' : 'r'}" style="font-size:16px">●</span>`;
   }
   // última quebra em formato curto: ▲ BOS · 27v · FVG ✔ · 💧 (o porquê da validação fica no tooltip)
   function brkCell(d, b) {
@@ -3673,38 +3712,82 @@
   // camada que termina num troço manual: a app não marca nada de novo nela (não deteta quebras novas)
   const frozen = (dd, L) => { const sg = dd && dd[L] && dd[L].res && dd[L].res.segs; return !!(sg && sg.length && sg[sg.length - 1].mode === 'man'); };
   const frozenBadge = '<br><span class="badge" style="background:#f5c518;color:#111" title="Esta camada termina num troço manual: a app não marca pontos nem quebras novas. No gráfico, em modo edição, escolhe ⏩ Continuar automático na vela a seguir à tua última marca.">✋ manual — não atualiza</span>';
+  // EMA 8/21 de um timeframe (Diário, Semanal, Mensal): bolinha verde = EMA 8 acima da 21
+  function emaTf(d) {
+    if (!d || !d.closed || d.closed.length < 30) return null;
+    if (d._ema && d._ema.n === d.closed.length) return d._ema;
+    const cl = d.closed.map((c) => c.c), a = emaOf(cl, 8), b = emaOf(cl, 21), n = cl.length, sg = (i) => Math.sign(a[i] - b[i]);
+    let ago = 0; for (let i = n - 1; i > 21 && sg(i) === sg(n - 1); i--) ago++;
+    return (d._ema = { n, up: a[n - 1] > b[n - 1], e8: a[n - 1], e21: b[n - 1], ago });
+  }
+  const emaDotTf = (d, lb) => { const e = emaTf(d); return e ? ` <span class="np-dot ${e.up ? 'g' : 'r'}" title="EMA ${lb} 8/21: EMA 8 ${e.up ? 'acima' : 'abaixo'} da EMA 21 (${fmt(e.e8)} / ${fmt(e.e21)}) — cruzou há ${e.ago} vela${e.ago === 1 ? '' : 's'}">●</span>` : ''; };
+  // para que serve cada timeframe nos setups ligados (zona / quebra / contexto)
+  function tfRoles(id, has4hc) {
+    const out = [];
+    for (const st of (settings.setups || []).filter((x) => x.on && !suHid(x))) {
+      const k = (tf, role) => (tf === '4h' && role !== 'trig' && has4hc ? '4hc' : tf), nmS = st.name;
+      if (k(st.zone, 'zone') === id) out.push(`zona do ${nmS}`);
+      if (k(st.trig, 'trig') === id) out.push(`quebra do ${nmS}`);
+      if (ctxOf(st) && k(ctxOf(st), 'ctx') === id) out.push(`contexto do ${nmS}`);
+    }
+    return out;
+  }
+  // a tua linha/canal mais perto do preço neste timeframe
+  function nearLineCell(id, d) {
+    const now = Date.now(), price = d.price, tf = id === '4hc' ? '4h' : id; let best = null;
+    for (const l of userLines().filter((l) => lnLive(l, now) && lnTfsOf(l).includes(tf))) {
+      const vs = l.type === 'chan' ? [lnVal(l, now, 0, d.candles), lnVal(l, now, l.off || 0, d.candles)] : [lnVal(l, now, 0, d.candles)], hi = l.type === 'chan' ? Math.max(...vs) : null;
+      vs.forEach((v) => { if (!(v > 0)) return; const dist = (v - price) / price * 100; if (!best || Math.abs(dist) < Math.abs(best.dist)) best = { v, dist, what: l.type === 'chan' ? (v === hi ? 'teto do canal' : 'chão do canal') : 'diagonal', name: l.name }; });
+    }
+    if (!best) return '<span class="muted">·</span>';
+    return `<span title="${best.name ? npEsc(best.name) + ' · ' : ''}a tua linha mais perto neste timeframe">${best.what}<br><b>${fmt(best.v)}</b> <span class="muted small">${pct(best.dist, true)}</span>${Math.abs(best.dist) <= 1 ? ' <span class="ev">colado</span>' : ''}</span>`;
+  }
+  // Fibonacci da perna (como nas Reversões): em cima a entrada ótima [0,618–0,65], em baixo a 0,786; ✔ quando a retração está entre 61,8% e 80%
+  function fibCell(d) {
+    const f = d.fibs && d.fibs[0]; if (!f) return '<span class="muted">·</span>';
+    const r = FB.retrOf(f, d.price) * 100, ok = r >= 61.8 && r <= 80;
+    return `<span title="Fibonacci da perna atual: entrada ótima 0,618–0,65 · em baixo a 0,786 · retração ${pct(r)}" class="${ok ? 'ev' : ''}" style="white-space:nowrap">${ok ? '✔ ' : ''}[${fmt(f.entry.lo)}–${fmt(f.entry.hi)}]</span><br><span class="muted small">0,786 · ${fmt(f.deep)}</span>`;
+  }
+  // SMA 200 (só Diário, Semanal e Mensal) quando o preço está perto (até 3%)
+  const smaNear = (id, d) => { if (!['1M', '1w', '1d'].includes(id)) return ''; const m = smaOfTf(d, 200); if (!m) return ''; const dd = (m - d.price) / d.price * 100; return Math.abs(dd) <= 3 ? `<br><span class="small">SMA 200 · ${fmt(m)} <span class="muted">${pct(dd, true)}</span></span>` : ''; };
   function renderTable() {
     const rows = [], U = uniOn(settings);
     // estrutura única: um quadro só, uma linha por estrutura. O 4H tem duas: o 4H contexto (zona do Day trade) e o 4H (quebra do Longo prazo)
-    const list = [];
+    const list = [], has4hc = U && !!data['4hc'];
     for (const tf of TFS) {
       if (!settings.tfs.includes(tf.id) || !data[tf.id] || tfHid(tf.id)) continue;
-      if (tf.id === '4h' && U && data['4hc']) { list.push({ id: '4hc', label: '4H', role: 'contexto', d: data['4hc'] }); list.push({ id: '4h', label: '4H', role: 'gatilho', d: data['4h'] }); }
-      else list.push({ id: tf.id, label: tf.label, role: '', d: data[tf.id] });
+      if (tf.id === '4h' && has4hc) { list.push({ id: '4hc', label: '4H contexto', d: data['4hc'] }); list.push({ id: '4h', label: '4H gatilho', d: data['4h'] }); }
+      else list.push({ id: tf.id, label: tf.label, d: data[tf.id] });
     }
-    for (const { id, label, role, d } of list) {
+    for (const { id, label, d } of list) {
       const x = d.ext.snap, n = d.int.snap;
       const b = n.lastBreak;
       const rs = recentState(n);
+      const fg = fvgGR(fvgC(d)), fgT = (v, cv, c) => (v == null ? '<span class="muted">·</span>' : `<b class="${c}">${v}</b>${cv ? `<div class="muted small" title="FVG nascidos na correção">corr. ${cv}</div>` : ''}`);
       const extCells = x.trend ? `
-        <td class="gl">${extBadge(x)}${frozen(d, 'ext') ? frozenBadge : ''}</td>
+        <td>${extBadge(x)}${frozen(d, 'ext') ? frozenBadge : ''}</td>
         <td class="wr" style="max-width:92px">${phaseCell(x)}</td>
         <td class="num">${pullCell(x)}</td>
-        <td class="liq">${legRangeCell(x, d)}</td>`
-        : `<td class="gl muted" colspan="4">sem estrutura suficiente${frozen(d, 'ext') ? frozenBadge : ''}</td>`;
-      // no modo de estrutura única, o "Estado" só aparece quando diz algo novo (zona de entrada, quebrou, em disputa) e a correção da perna não se repete
+        <td class="liq">${legRangeCell(x, d)}${smaNear(id, d)}</td>
+        <td class="small">${fibCell(d)}</td>
+        <td class="num fvgc">${fgT(fg.g, fg.cg, 'c-up')}</td><td class="num fvgc">${fgT(fg.r, fg.cr, 'c-dn')}</td>`
+        : `<td class="muted" colspan="7">sem estrutura suficiente${frozen(d, 'ext') ? frozenBadge : ''}</td>`;
+      // no modo de estrutura única, o "Evento" só aparece quando diz algo novo (zona de entrada, quebrou, em disputa)
       const evt = U ? (rs && rs.key !== 'trend' ? recentBadge(n, id) : '<span class="muted">·</span>') : recentBadge(n, id);
+      const rng = rangeCell(d, id), rngTxt = /^<span class="muted">·<\/span>$/.test(rng) ? '' : `<div class="small" style="margin-top:4px">${rng}</div>`;
+      const liq = (settings.liqTfs || []).includes(id === '4hc' ? '4h' : id) ? liqCell(d) : '';
       const intCells = n.trend ? `
-        <td class="gl rw">${evt}${frozen(d, 'int') && !U ? frozenBadge : ''}</td>
+        <td class="rw">${evt}${frozen(d, 'int') && !U ? frozenBadge : ''}</td>
         ${U ? '' : `<td class="num rw">${pullCell(n)}</td>`}
-        <td class="rw">${brkCell(d, b)}${pendBadge(n)}</td>
-        <td class="num rc rw">${divCell(d)}</td>
-        <td class="small rc rngc rw">${rangeCell(d, id)}</td>
-        <td class="rc rw">${b ? candleCell(b) : '—'}</td>
-        <td class="liq rw">${(settings.liqTfs || []).includes(id === '4hc' ? '4h' : id) ? liqCell(d) : '<span class="muted small">oculto</span>'}</td>`
-        : `<td class="gl muted" colspan="${U ? 6 : 7}">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
-      const roleTxt = role === 'contexto' ? '<div class="tfrole">contexto · zona do Day trade</div>' : role === 'gatilho' ? '<div class="tfrole">gatilho · quebra do Longo prazo</div>' : '';
-      rows.push(`<tr data-tf="${id}" class="${id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${label}${roleTxt}</td>${extCells}${intCells}</tr>`);
+        <td class="rw">${brkCell(d, b)}${pendBadge(n)}${b ? `<div class="small" style="margin-top:3px">${candleCell(b)}</div>` : ''}</td>
+        <td class="num rc rw divc">${divCell(d)}</td>
+        <td class="small rw">${nearLineCell(id, d)}</td>
+        <td class="liq rw">${liq || rngTxt ? liq + rngTxt : '<span class="muted small">—</span>'}</td>`
+        : `<td class="muted" colspan="${U ? 5 : 6}">sem estrutura suficiente${frozen(d, 'int') ? frozenBadge : ''}</td>`;
+      const roles = tfRoles(id, has4hc), lb = id === '4hc' ? '4H' : id === '4h' && has4hc ? '4H' : label;
+      const roleTxt = `<div class="tfrole">${id === '4hc' ? 'contexto' : id === '4h' && has4hc ? 'gatilho' : ''}${(id === '4hc' || (id === '4h' && has4hc)) && roles.length ? ' · ' : ''}${roles.join(' · ')}</div>`;
+      const ema = ['1M', '1w', '1d'].includes(id) ? emaDotTf(d, label) : '';
+      rows.push(`<tr data-tf="${id}" class="${id === selectedTf ? 'sel' : ''} ${rs && rs.key !== 'trend' ? 'recent' : ''}"><td class="tf">${lb}${ema}${roleTxt}</td>${extCells}${intCells}</tr>`);
     }
     $('#tbody').innerHTML = rows.join('');
     // telemóvel: um cartão por timeframe (toca para ver mais; "Gráfico ›" abre o gráfico nesse timeframe)
@@ -5333,7 +5416,16 @@
   // ---------- monitorização (Definições): a partir de que timeframe cada favorito é vigiado ----------
   const monTf = (s) => SY.monOf(settings, s);
   const monMinMs = (s) => TF_MS0[monTf(s)] || 0;
-  const npNv = (s, st) => !!(st && (TF_MS0[st.trig] || 0) < monMinMs(s));   // setup com gatilho abaixo do vigiado
+  // monitorização por timeframe (Definições → Monitorização → Por timeframe): m = monitorizar · f = FVG na análise IA · a = alertas
+  const MTF = [['1M', 'Mensal'], ['1w', 'Semanal'], ['1d', 'Diário'], ['4hc', '4H contexto'], ['4h', '4H gatilho'], ['1h', '1H']];
+  const monTfGet = (s, tf, k) => { const o = settings.monTfs && settings.monTfs[s] && settings.monTfs[s][tf]; if (!o) return true; if (k !== 'm' && o.m === false) return false; return o[k] !== false; };
+  const monOffSt = (s, st) => !!st && [[st.zone, 'zone'], [st.trig, 'trig'], [ctxOf(st), 'ctx']].some(([id, r]) => id && !monTfGet(s, id === '4h' && r !== 'trig' ? '4hc' : id, 'm'));
+  const npNv = (s, st) => !!(st && ((TF_MS0[st.trig] || 0) < monMinMs(s) || monOffSt(s, st)));   // setup com gatilho abaixo do vigiado (ou com um timeframe desligado)
+  // força da perna pelos FVG (motor): perna que fez estrutura (limite → topo/fundo) e correção depois dela
+  const fvgC = (d) => (d && d.ext && d.ext.res && E.fvgCount ? E.fvgCount(d.ext.res) : null);
+  // "3·0": verde · vermelho (verde = FVG de subida, vermelho = de descida)
+  const fvgGR = (c) => { if (!c) return { g: null, r: null }; const up = c.dir === 1; return { g: up ? c.legF : c.legC, r: up ? c.legC : c.legF, cg: up ? c.corF : c.corC, cr: up ? c.corC : c.corF }; };
+  const fvgPair = (d) => { const c = fvgC(d); if (!c) return '<span class="muted">·</span>'; const v = fvgGR(c); return `<span class="fvgp" title="FVG na perna que fez estrutura (${c.dir === 1 ? 'HL → HH' : 'LH → LL'}): ${v.g} de subida · ${v.r} de descida${v.cg + v.cr ? ` · na correção: ${v.cg} de subida · ${v.cr} de descida` : ''}"><span class="c-up">${v.g}</span>·<span class="c-dn">${v.r}</span></span>`; };
   // 15m e 5m (e com eles Day trade e Scalp) só nos ativos vigiados a partir desses timeframes — por defeito só o BTC
   const tfHid = (id, s) => (id === '15m' || id === '5m') && (TF_MS0[id] || 0) < monMinMs(s || symbol);
   const suHid = (st, s) => !!st && (tfHid(st.trig, s) || tfHid(st.zone, s) || tfHid(ctxOf(st), s));
@@ -5648,12 +5740,34 @@
     $('#setSetups').innerHTML = (settings.setups || []).map((x, k) => `<div class="setrow"><input type="checkbox" data-k="${k}" class="su-on" ${x.on ? 'checked' : ''}><input type="text" class="su-name" data-k="${k}" value="${x.name}"><select class="su-ctx" data-k="${k}" title="contexto">${opts(ctxOf(x))}</select><span class="muted">·</span><select class="su-zone" data-k="${k}">${opts(x.zone)}</select><span class="muted">→</span><select class="su-trig" data-k="${k}">${opts(x.trig)}</select></div>`).join('');
     $('#setLiq').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${(settings.liqTfs || []).includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
     $('#setTfs').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${settings.tfs.includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
+    monTfDraft = JSON.parse(JSON.stringify(settings.monTfs || {})); monClip = null;
     monDraft = JSON.parse(JSON.stringify(settings.mon || SY.MON_DEF)); monDraft.grp = Object.assign({}, SY.MON_DEF.grp, monDraft.grp || {}); monDraft.per = monDraft.per || {};
     monRender();
     $('#settings').classList.add('open');
   }
   // ---------- Monitorização: quadro por grupo e por ativo ----------
-  let monDraft = null, monTab = 'g';
+  let monDraft = null, monTab = 'g', monTfDraft = {}, monClip = null;
+  // Por timeframe: por ativo, três interruptores em cada timeframe — 👁 monitorizar · IA (FVG na análise IA) · 🔔 alertas
+  const mtGet = (s, tf, k) => { const o = monTfDraft[s] && monTfDraft[s][tf]; if (!o) return true; if (k !== 'm' && o.m === false) return false; return o[k] !== false; };
+  function monTfRender() {
+    const box = $('#monTList'); if (!box) return; const q = ($('#monTQ').value || '').trim().toLowerCase();
+    const favs = (settings.favs || []).filter((x) => !q || x.toLowerCase().includes(q) || nm(x).toLowerCase().includes(q)).sort((a, b) => 'csfr'.indexOf(SY.monGroup(a)) - 'csfr'.indexOf(SY.monGroup(b)) || nm(a).localeCompare(nm(b)));
+    const chip = (s, tf, k, lab, tip) => { const on = mtGet(s, tf, k), dis = k !== 'm' && !mtGet(s, tf, 'm'); return `<button type="button" class="mtc ${on ? 'on' : ''}" data-mts="${npEsc(s)}" data-mtf="${tf}" data-mtk="${k}" ${dis ? 'disabled' : ''} title="${tip}">${lab}</button>`; };
+    box.innerHTML = `${monClip ? `<p class="small">📋 Regras copiadas de <b>${npEsc(nm(monClip.from))}</b> — carrega em 📥 num ativo para as colar, ou <button type="button" class="lt" id="mtPasteAll">📥 colar em todos os da lista</button> <button type="button" class="lt" id="mtClipX">✕</button></p>` : ''}
+      <table class="montbl mttbl"><tr><th></th>${MTF.map(([, l]) => `<th>${l}</th>`).join('')}<th></th></tr>${favs.map((s) => `<tr><td class="nm"><b>${npEsc(nm(s))}</b>${nm(s) !== s ? ` <span class="muted small">${s}</span>` : ''}</td>${MTF.map(([tf]) => `<td>${chip(s, tf, 'm', '👁', 'Monitorizar: desligado, este timeframe deixa de ser vigiado neste ativo (fora dos alertas, dos setups e da análise IA)')}${chip(s, tf, 'f', 'IA', 'FVG deste timeframe na análise IA')}${chip(s, tf, 'a', '🔔', 'Alertas deste timeframe')}</td>`).join('')}<td style="white-space:nowrap"><button type="button" class="lt" data-mtcp="${npEsc(s)}" title="Copiar as regras deste ativo">📋</button>${monClip ? ` <button type="button" class="lt" data-mtpa="${npEsc(s)}" title="Colar aqui as regras copiadas">📥</button>` : ''}</td></tr>`).join('')}</table>`;
+  }
+  function monTfInit() {
+    if (!$('#monTList') || monTfInit.w) return; monTfInit.w = 1;
+    $('#monTQ').addEventListener('input', monTfRender);
+    $('#monTList').addEventListener('click', (e) => {
+      const c = e.target.closest('[data-mtk]');
+      if (c && !c.disabled) { const s = c.dataset.mts, tf = c.dataset.mtf, k = c.dataset.mtk, o = ((monTfDraft[s] = monTfDraft[s] || {})[tf] = monTfDraft[s][tf] || {}); o[k] = !mtGet(s, tf, k) ? true : false; if (o[k] === true) delete o[k]; if (!Object.keys(o).length) delete monTfDraft[s][tf]; if (!Object.keys(monTfDraft[s]).length) delete monTfDraft[s]; monTfRender(); return; }
+      const cp = e.target.closest('[data-mtcp]'); if (cp) { monClip = { from: cp.dataset.mtcp, r: JSON.parse(JSON.stringify(monTfDraft[cp.dataset.mtcp] || {})) }; monTfRender(); return; }
+      const pa = e.target.closest('[data-mtpa]'); if (pa && monClip) { const r = JSON.parse(JSON.stringify(monClip.r)); if (Object.keys(r).length) monTfDraft[pa.dataset.mtpa] = r; else delete monTfDraft[pa.dataset.mtpa]; monTfRender(); return; }
+      if (e.target.id === 'mtClipX') { monClip = null; monTfRender(); return; }
+      if (e.target.id === 'mtPasteAll' && monClip) { const q = ($('#monTQ').value || '').trim().toLowerCase(); (settings.favs || []).filter((x) => !q || x.toLowerCase().includes(q) || nm(x).toLowerCase().includes(q)).forEach((x) => { const r = JSON.parse(JSON.stringify(monClip.r)); if (Object.keys(r).length) monTfDraft[x] = r; else delete monTfDraft[x]; }); monTfRender(); }
+    });
+  }
   const MON_COLS = ['5m', '15m', '1h', '4h'];
   const MON_GN = { c: 'Cripto', s: 'Ações e ETFs', f: 'Futuros (S&P 500, ouro, petróleo…)', r: 'Rácios' };
   const monVal = (s) => monDraft.per[s] || monDraft.grp[SY.monGroup(s)];
@@ -5663,7 +5777,7 @@
   function monRender() {
     if (!monDraft || !$('#monG')) return;
     document.querySelectorAll('#monTabs button').forEach((b) => b.classList.toggle('on', b.dataset.mt === monTab));
-    $('#monG').hidden = monTab !== 'g'; $('#monA').hidden = monTab !== 'a';
+    $('#monG').hidden = monTab !== 'g'; $('#monA').hidden = monTab !== 'a'; if ($('#monT')) { $('#monT').hidden = monTab !== 't'; monTfInit(); if (monTab === 't') monTfRender(); }
     const favs = settings.favs || [], head = `<colgroup><col><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:10%"><col style="width:12%"></colgroup><tr><th></th><th colspan="5" class="muted small" style="text-align:center">vigiar a partir de</th></tr>`;
     $('#monG').innerHTML = `<table class="montbl">${head}${['c', 's', 'f', 'r'].map((g) => { const n = favs.filter((x) => SY.monGroup(x) === g).length, v = monDraft.grp[g];
       return `<tr><td class="nm"><b>${MON_GN[g]}</b> <span class="muted small">${n} favoritos</span><div class="keep">fica com: ${monKeep(v)}</div></td>${monCells(v, 'data-mg-' + g)}</tr>`; }).join('')}</table>
@@ -5698,16 +5812,17 @@
     if (uniCh) uniApply();
     const monCh = (monDraft && JSON.stringify(monDraft) !== JSON.stringify(settings.mon || null)) || swOld !== (settings.swFloor == null ? 1 : +settings.swFloor) || uniCh || priOld !== JSON.stringify(settings.priSens || null);
     if (monDraft) settings.mon = monDraft;
+    if (monTfDraft) { const ch = JSON.stringify(monTfDraft) !== JSON.stringify(settings.monTfs || {}); settings.monTfs = monTfDraft; if (ch) { save('mss_settings4', settings); scanFavs(true); npRender(); } }
     save('mss_settings4', settings); $('#settings').classList.remove('open'); loadAll();
     if (monCh) { scanFavs(true); npRender(); }
   }
 
 
   // ---------- alertas no Telegram: página de escolhas (o vigia no Google Apps Script lê-as da conta) ----------
-  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false, rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2, emaOn: true, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
+  const AL_DEF = { on: true, tgToken: '', tgChat: '', relay: '', setupOn: true, confOn: true, setups: {}, minPull: 50, fOnlyFvg: false, fOnlyStrong: false, fOnlyVol: false, fOnlyCtx: false, fvgOn: true, kzOn: true, kzLondon: true, kzNy: true, kzAsia: true, kzDay: true, kzLon: true, weekOn: true, dayOn: false, weekSweep: true, weekClose: true, brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false, rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2, emaOn: true, fvgxOn: true, fvgxMin: 1, fvgxTfs: ['1M', '1w', '1d', '4hc', '1h'], fvglOn: true, fvglTfs: ['1M', '1w', '1d', '4hc', '1h'], fvglPct: 0.5, earnOn: true, earnDays: 2, lineAll: false, linePct: 0, nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false, cgKey: '',
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5, tgtOn: true, tgtPct: 1, lineOn: true, fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true }, forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false }, };
-  const AL_CHK = { alEma: 'emaOn', alRz: 'rzOn', alBrk: 'brkOn', alBrkBos: 'brkBos', alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true, fvgx: true, fvgl: true }, forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false, fvgx: true, fvgl: true }, };
+  const AL_CHK = { alFvgx: 'fvgxOn', alFvgl: 'fvglOn', alEarn: 'earnOn', alLineAll: 'lineAll', alEma: 'emaOn', alRz: 'rzOn', alBrk: 'brkOn', alBrkBos: 'brkBos', alConf: 'confOn', alTgt: 'tgtOn', alLine: 'lineOn', alFib786: 'fib786', alFibStar: 'fibStar', alSma: 'smaOn', alOn: 'on', alSetup: 'setupOn', alFFvg: 'fOnlyFvg', alFStrong: 'fOnlyStrong', alFVol: 'fOnlyVol', alFCtx: 'fOnlyCtx', alFvg: 'fvgOn', alKz: 'kzOn', alKzL: 'kzLondon', alKzN: 'kzNy', alKzA: 'kzAsia', alKzD: 'kzDay', alKzLo: 'kzLon', alWk: 'weekOn', alDy: 'dayOn', alNear: 'nearOn', alNearI: 'nearInv', alNearC: 'nearCont', alWkS: 'weekSweep', alWkC: 'weekClose' };
   let alDraft = null;
   const alCfg = () => Object.assign({}, AL_DEF, settings.alerts || {}, { per: JSON.parse(JSON.stringify((settings.alerts || {}).per || {})), perNew: (settings.alerts || {}).perNew ? Object.assign({}, settings.alerts.perNew) : null, forA: Object.assign({}, AL_DEF.forA, (settings.alerts || {}).forA || {}), forR: Object.assign({}, AL_DEF.forR, ((settings.alerts || {}).forRv2 && (settings.alerts || {}).forR) || {}), forRv2: 1, brkTfs: ((settings.alerts || {}).brkTfs || AL_DEF.brkTfs).slice(), rzTfs: ((settings.alerts || {}).rzTfs || AL_DEF.rzTfs).slice(), nearTfsR: ((settings.alerts || {}).nearTfsR || AL_DEF.nearTfsR).slice(), smaTfs: ((settings.alerts || {}).smaTfs || AL_DEF.smaTfs).slice(), fibTfs: ((settings.alerts || {}).fibTfs || AL_DEF.fibTfs).slice(), kcTfs: ((settings.alerts || {}).kcTfs || AL_DEF.kcTfs).slice(), revTfs: ((settings.alerts || {}).revTfs || AL_DEF.revTfs).slice(), setups: Object.assign({}, (settings.alerts || {}).setups || {}), nearTfs: ((settings.alerts || {}).nearTfs || AL_DEF.nearTfs).slice(), nearPct: Object.assign({}, AL_DEF.nearPct, (settings.alerts || {}).nearPct || {}) });
   const agoTxt = (ms) => { const m = Math.round((Date.now() - ms) / 6e4); return m < 1 ? 'agora mesmo' : m < 60 ? `há ${m} min` : m < 1440 ? `há ${Math.floor(m / 60)} h ${m % 60} min` : (Math.floor(m / 1440) === 1 ? 'há 1 dia' : `há ${Math.floor(m / 1440)} dias`); };
@@ -5765,7 +5880,7 @@ function motor_() {
     catch (e) { m.innerHTML = ''; }
   }
   // ---------- alertas por ativo ----------
-  const AK_FIX = [['brk', 'Quebra confirmada'], ['rz', 'Zona de reversão ⭐'], ['ema', 'Cruzamento EMA 8/21 (Diário)'], ['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
+  const AK_FIX = [['brk', 'Quebra confirmada'], ['rz', 'Zona de reversão ⭐'], ['ema', 'Cruzamento EMA 8/21 (Diário)'], ['fvgx', 'Primeiro FVG contrário'], ['fvgl', 'FVG colado a linha tua'], ['fvg', 'FVG no pullback'], ['kz', 'Killzones'], ['week', 'Liquidez dia/semana'], ['near', 'Perto da inversão'], ['sma', 'SMA 200'], ['tgt', 'Perto do alvo'], ['line', 'Linhas e canais'], ['fibz', 'Zona de entrada (Fib)'], ['kc', 'Keltner (fecho)'], ['rev', 'Reversão provável']];
   const alKeys = () => (settings.setups || []).filter((x) => x.on).map((x) => ['su:' + x.name, 'Setup · ' + x.name]).concat(AK_FIX);
   // o que vale hoje para um ativo (escolhas por ativo, senão as gerais)
   function alEff(A, sym) {
@@ -5773,7 +5888,7 @@ function motor_() {
     for (const [k] of alKeys()) {
       if (p[k] != null) { out[k] = !!p[k]; continue; }
       if (k.indexOf('su:') === 0) out[k] = !!A.setupOn && g.setup !== false && (A.setups || {})[k.slice(3)] !== false;
-      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' }[k]]) && g[k] !== false;
+      else out[k] = (k === 'week' ? !!(A.weekOn || A.dayOn) : !!A[{ ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn', fvgx: 'fvgxOn', fvgl: 'fvglOn' }[k]]) && g[k] !== false;
     }
     return out;
   }
@@ -5844,6 +5959,11 @@ function motor_() {
     $('#alFibTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-ft="${id}" ${alDraft.fibTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alRevTfs').innerHTML = ['1h', '4h', '1d', '1w', '1M'].map((id) => `<label class="chk"><input type="checkbox" data-rvt="${id}" ${alDraft.revTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alRevMin').value = alDraft.revMin || 5;
+    const FXT = ['1M', '1w', '1d', '4hc', '1h'], fxl = (id) => (id === '4hc' ? '4H contexto' : tfLabel(id));
+    $('#alFvgxTfs').innerHTML = FXT.map((id) => `<label class="chk"><input type="checkbox" data-fxt="${id}" ${(alDraft.fvgxTfs || AL_DEF.fvgxTfs).includes(id) ? 'checked' : ''}> ${fxl(id)}</label>`).join(' ');
+    $('#alFvglTfs').innerHTML = FXT.map((id) => `<label class="chk"><input type="checkbox" data-flt="${id}" ${(alDraft.fvglTfs || AL_DEF.fvglTfs).includes(id) ? 'checked' : ''}> ${fxl(id)}</label>`).join(' ');
+    $('#alFvgxMin').value = String(alDraft.fvgxMin || 1); $('#alFvglPct').value = alDraft.fvglPct != null ? alDraft.fvglPct : 0.5;
+    $('#alEarnD').value = alDraft.earnDays || 2; $('#alLinePct').value = alDraft.linePct || 0;
     $('#alKcTfs').innerHTML = ['1M', '1w', '1d'].map((id) => `<label class="chk"><input type="checkbox" data-kt="${id}" ${alDraft.kcTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alSmaTfs').innerHTML = ['1M', '1w', '1d', '4h', '1h'].map((id) => `<label class="chk"><input type="checkbox" data-st="${id}" ${alDraft.smaTfs.includes(id) ? 'checked' : ''}> ${tfLabel(id)}</label>`).join(' ');
     $('#alSmaPre').value = alDraft.smaPre; $('#alTgtPct').value = alDraft.tgtPct; $('#alSmaRe').value = alDraft.smaRearm;
@@ -5876,6 +5996,10 @@ function motor_() {
     alDraft.fibTfs = [...document.querySelectorAll('[data-ft]')].filter((i) => i.checked).map((i) => i.dataset.ft);
     alDraft.revTfs = [...document.querySelectorAll('[data-rvt]')].filter((i) => i.checked).map((i) => i.dataset.rvt);
     alDraft.revMin = Math.max(1, Math.min(8, Math.round(+$('#alRevMin').value || 5)));
+    alDraft.fvgxTfs = [...document.querySelectorAll('[data-fxt]')].filter((i) => i.checked).map((i) => i.dataset.fxt);
+    alDraft.fvglTfs = [...document.querySelectorAll('[data-flt]')].filter((i) => i.checked).map((i) => i.dataset.flt);
+    alDraft.fvgxMin = Math.max(1, Math.min(3, +$('#alFvgxMin').value || 1)); alDraft.fvglPct = Math.max(0.1, Math.min(3, +String($('#alFvglPct').value).replace(',', '.') || 0.5));
+    alDraft.earnDays = Math.max(1, Math.min(10, Math.round(+$('#alEarnD').value || 2))); alDraft.linePct = Math.max(0, Math.min(10, +String($('#alLinePct').value).replace(',', '.') || 0));
     alDraft.kcTfs = [...document.querySelectorAll('[data-kt]')].filter((i) => i.checked).map((i) => i.dataset.kt);
     alDraft.smaTfs = [...document.querySelectorAll('[data-st]')].filter((i) => i.checked).map((i) => i.dataset.st);
     alDraft.smaPre = Math.max(0, Math.min(20, +String($('#alSmaPre').value).replace(',', '.') || 0));
@@ -6441,7 +6565,7 @@ ${AI_DAY_FORMAT}`;
         const su = (settings.setups || []).find((x) => x.on && x.zone === id), ev = su ? favSetup(s, su) : null;
         const gat = !ev ? '—' : ev.rank === 4 ? '✔ pronto' : ev.rank === 3 ? '⚡ falta FVG' : ev.box ? '↔ lateral' : ev.rank === 2 ? '⏳ falta quebra' : '—';
         const score = REV_COLS.filter(([k]) => ok[k]).length;
-        rows.push({ s, id, dir, pull: z.pullback, price, ok, val, score, gat, su, fr: !isRatio(s) && ok.fr !== undefined });
+        rows.push({ s, id, d, dir, pull: z.pullback, price, ok, val, score, gat, su, fr: !isRatio(s) && ok.fr !== undefined });
       }
     }
     return rows.sort((a, b) => b.score - a.score || b.pull - a.pull);
@@ -6622,6 +6746,11 @@ ${AI_DAY_FORMAT}`;
     const NOTE = uniOn(settings) ? '\n\nNOTA: cada timeframe tem UMA só estrutura (do Anual ao Diário: só os topos/fundos que quebraram estrutura; do 4H para baixo: todos). O 4H tem duas: o "4H" (quebra do Longo prazo) e o "4H contexto" (zona do Day trade).' : '';
     return `${AI_MULTI_HEAD(parts.length)}\n\n${AI_FORMAT}${NOTE}\n\n${parts.join('\n\n')}`;
   }
+  const AI_LF_RULES = `
+AS MINHAS LINHAS E OS FVG:
+- Analisa sempre à luz das minhas linhas e canais. Nos RÁCIOS são o elemento principal: pesam mais do que as quebras de estrutura (uma quebra pode ser momentânea; estar colado ao teto ou ao chão de um canal meu é informação forte). Se o preço de um rácio está colado a uma linha minha, diz isso logo e o que significa (resistência / apoio).
+- Os FVG por preencher leem-se em relação às linhas: um FVG colado a uma linha minha é a confluência mais forte (diz qual e de que lado).
+- Contagem de FVG das pernas: uma perna com FVG só de um lado foi forte (ex.: 🟢 3 · 🔴 0); com os dois lados foi disputada. O PRIMEIRO FVG contra depois de uma perna limpa é um sinal de que a força pode estar a mudar. Entre timeframes: FVG contra num timeframe de baixo são só correção enquanto o timeframe de cima mantém a perna limpa; ganham peso quando o timeframe de cima cria o seu primeiro FVG contra.`;
   const AI_JOINT_FORMAT = `Responde em português de Portugal, numa linguagem simples e direta, no máximo ~450 palavras. O meu método (ICT): só há trade quando um timeframe está em zona (correção de 50% ou mais, até ao limite); os timeframes de baixo confirmam com uma quebra a favor.
 ESTA É UMA ANÁLISE CONJUNTA: o foco é SÓ o ativo âncora ⚓. Os outros ativos são CONTEXTO: servem para empurrar ou travar o trade na âncora, nunca o contrário. A app já classificou cada um (a favor / ⚠ contra / neutro) — explica, não contraries.
 Formato:
@@ -6629,7 +6758,9 @@ Formato:
 2) O CONTEXTO: uma frase por ativo de contexto — está a favor, contra ou neutro e porquê (em que zona está, de que lado), e a quebra a vigiar nesse ativo com A AÇÃO que ela desencadeia na âncora (ex.: "se o WTI fechar abaixo de X no 4H (−2%), é sinal contra o long na BP: espera").
 3) OS RÁCIOS (se houver): o veredicto da app numa ou duas frases (ex.: "a âncora está em zona de compra, mas os rácios mostram-na fraca face a X e Y: nos rácios o trade certo seria vender a âncora e comprar X").
 4) CONCLUSÃO: sinal forte (âncora e contexto em sintonia), com alerta (contexto contra) ou sem trade; e o que tinha de acontecer no contexto para mudar isso.
-VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho acima/abaixo de <preço> (<distância>)", "em zona de compra/venda", "pronto", "sem zona". PALAVRAS PROIBIDAS: "viragem", "virar", "gatilho", "zona aberta", "em alta", "em baixa". Cada preço vem com o que é e a distância. Usa só os números destes dados.`;
+VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho acima/abaixo de <preço> (<distância>)", "em zona de compra/venda", "pronto", "sem zona". PALAVRAS PROIBIDAS: "viragem", "virar", "gatilho", "zona aberta", "em alta", "em baixa". Cada preço vem com o que é e a distância.${AI_LF_RULES}
+- No CONTEXTO e nos RÁCIOS, usa as linhas, os FVG e a contagem que vêm por baixo de cada ativo: um rácio colado ao teto ou ao chão de um canal meu tem de ser dito, mesmo que a estrutura dele esteja "neutra".
+Usa só os números destes dados.`;
   function aiJointBrief(anc, ctx) {
     const head = aiWithSym(anc, () => aiSummary(null, { noFmt: true })) || `=== ${nm(anc)} === (sem dados)`, ax = aiBest(anc), ad = ax ? ax.dir : 0, lines = [], rat = { fav: [], con: [] };
     for (const c of ctx) {
@@ -6637,7 +6768,8 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
       const rel = aiRelOf(anc, c), x = aiBest(c), eff = x && rel.v ? x.dir * rel.v : 0, rl = rel.v === 1 ? 'anda com' : rel.v === -1 ? 'anda contra' : 'relação desconhecida';
       const v = !x ? 'NEUTRO (sem zona)' : !ad ? `empurra ${eff === 1 ? 'para LONG' : 'para SHORT'} na âncora (a âncora não tem zona)` : eff === ad ? 'A FAVOR — sinal forte' : '⚠ CONTRA — alerta';
       const sts = (settings.setups || []).filter((y) => y.on && !suHid(y, c)).map((st0) => { const y = favSetup(c, st0); return y && y.rank >= 2 ? `${st0.name} ${y.dir === 1 ? 'LONG' : 'SHORT'}: ${aiPhase(c, y)}` : null; }).filter(Boolean);
-      lines.push(`- ${nm(c)} (${c}) · ${rl} a âncora (${rel.src}) · ${v}${rel.weak ? ' (pesa pouco)' : ''}\n   ${sts.join('\n   ') || 'sem zona em nenhum setup'}${dayIdxNote(c, x ? x.dir : 1)}`);
+      const lf = aiWithSym(c, () => { const pd = data['1d'] || data['4h'] || data[Object.keys(data)[0]]; return aiLinesFvg(pd && pd.price, '   '); }) || [];
+      lines.push(`- ${nm(c)} (${c}) · ${rl} a âncora (${rel.src}) · ${v}${rel.weak ? ' (pesa pouco)' : ''}\n   ${sts.join('\n   ') || 'sem zona em nenhum setup'}${dayIdxNote(c, x ? x.dir : 1)}${lf.length ? '\n' + lf.join('\n') : ''}`);
       if (isRatio(c) && x) (eff === (ad || eff) ? rat.fav : rat.con).push(`${nm(c)} (${x.dir === 1 ? 'em zona de compra' : 'em zona de venda'} no ${tfLabel(x.st.zone)})`);
     }
     const [aSide, aTxt] = ax ? [ax.dir === 1 ? 'LONG' : 'SHORT', `${ax.st0.name} ${ax.dir === 1 ? 'LONG' : 'SHORT'} — ${aiPhase(anc, ax)}`] : ['', 'sem zona em nenhum setup'];
@@ -6723,18 +6855,19 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
         <td style="text-align:left"><b>${npEsc(r.st0.name)}</b><div class="mu" style="font-size:11px">${L(st.zone)} → ${L(st.trig)}</div></td>
         <td>${sideC(x.dir)}</td>
         <td>${zoneC(st.zone, x.z, true, x.deepTxt || '')}${x.deep ? `<div class="mu" style="font-size:11px">${up ? 'desconto' : 'prémio'} profundo</div>` : ''}</td>
+        <td title="FVG na perna do ${L(st.zone)} que fez estrutura: verde · vermelho">${fvgPair(dm[st.zone])}</td>
         <td style="text-align:left"><span class="cz nt hit">${L(st.trig)} ${arC(x.dir)} ${npEsc(brk)}</span><div class="mu" style="font-size:11px">${suAgoTxt(r.ago, st.trig)}</div></td>
         <td style="text-align:left">${PRONTO}${x.rsv.mode === 'counter' ? ` <span class="ev wn">⚠ contra o ${L(x.rsv.ctx)}</span>` : ''}<div style="margin-top:4px">${`<span class="ev ${fvg ? 'ok' : 'miss'}">${fvg ? '✔' : '✘'} FVG na quebra</span>`}${x.sweep ? ' <span class="ev ok">💧 sweep antes</span>' : ''}${x.star ? ` <span class="ev ok wrap">${npEsc(/⭐/.test(x.star.txt || '') ? x.star.txt : '⭐ ' + (x.star.txt || 'zona de reversão'))}</span>` : ''}</div></td>
         <td>${emaDot(dm)}</td>
         <td style="text-align:left;font-size:12.5px">${earnB(r.s, 30) ? earnB(r.s, 30) + '<br>' : ''}${suWords({ rsv: x.rsv, st, dir: x.dir, z: x.z, zoneOk: true, trigOk: true, ready: true }, dm)}</td>
         <td class="ctxcol" style="text-align:left">${ctxCellC(x.rsv, dm, x.dir)}</td>
         </tr>`; };
-    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Zona <span style="text-transform:none">(tend. principal)</span></th><th style="text-align:left">Quebra <span style="text-transform:none">(mov. recente)</span></th><th style="text-align:left">Estado · extras</th><th title="EMA 8/21 do Diário (só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D 8/21</th><th style="text-align:left">Em palavras</th><th style="text-align:left">Contexto</th></tr>';
+    const head = '<tr><th>Ativo</th><th style="text-align:left">Setup</th><th>Sentido</th><th>Zona <span style="text-transform:none">(tend. principal)</span></th><th title="FVG na perna do timeframe da zona que fez estrutura: verde (subida) · vermelho (descida)">FVG perna</th><th style="text-align:left">Quebra <span style="text-transform:none">(mov. recente)</span></th><th style="text-align:left">Estado · extras</th><th title="EMA 8/21 do Diário (só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D 8/21</th><th style="text-align:left">Em palavras</th><th style="text-align:left">Contexto</th></tr>';
     const wl = wait.slice(0, 12).map((r) => { const dm = (favData[r.s] || {}).tfs || {}; return `<li><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a> · ${npEsc(r.st0.name)} ${sideC(r.x.dir)} — ${zoneC(r.x.st.zone, r.x.z, true)} ${npEsc(r.b.txt)} <span class="ctxn small ${ctxInfo(r.x.rsv, dm, r.x.dir).k}">· ${ctxInfo(r.x.rsv, dm, r.x.dir).txt}</span></li>`; }).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Setups prontos</h2><div class="sub">${ready.length} pronto${ready.length === 1 ? '' : 's'} nos favoritos · pronto = em zona e a quebra já feita no timeframe de quebra (o FVG é extra) · a quebra mais recente primeiro · ${favProg || ''}</div></div></div>
       ${npOnlyBar() || npFQBox('npSuQ', 'Procurar (ex.: ouro, GC=F)…')}
       <div class="np-ff">${on.map((x) => `<button data-suf="${npEsc(x.name)}" class="${F[x.name] === false ? '' : 'on'}" title="Mostrar / esconder os setups ${npEsc(x.name)}">${npEsc(x.name)}</button>`).join('')}<button data-sufav="1" class="${settings.npSuFav ? 'on' : ''}" style="margin-left:14px" title="Esconder os setups contra o timeframe de cima (⚠)">✔ só a favor</button></div>
-      <div class="revwrap"><table class="revtbl sutbl">${head}${ready.map(row).join('') || `<tr><td colspan="9" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum setup pronto nestes filtros.'}</td></tr>`}</table></div>
+      <div class="revwrap"><table class="revtbl sutbl">${head}${ready.map(row).join('') || `<tr><td colspan="10" class="mu">${!Object.keys(favData).length ? 'a carregar os favoritos…' : 'Nenhum setup pronto nestes filtros.'}</td></tr>`}</table></div>
       ${wl ? `<h3 class="np-h2" style="margin-top:22px;font-size:20px">Mais perto de ficar prontos</h3><p class="mu" style="font-size:12.5px;margin:4px 0 8px">em zona, à espera da quebra — a mais perto primeiro</p><ul class="np-suw">${wl}</ul>` : ''}`;
     npFQWire('npSuQ', npRenderSetups0); npOnlyWire(box, npRenderSetups0);
     box.querySelectorAll('[data-sufav]').forEach((b) => b.addEventListener('click', () => { settings.npSuFav = !settings.npSuFav; save('mss_settings4', settings); npRenderSetups0(); }));
@@ -6754,11 +6887,11 @@ VOCABULÁRIO: "à espera da quebra para cima/para baixo no <timeframe>: fecho ac
     const all = revRows().filter((r) => (npOnly ? r.s === npOnly : npFavMatch(r.s, npFQ) && npKindOk(r.s, npKind))), list = all.filter((r) => npRevTf === 'all' || r.id === npRevTf);
     const cnt = (id) => all.filter((r) => id === 'all' || r.id === id).length, SH = { '1h': '1H', '4h': '4H', '1d': 'D', '1w': 'S', '1M': 'M' };
     const num = settings.revMode !== 'tick';
-    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.filter(([k]) => k !== 'ctx').map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}<th title="EMA 8/21 do Diário (sempre do Diário, só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D 8/21</th>${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th>' : ''}<th title="Estado da quebra no timeframe de quebra (só informativo)">Quebra</th><th title="${npEsc((REV_COLS.find(([k]) => k === 'ctx') || [])[2] || '')}">Contexto</th></tr>`;
+    const head = `<tr><th>Ativo</th><th>TF</th><th>Sentido</th><th title="Correção da tendência principal">Zona</th><th title="FVG na perna que fez estrutura: verde (subida) · vermelho (descida)">FVG perna</th>${num ? '<th>Preço</th>' : ''}${REV_COLS.filter(([k]) => k !== 'ctx').map(([, t, tip]) => `<th title="${npEsc(tip)}">${t}</th>`).join('')}<th title="EMA 8/21 do Diário (sempre do Diário, só informativo): 🟢 EMA 8 acima da 21 · 🔴 abaixo">EMA D 8/21</th>${num ? '<th title="Origem da perna: além daqui a reversão falha">Invalida</th>' : ''}<th title="Estado da quebra no timeframe de quebra (só informativo)">Quebra</th><th title="${npEsc((REV_COLS.find(([k]) => k === 'ctx') || [])[2] || '')}">Contexto</th></tr>`;
     const cellN = (r, k) => { const x = r.val[k]; if (x && x.dot) return `<td class="nv"><span class="np-dot ${x.dot}" title="${npEsc(x.t)}">●</span></td>`; if (!x) return `<td class="nv"><span class="mu">${k === 'fr' && isRatio(r.s) ? 'n/a' : '—'}</span></td>`; return `<td class="nv ${r.ok[k] ? 'hit' : ''}"${x.t ? ` title="${npEsc(x.t)}"` : ''}><div class="v">${npEsc(x.v)}</div>${x.d ? `<div class="d">${npEsc(x.d)}</div>` : ''}</td>`; };
     const cellT = (r, k) => `<td class="ck">${r.ok[k] ? '✔' : k === 'fr' && !r.fr ? '<span class="mu">n/a</span>' : '<span class="mu">·</span>'}</td>`;
     const body = list.map((r) => `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" class="np-chi" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico no ${tfLabel(r.id)}">📈</a><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${wIc(r.s)}${nm(r.s) !== r.s ? `<div class="mu" style="font-size:11px;margin-left:24px">${r.s}</div>` : ''}</td><td><b>${SH[r.id]}</b></td>
-      <td>${sideC(r.dir)}</td><td><span class="cz ${band(r.pull)}">${pct(r.pull)}</span></td>
+      <td>${sideC(r.dir)}</td><td><span class="cz ${band(r.pull)}">${pct(r.pull)}</span></td><td title="FVG na perna do ${tfLabel(r.id)} que fez estrutura: verde · vermelho">${fvgPair(r.d)}</td>
       ${num ? `<td class="nv"><div class="v"><b>${npEsc(aiF(r.price))}</b></div></td>` : ''}${REV_COLS.filter(([c]) => c !== 'ctx').map(([c]) => (num ? cellN : cellT)(r, c)).join('')}<td>${emaDot((favData[r.s] || {}).tfs)}</td>${num ? cellN(r, 'inv') : ''}
       <td style="white-space:nowrap">${r.gat}</td>${(num ? cellN : cellT)(r, 'ctx').replace('<td class="', '<td class="ctxcol ')}</tr>`).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Reversões prováveis</h2><div class="sub">${all.length} zona${all.length === 1 ? '' : 's'} de correção (≥ 50%) nos favoritos · ordenado pelo número de sinais a favor · o gatilho é só informativo — passa o rato pelos títulos das colunas</div></div></div>
@@ -6829,7 +6962,7 @@ REGRAS:
 - OBSTÁCULOS E VENTO A FAVOR: em cada setup, usa as linhas "no caminho até à quebra", "depois, até ao topo/fundo da perna", "vento a favor" e "divergências" que vêm nos dados. Um obstáculo só se menciona se estiver no caminho ou a menos de ~5% do preço; diz o que é (ex.: "o teto do teu canal 4H em 70 900 (+2%) está antes da quebra: pode travar aí"). Uma divergência "⚠ contra" diz-se sempre, como aviso.
 - Médias: só a SMA 200 e só quando estiver perto (vem nos dados quando está).
 - Nunca comeces por "LONG" ou "SHORT" em maiúsculas nem escolhas um lado a partir da tendência dos timeframes de baixo.
-- Se os dados trouxerem ENQUADRAMENTO DO MERCADO CRIPTO, acaba com 7) ENQUADRAMENTO CRIPTO: uma linha para o TOTAL e uma para o USDT.D + USDC.D, e se confirmam ou contrariam a leitura.
+- Se os dados trouxerem ENQUADRAMENTO DO MERCADO CRIPTO, acaba com 7) ENQUADRAMENTO CRIPTO: uma linha para o TOTAL e uma para o USDT.D + USDC.D, e se confirmam ou contrariam a leitura.${AI_LF_RULES}
 Usa só os números destes dados.`;
   // níveis à volta do preço, de todas as fontes da app (estrutura, liquidez, Fibonacci, médias, Keltner, as minhas linhas)
   function aiObstacles(price) {
@@ -6865,6 +6998,42 @@ Usa só os números destes dados.`;
     });
     return { win, lose, mix, winN, loseN, mixN, n: win.length + lose.length + mix.length };
   }
+  // as minhas linhas/canais, os FVG por preencher (com a relação às linhas) e a contagem de FVG das pernas — para a análise IA (âncora e cada rácio)
+  function aiLinesFvg(price, ind) {
+    const out = [], now = Date.now(), I = ind || ''; if (!(price > 0)) return out;
+    const dd = (x) => pct((x - price) / price * 100, true), LV = [];
+    const ls = userLines().filter((l) => lnLive(l, now));
+    if (ls.length) {
+      out.push(I + 'AS MINHAS LINHAS E CANAIS (elemento principal da leitura, sobretudo nos rácios):');
+      ls.forEach((l) => {
+        const tfs = lnTfsOf(l).slice().sort((a, b) => (TF_MS0[a] || 0) - (TF_MS0[b] || 0)), tl = lnTfsOf(l).map(tfLabel).join('/'), cs = (data[tfs[0]] || {}).candles, nmL = l.name ? ` «${l.name}»` : '';
+        if (l.type === 'chan') {
+          const a = lnVal(l, now, 0, cs), b = lnVal(l, now, l.off || 0, cs), hi = Math.max(a, b), lo = Math.min(a, b); if (!(hi > 0 && lo > 0)) return;
+          LV.push({ v: hi, n: `teto do meu canal ${tl}` }, { v: lo, n: `chão do meu canal ${tl}` });
+          const pos = price > hi ? `o preço está ACIMA do canal (o teto fica a ${dd(hi)})` : price < lo ? `o preço está ABAIXO do canal (o chão fica a ${dd(lo)})` : Math.abs(hi - price) / price <= 0.01 ? 'o preço está COLADO AO TETO (resistência)' : Math.abs(price - lo) / price <= 0.01 ? 'o preço está COLADO AO CHÃO (apoio)' : `o preço está dentro do canal, a ${Math.round((price - lo) / ((hi - lo) || 1) * 100)}% do chão para o teto`;
+          out.push(`${I}- canal ${tl}${nmL}: teto ${aiF(hi)} (${dd(hi)}), chão ${aiF(lo)} (${dd(lo)}) — ${pos}${l.alert ? ' (com alerta 🔔)' : ''}`);
+        } else {
+          const v = lnVal(l, now, 0, cs); if (!(v > 0)) return; LV.push({ v, n: `minha diagonal ${tl}`, fem: 1 });
+          out.push(`${I}- diagonal ${tl}${nmL}: ${aiF(v)} (${dd(v)}) — o preço está ${price > v ? 'acima' : 'abaixo'} dela${Math.abs(v - price) / price <= 0.01 ? ' e COLADO a ela' : ''}${l.alert ? ' (com alerta 🔔)' : ''}`);
+        }
+      });
+    }
+    const nearLine = (lo, hi) => { let b = null; LV.forEach((x) => { const dist = x.v >= lo && x.v <= hi ? 0 : Math.min(Math.abs(x.v - lo), Math.abs(x.v - hi)) / price * 100; if (!b || dist < b.dist) b = Object.assign({ dist }, x); }); return b; };
+    const FT = [['1M', 'Mensal'], ['1w', 'Semanal'], ['1d', 'Diário'], ['4hc', '4H contexto'], ['1h', '1H']], fl = [], cnt = [];
+    FT.forEach(([id, lb]) => {
+      const d = data[id]; if (!d || !d.ext || !d.ext.res || tfHid(id) || !monTfGet(symbol, id, 'f')) return;
+      (d.ext.res.fvgs || []).filter((f) => f.filled == null && f.top > f.bot).map((f) => ({ f, m: (f.top + f.bot) / 2 })).filter((o) => Math.abs(o.m - price) / price <= 0.15)
+        .sort((a, b) => Math.abs(a.m - price) - Math.abs(b.m - price)).slice(0, 3).forEach(({ f }) => {
+          const nl = nearLine(f.bot, f.top), inside = price >= f.bot && price <= f.top;
+          fl.push(`${I}- ${f.dir === 1 ? 'verde (de subida)' : 'vermelho (de descida)'} do ${lb} ${aiF(f.bot)}–${aiF(f.top)} (${inside ? 'o preço está DENTRO dele' : dd(price > f.top ? f.top : f.bot)})${nl ? (nl.dist <= 0.5 ? ` — COLADO ${nl.fem ? 'à' : 'ao'} ${nl.n} (${aiF(nl.v)})` : nl.dist <= 3 ? ` — perto ${nl.fem ? 'da' : 'do'} ${nl.n} (${aiF(nl.v)}, a ${pct(nl.dist)})` : '') : ''}`);
+        });
+      const c = fvgC(d); if (!c) return; const v = fvgGR(c), con = c.legC + c.corC;
+      cnt.push(`${I}- ${lb} (${c.dir === 1 ? 'sobe' : 'desce'}): na perna que fez estrutura (${c.dir === 1 ? 'HL → HH' : 'LH → LL'}) 🟢 ${v.g} · 🔴 ${v.r}; na correção depois dela 🟢 ${v.cg} · 🔴 ${v.cr}${!con ? ' — perna LIMPA (nenhum FVG contra)' : con === 1 && c.legC === 0 ? ` — já nasceu o PRIMEIRO FVG contra (na correção)` : ''}`);
+    });
+    if (fl.length) out.push(I + 'FVG POR PREENCHER (a menos de 15%; lê-os em relação às minhas linhas):', ...fl);
+    if (cnt.length) out.push(I + 'FORÇA DAS PERNAS — contagem de FVG (do Mensal ao 1H, todos com o mesmo peso):', ...cnt);
+    return out;
+  }
   function aiSummary(al, o) {
     const N = nm(symbol) !== symbol ? nm(symbol) + ' (' + symbol + ')' : symbol;
     const UNI_NOTE = uniOn(settings) ? '\n\nNOTA: cada timeframe tem UMA só estrutura (do Anual ao Diário: só os topos/fundos que quebraram estrutura; do 4H para baixo: todos os topos/fundos). O 4H tem duas: o "4H" (todos os topos/fundos — dá a quebra do Longo prazo) e o "4H contexto" (só quebras, ancorado ao Diário — dá a zona do Day trade). Diz sempre de que timeframe falas.' : '';
@@ -6874,9 +7043,9 @@ Usa só os números destes dados.`;
     const cry = !isRatio(symbol) && isCrypto(symbol) && !tfHid('5m'), noScalp = (st) => !suHid(st) && (cry || !(st.trig === '5m' || /scalp/i.test(st.name || '')));
     out.push(cry ? 'Foco: Longo prazo e Swing primeiro; Day trade e Scalp como afinação dentro da zona.' : 'Foco: Longo prazo e Swing (este ativo não tem Day trade nem Scalp).');
     out.push(`${N} — preço ${price != null ? aiF(price) : '?'} (${new Date().toLocaleString('pt-PT')})`);
-    TFS.forEach((t) => { if (data[t.id] && !tfHid(t.id) && (cry || t.id !== '5m')) { out.push(aiTfLine(t.id, data[t.id])); if (t.id === '4h' && data['4hc']) out.push(aiTfLine('4hc', data['4hc'])); } });
+    TFS.forEach((t) => { if (data[t.id] && !tfHid(t.id) && (cry || t.id !== '5m')) { if (t.id === '4h' && data['4hc'] && monTfGet(symbol, '4hc', 'm')) out.push(aiTfLine('4hc', data['4hc'])); if (monTfGet(symbol, t.id, 'm')) out.push(aiTfLine(t.id, data[t.id])); } });
     // VEREDICTO DA APP por setup (a regra das zonas): a IA explica, não decide
-    const evs = (settings.setups || []).filter((x) => x.on && noScalp(x)).map((st0) => ({ st0, r: evalSetup(st0) })).filter((e) => e.r);
+    const evs = (settings.setups || []).filter((x) => x.on && noScalp(x) && !monOffSt(symbol, x)).map((st0) => ({ st0, r: evalSetup(st0) })).filter((e) => e.r);
     const ev = evs.map(({ st0, r }, k) => {
       const st = r.st, up = r.dir === 1, dt = data[st.trig], ts = dt && dt.ext.snap;
       if (!r.zoneOk) return `- ${st0.name}: SEM TRADE — ${r.why}`;
@@ -6900,10 +7069,8 @@ Usa só os números destes dados.`;
       out.push('', 'Obstáculos ACIMA (do mais perto para o mais longe): ' + (ob.up.filter((x) => Math.abs(ob.d(x)) <= 15).slice(0, 6).map(f).join('; ') || 'nenhum até +15%'));
       out.push('Obstáculos ABAIXO: ' + (ob.dn.filter((x) => Math.abs(ob.d(x)) <= 15).slice(0, 6).map(f).join('; ') || 'nenhum até −15%'));
     }
-    // as minhas linhas
-    const ls = userLines().filter((l) => lnLive(l));
-    if (ls.length) out.push('', 'As minhas linhas: ' + ls.map((l) => { const now = Date.now(), v = lnVal(l, now, 0), v2 = l.type === 'chan' ? lnVal(l, now, l.off || 0) : null, dd = (x) => (price ? ` (${pct((x - price) / price * 100, true)})` : '');
-      return `${l.type === 'chan' ? 'canal' : 'diagonal'} em ${lnTfsOf(l).map(tfLabel).join('/')} agora em ${aiF(v)}${dd(v)}${v2 != null ? ' / ' + aiF(v2) + dd(v2) : ''}${l.alert ? ' (com alerta 🔔)' : ''}`; }).join('; '));
+    // as minhas linhas, os FVG por preencher e a contagem de FVG das pernas
+    { const lf = aiLinesFvg(price); if (lf.length) out.push('', ...lf); }
     // força relativa
     const fr = aiStrength(symbol);
     if (fr.win.length || fr.lose.length || fr.mix.length) out.push('', `Força relativa de ${nm(symbol)} (pelos rácios, Semanal e Diário): ganha a ${fr.win.join(', ') || 'nenhum'}; perde para ${fr.lose.join(', ') || 'nenhum'}${fr.mix.length ? '; misto com ' + fr.mix.join(', ') : ''}.`);
@@ -6915,7 +7082,8 @@ Usa só os números destes dados.`;
       rs.forEach((r) => { const f = favData[r]; if (!f || !f.tfs) { out.push(`- ${r}: sem dados carregados`); return; }
         const tfs = ['1M', '1w', '1d', '4h'].filter((id) => f.tfs[id]).map((id) => { const sn = f.tfs[id].ext.snap; return sn && sn.trend ? `${tfLabel(id)} ${sn.trend === 1 ? '▲' : '▼'} ${pct(sn.pullback)}` : `${tfLabel(id)} —`; }).join(', ');
         const best = favEvals(r).filter((x) => x && noScalp(x.st)).sort((a, b) => b.rank - a.rank)[0];
-        out.push(`- ${nm(r)} ${r} (${aiF(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}`); });
+        const rl = (aiWithSym(r, () => { const pd = data['1d'] || data['4h'] || data[Object.keys(data)[0]]; return aiLinesFvg(pd && pd.price, '   '); }) || []).filter((x) => /^ {3}- (canal|diagonal)/.test(x));
+        out.push(`- ${nm(r)} ${r} (${aiF(f.price)}): ${tfs}${best ? '; melhor setup: ' + npSetupTxt(best) : ''}${rl.length ? '\n   as minhas linhas neste rácio:\n' + rl.join('\n') : ''}`); });
     }
     // BTC: enquadrar com o mercado cripto total (TOTAL) e o domínio das stablecoins (USDT.D + USDC.D)
     if (/^BTC(USDT|USDC|FDUSD|EUR)?$/.test(symbol)) {

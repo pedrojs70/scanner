@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-16T11:00:18.903Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-17T14:50:45.113Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -690,7 +690,7 @@
       phase, pullback: pull,
       fromBroken: s.lastBroken ? (price - s.lastBroken) / s.lastBroken * 100 : null,
       toInvalid: (price - s.prot.p) / price * 100,
-      protected: s.prot.p, extreme: ext,
+      protected: s.prot.p, extreme: ext, protI: s.prot.i, extI: s.ext.i,
       levels: { 50: lvl(0.5), 618: lvl(0.618), 65: lvl(0.65), 786: lvl(0.786), 918: lvl(0.918) }, logScale: lg,
       lastBreak: lb ? Object.assign({ barsAgo: nowIdx - lb.i }, lb) : null,
       pending: res.pending || null,
@@ -741,7 +741,19 @@
     }
     return null;
   }
-  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive };
+  // força da perna pelos FVG: quantos FVG nasceram na perna que fez estrutura (limite → topo/fundo: HL→HH ou LH→LL) e na correção depois dela
+  // fav = no sentido da estrutura, con = contra. Contam os criados (mesmo os já preenchidos). firstCon = o 1.º FVG contrário depois do limite (perna ou correção).
+  function fvgCount(res) {
+    const s = res && res.state; if (!s || !s.trend || !s.prot || !res.fvgs) return null;
+    const a = s.prot.i, b = s.ext && s.ext.i != null ? s.ext.i : Infinity, d = s.trend, o = { dir: d, legF: 0, legC: 0, corF: 0, corC: 0, firstCon: null, a, b };
+    for (const f of res.fvgs) {
+      if (a == null || f.created <= a) continue; const fav = f.dir === d;
+      if (f.created <= b) { if (fav) o.legF++; else o.legC++; } else if (fav) o.corF++; else o.corC++;
+      if (!fav && (!o.firstCon || f.created < o.firstCon.created)) o.firstCon = f;
+    }
+    return o;
+  }
+  const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive, fvgCount };
   if (typeof module !== 'undefined' && module.exports) module.exports = api; else root.StructureEngine = api;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -919,22 +931,26 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false,
     rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2,
     emaOn: true,   // cruzamento EMA 8/21 no Diário
+    fvgxOn: true, fvgxMin: 1, fvgxTfs: ['1M', '1w', '1d', '4hc', '1h'],   // primeiro FVG contrário depois de uma perna limpa
+    fvglOn: true, fvglTfs: ['1M', '1w', '1d', '4hc', '1h'], fvglPct: 0.5,   // o preço entra num FVG colado a uma linha tua
+    earnOn: true, earnDays: 2,   // resultados das empresas (todos os favoritos): aviso N dias antes
+    lineAll: false, linePct: 0,   // linhas: todas as dos favoritos (sem 🔔) · distância por defeito (0 = automática: 1% do Diário para cima, 0,5% abaixo)
     nearOn: true, nearTfs: ['1M', '1w', '1d', '4h'], nearTfsR: ['1M', '1w', '1d'], nearPct: { '1Y': 8, '6M': 6, '3M': 5, '1M': 5, '1w': 3, '1d': 2, '4h': 1 }, nearInv: true, nearCont: false,
     smaOn: true, smaTfs: ['1w', '1d'], smaPre: 0, smaRearm: 5,
     tgtOn: true, tgtPct: 1, lineOn: true,
     fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true },
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true, fvgx: true, fvgl: true },
     // rácios: só estrutura do Diário para cima e as tuas linhas (forRv2: o padrão novo substituiu o antigo uma vez)
-    forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false },
+    forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false, fvgx: true, fvgl: true },
   };
-  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'], rz: ['rzOn'], ema: ['emaOn'] };
+  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'], rz: ['rzOn'], ema: ['emaOn'], fvgx: ['fvgxOn'], fvgl: ['fvglOn'] };
   const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
   // WATCH LIST: os ativos vigiados usam as definições PRIORITÁRIAS (A.pri.on — mesmas chaves das escolhas por ativo), que substituem as normais
   const isW = (S, sym) => !!(S && (S.watch || []).indexOf(sym) >= 0 && (S.favs || []).indexOf(sym) >= 0);
   function applyP(o, p) {
-    const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn' };
+    const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn', fvgx: 'fvgxOn', fvgl: 'fvglOn' };
     for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
     if (p.week === false) { o.weekOn = false; o.dayOn = false; } else if (p.week === true && !o.weekOn && !o.dayOn) { o.weekOn = true; o.dayOn = true; }
     const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
@@ -957,8 +973,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function anyOn(A, sym, S) {
     if (isW(S, sym) || ((S && S.pos) || []).some((p) => p.sym === sym)) return true;
     const e = effA(A, sym, S), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
-    const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert);
-    return !!(su || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
+    const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert || e.lineAll);
+    return !!(su || e.fvgxOn || e.fvglOn || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -1219,7 +1235,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (!A._np && A.pri && A.pri.on && (S.watch || []).length) { const B = Object.assign({}, A, { _np: 1 }); applyP(B, A.pri.on); neededTfs(S, B).forEach((id) => s.add(id)); }
     if ((S.pos || []).length) ['1M', '1w', '1d'].concat((S.pos || []).map((p) => p.zone), (S.pos || []).map((p) => p.trig)).filter(Boolean).forEach((id) => s.add(id === '4hc' ? '4h' : id));
     if (A.setupOn || A.fvgOn) (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false).forEach((x) => { s.add(x.zone); s.add(x.trig); if (ctxOf(x)) s.add(ctxOf(x)); if (FB && FB.NEXT[x.zone]) { s.add(FB.NEXT[x.zone]); if (FB.NEXT[FB.NEXT[x.zone]]) s.add(FB.NEXT[FB.NEXT[x.zone]]); } });
-    if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert) lnTfs(l).forEach((id) => s.add(id)); }));
+    if (A.lineOn) Object.values(S.lines || {}).forEach((ls) => (ls || []).forEach((l) => { if (l.alert || A.lineAll) lnTfs(l).forEach((id) => s.add(id)); }));
+    if (A.fvgxOn) (A.fvgxTfs || A_DEF.fvgxTfs).forEach((id) => s.add(id === '4hc' ? '4h' : id));
+    if (A.fvglOn) (A.fvglTfs || A_DEF.fvglTfs).forEach((id) => s.add(id === '4hc' ? '4h' : id));
     if (A.kzOn) { s.add('5m'); s.add('1h'); }
     if (A.weekOn || A.dayOn) s.add('1h');
     if (A.nearOn) (A.nearTfs || []).concat(A.nearTfsR || A_DEF.nearTfsR).forEach((id) => s.add(id));
@@ -1785,12 +1803,12 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   function lineAlerts(sym, raw, S, A, st, now, out) {
     // uma linha pode estar em vários timeframes: um só alerta por linha; o fecho fora do canal conta no timeframe mais pequeno marcado (e vigiado)
-    const ls = ((S.lines || {})[sym] || []).filter((l) => l.alert && lnLive(l, now)).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0)); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
+    const ls = ((S.lines || {})[sym] || []).filter((l) => (l.alert || A.lineAll) && lnLive(l, now)).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0) && !(A.tfOff && A.tfOff[id])); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
     if (!A.lineOn || !ls.length) return;
     st.ln = st.ln || {};
     for (const l of ls) {
       const cs = raw[l.tf]; if (!cs || !cs.length) continue;
-      const price = cs[cs.length - 1].c, f = lnAt(l, now, cs), pc = (+l.pct || (TF_MS[l.home || l.tf] >= 864e5 ? 1 : 0.5)) / 100;
+      const price = cs[cs.length - 1].c, f = lnAt(l, now, cs), pc = (+l.pct || +A.linePct || (TF_MS[l.home || l.tf] >= 864e5 ? 1 : 0.5)) / 100;
       const sides = l.type === 'chan' ? [['base', f(0)], ['par', f(l.off || 0)]] : [['linha', f(0)]];
       const chHi = l.type === 'chan' ? Math.max(sides[0][1], sides[1][1]) : null;
       for (const [nm, v] of sides) {
@@ -1821,8 +1839,84 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       }
     }
   }
+  // ---------- FVG: primeiro FVG contrário depois de uma perna limpa ----------
+  const FVX_ORDER = ['1M', '1w', '1d', '4hc', '1h'];
+  const fvgCnt = (d) => (d && d.ext && d.ext.res && E.fvgCount ? E.fvgCount(d.ext.res) : null);
+  const cntTxt = (id, d) => { const c = fvgCnt(d); if (!c) return null; const up = c.dir === 1; return `${LBL[id]} (${up ? 'sobe' : 'desce'}): perna 🟢 ${up ? c.legF : c.legC} · 🔴 ${up ? c.legC : c.legF}${c.corF + c.corC ? ` · correção 🟢 ${up ? c.corF : c.corC} · 🔴 ${up ? c.corC : c.corF}` : ''}`; };
+  function fvgxAlerts(sym, dm, A, st, now, out) {
+    if (!A.fvgxOn) return; const N = Math.max(1, +A.fvgxMin || 1), tfs = (A.fvgxTfs || A_DEF.fvgxTfs).filter((id) => !(A.tfOff && A.tfOff[id]));
+    for (const id of tfs) {
+      const d = dm[id]; if (!d || !d.closed || d.closed.length < 5) continue;
+      const c = fvgCnt(d), sn = d.ext.snap; if (!c || !c.firstCon || !sn || !sn.trend) continue;
+      const f = c.firstCon, n = d.closed.length; if (f.created < n - 2) continue;   // só logo a seguir ao fecho da vela que criou o FVG (um aviso por FVG)
+      if (c.legF < N) continue; const inLeg = f.created <= c.b;
+      const key = `fx|${sym}|${id}|${d.closed[f.created].t}`; if (st.seen[key]) continue; st.seen[key] = now; if (st.silent) continue;
+      const up = c.dir === 1, low = FVX_ORDER.slice(FVX_ORDER.indexOf(id) + 1).map((k) => cntTxt(k, dm[k])).filter(Boolean);
+      out.push({ kind: 'fvgx', sym, text: [
+        `⚠️ <b>Primeiro FVG contrário · ${LBL[id]} · ${esc(sym)}</b>`,
+        `Depois de ${c.legF} FVG de ${up ? 'subida' : 'descida'} na perna (${fmt(sn.protected)} → ${fmt(sn.extreme)}) e nenhum contra, nasceu o primeiro FVG de ${up ? 'descida' : 'subida'} (${fmt(f.bot0 != null ? f.bot0 : f.bot)}–${fmt(f.top0 != null ? f.top0 : f.top)}) ${inLeg ? 'ainda dentro da perna' : 'na correção'}.`,
+        `A ${up ? 'subida' : 'descida'} do ${LBL[id]} pode estar a esgotar-se. O limite da estrutura é ${fmt(sn.protected)}.`,
+        low.length ? 'Nos timeframes de baixo: ' + low.join(' · ') : '',
+      ].filter(Boolean).join('\n') });
+    }
+  }
+  // ---------- o preço entra num FVG colado a uma linha tua ----------
+  function fvglAlerts(sym, dm, S, A, st, now, out) {
+    if (!A.fvglOn) return; const ls = ((S.lines || {})[sym] || []).filter((l) => lnLive(l, now)); if (!ls.length) return;
+    const tfs = (A.fvglTfs || A_DEF.fvglTfs).filter((id) => !(A.tfOff && A.tfOff[id])), k = (+A.fvglPct || 0.5) / 100;
+    st.fl = st.fl || {};
+    for (const id of tfs) {
+      const d = dm[id]; if (!d || !d.ext || !d.ext.res) continue; const price = d.price;
+      for (const f of (d.ext.res.fvgs || []).filter((g) => g.filled == null)) {
+        const lo = f.bot, hi = f.top; if (!(hi > lo)) continue;
+        let hit = null;
+        for (const l of ls) {
+          const g = lnAt(l, now), vs = l.type === 'chan' ? [[g(0), l], [g(l.off || 0), l]] : [[g(0), l]];
+          const hiC = l.type === 'chan' ? Math.max(vs[0][0], vs[1][0]) : null;
+          for (const [v] of vs) { if (!(v > 0)) continue; const dist = v >= lo && v <= hi ? 0 : Math.min(Math.abs(v - lo), Math.abs(v - hi)) / v;
+            if (dist <= k && (!hit || dist < hit.dist)) hit = { dist, v, l, fem: l.type !== 'chan', what: l.type === 'chan' ? (v === hiC ? 'teto do teu canal' : 'chão do teu canal') : 'tua diagonal' }; }
+        }
+        if (!hit) continue;
+        const key = `fl|${sym}|${id}|${d.closed[f.created] ? d.closed[f.created].t : f.created}`, inside = price >= lo && price <= hi, was = st.fl[key];
+        st.fl[key] = { in: inside, at: now };
+        if (!inside || (was && was.in)) continue;
+        if (st.silent) continue;
+        const tl = lnTfs(hit.l).map((x) => LBL[x]).join('/');
+        out.push({ kind: 'fvgl', sym, text: [
+          `🎯 <b>FVG colado a uma linha tua · ${LBL[id]} · ${esc(sym)}</b>`,
+          `O preço (${fmt(price)}) entrou no FVG ${f.dir === 1 ? 'verde (de subida)' : 'vermelho (de descida)'} do ${LBL[id]} ${fmt(lo)}–${fmt(hi)}, ${hit.dist === 0 ? (hit.fem ? 'atravessado pela' : 'atravessado pelo') : (hit.fem ? 'colado à' : 'colado ao')} ${hit.what} ${tl} (${fmt(hit.v)}).${hit.l.name ? ' · ' + esc(hit.l.name) : ''}`,
+          `É a confluência mais forte: ${f.dir === 1 ? 'possível apoio' : 'possível resistência'}.`,
+        ].join('\n') });
+      }
+    }
+  }
+  // ---------- resultados das empresas: aviso N dias antes (todos os favoritos; a data vem do worker) ----------
+  function earnAlerts(earn, S, A, st, now) {
+    const out = []; if (!A.earnOn || !earn) return out; const days = +A.earnDays || 2;
+    for (const sym of S.favs || []) {
+      const e = earn[sym]; if (!e || !e.t) continue; const left = (e.t - now) / 864e5; if (left <= 0 || left > days) continue;
+      const key = `er|${sym}|${e.t}`; if (st.seen[key]) continue; st.seen[key] = now; if (st.silent) continue;
+      const dt = new Date(e.t), dd = `${String(dt.getUTCDate()).padStart(2, '0')}/${String(dt.getUTCMonth() + 1).padStart(2, '0')}`, n = Math.ceil(left);
+      out.push({ kind: 'earn', sym, text: `📅 <b>Resultados · ${esc(sym)}</b>\nApresenta resultados a ${dd} (${n <= 1 ? 'amanhã' : 'daqui a ' + n + ' dias'}${e.est ? '; data ainda estimada' : ''}). Um salto nesse dia pode atravessar a zona e o limite de uma vez.` });
+    }
+    return out;
+  }
+  // monitorização por timeframe (Definições → Monitorização → Por timeframe): Monitorizar e Alertas desligados tiram esse timeframe dos alertas
+  const TFK = (id, role) => (id === '4h' && role !== 'trig' ? '4hc' : id);
+  function tfOffOf(S, sym) {
+    const o = (S && S.monTfs && S.monTfs[sym]) || null, off = {}; if (!o) return null;
+    for (const k in o) if (o[k] && (o[k].m === false || o[k].a === false)) off[k] = true;
+    return Object.keys(off).length ? off : null;
+  }
   // monitorização (Definições): abaixo do timeframe escolhido para o ativo nada é vigiado — setups com gatilho mais baixo, killzones (5m) e listas de timeframes
-  function monA(A, S, sym) {
+  function monA(A0, S, sym) {
+    let A = A0; const off = tfOffOf(S, sym);
+    if (off) {
+      A = Object.assign({}, A0, { tfOff: off }); A.setups = Object.assign({}, A0.setups || {});
+      (S.setups || []).forEach((x) => { if (off[TFK(x.zone, 'zone')] || off[TFK(x.trig, 'trig')] || (ctxOf(x) && off[TFK(ctxOf(x), 'ctx')])) A.setups[x.name] = false; });
+      ['nearTfs', 'brkTfs', 'rzTfs', 'fibTfs', 'smaTfs', 'kcTfs', 'revTfs'].forEach((k) => { if (Array.isArray(A0[k])) A[k] = A0[k].filter((id) => !off[id]); });
+      if (off['1d']) A.emaOn = false;
+    }
     const SY = root.MSS_SYNTH; if (!SY || !SY.monOf) return A;
     const minMs = TF_MS[SY.monOf(S, sym)] || 0; if (minMs <= TF_MS['5m']) return A;
     const B = Object.assign({}, A), ok = (id) => (TF_MS[id] || 0) >= minMs;
@@ -1841,6 +1935,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (A.nearOn) (A.nearTfs || []).forEach((id) => setupTfs.add(id));
     if (A.brkOn) (A.brkTfs || A_DEF.brkTfs).forEach((id) => setupTfs.add(id));
     if (A.emaOn) setupTfs.add('1d');
+    if (A.fvgxOn) (A.fvgxTfs || A_DEF.fvgxTfs).forEach((id) => setupTfs.add(id === '4hc' ? '4h' : id));
+    if (A.fvglOn) (A.fvglTfs || A_DEF.fvglTfs).forEach((id) => setupTfs.add(id === '4hc' ? '4h' : id));
     if (A.posOn && myPos.length) myPos.forEach((p) => { ['1M', '1w', '1d'].forEach((id) => setupTfs.add(id)); if (p.zone) setupTfs.add(p.zone); if (p.trig) setupTfs.add(p.trig); });
     if (A.rzOn) (A.rzTfs || A_DEF.rzTfs).forEach((id) => setupTfs.add(id));
     if (A.fibOn) (A.fibTfs || []).forEach((id) => setupTfs.add(id));
@@ -1865,15 +1961,18 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     revAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
+    fvgxAlerts(sym, dm, A, st, now, out);
+    fvglAlerts(sym, dm, S, A, st, now, out);
     if (A._pri) out.forEach((m) => { if (m.text && m.text.indexOf('ALERTA PRIORITÁRIO') < 0) m.text = '🚨 <b>ALERTA PRIORITÁRIO</b>\n' + m.text; m.pri = true; });
     return out;
   }
   function pruneState(st, now) {
+    if (st.fl) for (const k of Object.keys(st.fl)) if (now - (st.fl[k].at || 0) > 30 * 864e5) delete st.fl[k];
     for (const k of Object.keys(st.seen)) if (now - st.seen[k] > 12 * 864e5) delete st.seen[k];
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, dailyFix, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
+  root.MSS_ALERT_CORE = { _fx: fvgxAlerts, _fl: fvglAlerts, earnAlerts, fvgCnt, anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, dailyFix, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -2331,6 +2430,19 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       } catch (e) { hb.err.push(s + ': ' + (e.message || e)); }
     }
     st.silent = false;
+    // resultados das empresas: as datas vêm do worker de 12 em 12 h (só ações; o worker responde "none" aos outros)
+    try {
+      if (A.earnOn !== false) {
+        const eq = favs.filter((s) => !C.isRatio(s) && !isCrypto(s) && !SYN.isSynth(s) && /^[A-Za-z0-9.\-]{1,15}$/.test(s));
+        if (eq.length && (!st.earnAt || now - st.earnAt > 12 * 36e5)) {
+          const got = {};
+          for (let i = 0; i < eq.length; i += 25) { const r = http(STOCK_API + '/earnings?s=' + eq.slice(i, i + 25).map(encodeURIComponent).join(',')); if (r.code === 200) Object.assign(got, JSON.parse(r.text)); }
+          st.earn = {}; for (const k in got) if (got[k] && got[k].t) st.earn[k] = { t: got[k].t, est: !!got[k].est };
+          st.earnAt = now;
+        }
+        if (st.earn) C.earnAlerts(st.earn, S, A, st, now).forEach((m) => msgs.push(m));
+      }
+    } catch (e) { hb.err.push('resultados: ' + (e.message || e)); }
     if (first) msgs.push({ kind: 'info', sym: '', text: '✅ <b>Vigia ligado</b>\nA vigiar ' + favs.length + ' favoritos de 5 em 5 minutos. A partir de agora recebes aqui os alertas que escolheste na app.' });
     const own = Object.assign({}, S.autoNames || {}, S.names || {});
     for (const m of msgs) {
