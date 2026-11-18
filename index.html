@@ -55,7 +55,7 @@
   th { color:var(--muted); font-weight:500; font-size:12px; background:var(--panel); }
   tr.grp th { color:var(--text); font-size:11px; letter-spacing:.5px; padding-bottom:2px; border-bottom:none; }
   .gl { border-left:1px solid var(--line); }
-  .lyr { padding:3px 8px; font-size:12px; margin-left:auto; } .lyr.on { background:#2a3440; border-color:#4a5868; } .lyr.editing { background:#f5c518 !important; color:#111 !important; border-color:#f5c518 !important; font-weight:600; }
+  .lyr { padding:3px 8px; font-size:12px; margin-left:auto; } .lyr.on { background:#2a3440; border-color:#4a5868; } .alpa .qk .lyr.on { background:#1d2430; color:#fff; border-color:#1d2430; } .lyr.editing { background:#f5c518 !important; color:#111 !important; border-color:#f5c518 !important; font-weight:600; }
   tbody tr { cursor:pointer; } tbody tr:hover { background:#161c23; }
   tr.sel { background:#18202a !important; } tr.sel td.tf { box-shadow:3px 0 0 var(--acc) inset; }
   tr.recent td.tf::after { content:' •'; color:var(--acc); }
@@ -343,6 +343,11 @@
   .np-h { cursor:grab; touch-action:none; user-select:none; color:var(--np-mu); font-size:14px; padding:0 6px 0 0; margin-left:-2px; line-height:1; align-self:center; }
   .np-h:active { cursor:grabbing; }
   .np-dragging { opacity:.55; outline:1px dashed var(--np-ink); }
+  .np-selbar { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:10px 0 6px; font-size:14px; }
+  .np-selbar label { display:flex; align-items:center; gap:6px; cursor:pointer; }
+  .np-selbar button { font:inherit; font-size:13px; padding:4px 10px; cursor:pointer; }
+  .np-selbar .np-seldel { color:#c62828; border-color:#c62828; }
+  input.np-fsel { margin:0 6px 0 0; width:16px; height:16px; cursor:pointer; vertical-align:middle; }
   .np-syninfo { flex-basis:100%; font-size:12px; color:var(--np-mu); margin-top:8px; line-height:1.5; }
   .linehint { display:none; position:absolute; left:8px; top:8px; z-index:6; background:#f5c518; color:#111; font-size:12.5px; padding:5px 9px; border-radius:3px; pointer-events:auto; }
   .linehint a { color:#111; }
@@ -840,7 +845,7 @@
   .sutbl td:nth-child(9) { white-space:normal; min-width:260px; max-width:360px; text-align:left; } .sutbl td.ctxcol { white-space:normal; min-width:150px; }
   td.fvgc, th.fvgc { width:46px; text-align:center; } td.divc, th.divc { width:40px; text-align:center; } .fvgp { white-space:nowrap; font-weight:700; }
   .mttbl td { white-space:nowrap; padding:4px 3px; } .mtc { font-size:11px; padding:1px 5px; margin:0 1px; border:1px solid var(--evm); background:transparent; color:var(--evm); border-radius:3px; cursor:pointer; } .mtc.on { background:var(--evf); color:var(--prf); border-color:var(--evf); } .mtc:disabled { opacity:.35; cursor:default; }
-  .fseq { font-size:14px; letter-spacing:1px; white-space:normal; word-break:break-all; } .fbar { color:var(--evm); margin:0 3px; } td.fvgs { max-width:150px; }
+  .fseq { font-size:14px; letter-spacing:1px; display:inline-flex; align-items:stretch; white-space:nowrap; } .fseq .fpart { display:inline-block; white-space:nowrap; } .fseq .fpart:first-child { text-align:right; } .fbar { color:transparent; font-size:0; width:0; border-left:1.5px solid var(--evm); margin:2px 5px; align-self:stretch; } td.fvgs { max-width:150px; }
   .np-only { margin:6px 0 12px; padding:9px 12px; background:var(--evb); border-radius:3px; font-size:13.5px; }
   body.uni .nunirow, body.uni .nunicell { display:none; }
   /* as classes antigas passam a seguir o dicionário */
@@ -895,7 +900,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 18nov 15h28</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 18nov 20h39</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -5547,8 +5552,10 @@
   const fvgDot = (f) => `<span class="${f.dir === 1 ? 'c-up' : 'c-dn'}">${f.filled == null ? '●' : '○'}</span>`;
   function fvgSeqHtml(c) {
     if (!c) return '<span class="muted">·</span>';
-    const leg = c.list.filter((x) => x.leg).map((x) => fvgDot(x.f)).join(''), cor = c.list.filter((x) => !x.leg).map((x) => fvgDot(x.f)).join('');
-    return `<span class="fseq">${leg || '<span class="muted">—</span>'}<span class="fbar">|</span>${cor}</span>`;
+    // até 7 bolas por linha; quando passa, a linha seguinte fica do mesmo lado da barra (perna à esquerda, correção à direita)
+    const rows = (a) => { const r = []; for (let i = 0; i < a.length; i += 7) r.push(a.slice(i, i + 7).join('')); return r.join('<br>'); };
+    const leg = rows(c.list.filter((x) => x.leg).map((x) => fvgDot(x.f))), cor = rows(c.list.filter((x) => !x.leg).map((x) => fvgDot(x.f)));
+    return `<span class="fseq"><span class="fpart">${leg || '<span class="muted">—</span>'}</span><span class="fbar">|</span><span class="fpart">${cor}</span></span>`;   // cada lado parte linha do seu lado da barra
   }
   // lista de cada FVG contado (para a dica ao passar o rato)
   function fvgTip(d, c) {
@@ -6045,26 +6052,29 @@ function motor_() {
   // alertas que não existem para um ativo sem 15m/5m: setups com gatilho/zona nesses timeframes e as killzones (velas de 5m)
   const alHid = (k, s) => (k.indexOf('su:') === 0 ? suHid((settings.setups || []).find((x) => x.name === k.slice(3)), s) : k === 'kz' ? tfHid('5m', s) : false);
   const AL_HID_TIP = 'não existe neste ativo: 15m e 5m (Day trade, Scalp, killzones) só nos ativos com intraday — Definições → Monitorização';
+  let alView = 'all';   // classe de ativos à vista na lista (Todos · Cripto · Ações/futuros · Rácios)
   function alRenderA() {
     const favs = npSorted(), keys = alKeys(), box = $('#alTabA');
     const grpName = { c: 'Cripto', s: 'Ações, ETFs e futuros', r: 'Rácios (A ÷ B)' };
     let lst = '', lg = null;
-    for (const s of favs) { const g = npGroup(s); if (g !== lg) { lst += `<div class="gh">${grpName[g]}</div>`; lg = g; } lst += `<label><input type="checkbox" data-as="${s}" ${alSel.has(s) ? 'checked' : ''}> ${s}</label>`; }
+    for (const s of favs) { const g = npGroup(s); if (alView !== 'all' && g !== alView) continue; if (g !== lg) { lst += `<div class="gh">${grpName[g]}</div>`; lg = g; } lst += `<label><input type="checkbox" data-as="${s}" ${alSel.has(s) ? 'checked' : ''}> ${s}</label>`; }
+    if (!lst) lst = '<div class="muted small" style="padding:8px">Nenhum favorito desta classe.</div>';
     const sel = [...alSel].filter((s) => favs.includes(s)), effs = sel.map((s) => alEff(alDraft, s));
     const ks = keys.map(([k, t]) => { const on = effs.filter((e) => e[k]).length, st = !sel.length ? '' : on === sel.length ? 'checked' : on ? 'data-mixed="1"' : '';
       const hid = sel.length && sel.every((x) => alHid(k, x));
       return `<label${hid ? ` style="opacity:.45" title="${AL_HID_TIP}"` : ''}><input type="checkbox" data-ak="${k}" ${st} ${sel.length && !hid ? '' : 'disabled'}> ${t}${hid ? ' <span class="muted small">(só ativos com intraday)</span>' : ''}</label>`; }).join('');
-    box.innerHTML = `<div class="alpa"><div><div class="qk"><button class="lyr" data-q="all">Todos</button><button class="lyr" data-q="c">Cripto</button><button class="lyr" data-q="s">Ações/futuros</button><button class="lyr" data-q="r">Rácios</button><button class="lyr" data-q="none">Nenhum</button></div><div class="lst">${lst || '<span class="muted small">sem favoritos</span>'}</div></div>
+    box.innerHTML = `<div class="alpa"><div><div class="qk"><button class="lyr${alView === 'all' ? ' on' : ''}" data-q="all">Todos</button><button class="lyr${alView === 'c' ? ' on' : ''}" data-q="c">Cripto</button><button class="lyr${alView === 's' ? ' on' : ''}" data-q="s">Ações/futuros</button><button class="lyr${alView === 'r' ? ' on' : ''}" data-q="r">Rácios</button><button class="lyr" data-q="none">Nenhum</button></div><div class="lst">${lst || '<span class="muted small">sem favoritos</span>'}</div></div>
       <div><div class="small muted" style="margin-bottom:6px">${sel.length ? `${sel.length} selecionado${sel.length > 1 ? 's' : ''}: ${sel.slice(0, 6).join(', ')}${sel.length > 6 ? '…' : ''}${sel.length > 1 ? ' · caixa a meio (—) = escolhas diferentes entre eles' : ''}` : 'Seleciona um ou mais ativos à esquerda.'}</div>
       <div class="ks">${ks}</div>
-      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="alOffSel" ${sel.length ? '' : 'disabled'}>Desligar tudo nos selecionados</button><span class="small muted" style="align-self:center">as caixas valem logo para os ativos selecionados · grava com “Guardar”</span></div>
+      <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"><button id="alOnSel" ${sel.length ? '' : 'disabled'}>Ligar tudo nos selecionados</button><button id="alOffSel" ${sel.length ? '' : 'disabled'}>Desligar tudo nos selecionados</button><span class="small muted" style="align-self:center">as caixas valem logo para os ativos selecionados · grava com “Guardar”</span></div>
       <div class="small muted" style="margin-top:8px">Os números (timeframes, percentagens, Telegram…) estão em <a href="#" data-gotab="s">Ajustes</a> e valem para todos. Ativos sem nenhum alerta não são analisados pelo vigia (ficam só na app).</div></div></div>`;
     box.querySelectorAll('[data-mixed]').forEach((i) => { i.indeterminate = true; });
     box.querySelectorAll('[data-as]').forEach((i) => i.addEventListener('change', () => { if (i.checked) alSel.add(i.dataset.as); else alSel.delete(i.dataset.as); alRenderA(); }));
-    box.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => { const q = b.dataset.q; alSel = new Set(q === 'none' ? [] : favs.filter((s) => q === 'all' || npGroup(s) === q)); alRenderA(); }));
+    box.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => { const q = b.dataset.q; alSel = new Set(q === 'none' ? [] : favs.filter((s) => q === 'all' || npGroup(s) === q)); if (q !== 'none') alView = q; alRenderA(); }));   // a lista mostra só a classe escolhida
     box.querySelector('[data-gotab]').addEventListener('click', (e) => { e.preventDefault(); alSetTab('s'); });
-    const apply = (all) => { alDraft.per = Object.assign({}, alDraft.per || {}); for (const s of sel) { const p = Object.assign({}, alDraft.per[s] || {}); box.querySelectorAll('[data-ak]').forEach((i) => { if (all === false) p[i.dataset.ak] = false; else if (!i.indeterminate) p[i.dataset.ak] = i.checked; }); alDraft.per[s] = p; } alRenderA(); };
+    const apply = (all) => { alDraft.per = Object.assign({}, alDraft.per || {}); for (const s of sel) { const p = Object.assign({}, alDraft.per[s] || {}); box.querySelectorAll('[data-ak]').forEach((i) => { if (all === false) p[i.dataset.ak] = false; else if (all === 'on') { if (!i.disabled) p[i.dataset.ak] = true; } else if (!i.indeterminate) p[i.dataset.ak] = i.checked; }); alDraft.per[s] = p; } alRenderA(); };
     box.querySelectorAll('[data-ak]').forEach((i) => i.addEventListener('change', () => { i.indeterminate = false; i.removeAttribute('data-mixed'); apply(true); }));
+    const on = $('#alOnSel'); if (on) on.addEventListener('click', () => apply('on'));
     const of = $('#alOffSel'); if (of) of.addEventListener('click', () => { if (confirm('Desligar todos os alertas de ' + sel.length + ' ativo(s)?')) apply(false); });
   }
   function alRenderG() {
@@ -6084,7 +6094,7 @@ function motor_() {
     box.querySelectorAll('[data-go]').forEach((td) => td.addEventListener('click', () => { alSel = new Set([td.dataset.go]); alSetTab('a'); }));
   }
   function openAlerts() {
-    alDraft = alCfg();
+    alDraft = alCfg(); alView = 'all';
     for (const id in AL_CHK) $('#' + id).checked = !!alDraft[AL_CHK[id]];
     $('#alMin').value = alDraft.minPull;
     $('#alNearTfs').innerHTML = TFS.map((t) => `<span class="alnt"><label class="chk"><input type="checkbox" data-nt="${t.id}" ${alDraft.nearTfs.includes(t.id) ? 'checked' : ''}> ${tfLabel(t.id)}</label> <input type="number" data-np="${t.id}" min="0.1" max="30" step="0.1" value="${alDraft.nearPct[t.id] != null ? alDraft.nearPct[t.id] : 0.5}"><span class="muted small">%</span></span>`).join('');
@@ -6314,31 +6324,57 @@ function motor_() {
     box.querySelectorAll('[data-x]').forEach((b) => b.addEventListener('click', (ev) => { ev.stopPropagation(); npRemove(b.dataset.x); }));
   }
   // arrastar para mudar a ordem dos favoritos (só dentro do mesmo grupo: cripto, ações/futuros, rácios)
+  let npDragOn = 0;
   function npDrag(container, rowSel) {
     container.querySelectorAll('.np-h').forEach((h) => {
       h.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); });
       h.addEventListener('pointerdown', (e) => {
         e.preventDefault(); e.stopPropagation();
         const row = h.closest(rowSel); if (!row) return;
-        const g = row.dataset.g; let moved = false;
-        row.classList.add('np-dragging');
-        const move = (ev) => {
-          ev.preventDefault();
+        const g = row.dataset.g; let moved = false, lastY = e.clientY;
+        // se arrastas um dos selecionados, vão todos os selecionados (do mesmo grupo)
+        const grp = npFavSel.has(row.dataset.s) ? [...container.querySelectorAll(rowSel)].filter((r) => r.dataset.g === g && npFavSel.has(r.dataset.s)) : [row];
+        grp.forEach((r) => r.classList.add('np-dragging')); npDragOn = 1;
+        const place = (y) => {
           const sibs = [...container.querySelectorAll(rowSel)].filter((r) => r.dataset.g === g && r !== row);
-          let target = null; for (const r of sibs) { const b = r.getBoundingClientRect(); if (ev.clientY < b.top + b.height / 2) { target = r; break; } }
+          let target = null; for (const r of sibs) { const b = r.getBoundingClientRect(); if (y < b.top + b.height / 2) { target = r; break; } }
           if (target) { if (row.nextElementSibling !== target) { target.parentNode.insertBefore(row, target); moved = true; } }
           else if (sibs.length) { const last = sibs[sibs.length - 1]; if (last.nextElementSibling !== row) { last.after(row); moved = true; } }
         };
+        const move = (ev) => { ev.preventDefault(); lastY = ev.clientY; place(lastY); };
+        // perto do topo/fundo do ecrã a página anda sozinha (para levares o ativo até ao topo de uma lista comprida)
+        const edge = 70, tick = setInterval(() => {
+          const d = lastY < edge ? -Math.ceil((edge - lastY) / 3) - 4 : lastY > innerHeight - edge ? Math.ceil((lastY - (innerHeight - edge)) / 3) + 4 : 0;
+          if (!d) return; const y0 = scrollY; window.scrollBy(0, d); if (scrollY !== y0) place(lastY);
+        }, 16);
         const up = () => {
+          clearInterval(tick); const pend = npDragOn === 2; npDragOn = 0;
           window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); window.removeEventListener('pointercancel', up);
-          row.classList.remove('np-dragging');
-          if (moved) npSaveOrder([...container.querySelectorAll(rowSel)].map((r) => r.dataset.s));
+          grp.forEach((r) => r.classList.remove('np-dragging'));
+          if (!moved) { if (pend) npRender(); return; }
+          let list = [...container.querySelectorAll(rowSel)].map((r) => r.dataset.s);
+          if (grp.length > 1) { const others = grp.map((r) => r.dataset.s); list = list.filter((x) => x === row.dataset.s || !others.includes(x)); const k = list.indexOf(row.dataset.s); list.splice(k, 1, ...others); }
+          npSaveOrder(list);
         };
         window.addEventListener('pointermove', move, { passive: false }); window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       });
     });
   }
+  // seleção de vários favoritos (para apagar ou mover de uma vez)
+  const npFavSel = new Set();
+  function npFavMove(top) {
+    const fv = settings.favs || [], sel = fv.filter((x) => npFavSel.has(x)), rest = fv.filter((x) => !npFavSel.has(x));
+    settings.favs = top ? sel.concat(rest) : rest.concat(sel); settings.favManual = true; settings.favPrev = null; save('mss_settings4', settings); npRender();
+  }
+  function npFavDelSel() {
+    const sel = (settings.favs || []).filter((x) => npFavSel.has(x)); if (!sel.length) return;
+    if (editMode && sel.includes(symbol)) { alert('Termina primeiro a edição do gráfico (✔ Terminar edição) e depois tenta outra vez.'); return; }
+    if (!confirm(`Tirar ${sel.length} ativo${sel.length > 1 ? 's' : ''} dos favoritos?\n\n${sel.slice(0, 12).join(', ')}${sel.length > 12 ? '…' : ''}\n\nAs marcas destes ativos também são apagadas.`)) return;
+    for (const x of sel) { try { wipeMarks(x, `antes de tirar ${x} dos favoritos`); } catch (e) {} delete favData[x]; }
+    settings.favs = (settings.favs || []).filter((y) => !npFavSel.has(y)); npFavSel.clear(); save('mss_settings4', settings); updateStar(); npRender();
+  }
   function npSaveOrder(list) {
+    list = [...new Set(list)];   // se a tabela se redesenhou durante o arrasto, uma linha pode aparecer duas vezes
     const fv = settings.favs || [], seen = new Set(list);
     settings.favs = list.filter((x) => fv.includes(x)).concat(fv.filter((x) => !seen.has(x)));
     settings.favManual = true; settings.favPrev = null; save('mss_settings4', settings); npRender();
@@ -7673,6 +7709,7 @@ Usa só os números destes dados.`;
   let npDqOnly = false;
   function npRenderBoard0() {
     const box = $('#npBoard'); if (!box) return;
+    if (npDragOn) { npDragOn = 2; return; }   // não redesenhar a meio de um arrasto (volta a desenhar no fim)
     const so = settings.npBoardSort || 'name';
     const dqOf = (x) => { const legs = isRatio(x) ? ratioLegs(x) : [x], ds = legs.map((l) => dqMap[l]).filter(Boolean); if (!ds.length) return null;
       const lvl = ds.some((d) => d.lvl === 'bad') ? 'bad' : ds.some((d) => d.lvl === 'warn') ? 'warn' : 'ok'; return { lvl, msgs: ds.flatMap((d, k) => d.msgs.map((m) => (legs.length > 1 ? nm(legs[k]) + ': ' : '') + m.txt)) }; };
@@ -7684,13 +7721,15 @@ Usa só os números destes dados.`;
     if (cmp) list = rows.sort(cmp);
     else { const ord = npSorted(); list = rows.sort((a, b) => ord.indexOf(a.s) - ord.indexOf(b.s)); }
     let body = '', lastG = null;
+    [...npFavSel].forEach((x) => { if (!(settings.favs || []).includes(x)) npFavSel.delete(x); }); const nSel = npFavSel.size;
     for (const r of list) {
       if (!cmp) { const g = npGroup(r.s); if (g !== lastG) { body += `<tr class="grp"><td colspan="9">${g === 'c' ? 'Cripto' : g === 'r' ? 'Rácios (A ÷ B)' : 'Ações, ETFs e futuros'}</td></tr>`; lastG = g; } }
-      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo)">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}${wIc(r.s)} ${dqB(r.s)}</div>${earnB(r.s, 14)}${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
+      body += `<tr class="row" data-s="${r.s}" data-g="${npGroup(r.s)}"><td data-l="Ativo"><div class="nm"><input type="checkbox" class="np-fsel" data-fs="${r.s}"${npFavSel.has(r.s) ? ' checked' : ''} title="Selecionar (para apagar ou mover vários de uma vez)">${cmp ? '' : `<span class="np-h" title="Arrastar para mudar a ordem (só dentro do grupo) · se estiver selecionado, vão todos os selecionados">⠿</span>`}<button class="np-bc" data-c="${r.s}" title="Abrir o gráfico grande">📈</button> ${nmHtml(r.s)}${wIc(r.s)} ${dqB(r.s)}</div>${earnB(r.s, 14)}${cmp ? `<div class="mu" style="font-size:11px">${{ c: 'Cripto', r: 'Rácio', s: 'Ação / ETF / futuro' }[npGroup(r.s)] || ''}</div>` : ''}<div class="mu">${r.price != null ? fmt(r.price) : 'a carregar…'}${r.chg != null ? ` <span class="${r.chg >= 0 ? 'up' : 'dn'}">${pct(r.chg, true)}</span>` : ''}</div></td>
         <td data-l="${uniOn(settings) ? 'Estrutura' : 'Tendência principal'}"><div class="tr">${r.trend}</div></td><td data-l="Setups">${r.setups}</td><td data-l="Perto da inversão">${r.near}</td><td data-l="SMA 200">${r.sma}</td><td data-l="Liquidez por varrer">${r.liq}</td><td data-l="EMA 8/21 Diário">${emaDot((favData[r.s] || {}).tfs)}</td><td data-l="Último alerta">${r.al}</td><td class="bx"><button class="np-bx" data-x="${r.s}" title="Tirar ${r.s} dos favoritos">✕</button></td></tr>`;
     }
     box.innerHTML = `<div class="bhead"><div><h2>Quadro dos favoritos</h2><div class="sub">${(settings.favs || []).length} ativos · ${favProg || ''} · ${dqAll.length ? `<a href="#" class="npDq" title="Verificação das velas das ações, ETFs, futuros e rácios (as cripto vêm da Binance)">velas: ${dqAll.length - dqW} ✔${dqW ? ` · ${dqW} ⚠` : ''}${npDqOnly ? ' (a mostrar só os ⚠ — carrega para ver todos)' : ''}</a> · ` : ''}carrega no título de uma coluna para ordenar; numa linha para abrir o ativo${cmp ? '' : ' · arrasta ⠿ para mudar a ordem'}${so !== 'setup' ? ' · <a href="#" class="npReady">ordenar por prontos</a>' : ''}${!cmp && settings.favManual ? ' · <a href="#" class="npAZ">repor A–Z</a>' : ''}${(so !== 'name' || (settings.favPrev && !cmp)) ? ' · <a href="#" class="npUndo"><b>↶ voltar à ordem anterior</b></a>' : ''} · <a href="#" class="npReAll" title="Escolhe os favoritos a recriar em automático e com quantos Pontos (com cópia e Desfazer)">⟲ Recriar gráficos</a></div></div><div style="display:flex;gap:8px;align-items:center"><select id="npBoardSel" class="np-bsel" aria-label="Ordenar">${BOARD_COLS.map(([k, t]) => `<option value="${k}" ${so === k ? 'selected' : ''}>Ordenar: ${k === 'name' ? 'por grupo (a tua ordem)' : t}</option>`).join('')}</select></div></div>
       ${npFQBox('npBoardQ', 'Procurar (ex.: ouro, GC=F)…')}
+      <div class="np-selbar"><label><input type="checkbox" id="npSelAll"${list.length && list.every((r) => npFavSel.has(r.s)) ? ' checked' : ''}> selecionar todos${npFQ || npKind !== 'all' ? ' os visíveis' : ''}</label>${nSel ? `<b>${nSel} selecionado${nSel > 1 ? 's' : ''}</b><button id="npSelTop" title="Levar os selecionados para o topo (cada um no seu grupo)">⬆ Mover para o topo</button><button id="npSelBot" title="Levar os selecionados para o fim (cada um no seu grupo)">⬇ Mover para o fundo</button><button id="npSelDel" class="np-seldel">🗑 Apagar selecionados (${nSel})</button><a href="#" id="npSelClr">limpar seleção</a>` : '<span class="mu">seleciona vários para apagar ou mover de uma vez</span>'}</div>
       <table><thead><tr>${BOARD_COLS.map(([k, t]) => `<th data-k="${k}" class="${so === k ? 'on' : ''}">${k === 'trend' && uniOn(settings) ? 'Estrutura' : t}</th>`).join('')}<th></th></tr></thead><tbody>${body || `<tr><td colspan="8" class="mu">${npFQ ? 'Nenhum favorito com “' + npEsc(npFQ) + '”.' : 'Ainda não tens favoritos.'}</td></tr>`}</tbody></table>
       <div class="mu" style="margin-top:10px">Estrutura: M = Mensal, S = Semanal, D = Diário, 4H — seta verde/vermelha = sentido; o fundo da % diz a profundidade da correção (azul &lt; 50 · amarelo 50–65 · laranja 65–92 · roxo &gt; 92). Perto da inversão: o limite mais perto entre esses timeframes (⚠ a negrito dentro da distância do alerta 5). SMA 200: distância do preço à média diária (D) e semanal (S). Liquidez: o máximo/mínimo do dia ou da semana anterior ainda por varrer mais perto do preço.</div>`;
     npFQWire('npBoardQ', npRenderBoard0);
@@ -7705,6 +7744,10 @@ Usa só os números destes dados.`;
       save('mss_settings4', settings); npRender(); }));
     npAZWire(box); if (!cmp && !npFQ && npKind === 'all') npDrag(box, 'tr.row');
     box.querySelectorAll('.np-bx').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npRemove(b.dataset.x); }));
+    box.querySelectorAll('.np-fsel').forEach((i) => { i.addEventListener('click', (e) => e.stopPropagation()); i.addEventListener('change', () => { if (i.checked) npFavSel.add(i.dataset.fs); else npFavSel.delete(i.dataset.fs); const y = scrollY; npRenderBoard0(); window.scrollTo(0, y); }); });
+    { const sa = $('#npSelAll'); if (sa) sa.addEventListener('change', () => { list.forEach((r) => (sa.checked ? npFavSel.add(r.s) : npFavSel.delete(r.s))); npRenderBoard0(); }); }
+    { const t = $('#npSelTop'); if (t) t.addEventListener('click', () => npFavMove(true)); const b2 = $('#npSelBot'); if (b2) b2.addEventListener('click', () => npFavMove(false)); const d = $('#npSelDel'); if (d) d.addEventListener('click', npFavDelSel);
+      const c = $('#npSelClr'); if (c) c.addEventListener('click', (e) => { e.preventDefault(); npFavSel.clear(); npRenderBoard0(); }); }
     box.querySelectorAll('.np-bc').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); npOpenChart(b.dataset.c); }));
     const dqa = box.querySelector('.npDq'); if (dqa) dqa.addEventListener('click', (e) => { e.preventDefault(); npDqOnly = !npDqOnly; npRenderBoard0(); });
     box.querySelectorAll('tr.row').forEach((tr) => tr.addEventListener('click', (e) => { if (e.target.closest('[data-tip]') && window.matchMedia('(hover:none)').matches) return; npOpenAsset(tr.dataset.s); }));
