@@ -895,7 +895,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 18nov 13h52</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 18nov 15h28</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -7220,12 +7220,14 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
   }
   function npShowBell() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
+    if (npView !== 'bell') npBellSub = bellUnread() ? 'fired' : 'act';   // com disparados por ver, abre logo nesses
     npView = 'bell'; document.body.dataset.npv = 'bell'; clearInterval(npPxTimer);
     npRender(); window.scrollTo(0, 0); navPush({ v: 'bell' });
   }
+  let npBellSub = 'act';
   function npRenderBell() {
     const box = $('#npBell'); if (!box) return;
-    const now = Date.now(), act = bellArmed();
+    const now = Date.now(), act = bellArmed().filter((x) => x.kind === 'price'), sub = npBellSub;
     const fired = bellFired(), seenT = +settings.firedSeen || 0;
     const priceOf = (s) => (favData[s] && favData[s].price) || (s === dataSym && data[selectedTf] ? data[selectedTf].price : null);
     const lvl = (it) => { if (it.kind === 'price') return it.a.p; const l = it.a, cs = favData[it.s] && favData[it.s].tfs[l.tf] && favData[it.s].tfs[l.tf].candles; return l.type === 'chan' ? [lnVal(l, now, 0, cs), lnVal(l, now, l.off || 0, cs)] : lnVal(l, now, 0, cs); };
@@ -7243,12 +7245,14 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       <td>${f.kind === 'price' ? `tocou o preço <b>${fmt(f.v)}</b>` : `tocou ${npEsc(f.what || 'a tua linha')} em <b>${fmt(f.v)}</b>`}${f.name ? `<div class="mu small">${npEsc(f.name)}</div>` : ''}</td>
       <td class="small">${(BELL_MODE.find(([k]) => k === f.mode) || [0, ''])[1]}${f.once ? '' : ' · sempre'}</td>
       <td><a href="#" class="np-chi" data-bfo="${npEsc(f.k)}" title="Abrir o gráfico no momento do toque">📈 ver</a></td><td><button data-bfd="${npEsc(f.k)}" title="Apagar do histórico">🗑</button></td></tr>`;
-    box.innerHTML = `<div class="bhead"><div><h2>🔔 Alertas</h2><div class="sub">As tuas linhas e alertas de preço · toque exato (a sombra da vela conta) · cria um alerta de preço com o botão direito no gráfico → “🔔 Criar alerta aqui”; numa linha, carrega nela e liga o 🔔</div></div></div>
-      <h3 class="np-h2" style="font-size:20px;margin-top:14px">Ativos <span class="mu" style="font-size:14px">${act.length}</span></h3>
-      <div class="revwrap"><table class="revtbl belltbl"><tr><th>Ativo</th><th>Tipo</th><th>Nível · distância</th><th>Entrega</th><th>Repetir</th><th>Nome</th><th></th></tr>${act.map(aRow).join('') || '<tr><td colspan="7" class="mu">Nenhum alerta ligado.</td></tr>'}</table></div>
-      <p class="mu" style="font-size:12px;margin:6px 0 0">Uma vez: ao disparar, o 🔔 da linha desliga-se (a linha fica) e o alerta de preço sai do gráfico. Sempre: volta a avisar depois de o preço se afastar. Para novos alertas de preço: <select id="bellDef">${bellOpts(BELL_MODE, settings.bellMode || 'both')}</select></p>
-      <h3 class="np-h2" style="font-size:20px;margin-top:22px">Disparados <span class="mu" style="font-size:14px">${fired.length}</span> ${fired.length ? '<button id="bellClr" style="margin-left:10px;font:inherit;font-size:13px;padding:3px 10px">limpar tudo</button>' : ''}</h3>
-      <div class="revwrap"><table class="revtbl belltbl"><tr><th>Quando</th><th>Ativo</th><th>O quê</th><th>Entrega</th><th></th><th></th></tr>${fired.map(fRow).join('') || '<tr><td colspan="6" class="mu">Ainda nada disparou.</td></tr>'}</table></div>`;
+    const nNew = fired.filter((f) => f.at > seenT).length;
+    box.innerHTML = `<div class="bhead"><div><h2>🔔 Alertas</h2><div class="sub">${sub === 'fired' ? 'Os alertas que já tocaram — de preço e das tuas linhas e canais' : 'Os teus alertas de preço · toque exato (a sombra da vela conta) · cria um com o botão direito no gráfico → “🔔 Criar alerta aqui”. Os 🔔 das linhas e canais ligam-se e mudam-se no menu da linha (carrega nela no gráfico).'}</div></div>
+      <div class="np-ff"><button data-bsub="act" class="${sub === 'act' ? 'on' : ''}">Alertas de preço (${act.length})</button><button data-bsub="fired" class="${sub === 'fired' ? 'on' : ''}">Disparados (${fired.length})${nNew ? ` <span class="bellN">${nNew}</span>` : ''}</button></div></div>
+      ${sub === 'fired' ? `<div style="margin-top:12px">${fired.length ? '<button id="bellClr" style="font:inherit;font-size:13px;padding:3px 10px">limpar tudo</button>' : ''}</div>
+      <div class="revwrap" style="margin-top:8px"><table class="revtbl belltbl"><tr><th>Quando</th><th>Ativo</th><th>O quê</th><th>Entrega</th><th></th><th></th></tr>${fired.map(fRow).join('') || '<tr><td colspan="6" class="mu">Ainda nada disparou.</td></tr>'}</table></div>`
+      : `<div class="revwrap" style="margin-top:12px"><table class="revtbl belltbl"><tr><th>Ativo</th><th>Tipo</th><th>Nível · distância</th><th>Entrega</th><th>Repetir</th><th>Nome</th><th></th></tr>${act.map(aRow).join('') || '<tr><td colspan="7" class="mu">Nenhum alerta de preço. Cria um com o botão direito no gráfico → “🔔 Criar alerta aqui”.</td></tr>'}</table></div>
+      <p class="mu" style="font-size:12px;margin:6px 0 0">Uma vez: ao disparar, o alerta sai do gráfico. Sempre: volta a avisar depois de o preço se afastar. Para novos alertas: <select id="bellDef">${bellOpts(BELL_MODE, settings.bellMode || 'both')}</select></p>`}`;
+    box.querySelectorAll('[data-bsub]').forEach((b) => b.addEventListener('click', () => { npBellSub = b.dataset.bsub; npRenderBell(); }));
     const find = (key) => { const [kind, s, id] = key.split('|'); return { kind, s, id }; };
     const updA = (key, fn) => { const { kind, s, id } = find(key);
       if (kind === 'price') pAlSet(s, pAl(s).map((p) => (p.id === id ? fn(Object.assign({}, p)) : p)));
@@ -7265,7 +7269,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const cl = $('#bellClr'); if (cl) cl.addEventListener('click', () => { if (!confirm('Apagar todo o histórico de alertas disparados?')) return; settings.firedClr = Date.now(); settings.firedApp = []; settings.firedDel = []; save('mss_settings4', settings); bellBadge(); npRenderBell(); });
     const df = $('#bellDef'); if (df) df.addEventListener('change', () => { settings.bellMode = df.value; save('mss_settings4', settings); });
     // ao ver a aba, os disparados ficam lidos
-    if (fired.length && fired[0].at > seenT) { settings.firedSeen = fired[0].at; save('mss_settings4', settings); setTimeout(bellBadge, 0); }
+    if (sub === 'fired' && fired.length && fired[0].at > seenT) { settings.firedSeen = fired[0].at; save('mss_settings4', settings); setTimeout(bellBadge, 0); }
   }
   // menu do botão direito no gráfico: criar um alerta de preço (ou apagar o que está debaixo do rato)
   function pAlMenu(ev) {
