@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-17T14:50:45.113Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-18T12:09:44.523Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -303,8 +303,8 @@
     // Fair value gaps (padrão de 3 velas) e respetivo preenchimento
     const fvgs = [];
     for (let i = 2; i < n; i++) {
-      if (L(i) > H(i - 2)) fvgs.push({ dir: 1, top: L(i), bot: H(i - 2), mid: i - 1, created: i });
-      if (H(i) < L(i - 2)) fvgs.push({ dir: -1, top: L(i - 2), bot: H(i), mid: i - 1, created: i });
+      if (L(i) > H(i - 2)) fvgs.push({ dir: 1, top: L(i), bot: H(i - 2), mid: i - 1, created: i, atr: atr[i - 1] || atr[i] || null });
+      if (H(i) < L(i - 2)) fvgs.push({ dir: -1, top: L(i - 2), bot: H(i), mid: i - 1, created: i, atr: atr[i - 1] || atr[i] || null });
     }
     for (const f of fvgs) {
       f.filled = null; f.touched = false;
@@ -741,16 +741,22 @@
     }
     return null;
   }
-  // força da perna pelos FVG: quantos FVG nasceram na perna que fez estrutura (limite → topo/fundo: HL→HH ou LH→LL) e na correção depois dela
-  // fav = no sentido da estrutura, con = contra. Contam os criados (mesmo os já preenchidos). firstCon = o 1.º FVG contrário depois do limite (perna ou correção).
-  function fvgCount(res) {
+  // força da perna pelos FVG: os FVG da perna que fez estrutura (limite → topo/fundo: HL→HH ou LH→LL) e da correção depois dela
+  // cada FVG conta pela VELA DO MEIO (a vela forte que o abriu) · fav = no sentido da estrutura, con = contra · contam os criados (mesmo os já preenchidos)
+  // k = tamanho mínimo em ATR do próprio timeframe (os vazios mais pequenos não contam)
+  function fvgCount(res, k) {
     const s = res && res.state; if (!s || !s.trend || !s.prot || !res.fvgs) return null;
-    const a = s.prot.i, b = s.ext && s.ext.i != null ? s.ext.i : Infinity, d = s.trend, o = { dir: d, legF: 0, legC: 0, corF: 0, corC: 0, firstCon: null, a, b };
+    const a = s.prot.i, b = s.ext && s.ext.i != null ? s.ext.i : Infinity, d = s.trend, kk = +k || 0, o = { dir: d, legF: 0, legC: 0, corF: 0, corC: 0, firstCon: null, a, b, list: [] };
+    if (a == null) return o;
     for (const f of res.fvgs) {
-      if (a == null || f.created <= a) continue; const fav = f.dir === d;
-      if (f.created <= b) { if (fav) o.legF++; else o.legC++; } else if (fav) o.corF++; else o.corC++;
-      if (!fav && (!o.firstCon || f.created < o.firstCon.created)) o.firstCon = f;
+      if (f.mid < a) continue;
+      if (kk && f.atr && (f.top0 != null ? f.top0 - f.bot0 : f.top - f.bot) < kk * f.atr) continue;
+      const fav = f.dir === d, leg = f.mid <= b;
+      if (leg) { if (fav) o.legF++; else o.legC++; } else if (fav) o.corF++; else o.corC++;
+      o.list.push({ f, leg, fav });
+      if (!fav && (!o.firstCon || f.mid < o.firstCon.mid)) o.firstCon = f;
     }
+    o.list.sort((x, y) => x.f.mid - y.f.mid || x.f.created - y.f.created);
     return o;
   }
   const api = { analyze, analyzeRecent, snapshot, rangeBox, DEFAULTS, anchorFrom, fvgLive, fvgCount };
@@ -909,7 +915,63 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // nome do alvo com a origem: "Alvo 2 do Diário" (perna principal) ou "Alvo 2 do Diário (mov. recente)" (perna do movimento recente)
   const starName = (c, dl, tfName) => `${c.tgt} do ${tfName}${dl && (dl.fibsI || []).includes(c.src) && !(dl.fibs || []).includes(c.src) ? ' (mov. recente)' : ''}`;
-  root.MSS_FIB = { ZID, orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+  // ---------- FVG por setup (a mesma leitura na app e no vigia) ----------
+  // tamanho mínimo do FVG, em ATR do próprio timeframe (Definições: fvgMinK)
+  const FVG_K = { '1M': 0.05, '1w': 0.05, '1d': 0.2, '4hc': 0.2, '4h': 0.2, '1h': 0.3, '15m': 0.3, '5m': 0.3 };
+  const fvgK = (id, S) => { const m = S && S.fvgMinK, v = m && m[id]; return v != null && v !== '' ? +v : FVG_K[id] != null ? FVG_K[id] : 0.2; };
+  const fsz = (f) => (f.top0 != null ? f.top0 - f.bot0 : f.top - f.bot);
+  const fvgsK = (d, k) => ((d && d.ext && d.ext.res && d.ext.res.fvgs) || []).filter((f) => !(k && f.atr && fsz(f) < k * f.atr)).slice().sort((a, b) => a.mid - b.mid || a.created - b.created);
+  const fCount = (d, k) => { const E = root.StructureEngine; return d && d.ext && d.ext.res && E && E.fvgCount ? E.fvgCount(d.ext.res, k) : null; };
+  const SERIES = 2, VALID = 10;   // série contra mínima antes do 1.º FVG a favor · validade em velas do gatilho
+  // st = setup já resolvido (zone/trig com ids reais, '4hc' incluído). Devolve:
+  //  disc  = FVG de desconto/prémio (último FVG a favor aberto dentro da zona) e se o preço já lhe tocou nesta correção
+  //  react = ⚡ pronto pela reação: depois do toque, o gatilho criou o 1.º FVG a favor depois de ≥ 2 contra (valid: ≤ 10 velas, sem FVG contra depois)
+  //  top   = ⚠ possível topo/fundo: o TF da zona criou o 1.º FVG contra depois de uma perna limpa; conf = o gatilho também (1.º contra depois de ≥ 2 a favor)
+  function fvgSetup(dm, st, S) {
+    const dz = dm[st.zone], dt = dm[st.trig]; if (!dz || !dz.ext || !dz.ext.res || !dz.closed || !dt || !dt.ext || !dt.ext.res || !dt.closed) return null;
+    const sz = dz.ext.snap, d = sz && sz.trend; if (!d) return null;
+    const kz = fvgK(st.zone, S), kt = fvgK(st.trig, S), cz = fCount(dz, kz), zc = dz.closed, tc = dt.closed, price = dz.price;
+    const inZ = sz.pullback >= 50 && sz.pullback <= 100, o = { dir: d, cz, ct: fCount(dt, kt), inZ, disc: null, react: null, top: null };
+    const tT = (f) => (tc[f.created] ? tc[f.created].t : 0), seqT = fvgsK(dt, kt);
+    const lv50 = sz.levels && sz.levels[50], lim = sz.protected;
+    if (inZ && lv50 != null && lim != null) {
+      const lo = Math.min(lv50, lim), hi = Math.max(lv50, lim);
+      const cs = fvgsK(dz, kz).filter((f) => f.dir === d && f.filled == null && f.top > lo && f.bot < hi);
+      cs.sort((a, b) => Math.abs((a.top + a.bot) / 2 - price) - Math.abs((b.top + b.bot) / 2 - price));
+      const f = cs[0];
+      if (f) {
+        let tI = -1; const from = Math.max(cz && isFinite(cz.b) ? cz.b + 1 : 0, f.created + 1);
+        for (let i = from; i < zc.length; i++) if (d === 1 ? zc[i].l <= f.top : zc[i].h >= f.bot) { tI = i; break; }
+        o.disc = { f, touched: tI >= 0, inside: price >= f.bot && price <= f.top, t: tI >= 0 ? zc[tI].t : null, dist: (d === 1 ? f.top - price : f.bot - price) / price * 100 };
+        if (tI >= 0) for (let j = SERIES; j < seqT.length; j++) {
+          const g = seqT[j]; if (g.dir !== d || tT(g) < o.disc.t) continue;
+          let ok = true; for (let q = 1; q <= SERIES; q++) if (seqT[j - q].dir === d) ok = false;
+          if (!ok) continue;
+          const after = seqT.slice(j + 1), age = tc.length - 1 - g.created;
+          o.react = { f: g, at: tT(g), age, valid: age <= VALID && !after.some((h) => h.dir !== d) && inZ, after: after.length };
+          break;
+        }
+      }
+    }
+    if (cz && cz.firstCon && cz.legC + cz.corC === 1 && cz.legF >= 1) {
+      const fc = cz.firstCon, t0 = zc[fc.mid] ? zc[fc.mid].t : 0;
+      o.top = { f: fc, inLeg: fc.mid <= cz.b, at: zc[fc.created] ? zc[fc.created].t : 0, conf: null };
+      for (let j = SERIES; j < seqT.length; j++) {
+        const g = seqT[j]; if (g.dir === d || tT(g) < t0) continue;
+        let ok = true; for (let q = 1; q <= SERIES; q++) if (seqT[j - q].dir !== d) ok = false;
+        if (!ok) continue;
+        const after = seqT.slice(j + 1), age = tc.length - 1 - g.created;
+        o.top.conf = { f: g, at: tT(g), age, valid: age <= VALID && !after.some((h) => h.dir === d) };
+        break;
+      }
+    }
+    // 🔥 pelos dois: a quebra de estrutura do gatilho veio depois da reação pelos FVG
+    const lb = dt.int && dt.int.snap && dt.int.snap.lastBreak;
+    o.brkT = lb && lb.barsAgo != null && tc[tc.length - 1 - lb.barsAgo] ? tc[tc.length - 1 - lb.barsAgo].t : null;
+    o.double = !!(o.react && o.brkT != null && o.brkT >= o.react.at && lb && lb.dir === d);
+    return o;
+  }
+  root.MSS_FIB = { FVG_K, fvgK, fvgsK, fCount, fvgSetup, ZID, orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Alertas do Scanner de Estrutura — a lógica (sem rede): recebe velas, definições e marcações; devolve as mensagens.
@@ -931,6 +993,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false,
     rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2,
     emaOn: true,   // cruzamento EMA 8/21 no Diário
+    fvgrOn: true, fvgtOn: true, fvgdOn: true,   // FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 PRONTO pelos dois
     fvgxOn: true, fvgxMin: 1, fvgxTfs: ['1M', '1w', '1d', '4hc', '1h'],   // primeiro FVG contrário depois de uma perna limpa
     fvglOn: true, fvglTfs: ['1M', '1w', '1d', '4hc', '1h'], fvglPct: 0.5,   // o preço entra num FVG colado a uma linha tua
     earnOn: true, earnDays: 2,   // resultados das empresas (todos os favoritos): aviso N dias antes
@@ -940,17 +1003,17 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     tgtOn: true, tgtPct: 1, lineOn: true,
     fibOn: false, fibTfs: ['1w', '1d'], fib786: false, fibStar: false, kcAlOn: false, kcTfs: ['1M', '1w', '1d'], revOn: false, revTfs: ['4h', '1d', '1w', '1M'], revMin: 5,
     // para quem vale cada alerta: ativos normais (forA) e rácios A/B (forR)
-    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true, fvgx: true, fvgl: true },
+    forA: { setup: true, fvg: true, kz: true, week: true, near: true, sma: true, tgt: true, line: true, brk: true, rz: true, ema: true, fvgx: true, fvgl: true, fvgr: true, fvgt: true, fvgd: true },
     // rácios: só estrutura do Diário para cima e as tuas linhas (forRv2: o padrão novo substituiu o antigo uma vez)
-    forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false, fvgx: true, fvgl: true },
+    forR: { setup: false, fvg: false, kz: false, week: false, near: true, sma: false, tgt: false, line: true, brk: true, rz: false, ema: false, fvgx: false, fvgl: true, fvgr: false, fvgt: false, fvgd: false },
   };
-  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'], rz: ['rzOn'], ema: ['emaOn'], fvgx: ['fvgxOn'], fvgl: ['fvglOn'] };
+  const GRP_KEYS = { setup: ['setupOn', 'confOn'], fvg: ['fvgOn'], kz: ['kzOn'], week: ['weekOn', 'dayOn'], near: ['nearOn'], sma: ['smaOn'], tgt: ['tgtOn'], line: ['lineOn'], brk: ['brkOn'], rz: ['rzOn'], ema: ['emaOn'], fvgx: ['fvgxOn'], fvgl: ['fvglOn'], fvgr: ['fvgrOn'], fvgt: ['fvgtOn'], fvgd: ['fvgdOn'] };
   const FB = root.MSS_FIB;
   // as escolhas de alertas que valem para este ativo (rácio ou não)
   // WATCH LIST: os ativos vigiados usam as definições PRIORITÁRIAS (A.pri.on — mesmas chaves das escolhas por ativo), que substituem as normais
   const isW = (S, sym) => !!(S && (S.watch || []).indexOf(sym) >= 0 && (S.favs || []).indexOf(sym) >= 0);
   function applyP(o, p) {
-    const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn', fvgx: 'fvgxOn', fvgl: 'fvglOn' };
+    const M = { ema: 'emaOn', rz: 'rzOn', brk: 'brkOn', fvg: 'fvgOn', kz: 'kzOn', near: 'nearOn', sma: 'smaOn', tgt: 'tgtOn', line: 'lineOn', fibz: 'fibOn', kc: 'kcAlOn', rev: 'revOn', fvgx: 'fvgxOn', fvgl: 'fvglOn', fvgr: 'fvgrOn', fvgt: 'fvgtOn', fvgd: 'fvgdOn' };
     for (const k in M) if (p[k] != null) o[M[k]] = !!p[k];
     if (p.week === false) { o.weekOn = false; o.dayOn = false; } else if (p.week === true && !o.weekOn && !o.dayOn) { o.weekOn = true; o.dayOn = true; }
     const sus = Object.keys(p).filter((k) => k.indexOf('su:') === 0);
@@ -974,7 +1037,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (isW(S, sym) || ((S && S.pos) || []).some((p) => p.sym === sym)) return true;
     const e = effA(A, sym, S), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
     const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert || e.lineAll);
-    return !!(su || e.fvgxOn || e.fvglOn || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
+    return !!(su || e.fvgxOn || e.fvglOn || e.fvgrOn || e.fvgtOn || e.fvgdOn || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
 
@@ -1841,23 +1904,60 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   }
   // ---------- FVG: primeiro FVG contrário depois de uma perna limpa ----------
   const FVX_ORDER = ['1M', '1w', '1d', '4hc', '1h'];
-  const fvgCnt = (d) => (d && d.ext && d.ext.res && E.fvgCount ? E.fvgCount(d.ext.res) : null);
-  const cntTxt = (id, d) => { const c = fvgCnt(d); if (!c) return null; const up = c.dir === 1; return `${LBL[id]} (${up ? 'sobe' : 'desce'}): perna 🟢 ${up ? c.legF : c.legC} · 🔴 ${up ? c.legC : c.legF}${c.corF + c.corC ? ` · correção 🟢 ${up ? c.corF : c.corC} · 🔴 ${up ? c.corC : c.corF}` : ''}`; };
-  function fvgxAlerts(sym, dm, A, st, now, out) {
+  const fvgCnt = (d, id, S) => (d && d.ext && d.ext.res && E.fvgCount ? E.fvgCount(d.ext.res, FB && FB.fvgK ? FB.fvgK(id, S) : 0) : null);
+  const cntTxt = (id, d, S) => { const c = fvgCnt(d, id, S); if (!c) return null; const up = c.dir === 1; return `${LBL[id]} (${up ? 'sobe' : 'desce'}): perna 🟢 ${up ? c.legF : c.legC} · 🔴 ${up ? c.legC : c.legF}${c.corF + c.corC ? ` · correção 🟢 ${up ? c.corF : c.corC} · 🔴 ${up ? c.corC : c.corF}` : ''}`; };
+  function fvgxAlerts(sym, dm, A, st, now, out, S) {
     if (!A.fvgxOn) return; const N = Math.max(1, +A.fvgxMin || 1), tfs = (A.fvgxTfs || A_DEF.fvgxTfs).filter((id) => !(A.tfOff && A.tfOff[id]));
     for (const id of tfs) {
       const d = dm[id]; if (!d || !d.closed || d.closed.length < 5) continue;
-      const c = fvgCnt(d), sn = d.ext.snap; if (!c || !c.firstCon || !sn || !sn.trend) continue;
+      const c = fvgCnt(d, id, S), sn = d.ext.snap; if (!c || !c.firstCon || !sn || !sn.trend) continue;
       const f = c.firstCon, n = d.closed.length; if (f.created < n - 2) continue;   // só logo a seguir ao fecho da vela que criou o FVG (um aviso por FVG)
-      if (c.legF < N) continue; const inLeg = f.created <= c.b;
+      if (c.legF < N) continue; const inLeg = f.mid <= c.b;
       const key = `fx|${sym}|${id}|${d.closed[f.created].t}`; if (st.seen[key]) continue; st.seen[key] = now; if (st.silent) continue;
-      const up = c.dir === 1, low = FVX_ORDER.slice(FVX_ORDER.indexOf(id) + 1).map((k) => cntTxt(k, dm[k])).filter(Boolean);
+      const up = c.dir === 1, low = FVX_ORDER.slice(FVX_ORDER.indexOf(id) + 1).map((k) => cntTxt(k, dm[k], S)).filter(Boolean);
       out.push({ kind: 'fvgx', sym, text: [
         `⚠️ <b>Primeiro FVG contrário · ${LBL[id]} · ${esc(sym)}</b>`,
         `Depois de ${c.legF} FVG de ${up ? 'subida' : 'descida'} na perna (${fmt(sn.protected)} → ${fmt(sn.extreme)}) e nenhum contra, nasceu o primeiro FVG de ${up ? 'descida' : 'subida'} (${fmt(f.bot0 != null ? f.bot0 : f.bot)}–${fmt(f.top0 != null ? f.top0 : f.top)}) ${inLeg ? 'ainda dentro da perna' : 'na correção'}.`,
         `A ${up ? 'subida' : 'descida'} do ${LBL[id]} pode estar a esgotar-se. O limite da estrutura é ${fmt(sn.protected)}.`,
         low.length ? 'Nos timeframes de baixo: ' + low.join(' · ') : '',
       ].filter(Boolean).join('\n') });
+    }
+  }
+  // ---------- FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 PRONTO pelos dois ----------
+  function fvgSuAlerts(sym, dm, S, A, st, now, out) {
+    if (!(A.fvgrOn || A.fvgtOn || A.fvgdOn) || !FB || !FB.fvgSetup) return;
+    const seen = new Set();
+    for (const su0 of (S.setups || []).filter((x) => x.on && A.setups[x.name] !== false)) {
+      const rsv = dm[FB.ZID(dm, su0.zone)] && dm[su0.trig] ? FB.resolveSetup(su0, dm, ctxOf(su0)) : null; if (!rsv) continue;
+      const su = Object.assign({}, su0, { zone: rsv.zone, trig: rsv.trig }), k0 = su.zone + '|' + su.trig; if (seen.has(k0)) continue; seen.add(k0);
+      const fs = FB.fvgSetup(dm, su, S); if (!fs) continue;
+      const up = fs.dir === 1, side = up ? 'LONG' : 'SHORT', Z = LBL[su.zone], G = LBL[su.trig], dz = dm[su.zone], sz = dz.ext.snap;
+      const fz = (f) => `${fmt(f.bot0 != null ? f.bot0 : f.bot)}–${fmt(f.top0 != null ? f.top0 : f.top)}`;
+      if (fs.react && fs.react.valid && rsv.mode !== 'blocked' && fs.react.age <= 2 && A.fvgrOn) {
+        const key = `fr|${sym}|${su.name}|${fs.react.at}`;
+        if (!st.seen[key]) { st.seen[key] = now; if (!st.silent) out.push({ kind: 'fvgr', sym, text: [
+          `⚡ <b>Pronto pela reação · ${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
+          `Zona: ${Z} em zona de ${up ? 'compra' : 'venda'} (${pct(sz.pullback)}) · o preço tocou o FVG de ${up ? 'desconto' : 'prémio'} ${fz(fs.disc.f)}.`,
+          `Gatilho: o ${G} criou o 1.º FVG ${up ? 'verde' : 'vermelho'} (${fz(fs.react.f)}) depois de uma série de FVG contra.`,
+          `Falta para o PRONTO normal: a quebra de estrutura ${up ? 'para cima' : 'para baixo'} no ${G}. É um sinal antecipado.`,
+        ].join('\n') }); }
+      }
+      if (fs.top && fs.top.conf && fs.top.conf.valid && fs.top.conf.age <= 2 && A.fvgtOn) {
+        const key = `ft|${sym}|${su.name}|${fs.top.conf.at}`, c = fs.cz;
+        if (!st.seen[key]) { st.seen[key] = now; if (!st.silent) out.push({ kind: 'fvgt', sym, text: [
+          `⚠ <b>Pronto pelo ${up ? 'topo' : 'fundo'} · ${up ? 'SHORT' : 'LONG'} · ${esc(su.name)} · ${esc(sym)}</b>`,
+          `O ${Z} criou o 1.º FVG ${up ? 'vermelho' : 'verde'} (${fz(fs.top.f)}) depois de ${c.legF} ${up ? 'verdes' : 'vermelhos'}${fs.top.inLeg ? ', ainda no topo da perna' : ', no início da correção'}, e o ${G} confirmou com o seu 1.º ${up ? 'vermelho' : 'verde'} (${fz(fs.top.conf.f)}).`,
+          `Ainda não há estrutura a confirmar: é um sinal antecipado, contra a tendência do ${Z}.`,
+        ].join('\n') }); }
+      }
+      if (fs.double && rsv.mode !== 'blocked' && A.fvgdOn) {
+        const lb = dm[su.trig].int.snap.lastBreak;
+        if (lb && lb.barsAgo <= 2) { const key = `fd|${sym}|${su.name}|${fs.react.at}`;
+          if (!st.seen[key]) { st.seen[key] = now; if (!st.silent) out.push({ kind: 'fvgd', sym, text: [
+            `🔥 <b>PRONTO pelos dois · ${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
+            `${Z} em zona (${pct(sz.pullback)}), reação no FVG de ${up ? 'desconto' : 'prémio'} ${fz(fs.disc.f)}, 1.º FVG ${up ? 'verde' : 'vermelho'} no ${G} e agora a quebra de estrutura no ${G}.`,
+          ].join('\n') }); } }
+      }
     }
   }
   // ---------- o preço entra num FVG colado a uma linha tua ----------
@@ -1961,7 +2061,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     revAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
-    fvgxAlerts(sym, dm, A, st, now, out);
+    fvgxAlerts(sym, dm, A, st, now, out, S);
+    fvgSuAlerts(sym, dm, S, A, st, now, out);
     fvglAlerts(sym, dm, S, A, st, now, out);
     if (A._pri) out.forEach((m) => { if (m.text && m.text.indexOf('ALERTA PRIORITÁRIO') < 0) m.text = '🚨 <b>ALERTA PRIORITÁRIO</b>\n' + m.text; m.pri = true; });
     return out;
