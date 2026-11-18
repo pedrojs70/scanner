@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-18T12:09:44.523Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-18T13:52:14.724Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -993,7 +993,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     brkOn: true, brkTfs: ['1M', '1w', '1d'], brkBos: false,
     rzOn: true, rzTfs: ['1M', '1w', '1d'], rzPct: 2,
     emaOn: true,   // cruzamento EMA 8/21 no Diário
-    fvgrOn: true, fvgtOn: true, fvgdOn: true,   // FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 PRONTO pelos dois
+    fvgrOn: true, fvgtOn: true, fvgdOn: true,   // FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 Setup pronto + FVG em sintonia
     fvgxOn: true, fvgxMin: 1, fvgxTfs: ['1M', '1w', '1d', '4hc', '1h'],   // primeiro FVG contrário depois de uma perna limpa
     fvglOn: true, fvglTfs: ['1M', '1w', '1d', '4hc', '1h'], fvglPct: 0.5,   // o preço entra num FVG colado a uma linha tua
     earnOn: true, earnDays: 2,   // resultados das empresas (todos os favoritos): aviso N dias antes
@@ -1036,7 +1036,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function anyOn(A, sym, S) {
     if (isW(S, sym) || ((S && S.pos) || []).some((p) => p.sym === sym)) return true;
     const e = effA(A, sym, S), su = e.setupOn && ((S && S.setups) || []).some((x) => x.on && (e.setups || {})[x.name] !== false);
-    const ln = e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert || e.lineAll);
+    const ln = (e.lineOn && (((S && S.lines) || {})[sym] || []).some((l) => l.alert || e.lineAll)) || ((S && S.pAlerts) || {})[sym] && S.pAlerts[sym].length;
     return !!(su || e.fvgxOn || e.fvglOn || e.fvgrOn || e.fvgtOn || e.fvgdOn || e.emaOn || e.rzOn || e.brkOn || e.kzOn || e.weekOn || e.dayOn || e.nearOn || e.smaOn || e.fibOn || e.kcAlOn || e.revOn || ln);
   }
   const KZ_PROFILES = { ict: { asia: [20, 24], londres: [2, 5], ny: [7, 10], fecho: [10, 12] }, cripto: { asia: [20, 24], londres: [2, 5], ny: [8.5, 11] } };
@@ -1864,6 +1864,51 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     }
     return out;
   }
+  // ---------- toque exato (como no TradingView): as máximas/mínimas das velas desde a última volta — a sombra conta ----------
+  const TOUCH_TFS = ['5m', '15m', '1h', '4h', '1d', '1w'];
+  const lowCs = (raw) => { for (const id of TOUCH_TFS) if (raw[id] && raw[id].length > 1) return { id, cs: raw[id] }; return null; };
+  // velas a ver: as que acabam depois da última volta (na primeira volta, só a vela atual)
+  const sinceCs = (cs, since, from) => { const lo = Math.max(since || 0, from || 0); const r = since ? cs.filter((c) => (c.ct || c.t) > lo) : cs.slice(-1).filter((c) => (c.ct || c.t) > (from || 0)); return r; };
+  const firedRec = (o) => Object.assign({ at: Date.now() }, o);
+  function touchLine(sym, raw, l, A, st, now, out, ak, once) {
+    const lc = lowCs(raw); if (!lc) return;
+    st.tt = st.tt || {}; const since = st.tt[ak]; st.tt[ak] = now;
+    const sides = l.type === 'chan' ? [0, l.off || 0] : [0];
+    let hit = null;
+    for (const c of sinceCs(lc.cs, since, l.alAt || 0)) {
+      for (const off of sides) { const v = lnAt(l, c.t + ((c.ct || c.t) - c.t) / 2)(off); if (v > 0 && c.l <= v && c.h >= v) { hit = { c, v, off }; break; } }
+      if (hit) break;
+    }
+    if (!hit) { if (!once && st.ta && st.ta[ak + '|w']) { const v = lnAt(l, now)(0), p = lc.cs[lc.cs.length - 1].c; if (Math.abs(p - v) / v > 0.003) delete st.ta[ak + '|w']; } return; }
+    if (!once && st.ta && st.ta[ak + '|w']) return;   // "sempre": volta a avisar depois de o preço se afastar
+    st.ta = st.ta || {}; st.ta[once ? ak : ak + '|w'] = now;
+    if (st.silent) return;
+    const chHi = l.type === 'chan' ? Math.max(lnAt(l, now)(0), lnAt(l, now)(l.off || 0)) : null, vNow = lnAt(l, now)(hit.off);
+    const what = l.type === 'chan' ? (vNow === chHi ? 'o teto do teu canal' : 'o chão do teu canal') : 'a tua diagonal';
+    const mode = l.alMode || 'both';
+    out.push({ kind: 'line', sym, noTg: mode === 'app', text: `🔔 <b>${esc(sym)} · ${LBL[l.tf] || l.tf}</b>\nO preço tocou ${what} em ${fmt(hit.v)}${l.name ? ' · ' + esc(l.name) : ''}.${once ? '\n<i>Alerta desligado (era só uma vez). A linha fica no gráfico.</i>' : ''}`,
+      fire: firedRec({ k: once ? ak : ak + '|' + hit.c.t, sym, kind: 'line', id: l.id, alAt: l.alAt || l.at || 0, v: hit.v, t: hit.c.t, tf: l.tf, ctf: lc.id, name: l.name || '', what, mode, once }) });
+  }
+  // alertas de preço (linha horizontal criada com o botão direito no gráfico)
+  function priceAlerts(sym, raw, S, A, st, now, out) {
+    const ps = ((S.pAlerts || {})[sym] || []).filter((p) => p && p.p > 0); if (!ps.length) return;
+    const lc = lowCs(raw); if (!lc) return;
+    st.ta = st.ta || {}; st.tt = st.tt || {};
+    for (const p of ps) {
+      const once = p.rep !== 'always', ak = sym + '|' + p.id + '|' + (p.at || 0);
+      if (once && st.ta[ak]) continue;
+      const since = st.tt[ak]; st.tt[ak] = now;
+      const hit = sinceCs(lc.cs, since, p.at || 0).find((c) => c.l <= p.p && c.h >= p.p);
+      if (!hit) { if (!once && st.ta[ak + '|w'] && Math.abs(lc.cs[lc.cs.length - 1].c - p.p) / p.p > 0.003) delete st.ta[ak + '|w']; continue; }
+      if (!once && st.ta[ak + '|w']) continue;
+      st.ta[once ? ak : ak + '|w'] = now;
+      if (st.silent) continue;
+      const mode = p.mode || 'both';
+      out.push({ kind: 'palert', sym, noTg: mode === 'app', text: `🔔 <b>${esc(sym)}</b>\nO preço tocou ${fmt(p.p)}${p.name ? ' · ' + esc(p.name) : ''}.${once ? '\n<i>Alerta apagado (era só uma vez).</i>' : ''}`,
+        fire: firedRec({ k: once ? ak : ak + '|' + hit.t, sym, kind: 'price', id: p.id, alAt: p.at || 0, v: p.p, t: hit.t, ctf: lc.id, name: p.name || '', mode, once }) });
+    }
+  }
+  const hasTouch = (S, sym) => (((S.pAlerts || {})[sym] || []).length > 0) || (((S.lines || {})[sym] || []).some((l) => l.alert));
   function lineAlerts(sym, raw, S, A, st, now, out) {
     // uma linha pode estar em vários timeframes: um só alerta por linha; o fecho fora do canal conta no timeframe mais pequeno marcado (e vigiado)
     const ls = ((S.lines || {})[sym] || []).filter((l) => (l.alert || A.lineAll) && lnLive(l, now)).map((l) => { const t = lnTfs(l).filter((id) => (TF_MS[id] || 0) >= (A.lineMinMs || 0) && !(A.tfOff && A.tfOff[id])); return t.length ? Object.assign({}, l, { tf: t[0], home: l.tf }) : null; }).filter(Boolean);
@@ -1871,18 +1916,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     st.ln = st.ln || {};
     for (const l of ls) {
       const cs = raw[l.tf]; if (!cs || !cs.length) continue;
-      const price = cs[cs.length - 1].c, f = lnAt(l, now, cs), pc = (+l.pct || +A.linePct || (TF_MS[l.home || l.tf] >= 864e5 ? 1 : 0.5)) / 100;
-      const sides = l.type === 'chan' ? [['base', f(0)], ['par', f(l.off || 0)]] : [['linha', f(0)]];
-      const chHi = l.type === 'chan' ? Math.max(sides[0][1], sides[1][1]) : null;
-      for (const [nm, v] of sides) {
-        const key = sym + '|' + l.id + '|' + nm, dist = Math.abs(price - v) / v, rec = st.ln[key] || (st.ln[key] = { armed: dist > pc });
-        if (!rec.armed) { if (dist > pc * 3) rec.armed = true; continue; }
-        if (dist > pc) continue;
-        rec.armed = false;
-        if (st.silent) continue;
-        const what = l.type === 'chan' ? (v === chHi ? 'teto do canal — possível venda ou realização' : 'chão do canal — possível compra') : 'linha diagonal';
-        out.push({ kind: 'line', sym, text: `📐 <b>${esc(sym)} · ${LBL[l.tf]}</b>\nA ${pct(dist * 100)} ${l.type === 'chan' ? 'do' : 'da'} ${what} (${fmt(v)}).${l.name ? ' · ' + esc(l.name) : ''}` });
-      }
+      const once = !!l.alert && l.alRep !== 'always', ak = sym + '|' + l.id + '|' + (l.alAt || l.at || 0);
+      if (once && st.ta && st.ta[ak]) continue;   // já disparou (uma vez): só volta a avisar se ligares o 🔔 de novo
+      touchLine(sym, raw, l.alert ? l : Object.assign({}, l, { alMode: 'tg' }), A, st, now, out, ak, once);
       if (l.type !== 'chan') {   // quebra da diagonal: uma vela fecha do outro lado da linha
         const cl = cs.filter((c) => c.ct < now), lc = cl[cl.length - 1]; if (lc) {
           const v = lnAt(l, lc.t + (lc.ct - lc.t) / 2, cs)(0), side = lc.c > v ? 1 : lc.c < v ? -1 : 0, key = sym + '|' + l.id + '|x', rec = st.ln[key];
@@ -1923,7 +1959,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       ].filter(Boolean).join('\n') });
     }
   }
-  // ---------- FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 PRONTO pelos dois ----------
+  // ---------- FVG por setup: ⚡ pronto pela reação · ⚠ pronto pelo topo/fundo · 🔥 Setup pronto + FVG em sintonia ----------
   function fvgSuAlerts(sym, dm, S, A, st, now, out) {
     if (!(A.fvgrOn || A.fvgtOn || A.fvgdOn) || !FB || !FB.fvgSetup) return;
     const seen = new Set();
@@ -1954,7 +1990,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         const lb = dm[su.trig].int.snap.lastBreak;
         if (lb && lb.barsAgo <= 2) { const key = `fd|${sym}|${su.name}|${fs.react.at}`;
           if (!st.seen[key]) { st.seen[key] = now; if (!st.silent) out.push({ kind: 'fvgd', sym, text: [
-            `🔥 <b>PRONTO pelos dois · ${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
+            `🔥 <b>Setup pronto + FVG em sintonia · ${side} · ${esc(su.name)} · ${esc(sym)}</b>`,
             `${Z} em zona (${pct(sz.pullback)}), reação no FVG de ${up ? 'desconto' : 'prémio'} ${fz(fs.disc.f)}, 1.º FVG ${up ? 'verde' : 'vermelho'} no ${G} e agora a quebra de estrutura no ${G}.`,
           ].join('\n') }); } }
       }
@@ -2061,6 +2097,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     revAlerts(sym, dm, A, st, now, out, S);
     kcAlerts(sym, raw, A, st, now, out);
     lineAlerts(sym, raw, S, A, st, now, out);
+    priceAlerts(sym, raw, S, A, st, now, out);
     fvgxAlerts(sym, dm, A, st, now, out, S);
     fvgSuAlerts(sym, dm, S, A, st, now, out);
     fvglAlerts(sym, dm, S, A, st, now, out);
@@ -2068,12 +2105,13 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     return out;
   }
   function pruneState(st, now) {
+    for (const o of [st.ta, st.tt]) if (o) for (const k of Object.keys(o)) if (now - (o[k] || 0) > 90 * 864e5) delete o[k];
     if (st.fl) for (const k of Object.keys(st.fl)) if (now - (st.fl[k].at || 0) > 30 * 864e5) delete st.fl[k];
     for (const k of Object.keys(st.seen)) if (now - st.seen[k] > 12 * 864e5) delete st.seen[k];
     st.trk = st.trk.filter((x) => now - x.at < 15 * 864e5);
   }
 
-  root.MSS_ALERT_CORE = { _fx: fvgxAlerts, _fl: fvglAlerts, earnAlerts, fvgCnt, anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, dailyFix, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
+  root.MSS_ALERT_CORE = { hasTouch, _touch: (sym, raw, S, A, st, now) => { const out = []; curRaw = raw; curS = S; lineAlerts(sym, raw, S, A, st, now, out); priceAlerts(sym, raw, S, A, st, now, out); return out; }, _fx: fvgxAlerts, _fl: fvglAlerts, earnAlerts, fvgCnt, anyOn, effA, isRatio, ratioRaw, baseTfs, A_DEF, TF_MS, LBL, MAGG, nyParts, nyOffsetH, fmt, deserEd, earliestEdit, computeTf, aggregateMonths, aggregateSession, monthlyFix, deriveWM, dataCheck, validateIv, dailyFix, neededTfs, levels, evaluateAsset, pruneState, ctxOf, _kc: kcAlerts };
 })(typeof window !== 'undefined' ? window : globalThis);
 
 // Ativos sintéticos (índices que não existem na Binance nem na Yahoo), por agora só o STABLE.D = USDT.D + USDC.D.
@@ -2491,7 +2529,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     // monitorização: cada favorito só é analisado quando "lhe toca" (5m a cada volta; 15m depois de fechar uma vela de 15m; 1H/4H de hora a hora)
     st.lastAn = st.lastAn || {};
     const due = (s) => { const ev = SYN.monEvery(SYN.monOf(S, s)), l = st.lastAn[s]; return !ev || !l || Math.floor(now / ev) > Math.floor(l / ev); };
-    const order = [...new Set(st.trk.map((x) => x.sym))].filter((s) => act.indexOf(s) >= 0);
+    const order = [...new Set(st.trk.map((x) => x.sym).concat(act.filter((s) => C.hasTouch(S, s))))].filter((s) => act.indexOf(s) >= 0);   // os setups seguidos e os ativos com alertas 🔔 (linhas e preços) primeiro
     for (let k = 0; k < act.length; k++) { const s = act[(st.cur + k) % act.length]; if (order.indexOf(s) < 0 && due(s)) order.push(s); }
     hb.due = order.length;
     const batch = [], dl = new Set(); let used = 0;
@@ -2515,7 +2553,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     for (const k in cgrp) { const t = k ? k.split(',') : []; Object.assign(cdata, relay ? relayCandles(relay, cgrp[k], t, edits) : cryptoCandles(cgrp[k], t, edits)); }
     const sdata = {};
     const legData = (x) => { if (SYN.isSynth(x)) { const sy = syn && syn[x]; if (!sy) return { _err: 'sem dados' }; if (!synH[x]) synH[x] = synthHist(a, x); if (!Object.keys(synH[x]).length && !sy.live.length) return { _err: 'importa o histórico (CSV do TradingView) na app' }; return SYN.build(synH[x], sy.live, tfsFor(x)); } if (isCrypto(x)) return cdata[x] || { _err: 'sem dados' }; if (!sdata[x]) { try { sdata[x] = stockCandles(x, tfsFor(x)); } catch (e) { sdata[x] = { _err: String(e.message || e) }; } } return sdata[x]; };
-    const msgs = [];
+    const msgs = [], fires = [];
     for (const s of batch) {
       if (Date.now() - t0 > TIME_MAX) { hb.err.push('sem tempo para ' + s); break; }
       try {
@@ -2548,16 +2586,27 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     const own = Object.assign({}, S.autoNames || {}, S.names || {});
     for (const m of msgs) {
       if (m.sym) { const n = SYN.nameOf(m.sym, own); if (n && n !== m.sym) m.text = m.text.split('· ' + m.sym + '</b>').join('· ' + n + ' (' + m.sym + ')</b>').split('<b>' + m.sym + ' ·').join('<b>' + n + ' (' + m.sym + ') ·'); }
-      m.at = now; const e = tg(A, m.text + linkLine(A, m), m); if (e) hb.err.push(e);
+      m.at = now; if (m.fire) fires.push(Object.assign(m.fire, { at: now, text: m.text }));
+      if (!m.noTg) { const e = tg(A, m.text + linkLine(A, m), m); if (e) hb.err.push(e); }
       st.log.unshift({ at: now, kind: m.kind, sym: m.sym, text: m.text });
     }
     st.log = st.log.slice(0, 80);
+    // alertas 🔔 disparados (linhas e preços): ficam na conta (meta/fired) para a app mostrar na aba 🔔 e desligar os de "uma vez"
+    try {
+      const dsig = JSON.stringify([S.firedClr || 0, (S.firedDel || []).length, (S.firedDel || []).slice(-3)]);
+      if (fires.length || dsig !== st.fdsig) {
+        let fl = []; try { fl = JSON.parse(fsGet(a, 'meta/fired') || '[]'); } catch (e) {}
+        const del = new Set(S.firedDel || []), clr = +S.firedClr || 0, seen = new Set();
+        fl = fires.concat(fl).filter((x) => x && x.k && !del.has(x.k) && x.at > clr && !seen.has(x.k) && seen.add(x.k)).slice(0, 150);
+        const e = fsSet(a, 'meta/fired', JSON.stringify(fl)); if (e) hb.err.push(e); else st.fdsig = dsig;
+      }
+    } catch (e) { hb.err.push('alertas 🔔: ' + (e.message || e)); }
     C.pruneState(st, now);
     for (const k of Object.keys(st.known)) if (favs.indexOf(k) < 0) delete st.known[k];
     if (st.sma) for (const k of Object.keys(st.sma)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.sma[k];
     if (st.ln) for (const k of Object.keys(st.ln)) if (favs.indexOf(k.split('|')[0]) < 0) delete st.ln[k];
     if (st.tgw) st.tgw = st.tgw.filter((x) => favs.indexOf(x.sym) >= 0);
-    for (const o of [st.fibz, st.kc, st.rev]) if (o) for (const k of Object.keys(o)) if (favs.indexOf(k.split('|')[0]) < 0) delete o[k];
+    for (const o of [st.fibz, st.kc, st.rev, st.ta, st.tt]) if (o) for (const k of Object.keys(o)) if (favs.indexOf(k.split('|')[0]) < 0) delete o[k];
     saveState(st);
     hb.ms = Date.now() - t0;
     const e = fsSet(a, 'meta/alertlog', JSON.stringify(Object.assign(hb, { log: st.log })));
