@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-18T15:28:56.408Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-19T16:59:54.905Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1682,7 +1682,8 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
       if (A.nearInv && s.protected != null) kinds.push(['inv', s.protected]);
       if (A.nearCont && s.extreme != null) kinds.push(['cont', s.extreme]);
       for (const [kind, lvl] of kinds) {
-        const key = `n|${sym}|${id}|${kind}|${lvl}`;
+        // uma vez por perna: a continuação guarda-se pela origem da perna (o limite), não pelo topo/fundo — que sobe/desce a cada máximo/mínimo novo
+        const key = kind === 'cont' ? `n|${sym}|${id}|cont|${s.protected != null ? s.protected : lvl}|${up ? 1 : -1}` : `n|${sym}|${id}|${kind}|${lvl}`;
         // do lado certo do nível: inversão — acima do limite numa subida; continuação — abaixo do topo numa subida
         const gap = kind === 'inv' ? (up ? price - lvl : lvl - price) : (up ? lvl - price : price - lvl);
         if (gap < 0) continue;                                   // já passou (a quebra é avisada pela própria estrutura)
