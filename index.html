@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 19nov 20h33</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 19nov 21h12</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -7459,13 +7459,14 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
         if (dir === 1 ? c.l <= edge : c.h >= edge) {
           const stop = mode === 'B' ? (dir === 1 ? Math.min(...cand.map((x) => x.bot)) : Math.max(...cand.map((x) => x.top))) : dir === 1 ? first.bot : first.top;
           const e = edge, risk = Math.abs(e - stop); if (!(risk > 0)) return { r: 'N', why: 'risco zero' };
-          const R = Math.abs(target - e) / risk;
+          const R = Math.abs(target - e) / risk, legR = Math.abs(ext - e) / risk;   // legR: o topo/fundo da perna do gatilho, em R
+          let mfe = 0;   // até onde chegou a favor (em R) antes do stop — a vela da entrada não conta (não se sabe a ordem dentro dela)
           for (let k = i; k < T.length && k <= i + BT_CAP; k++) {
             const d = T[k];
-            if (dir === 1 ? d.l <= stop : d.h >= stop) return { r: 'L', R: -1, mv: risk / e * 100, bars: k - i, rr: R };
-            if (k > i && (dir === 1 ? d.h >= target : d.l <= target)) return { r: 'W', R, mv: Math.abs(target - e) / e * 100, bars: k - i, rr: R };
+            if (dir === 1 ? d.l <= stop : d.h >= stop) return { r: 'L', R: -1, mv: risk / e * 100, bars: k - i, rr: R, mfe, legR, inst: k === i };
+            if (k > i) { mfe = Math.max(mfe, (dir === 1 ? d.h - e : e - d.l) / risk); if (dir === 1 ? d.h >= target : d.l <= target) return { r: 'W', R, mv: Math.abs(target - e) / e * 100, bars: k - i, rr: R, mfe: Math.max(mfe, R), legR }; }
           }
-          return { r: 'O', rr: R };
+          return { r: 'O', rr: R, mfe, legR };
         }
       }
       if (tr && pv && tr.lb !== pv.lb) return { r: 'N', why: 'quebra antes da entrada' };
@@ -7530,7 +7531,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
         const o = btOutcome(T, j, dir, trZ.ext.p, trZ.prot.p);
         const ft = feats(j, dir, trZ, kz, pb, trT.lb.i);
         out.push(Object.assign({ sym, setup: st0.name, kind: 'pronto', dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae, mv: o.mv }, ft));
-        for (const md of ['A', 'B']) { const e = btFvgEntry(T, rt, tf, j, trT.lb, dir, trZ.ext.p, trZ.prot.p, md); out.push(Object.assign({ sym, setup: st0.name, kind: 'fvg' + md, dir, t: T[j].ct, pb, r: e.r, R: e.R, rr: e.rr, why: e.why || '', bars: e.bars, mv: e.mv }, ft)); }
+        for (const md of ['A', 'B']) { const e = btFvgEntry(T, rt, tf, j, trT.lb, dir, trZ.ext.p, trZ.prot.p, md); out.push(Object.assign({ sym, setup: st0.name, kind: 'fvg' + md, dir, t: T[j].ct, pb, r: e.r, R: e.R, rr: e.rr, why: e.why || '', bars: e.bars, mv: e.mv, mfe: e.mfe, legR: e.legR, inst: e.inst ? true : e.r === 'L' ? false : null }, ft)); }
       }
       // ⚡ antes da quebra: em zona, FVG de desconto/prémio tocado e o 1.º FVG a favor no gatilho acabou de nascer
       if (inZ && !usedR.has(legK) && !used.has(legK)) {
@@ -7634,6 +7635,15 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       ${T.length ? `<h3 class="np-h2" style="font-size:20px;margin-top:16px">Taxa base por setup${S && S.deep ? ' <span class="mu" style="font-size:14px">histórico todo</span>' : ''}</h3>
       <div class="np-ff" style="margin:6px 0">${[['all', 'Todos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btk="${k}" class="${npBtKind === k ? 'on' : ''}">${t}</button>`).join('')}</div>
       <div class="revwrap"><table class="revtbl bttbl"><tr><th>Entrada</th><th>Setup</th><th>Ganhou</th><th title="Mediana de velas do timeframe de gatilho até ao resultado">Velas</th><th title="Mediana do máximo que andou contra antes do resultado">Recuo contra</th><th title="Média do movimento da entrada até ao alvo, nos que ganharam (% do preço)">Quando ganhou</th><th title="Média do movimento da entrada até ao fecho que invalidou, nos que perderam (% do preço)">Quando perdeu</th><th title="Média por caso: (ganhos × quanto ganhou − perdas × quanto perdeu) ÷ casos, em % do preço. Positivo = no total, o setup andou a favor">Média por caso</th><th title="Só nas entradas no FVG: média por caso em múltiplos do risco (perda = −1 R; ganho = distância ao alvo ÷ distância ao stop)">Em R</th></tr>${baseRows || '<tr><td colspan="9" class="mu">Nenhum caso.</td></tr>'}</table></div>
+      ${(() => { const rows = ['fvgA', 'fvgB'].flatMap((k) => [...new Set(T.filter((x) => x.kind === k).map((x) => x.setup))].map((s0) => { const E = T.filter((x) => x.kind === k && x.setup === s0 && (npBtKind === 'all' || cls(x.sym) === npBtKind) && (x.r === 'W' || x.r === 'L') && x.mfe != null); if (!E.length) return '';
+          const n = E.length, at = (X) => E.filter((x) => x.mfe >= X).length / n, inst = E.filter((x) => x.inst).length / n, leg = E.filter((x) => x.legR != null && x.mfe >= x.legR).length / n;
+          const exp = (X) => at(X) * X - (1 - at(X)), Xs = [1, 2, 3, 5, 10], best = Xs.reduce((m, X) => (exp(X) > exp(m) ? X : m), 1);
+          const legExp = E.reduce((p, x) => p + (x.legR != null && x.mfe >= x.legR ? x.legR : -1), 0) / n;
+          const c = (v, X) => `<td>${Math.round(v * 100)}%<div class="small ${exp(X) >= 0 ? 'up' : 'dn'}">${exp(X) >= 0 ? '+' : ''}${exp(X).toFixed(2).replace('.', ',')} R</div></td>`;
+          return `<tr><td>${k === 'fvgA' ? 'A · 1.º FVG' : 'B · FVG em desconto'}</td><td>${npEsc(s0)}</td><td>${n}${n < 30 ? ' <span class="wn small">poucos</span>' : ''}</td><td>${Math.round(inst * 100)}%</td>${Xs.map((X) => c(at(X), X)).join('')}<td>${Math.round(leg * 100)}%<div class="small ${legExp >= 0 ? 'up' : 'dn'}">${legExp >= 0 ? '+' : ''}${legExp.toFixed(2).replace('.', ',')} R</div></td><td><b>${best} R</b></td></tr>`; })).join('');
+        return rows ? `<h3 class="np-h2" style="font-size:20px;margin-top:20px">Entradas no FVG: até onde chegou antes do stop</h3>
+        <p class="mu small" style="margin:4px 0 8px">Em cada coluna: a percentagem das entradas que chegou a esse múltiplo do risco antes de tocar o stop; por baixo, a média por caso se o alvo fosse esse (ganha X R quando chega, perde 1 R quando não). “Topo do gatilho” = o extremo da perna que quebrou no gatilho. A vela da entrada não conta para o “a favor”.</p>
+        <div class="revwrap"><table class="revtbl bttbl"><tr><th>Entrada</th><th>Setup</th><th>Entraram</th><th title="Tocou o stop na própria vela em que entrou (atravessou o FVG todo)">Stop na vela da entrada</th><th>≥ 1 R</th><th>≥ 2 R</th><th>≥ 3 R</th><th>≥ 5 R</th><th>≥ 10 R</th><th>Topo do gatilho</th><th title="O alvo fixo com melhor média por caso">Melhor alvo</th></tr>${rows}</table></div>` : ''; })()}
       <h3 class="np-h2" style="font-size:20px;margin-top:20px">Cada input: com e sem</h3>
       <div class="np-ff" style="margin:6px 0">${[['pronto', 'Entrada na quebra'], ['fvgA', 'Entrada no 1.º FVG (A)'], ['fvgB', 'Entrada no FVG em desconto (B)']].map(([k, t]) => `<button data-btent="${k}" class="${npBtEnt === k ? 'on' : ''}">${t}</button>`).join('')}</div>
       <div class="np-ff" style="margin:6px 0">${[['all', 'Todos os setups']].concat([...new Set(T.map((x) => x.setup))].map((x) => [x, x])).map(([k, t]) => `<button data-btset="${npEsc(k)}" class="${npBtSet === k ? 'on' : ''}">${npEsc(t)}</button>`).join('')}</div>
@@ -7650,7 +7660,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const go = $('#btGo'); if (go) go.addEventListener('click', () => { const names = settings.btSets || sets.map((y) => y.name), ss = sets.filter((x) => names.includes(x.name)); if (!ss.length) { alert('Escolhe pelo menos um setup.'); return; } const k = settings.btSy || 'all'; npBtSym = 'all'; btStart(sy(k), ss, k === 'btc' || k === 'btc3'); });
     const stp = $('#btStop'); if (stp) stp.addEventListener('click', () => { if (btState) btState.run = false; });
     const csv = $('#btCsv2'); if (csv) csv.addEventListener('click', () => {
-      const cols = ['sym', 'setup', 'kind', 'dir', 't', 'pb', 'r', 'R', 'rr', 'why', 'bars', 'mae', 'mv', 'depth', 'fvgBrk', 'sync', 'disc', 'legClean', 'corStrong', 'ctx', 'blocked', 'sweep', 'fib', 'vol', 'emaD', 'emaW', 'sma', 'mkt'];
+      const cols = ['sym', 'setup', 'kind', 'dir', 't', 'pb', 'r', 'R', 'rr', 'mfe', 'legR', 'inst', 'why', 'bars', 'mae', 'mv', 'depth', 'fvgBrk', 'sync', 'disc', 'legClean', 'corStrong', 'ctx', 'blocked', 'sweep', 'fib', 'vol', 'emaD', 'emaW', 'sma', 'mkt'];
       const txt = [cols.join(';')].concat(T.map((x) => cols.map((c) => (c === 't' ? new Date(x.t).toISOString().slice(0, 16) : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 100) / 100).replace('.', ',') : x[c])).join(';'))).join('\n');
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'teste-no-passado.csv'; a.click(); });
   }
