@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 19nov 19h10</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 19nov 19h41</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -7418,11 +7418,12 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     }
     return E.analyze(closed, Object.assign({}, base, { minRetraceAtr: +settings.extAtr, requireDisp: !!settings.dispExt }));
   }
-  async function btLoad(sym, ids, cache) {
+  const BT_MAX = { '1M': 200, '1w': 600, '1d': 3500, '4h': 21000, '1h': 85000, '15m': 105000, '5m': 105000 };   // histórico todo (Binance desde 2017; 15m/5m ~3 anos)
+  async function btLoad(sym, ids, cache, deep) {
     const api = [...new Set(ids.map(BT_API))], now = Date.now(); let out = {};
     if (isRatio(sym)) out = await ratioCandles(sym, api, false);
     else if (isSynth(sym)) out = await synthCandles(sym, api);
-    else if (isCrypto(sym)) { for (const id of api) { try { out[id] = await fetchTf(sym, id, HIST[id] || 3000, cache); } catch (e) {} } }
+    else if (isCrypto(sym)) { for (const id of api) { try { out[id] = await fetchTf(sym, id, (deep ? BT_MAX[id] : HIST[id]) || 3000, cache); } catch (e) {} } }
     else out = await stockCandles(sym, api);
     const r = {}; for (const id of Object.keys(out)) if (out[id] && out[id].length) r[id] = out[id].filter((c) => c.ct < now);
     return r;
@@ -7436,10 +7437,10 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const p0 = T[j].c; let mae = 0;
     for (let i = j + 1; i < T.length && i <= j + BT_CAP; i++) {
       const c = T[i]; mae = Math.max(mae, dir === 1 ? (p0 - c.l) / p0 * 100 : (c.h - p0) / p0 * 100);
-      if (dir === 1 ? c.c < inval : c.c > inval) return { r: 'L', bars: i - j, mae };
-      if (dir === 1 ? c.h >= target : c.l <= target) return { r: 'W', bars: i - j, mae };
+      if (dir === 1 ? c.c < inval : c.c > inval) return { r: 'L', bars: i - j, mae, mv: Math.abs(c.c - p0) / p0 * 100 };
+      if (dir === 1 ? c.h >= target : c.l <= target) return { r: 'W', bars: i - j, mae, mv: Math.abs(target - p0) / p0 * 100 };
     }
-    return { r: 'O', bars: null, mae };
+    return { r: 'O', bars: null, mae, mv: null };
   }
   // um ativo, um setup: todos os eventos (PRONTO · ⚡ antes da quebra · ⚠ topo/fundo) com os inputs no momento
   function btRun(sym, st0, C, RES, ctxG) {
@@ -7449,7 +7450,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const rc = cid && C[BT_API(cid)] ? RES(cid) : null, Cc = cid ? C[BT_API(cid)] : null;
     const kZ = FB.fvgK(zid, settings), kT = FB.fvgK(tid, settings);
     const ok = (f, k) => f.atr > 0 && f.top - f.bot >= k * f.atr;
-    const zf = rz.fvgs.filter((f) => ok(f, kZ)), tf = rt.fvgs.filter((f) => ok(f, kT));
+    const zf = rz.fvgs.filter((f) => ok(f, kZ)), tf = rt.fvgs.filter((f) => ok(f, kT)), tfEnd = new Map(); tf.forEach((f) => tfEnd.set(f.mid + 1, f));
     const pars = []; { let p = BT_UP[zid]; for (let n = 0; n < 2 && p; n++) { if (C[BT_API(p)]) pars.push(p); p = BT_UP[p]; } }
     const D = C['1d'], W = C['1w'], eD = btEma(D), eW = btEma(W), sD = btSma(D, 200);
     const out = [], used = new Set(), usedR = new Set(), usedT = new Set(), minPull = 50;
@@ -7494,12 +7495,12 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       if (inZ && trT && trT.lb && (!prv || prv.lb !== trT.lb) && trT.lb.dir === dir && !used.has(legK)) {
         used.add(legK);
         const o = btOutcome(T, j, dir, trZ.ext.p, trZ.prot.p);
-        out.push(Object.assign({ sym, setup: st0.name, kind: 'pronto', dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae }, feats(j, dir, trZ, kz, pb, trT.lb.i)));
+        out.push(Object.assign({ sym, setup: st0.name, kind: 'pronto', dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae, mv: o.mv }, feats(j, dir, trZ, kz, pb, trT.lb.i)));
       }
       // ⚡ antes da quebra: em zona, FVG de desconto/prémio tocado e o 1.º FVG a favor no gatilho acabou de nascer
       if (inZ && !usedR.has(legK) && !used.has(legK)) {
-        const nf = tf.find((x) => x.dir === dir && x.mid + 1 === j);
-        if (nf) { const ff = feats(j, dir, trZ, kz, pb, null); if (ff.disc && ff.sync) { usedR.add(legK); const o = btOutcome(T, j, dir, trZ.ext.p, trZ.prot.p); out.push(Object.assign({ sym, setup: st0.name, kind: 'react', dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae }, ff)); } }
+        const nf0 = tfEnd.get(j), nf = nf0 && nf0.dir === dir ? nf0 : null;
+        if (nf) { const ff = feats(j, dir, trZ, kz, pb, null); if (ff.disc && ff.sync) { usedR.add(legK); const o = btOutcome(T, j, dir, trZ.ext.p, trZ.prot.p); out.push(Object.assign({ sym, setup: st0.name, kind: 'react', dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae, mv: o.mv }, ff)); } }
       }
       // ⚠ topo/fundo: perto do extremo da perna, a zona e o gatilho criam o 1.º FVG contra → contra a perna (ganha se corrigir até 50%; perde se fechar além do extremo)
       if (kz !== lastKz) {
@@ -7508,7 +7509,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
           const zc = zf.filter((x) => x.dir === -dir && x.mid > trZ.ext.i && x.mid + 1 <= kz);
           if (zc.length === 1 && zc[0].mid + 1 === kz && tf.some((x) => x.dir === -dir && x.mid + 1 <= j && x.mid + 1 >= j - 10)) {
             usedT.add(legK); const half = (trZ.ext.p + trZ.prot.p) / 2, o = btOutcome(T, j, -dir, half, trZ.ext.p);
-            out.push({ sym, setup: st0.name, kind: 'top', dir: -dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae });
+            out.push({ sym, setup: st0.name, kind: 'top', dir: -dir, t: T[j].ct, pb, r: o.r, bars: o.bars, mae: o.mae, mv: o.mv });
           }
         }
       }
@@ -7516,24 +7517,24 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     return out;
   }
   const BT_BENCH = (s, avail) => (isRatio(s) ? null : isCrypto(s) || isSynth(s) ? (s !== 'TOTAL' && avail.includes('TOTAL') ? 'TOTAL' : s !== 'BTCUSDT' ? 'BTCUSDT' : null) : ['ES=F', 'SPY', '^GSPC'].find((x) => x !== s && avail.includes(x)) || 'ES=F');
-  async function btStart(syms, setups) {
-    const st = btState = { run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, t0: Date.now(), syms, setups: setups.map((x) => x.name) };
+  async function btStart(syms, setups, deep) {
+    const st = btState = { deep: !!deep, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, t0: Date.now(), syms, setups: setups.map((x) => x.name) };
     const cache = {}, bench = {}, tick = () => new Promise((r) => setTimeout(r, 0)), avail = settings.favs || [];
-    const getBench = async (b) => { if (!b) return null; if (bench[b] !== undefined) return bench[b]; try { const c = await btLoad(b, ['1d'], cache); bench[b] = c['1d'] && c['1d'].length > 60 ? { cs: c['1d'], res: btRes(c['1d'], '1d', b) } : null; } catch (e) { bench[b] = null; } return bench[b]; };
+    const getBench = async (b) => { if (!b) return null; if (bench[b] !== undefined) return bench[b]; try { const c = await btLoad(b, ['1d'], cache, deep); bench[b] = c['1d'] && c['1d'].length > 60 ? { cs: c['1d'], res: btRes(c['1d'], '1d', b) } : null; } catch (e) { bench[b] = null; } return bench[b]; };
     for (const sym of syms) {
       if (!st.run) break;
-      const sets = setups.filter((s0) => !suHid(s0, sym) && !(!isCrypto(sym) && !isSynth(sym) && ['15m', '5m'].includes(s0.trig)));
+      const sets = setups.filter((s0) => (deep || !suHid(s0, sym)) && !(!isCrypto(sym) && !isSynth(sym) && ['15m', '5m'].includes(s0.trig)));
       st.prog = `${sym} — a descarregar o histórico…`; npRenderBt(); await tick();
       try {
         const ids = new Set(['1d', '1w']); for (const s0 of sets) { [s0.zone, s0.trig, ctxOf(s0), BT_UP[s0.zone], BT_UP[BT_UP[s0.zone]]].filter(Boolean).forEach((x) => ids.add(x)); }
-        const C = await btLoad(sym, [...ids], cache), R = {}, RES = (id) => { const a = BT_API(id); if (!C[a] || C[a].length < 30) return null; if (!(id in R)) { try { R[id] = btRes(C[a], id, sym); } catch (e) { R[id] = null; } } return R[id]; };
+        const C = await btLoad(sym, [...ids], cache, deep), R = {}, RES = (id) => { const a = BT_API(id); if (!C[a] || C[a].length < 30) return null; if (!(id in R)) { try { R[id] = btRes(C[a], id, sym); } catch (e) { R[id] = null; } } return R[id]; };
         const g = await getBench(BT_BENCH(sym, avail));
         for (const s0 of sets) { st.prog = `${sym} — ${s0.name}…`; npRenderBt(); await tick(); try { st.trades.push(...btRun(sym, s0, C, RES, g)); } catch (e) { st.errs.push(`${sym} ${s0.name}: ${e.message || e}`); } }
       } catch (e) { st.errs.push(`${sym}: ${e.message || e}`); }
       st.done++; await tick();
     }
     st.run = false; st.prog = st.done < st.total ? 'Parado.' : 'Concluído.'; st.t1 = Date.now();
-    try { localStorage.setItem('mss_bt2', JSON.stringify({ t: Date.now(), trades: st.trades, syms, setups: st.setups, errs: st.errs.slice(0, 50) })); } catch (e) {}
+    try { localStorage.setItem('mss_bt2', JSON.stringify({ t: Date.now(), trades: st.trades, syms, setups: st.setups, deep: st.deep, errs: st.errs.slice(0, 50) })); } catch (e) {}
     npRenderBt();
   }
   // ---------- leitura dos resultados ----------
@@ -7546,6 +7547,9 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     ['mkt', 'Mercado a favor (TOTAL/BTC · S&P)', 'favor'], ['mktC', 'Mercado contra', 'contra', 'mkt'],
   ];
   const btRate = (L) => { const c = L.filter((x) => x.r === 'W' || x.r === 'L'), w = c.filter((x) => x.r === 'W').length; return { n: c.length, w, p: c.length ? w / c.length * 100 : null }; };
+  const btMv = (L) => { const w = L.filter((x) => x.r === 'W' && x.mv != null).map((x) => x.mv), l = L.filter((x) => x.r === 'L' && x.mv != null).map((x) => x.mv), r = btRate(L), avg = (a) => (a.length ? a.reduce((p, q) => p + q, 0) / a.length : null), aw = avg(w), al = avg(l);
+    return { aw, al, ex: r.n && (aw != null || !r.w) && (al != null || r.w === r.n) ? (r.w * (aw || 0) - (r.n - r.w) * (al || 0)) / r.n : null }; };
+  const btMvTd = (L) => { const m = btMv(L); return `<td class="up">${m.aw == null ? '—' : '+' + pct(m.aw)}</td><td class="dn">${m.al == null ? '—' : '−' + pct(m.al)}</td><td>${m.ex == null ? '—' : `<b class="${m.ex >= 0 ? 'up' : 'dn'}">${m.ex >= 0 ? '+' : '−'}${pct(Math.abs(m.ex))}</b>`}</td>`; };
   const btMed = (a) => { const v = a.filter((x) => x != null).sort((x, y) => x - y); return v.length ? v[Math.floor(v.length / 2)] : null; };
   function btTable(L) {
     const ts = L.map((x) => x.t).sort((a, b) => a - b), mid = ts[Math.floor(ts.length / 2)] || 0, base = btRate(L);
@@ -7562,46 +7566,50 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       return `<tr><td>${t}</td><td>${cell(ra)}</td><td>${cell(rb)}</td><td>${d == null ? '—' : `<b class="${d >= 0 ? 'up' : 'dn'}">${d >= 0 ? '+' : ''}${Math.round(d)}</b> pp`}</td><td class="small">${d1 == null ? '—' : (d1 >= 0 ? '+' : '') + Math.round(d1)} · ${d2 == null ? '—' : (d2 >= 0 ? '+' : '') + Math.round(d2)}</td><td>${verdict}</td></tr>`;
     }).join('');
     const dep = ['50–62%', '62–79%', '79–100%'].map((b) => `<tr><td>Profundidade da zona ${b}</td><td colspan="5">${cell(btRate(L.filter((x) => x.depth === b)))}</td></tr>`).join('');
-    return `<p>Base: ${cell(base)} ganharam · mediana de ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'} velas do gatilho até ao resultado · recuo máximo mediano contra ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae)) != null ? pct(btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae))) : '—'} · ${L.filter((x) => x.r === 'O').length} ainda em aberto (não contam)</p>
+    const mvB = btMv(L);
+    return `<p>Base: ${cell(base)} ganharam${mvB.aw != null ? ` · quando ganhou andou em média <b class="up">+${pct(mvB.aw)}</b>, quando perdeu <b class="dn">−${pct(mvB.al || 0)}</b> · média por caso <b class="${(mvB.ex || 0) >= 0 ? 'up' : 'dn'}">${(mvB.ex || 0) >= 0 ? '+' : '−'}${pct(Math.abs(mvB.ex || 0))}</b>` : ''} · mediana de ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'} velas do gatilho até ao resultado · recuo máximo mediano contra ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae)) != null ? pct(btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae))) : '—'} · ${L.filter((x) => x.r === 'O').length} ainda em aberto (não contam)</p>
       <div class="revwrap"><table class="revtbl bttbl"><tr><th>Input</th><th title="Taxa de acerto quando o input está presente (casos)">Com</th><th title="Taxa de acerto sem o input (casos)">Sem</th><th title="Diferença em pontos percentuais">Diferença</th><th title="A diferença na 1.ª metade do histórico · na 2.ª metade — só conta se for do mesmo lado nas duas">1.ª · 2.ª metade</th><th>Leitura</th></tr>${dep}${rows}</table></div>`;
   }
-  let npBtSet = 'all', npBtKind = 'all';
+  let npBtSet = 'all', npBtKind = 'all', npBtSym = 'all';
   function npShowBt() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     npView = 'bt'; document.body.dataset.npv = 'bt'; clearInterval(npPxTimer);
-    if (!btState) { try { const j = JSON.parse(localStorage.getItem('mss_bt2') || 'null'); if (j) btState = { run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {} }
+    if (!btState) { try { const j = JSON.parse(localStorage.getItem('mss_bt2') || 'null'); if (j) btState = { deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {} }
     npRender(); window.scrollTo(0, 0); navPush({ v: 'bt' });
   }
   function npRenderBt() {
     const box = $('#npBt'); if (!box || npView !== 'bt') return;
     const S = btState, sets = (settings.setups || []).filter((x) => x.on);
     const cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
-    const T = S ? S.trades : [], Lp = T.filter((x) => x.kind === 'pronto' && (npBtSet === 'all' || x.setup === npBtSet) && (npBtKind === 'all' || cls(x.sym) === npBtKind));
+    const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
+    const T = (S ? S.trades : []).filter(symOk), Lp = T.filter((x) => x.kind === 'pronto' && (npBtSet === 'all' || x.setup === npBtSet) && (npBtKind === 'all' || cls(x.sym) === npBtKind)), syms0 = [...new Set((S ? S.trades : []).map((x) => x.sym))];
     const by = (k) => { const m = {}; T.filter((x) => x.kind === k && (npBtKind === 'all' || cls(x.sym) === npBtKind)).forEach((x) => { (m[x.setup] = m[x.setup] || []).push(x); }); return m; };
     const baseRows = ['pronto', 'react', 'top'].map((k) => { const m = by(k), nmK = { pronto: 'PRONTO (zona + quebra)', react: '⚡ antes da quebra (pela reação)', top: '⚠ topo/fundo (contra a perna, alvo 50%)' }[k];
-      return Object.keys(m).map((s) => { const r = btRate(m[s]); return `<tr><td>${nmK}</td><td>${s}</td><td>${r.n ? `<b>${Math.round(r.p)}%</b> <span class="mu small">(${r.n})</span>${r.n < 30 ? ' <span class="wn small">poucos</span>' : ''}` : '—'}</td><td>${btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'}</td><td>${(() => { const v = btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.mae)); return v == null ? '—' : pct(v); })()}</td></tr>`; }).join(''); }).join('');
+      return Object.keys(m).map((s) => { const r = btRate(m[s]); return `<tr><td>${nmK}</td><td>${s}</td><td>${r.n ? `<b>${Math.round(r.p)}%</b> <span class="mu small">(${r.n})</span>${r.n < 30 ? ' <span class="wn small">poucos</span>' : ''}` : '—'}</td><td>${btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'}</td><td>${(() => { const v = btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.mae)); return v == null ? '—' : pct(v); })()}</td>${btMvTd(m[s])}</tr>`; }).join(''); }).join('');
     box.innerHTML = `<div class="bhead"><div><h2>📊 Teste no passado</h2><div class="sub">Cada setup PRONTO do passado, reconstruído vela a vela sem ver o futuro. <b>Ganhou</b> = chegou ao topo/fundo da perna da zona; <b>perdeu</b> = fechou para lá do limite da zona antes disso. As tuas linhas e as edições à mão ficam de fora (foram feitas a olhar para o passado).</div></div></div>
-      <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+      <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['btc', '₿ BTC · histórico todo'], ['btc3', 'BTC + ETH + SOL · histórico todo'], ['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
         <div><b>Setups</b> ${sets.map((x) => `<label class="btck"><input type="checkbox" data-btst="${npEsc(x.name)}"${(settings.btSets || sets.map((y) => y.name)).includes(x.name) ? ' checked' : ''}> ${npEsc(x.name)}</label>`).join('')}</div>
         <div>${S && S.run ? '<button id="btStop">■ Parar</button>' : '<button id="btGo" class="btgo">▶ Começar o teste</button>'} <span class="mu">${S ? npEsc(S.prog) + (S.total ? ` · ${S.done}/${S.total} ativos` : '') : 'Demora alguns minutos (descarrega anos de velas de cada favorito). Podes continuar a usar a app.'}</span>
         ${T.length && !(S && S.run) ? '<button id="btCsv2">Exportar CSV</button>' : ''}</div></div>
-      ${T.length ? `<h3 class="np-h2" style="font-size:20px;margin-top:16px">Taxa base por setup</h3>
+      ${syms0.length > 1 && syms0.includes('BTCUSDT') ? `<div class="np-ff" style="margin-top:14px">${[['all', 'Todos os ativos juntos'], ['BTCUSDT', 'Só BTC'], ['oth', 'Só os outros']].map(([k, t]) => `<button data-btsym="${k}" class="${npBtSym === k ? 'on' : ''}">${t}</button>`).join('')}</div>` : ''}
+      ${T.length ? `<h3 class="np-h2" style="font-size:20px;margin-top:16px">Taxa base por setup${S && S.deep ? ' <span class="mu" style="font-size:14px">histórico todo</span>' : ''}</h3>
       <div class="np-ff" style="margin:6px 0">${[['all', 'Todos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btk="${k}" class="${npBtKind === k ? 'on' : ''}">${t}</button>`).join('')}</div>
-      <div class="revwrap"><table class="revtbl bttbl"><tr><th>Entrada</th><th>Setup</th><th>Ganhou</th><th title="Mediana de velas do timeframe de gatilho até ao resultado">Velas</th><th title="Mediana do máximo que andou contra antes do resultado">Recuo contra</th></tr>${baseRows || '<tr><td colspan="5" class="mu">Nenhum caso.</td></tr>'}</table></div>
+      <div class="revwrap"><table class="revtbl bttbl"><tr><th>Entrada</th><th>Setup</th><th>Ganhou</th><th title="Mediana de velas do timeframe de gatilho até ao resultado">Velas</th><th title="Mediana do máximo que andou contra antes do resultado">Recuo contra</th><th title="Média do movimento da entrada até ao alvo, nos que ganharam (% do preço)">Quando ganhou</th><th title="Média do movimento da entrada até ao fecho que invalidou, nos que perderam (% do preço)">Quando perdeu</th><th title="Média por caso: (ganhos × quanto ganhou − perdas × quanto perdeu) ÷ casos, em % do preço. Positivo = no total, o setup andou a favor">Média por caso</th></tr>${baseRows || '<tr><td colspan="8" class="mu">Nenhum caso.</td></tr>'}</table></div>
       <h3 class="np-h2" style="font-size:20px;margin-top:20px">Cada input: com e sem <span class="mu" style="font-size:14px">só PRONTO</span></h3>
       <div class="np-ff" style="margin:6px 0">${[['all', 'Todos os setups']].concat([...new Set(T.map((x) => x.setup))].map((x) => [x, x])).map(([k, t]) => `<button data-btset="${npEsc(k)}" class="${npBtSet === k ? 'on' : ''}">${npEsc(t)}</button>`).join('')}</div>
       ${Lp.length ? btTable(Lp) : '<p class="mu">Nenhum setup PRONTO neste filtro.</p>'}
       <p class="mu small" style="margin-top:8px">“✔ ajuda” / “✖ prejudica” só aparece com 30+ casos de cada lado, diferença de 5+ pontos e o mesmo sinal nas duas metades do histórico. O resto é ruído até haver mais casos.</p>` : ''}
       ${S && S.errs.length ? `<details class="small mu" style="margin-top:10px"><summary>${S.errs.length} ativo(s)/setup(s) sem dados</summary>${S.errs.map(npEsc).join('<br>')}</details>` : ''}`;
-    const sy = (k) => { const f = settings.favs || []; return k === 'all' ? f : f.filter((s) => cls(s) === k); };
+    const sy = (k) => { const f = settings.favs || []; return k === 'btc' ? ['BTCUSDT'] : k === 'btc3' ? ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] : k === 'all' ? f : f.filter((s) => cls(s) === k); };
     box.querySelectorAll('[data-btsy]').forEach((b) => b.addEventListener('click', () => { settings.btSy = b.dataset.btsy; save('mss_settings4', settings); npRenderBt(); }));
     box.querySelectorAll('[data-btst]').forEach((i) => i.addEventListener('change', () => { settings.btSets = [...box.querySelectorAll('[data-btst]:checked')].map((x) => x.dataset.btst); save('mss_settings4', settings); }));
+    box.querySelectorAll('[data-btsym]').forEach((b) => b.addEventListener('click', () => { npBtSym = b.dataset.btsym; npRenderBt(); }));
     box.querySelectorAll('[data-btk]').forEach((b) => b.addEventListener('click', () => { npBtKind = b.dataset.btk; npRenderBt(); }));
     box.querySelectorAll('[data-btset]').forEach((b) => b.addEventListener('click', () => { npBtSet = b.dataset.btset; npRenderBt(); }));
-    const go = $('#btGo'); if (go) go.addEventListener('click', () => { const names = settings.btSets || sets.map((y) => y.name), ss = sets.filter((x) => names.includes(x.name)); if (!ss.length) { alert('Escolhe pelo menos um setup.'); return; } btStart(sy(settings.btSy || 'all'), ss); });
+    const go = $('#btGo'); if (go) go.addEventListener('click', () => { const names = settings.btSets || sets.map((y) => y.name), ss = sets.filter((x) => names.includes(x.name)); if (!ss.length) { alert('Escolhe pelo menos um setup.'); return; } const k = settings.btSy || 'all'; npBtSym = 'all'; btStart(sy(k), ss, k === 'btc' || k === 'btc3'); });
     const stp = $('#btStop'); if (stp) stp.addEventListener('click', () => { if (btState) btState.run = false; });
     const csv = $('#btCsv2'); if (csv) csv.addEventListener('click', () => {
-      const cols = ['sym', 'setup', 'kind', 'dir', 't', 'pb', 'r', 'bars', 'mae', 'depth', 'fvgBrk', 'sync', 'disc', 'legClean', 'corStrong', 'ctx', 'blocked', 'sweep', 'fib', 'vol', 'emaD', 'emaW', 'sma', 'mkt'];
+      const cols = ['sym', 'setup', 'kind', 'dir', 't', 'pb', 'r', 'bars', 'mae', 'mv', 'depth', 'fvgBrk', 'sync', 'disc', 'legClean', 'corStrong', 'ctx', 'blocked', 'sweep', 'fib', 'vol', 'emaD', 'emaW', 'sma', 'mkt'];
       const txt = [cols.join(';')].concat(T.map((x) => cols.map((c) => (c === 't' ? new Date(x.t).toISOString().slice(0, 16) : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 100) / 100).replace('.', ',') : x[c])).join(';'))).join('\n');
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'teste-no-passado.csv'; a.click(); });
   }
