@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 19nov 21h48</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 20nov 10h03</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -1042,7 +1042,7 @@
       <li><b>Velas das ações, ETFs e futuros:</b> o Semanal e o Mensal são construídos pela app a partir das velas diárias (como no TradingView), para nunca virem com o tamanho errado; o 3M, 6M e Anual saem do Mensal. As velas diárias são verificadas sempre que chegam: buracos sem velas, dados parados, velas impossíveis, picos falsos (vela que salta e volta no dia seguinte), histórico cortado e diferença para a cotação atual. No Quadro: <b>✔</b> verificado, <b>⚠ amarelo</b> aviso (a estrutura é desenhada na mesma), <b>⚠ vermelho</b> dados suspeitos — os alertas desse ativo ficam suspensos até os dados voltarem a estar bons. Passa o rato no ⚠ para ver as datas; “velas: … ⚠” no topo do Quadro mostra só os que têm aviso. As cripto vêm da Binance e não precisam disto.</li>
       <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) para colares numa conversa com o Claude. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
       <li><b>Em foco:</b> um cartão por ativo, só com o sinal mais forte dele: 🔥 Setup pronto + FVG em sintonia → PRONTO → ⚡ Pronto pela reação / ⚠ Pronto pelo topo/fundo. Por defeito só aparecem estes (“Sinais fortes”); “Em zona” e “Perto da inversão” estão nos botões de cima. Cada cartão mostra o setup, a sequência dos FVG da zona e do gatilho, a tua linha se o preço estiver colado a ela e 📅 os resultados se estiverem perto. No Jornal aparecem os 6 primeiros.</li>
-      <li><b>📊 Teste no passado:</b> reconstrói vela a vela, sem ver o futuro, cada setup PRONTO dos teus favoritos (anos de velas). Ganhou = chegou ao topo/fundo da perna da zona; perdeu = fechou para lá do limite da zona antes disso. Mostra a taxa base de cada setup (e das entradas ⚡ antes da quebra e ⚠ topo/fundo) e, para cada input (profundidade da zona, quebra com FVG, 🔥, perna limpa, correção forte, contexto, bloqueio, 💧, Fibonacci, volume, EMA D e S, SMA 200, mercado), a taxa com e sem. Só diz “ajuda/prejudica” com 30+ casos de cada lado e o mesmo sinal nas duas metades do histórico. As tuas linhas e edições à mão não entram.</li>
+      <li><b>📊 Teste no passado:</b> reconstrói vela a vela, sem ver o futuro, cada setup PRONTO dos teus favoritos (anos de velas). Ganhou = chegou ao topo/fundo da perna da zona; perdeu = fechou para lá do limite da zona antes disso. Mostra a taxa base de cada setup (e das entradas ⚡ antes da quebra e ⚠ topo/fundo) e, para cada input (profundidade da zona, quebra com FVG, 🔥, perna limpa, correção forte, contexto, bloqueio, 💧, Fibonacci, volume, EMA D e S, SMA 200, mercado), a taxa com e sem. Só diz “ajuda/prejudica” com 30+ casos de cada lado e o mesmo sinal nas duas metades do histórico. As tuas linhas e edições à mão não entram. Segundo modo, <b>“Só FVG + estrutura”</b>: cada timeframe (Semanal, Diário, 4H) sozinho — viés pela última quebra com FVG a favor ainda aberto (fica de fora se os FVG da quebra foram atravessados ou há um FVG contrário aberto a travar), entrada ao tocar um FVG a favor aberto com stop do outro lado, e três saídas testadas à parte (suporte cedeu · força contrária · liquidez), Long e Short, com comparação com comprar e segurar.</li>
       <li><b>EMA 8/21 D:</b> só o Diário, só fechos, favoritos sem rácios. Três sub-abas: "8 acima da 21", "21 acima da 8" e "Toques ou cruzamentos" (médias a menos de 0,1% do preço, ou cruzamento, nos últimos 3 fechos — ficam aí 3 fechos e depois passam para uma das outras), com há quantos fechos, a distância entre as médias (a aproximar-se ou a afastar-se), onde está o preço, a EMA do Semanal e PRONTO quando há um setup pronto no mesmo sentido.</li>
       <li><b>🔔 Alertas (linhas e preços, como no TradingView):</b> numa linha ou canal, carrega nela e liga o 🔔; para um alerta de preço, botão direito no gráfico → “🔔 Criar alerta aqui”. O toque é exato: conta a sombra da vela. Em cada alerta escolhes a entrega (Telegram + app · só Telegram · só na app) e se avisa <b>uma vez</b> (por defeito: ao disparar, o 🔔 da linha desliga-se e a linha fica; o alerta de preço sai do gráfico) ou <b>sempre</b>. A aba 🔔 Alertas tem os ativos (para mudar ou apagar) e os disparados (abre o gráfico no momento do toque; apaga um a um ou “limpar tudo”). Com a app aberta, a app vê de minuto a minuto; fechada, o vigia vê a cada volta.</li>
       <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
@@ -7559,8 +7559,88 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     return out;
   }
   const BT_BENCH = (s, avail) => (isRatio(s) ? null : isCrypto(s) || isSynth(s) ? (s !== 'TOTAL' && avail.includes('TOTAL') ? 'TOTAL' : s !== 'BTCUSDT' ? 'BTCUSDT' : null) : ['ES=F', 'SPY', '^GSPC'].find((x) => x !== s && avail.includes(x)) || 'ES=F');
+  // ---------- 📊 TESTE "SÓ FVG + ESTRUTURA": um timeframe sozinho, sem zonas nem gatilhos nem linhas ----------
+  // viés = última quebra com um FVG a favor da perna ainda aberto e nenhum FVG contrário aberto a travar · entrada ao tocar um FVG a favor aberto, stop do outro lado dele
+  // saídas lado a lado: 1 suporte cedeu (fecho para lá do FVG a favor mais recente) · 2 força contrária (1.º FVG contrário que a vela seguinte não fecha) · 3 liquidez (extremo da perna ou FVG contrário aberto mais perto)
+  const FS_EXIT = { 1: 'Suporte cedeu', 2: 'Força contrária', 3: 'Liquidez' };
+  function fsRun(sym, id, T, res) {
+    if (!T || T.length < 120 || !res || !res.trace) return [];
+    const k = FB.fvgK(id, settings), F = res.fvgs.filter((f) => f.atr > 0 && f.top - f.bot >= k * f.atr).map((f) => Object.assign({}, f, { from: f.mid + 2, fill: Infinity }));
+    for (const f of F) for (let i = f.from; i < T.length; i++) if (f.dir === 1 ? T[i].c < f.bot : T[i].c > f.top) { f.fill = i; break; }   // atravessado = fecho do outro lado
+    const openAt = (f, j) => f.from <= j && f.fill > j;
+    const legCache = new Map();
+    const legF = (lb) => { if (legCache.has(lb)) return legCache.get(lb); let a = lb.from >= 0 ? lb.from : Math.max(0, lb.i - 50); for (let q = a; q <= lb.i; q++) if (lb.dir === 1 ? T[q].l < T[a].l : T[q].h > T[a].h) a = q; const L = F.filter((f) => f.dir === lb.dir && f.mid >= a && f.mid <= lb.i); legCache.set(lb, L); return L; };
+    // viés no fecho da vela j (usado na vela j+1)
+    const bias = (j) => { const tr = res.trace[j]; if (!tr || !tr.lb) return 0; const d = tr.lb.dir, p = T[j].c; if (!legF(tr.lb).some((f) => openAt(f, j))) return 0;
+      if (F.some((f) => f.dir === -d && openAt(f, j) && (d === 1 ? f.bot > p : f.top < p))) return 0; return d; };
+    const out = [];
+    for (const ex of [1, 2, 3]) {
+      let pos = null;
+      for (let j = 60; j < T.length; j++) {
+        const c = T[j];
+        if (pos) {
+          const d = pos.dir; let exit = null, why = '';
+          if (d === 1 ? c.l <= pos.stop : c.h >= pos.stop) { exit = d === 1 ? Math.min(c.o, pos.stop) : Math.max(c.o, pos.stop); why = 'stop'; }
+          else if (ex === 3 && pos.tgt != null && (d === 1 ? c.h >= pos.tgt : c.l <= pos.tgt)) { exit = pos.tgt; why = 'alvo'; }
+          else if (ex === 1) { const sup = F.filter((f) => f.dir === d && f.from <= j && f.mid > pos.i0 - 1 && f.fill > j - 1).sort((a, b) => b.mid - a.mid)[0] || pos.f; if (d === 1 ? c.c < sup.bot : c.c > sup.top) { exit = c.c; why = 'suporte'; } }
+          else if (ex === 2) { const opp = F.find((f) => f.dir === -d && f.mid >= pos.i0 && f.mid + 2 === j); if (opp && (d === 1 ? c.c <= opp.top : c.c >= opp.bot)) { exit = c.c; why = 'contrária'; } }
+          if (exit == null && j - pos.i0 > BT_CAP) { exit = c.c; why = 'tempo'; }
+          if (exit != null) { const pnl = (exit - pos.e) / pos.e * 100 * d, R = (exit - pos.e) * d / pos.risk; out.push({ sym, tf: id, kind: 'fs', exit: ex, dir: d, t: T[pos.i0].ct, t1: c.ct, r: pnl > 0 ? 'W' : 'L', R, mv: Math.abs(pnl), pnl, bars: j - pos.i0, why }); pos = null; }
+          continue;
+        }
+        const b = bias(j - 1); if (!b) continue;
+        // a vela j toca um FVG a favor aberto (o mais perto do preço)
+        const cand = F.filter((f) => f.dir === b && openAt(f, j - 1) && (b === 1 ? f.top < T[j - 1].c : f.bot > T[j - 1].c));
+        if (!cand.length) continue;
+        const f = b === 1 ? cand.reduce((m, x) => (x.top > m.top ? x : m)) : cand.reduce((m, x) => (x.bot < m.bot ? x : m)), edge = b === 1 ? f.top : f.bot;
+        if (!(b === 1 ? c.l <= edge : c.h >= edge)) continue;
+        const e = b === 1 ? Math.min(c.o, edge) : Math.max(c.o, edge), stop = b === 1 ? f.bot : f.top, risk = Math.abs(e - stop); if (!(risk > 0)) continue;
+        const tr = res.trace[j - 1], legX = tr && tr.ext ? tr.ext.p : null;
+        const opp = F.filter((g) => g.dir === -b && openAt(g, j - 1) && (b === 1 ? g.bot > e : g.top < e)).map((g) => (b === 1 ? g.bot : g.top));
+        const tg = [legX].concat(opp).filter((x) => x != null && (b === 1 ? x > e : x < e)); const tgt = tg.length ? (b === 1 ? Math.min(...tg) : Math.max(...tg)) : null;
+        pos = { dir: b, e, stop, risk, f, i0: j, tgt };
+        if (b === 1 ? c.l <= stop : c.h >= stop) { out.push({ sym, tf: id, kind: 'fs', exit: ex, dir: b, t: c.ct, t1: c.ct, r: 'L', R: -1, mv: risk / e * 100, pnl: -risk / e * 100, bars: 0, why: 'stop' }); pos = null; }
+      }
+    }
+    // comprar e segurar no mesmo período (para comparar)
+    out.push({ sym, tf: id, kind: 'bh', t: T[60].ct, t1: T[T.length - 1].ct, pnl: (T[T.length - 1].c - T[60].c) / T[60].c * 100 });
+    return out;
+  }
+  async function fsStart(syms, tfs, deep) {
+    const st = btState = { mode: 'fs', deep: !!deep, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, syms, setups: tfs };
+    const cache = {}, tick = () => new Promise((r) => setTimeout(r, 0));
+    for (const sym of syms) {
+      if (!st.run) break;
+      st.prog = `${sym} — a descarregar o histórico…`; npRenderBt(); await tick();
+      try {
+        const C = await btLoad(sym, tfs, cache, deep);
+        for (const id of tfs) { if (!st.run) break; st.prog = `${sym} — ${tfLabel(id)}…`; npRenderBt(); await tick();
+          try { const T = C[BT_API(id)]; if (!T || T.length < 120) { st.errs.push(`${sym} ${tfLabel(id)}: poucas velas`); continue; } st.trades.push(...fsRun(sym, id, T, btRes(T, id, sym))); } catch (e) { st.errs.push(`${sym} ${tfLabel(id)}: ${e.message || e}`); } }
+      } catch (e) { st.errs.push(`${sym}: ${e.message || e}`); }
+      st.done++; await tick();
+    }
+    st.run = false; st.prog = st.done < st.total ? 'Parado.' : 'Concluído.';
+    try { localStorage.setItem('mss_bt3', JSON.stringify({ t: Date.now(), trades: st.trades, syms, setups: tfs, deep: st.deep, errs: st.errs.slice(0, 50) })); } catch (e) {}
+    npRenderBt();
+  }
+  function fsResults(T0) {
+    const T = T0.filter((x) => x.kind === 'fs'), BH = T0.filter((x) => x.kind === 'bh');
+    const tfs = ['1w', '1d', '4h'].filter((id) => T.some((x) => x.tf === id));
+    if (!T.length) return '<p class="mu">Nenhum trade neste filtro.</p>';
+    const worst = (L) => { let m = 0, c = 0; for (const x of L.slice().sort((a, b) => a.t1 - b.t1)) { if (x.r === 'L') { c++; m = Math.max(m, c); } else c = 0; } return m; };
+    const comp = (L) => { const bySym = {}; L.forEach((x) => (bySym[x.sym] = bySym[x.sym] || []).push(x)); const v = Object.values(bySym).map((a) => a.sort((p, q) => p.t1 - q.t1).reduce((p, x) => p * (1 + x.pnl / 100), 1) - 1); return v.length ? v.reduce((p, q) => p + q, 0) / v.length * 100 : null; };
+    const row = (L, lbl) => { if (!L.length) return ''; const n = L.length, w = L.filter((x) => x.r === 'W').length, R = L.reduce((p, x) => p + x.R, 0) / n, pc = L.reduce((p, x) => p + x.pnl, 0) / n;
+      const ts = L.map((x) => x.t).sort((a, b) => a - b), md = ts[Math.floor(n / 2)], h = (H) => (H.length ? H.reduce((p, x) => p + x.R, 0) / H.length : null), h1 = h(L.filter((x) => x.t < md)), h2 = h(L.filter((x) => x.t >= md));
+      const ok = n >= 30 && R >= 0.2 && h1 > 0 && h2 > 0, v = n < 30 ? '<span class="mu">poucos casos</span>' : ok ? '<b class="up">✔ aprovado</b>' : '<b class="dn">✖ não passa</b>', cp = comp(L);
+      const fR = (x) => (x == null ? '—' : `<span class="${x >= 0 ? 'up' : 'dn'}">${x >= 0 ? '+' : ''}${x.toFixed(2).replace('.', ',')} R</span>`);
+      return `<tr><td>${lbl}</td><td>${n}</td><td>${Math.round(w / n * 100)}%</td><td><b>${fR(R)}</b><div class="small ${pc >= 0 ? 'up' : 'dn'}">${pc >= 0 ? '+' : '−'}${pct(Math.abs(pc))} por trade</div></td><td class="small">${fR(h1)} · ${fR(h2)}</td><td>${btMed(L.map((x) => x.bars)) || 0}</td><td>${worst(L)}</td><td>${cp == null ? '—' : `<span class="${cp >= 0 ? 'up' : 'dn'}">${cp >= 0 ? '+' : '−'}${pct(Math.abs(cp))}</span>`}</td><td>${v}</td></tr>`; };
+    return tfs.map((id) => { const bh = BH.filter((x) => x.tf === id), bhAvg = bh.length ? bh.reduce((p, x) => p + x.pnl, 0) / bh.length : null;
+      const rows = [1, -1].map((d) => [1, 2, 3].map((ex) => row(T.filter((x) => x.tf === id && x.dir === d && x.exit === ex), `${d === 1 ? '<span class="up">▲ Long</span>' : '<span class="dn">▼ Short</span>'} · saída ${ex} — ${FS_EXIT[ex]}`)).join('')).join('');
+      return `<h3 class="np-h2" style="font-size:20px;margin-top:18px">${tfLabel(id)} <span class="mu" style="font-size:14px">comprar e segurar no mesmo período: ${bhAvg == null ? '—' : `<b class="${bhAvg >= 0 ? 'up' : 'dn'}">${bhAvg >= 0 ? '+' : '−'}${pct(Math.abs(bhAvg))}</b>`} (média dos ativos)</span></h3>
+        <div class="revwrap"><table class="revtbl bttbl"><tr><th>Lado · saída</th><th>Trades</th><th>Ganhou</th><th title="Média por trade em múltiplos do risco (e em % do preço)">Média por trade</th><th title="Média em R na 1.ª metade · 2.ª metade do histórico">1.ª · 2.ª metade</th><th title="Mediana de velas dentro da posição">Velas</th><th title="Maior número de perdas seguidas">Pior sequência</th><th title="Resultado composto dos trades, média dos ativos (para comparar com comprar e segurar)">Composto</th><th title="≥ +0,2 R por trade, ≥ 30 trades, positivo nas duas metades — e tem de passar na cripto e nas ações">Aprovação</th></tr>${rows}</table></div>`; }).join('');
+  }
   async function btStart(syms, setups, deep) {
-    const st = btState = { deep: !!deep, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, t0: Date.now(), syms, setups: setups.map((x) => x.name) };
+    const st = btState = { mode: 'su', deep: !!deep, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, t0: Date.now(), syms, setups: setups.map((x) => x.name) };
     const cache = {}, bench = {}, tick = () => new Promise((r) => setTimeout(r, 0)), avail = settings.favs || [];
     const getBench = async (b) => { if (!b) return null; if (bench[b] !== undefined) return bench[b]; try { const c = await btLoad(b, ['1d'], cache, deep); bench[b] = c['1d'] && c['1d'].length > 60 ? { cs: c['1d'], res: btRes(c['1d'], '1d', b) } : null; } catch (e) { bench[b] = null; } return bench[b]; };
     for (const sym of syms) {
@@ -7615,15 +7695,50 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     return `<p>Base: ${cell(base)} ganharam${rB != null ? ` · média por caso <b class="${rB >= 0 ? 'up' : 'dn'}">${rB >= 0 ? '+' : ''}${rB.toFixed(2).replace('.', ',')} R</b>` : ''}${mvB.aw != null ? ` · quando ganhou andou em média <b class="up">+${pct(mvB.aw)}</b>, quando perdeu <b class="dn">−${pct(mvB.al || 0)}</b> · média por caso <b class="${(mvB.ex || 0) >= 0 ? 'up' : 'dn'}">${(mvB.ex || 0) >= 0 ? '+' : '−'}${pct(Math.abs(mvB.ex || 0))}</b>` : ''} · mediana de ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'} velas do gatilho até ao resultado · recuo máximo mediano contra ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae)) != null ? pct(btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae))) : '—'} · ${L.filter((x) => x.r === 'O').length} ainda em aberto (não contam)</p>
       <div class="revwrap"><table class="revtbl bttbl"><tr><th>Input</th><th title="Taxa de acerto quando o input está presente (casos) · média por caso">Com</th><th title="Taxa de acerto sem o input (casos) · média por caso">Sem</th><th title="Diferença em pontos percentuais">Diferença</th><th title="A diferença na 1.ª metade do histórico · na 2.ª metade — só conta se for do mesmo lado nas duas">1.ª · 2.ª metade</th><th>Leitura</th></tr>${dep}${rows}</table></div>`;
   }
-  let npBtSet = 'all', npBtKind = 'all', npBtSym = 'all', npBtEnt = 'pronto';
+  let npBtSet = 'all', npBtKind = 'all', npBtSym = 'all', npBtEnt = 'pronto', npBtMode = 'su', btSaved = {};
+  function btLoadSaved(mode) {
+    try { const j = JSON.parse(localStorage.getItem(mode === 'fs' ? 'mss_bt3' : 'mss_bt2') || 'null'); if (j) return { mode, deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {}
+    return null;
+  }
+  function btSwitch(m) { if (m === npBtMode) return; btSaved[npBtMode] = btState; npBtMode = m; btState = btSaved[m] || btLoadSaved(m); npRenderBt(); }
   function npShowBt() {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     npView = 'bt'; document.body.dataset.npv = 'bt'; clearInterval(npPxTimer);
-    if (!btState) { try { const j = JSON.parse(localStorage.getItem('mss_bt2') || 'null'); if (j) btState = { deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {} }
+    if (!btState) btState = btLoadSaved(npBtMode);
     npRender(); window.scrollTo(0, 0); navPush({ v: 'bt' });
+  }
+  function npRenderFs(box, modeBar) {
+    const S = btState, cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's'), syms0 = [...new Set((S ? S.trades : []).map((x) => x.sym))];
+    const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
+    const T = (S ? S.trades : []).filter((x) => symOk(x) && (npBtKind === 'all' || cls(x.sym) === npBtKind)), tfSel = settings.fsTfs || ['1d', '4h', '1w'];
+    box.innerHTML = `<div class="bhead"><div><h2>📊 Teste no passado</h2><div class="sub"><b>Só FVG + estrutura</b>, cada timeframe sozinho, sem zonas, gatilhos nem linhas. <b>Viés</b>: a última quebra deixou um FVG a favor que continua aberto e não há FVG contrário aberto a travar (senão, fica de fora). <b>Entrada</b>: o preço toca um FVG a favor aberto; stop do outro lado dele. <b>Saídas</b> (cada uma testada à parte): 1 · suporte cedeu — fecho para lá do FVG a favor mais recente; 2 · força contrária — nasce um FVG contrário e a vela seguinte não o fecha; 3 · liquidez — o extremo da perna ou o FVG contrário aberto mais perto (o primeiro). O stop vale sempre.</div></div></div>
+      ${modeBar}
+      <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['btc', '₿ BTC · histórico todo'], ['btc3', 'BTC + ETH + SOL · histórico todo'], ['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+        <div><b>Timeframes</b> ${[['1w', 'Semanal'], ['1d', 'Diário'], ['4h', '4H']].map(([k, t]) => `<label class="btck"><input type="checkbox" data-fstf="${k}"${tfSel.includes(k) ? ' checked' : ''}> ${t}</label>`).join('')}</div>
+        <div>${S && S.run ? '<button id="btStop">■ Parar</button>' : '<button id="fsGo" class="btgo">▶ Começar o teste</button>'} <span class="mu">${S ? npEsc(S.prog) + (S.total ? ` · ${S.done}/${S.total} ativos` : '') : 'Demora alguns minutos. Podes continuar a usar a app.'}</span>
+        ${T.length && !(S && S.run) ? '<button id="fsCsv">Exportar CSV</button>' : ''}</div></div>
+      ${syms0.length > 1 && syms0.includes('BTCUSDT') ? `<div class="np-ff" style="margin-top:14px">${[['all', 'Todos os ativos juntos'], ['BTCUSDT', 'Só BTC'], ['oth', 'Só os outros']].map(([k, t]) => `<button data-btsym="${k}" class="${npBtSym === k ? 'on' : ''}">${t}</button>`).join('')}</div>` : ''}
+      ${S && S.trades.length ? `<div class="np-ff" style="margin-top:8px">${[['all', 'Todos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btk="${k}" class="${npBtKind === k ? 'on' : ''}">${t}</button>`).join('')}</div>${fsResults(T)}
+      <p class="mu small" style="margin-top:8px">Composto = o resultado de fazer todos os trades seguidos, um de cada vez, com o capital todo (média dos ativos) — para comparar com comprar e segurar. “✔ aprovado” só com +0,2 R ou mais por trade, 30+ trades e positivo nas duas metades do histórico.</p>` : ''}
+      ${S && S.errs.length ? `<details class="small mu" style="margin-top:10px"><summary>${S.errs.length} sem dados</summary>${S.errs.map(npEsc).join('<br>')}</details>` : ''}`;
+    const sy = (k) => { const f = settings.favs || []; return k === 'btc' ? ['BTCUSDT'] : k === 'btc3' ? ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] : k === 'all' ? f : f.filter((s) => cls(s) === k); };
+    box.querySelectorAll('[data-btmode]').forEach((b) => b.addEventListener('click', () => btSwitch(b.dataset.btmode)));
+    box.querySelectorAll('[data-btsy]').forEach((b) => b.addEventListener('click', () => { settings.btSy = b.dataset.btsy; save('mss_settings4', settings); npRenderBt(); }));
+    box.querySelectorAll('[data-fstf]').forEach((i) => i.addEventListener('change', () => { settings.fsTfs = [...box.querySelectorAll('[data-fstf]:checked')].map((x) => x.dataset.fstf); save('mss_settings4', settings); }));
+    box.querySelectorAll('[data-btsym]').forEach((b) => b.addEventListener('click', () => { npBtSym = b.dataset.btsym; npRenderBt(); }));
+    box.querySelectorAll('[data-btk]').forEach((b) => b.addEventListener('click', () => { npBtKind = b.dataset.btk; npRenderBt(); }));
+    const go = $('#fsGo'); if (go) go.addEventListener('click', () => { const tfs = settings.fsTfs || ['1d', '4h', '1w']; if (!tfs.length) { alert('Escolhe pelo menos um timeframe.'); return; } const k = settings.btSy || 'all'; npBtSym = 'all'; fsStart(sy(k), tfs, k === 'btc' || k === 'btc3'); });
+    const stp = $('#btStop'); if (stp) stp.addEventListener('click', () => { if (btState) btState.run = false; });
+    const csv = $('#fsCsv'); if (csv) csv.addEventListener('click', () => {
+      const cols = ['sym', 'tf', 'kind', 'exit', 'dir', 't', 't1', 'r', 'R', 'pnl', 'bars', 'why'];
+      const txt = [cols.join(';')].concat(S.trades.map((x) => cols.map((c) => (c === 't' || c === 't1' ? (x[c] ? new Date(x[c]).toISOString().slice(0, 16) : '') : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 100) / 100).replace('.', ',') : x[c])).join(';'))).join('\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'teste-fvg-estrutura.csv'; a.click(); });
   }
   function npRenderBt() {
     const box = $('#npBt'); if (!box || npView !== 'bt') return;
+    if (btState && btState.mode && btState.mode !== npBtMode) { const o = btSaved[btState.mode]; if (!o || o === btState || !o.run) btSaved[btState.mode] = btState; btState = btSaved[npBtMode] || btLoadSaved(npBtMode); }
+    const modeBar = `<div class="np-ff" style="margin-top:12px">${[['su', 'Setups da app (zona + quebra)'], ['fs', 'Só FVG + estrutura']].map(([k, t]) => `<button data-btmode="${k}" class="${npBtMode === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    if (npBtMode === 'fs') { npRenderFs(box, modeBar); return; }
     const S = btState, sets = (settings.setups || []).filter((x) => x.on);
     const cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
     const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
@@ -7633,6 +7748,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       return Object.keys(m).map((s) => { const r = btRate(m[s]); const ent = k.startsWith('fvg') ? (() => { const a = m[s].filter((x) => x.r !== 'N').length; return ` <span class="mu small" title="Entraram (o preço voltou ao FVG antes de qualquer quebra nova)">· entrou ${Math.round(a / m[s].length * 100)}% de ${m[s].length}</span>`; })() : '', rv = btR(m[s]);
         return `<tr><td>${nmK}${ent}</td><td>${s}</td><td>${r.n ? `<b>${Math.round(r.p)}%</b> <span class="mu small">(${r.n})</span>${r.n < 30 ? ' <span class="wn small">poucos</span>' : ''}` : '—'}</td><td>${btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'}</td><td>${(() => { const v = btMed(m[s].filter((x) => x.r !== 'O').map((x) => x.mae)); return v == null ? '—' : pct(v); })()}</td>${btMvTd(m[s])}<td>${rv == null ? '<span class="mu">—</span>' : `<b class="${rv >= 0 ? 'up' : 'dn'}">${rv >= 0 ? '+' : ''}${rv.toFixed(2).replace('.', ',')} R</b>`}</td></tr>`; }).join(''); }).join('');
     box.innerHTML = `<div class="bhead"><div><h2>📊 Teste no passado</h2><div class="sub">Cada setup PRONTO do passado, reconstruído vela a vela sem ver o futuro. <b>Ganhou</b> = chegou ao topo/fundo da perna da zona; <b>perdeu</b> = fechou para lá do limite da zona antes disso. Nas <b>entradas no FVG</b>: depois da quebra espera-se a correção até ao FVG da perna do gatilho (uma quebra nova antes disso anula); perdeu = tocou o stop abaixo do FVG; o resultado vem também em R (múltiplos do risco). As tuas linhas e as edições à mão ficam de fora (foram feitas a olhar para o passado).</div></div></div>
+      ${modeBar}
       <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['btc', '₿ BTC · histórico todo'], ['btc3', 'BTC + ETH + SOL · histórico todo'], ['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
         <div><b>Setups</b> ${sets.map((x) => `<label class="btck"><input type="checkbox" data-btst="${npEsc(x.name)}"${(settings.btSets || sets.map((y) => y.name)).includes(x.name) ? ' checked' : ''}> ${npEsc(x.name)}</label>`).join('')}</div>
         <div>${S && S.run ? '<button id="btStop">■ Parar</button>' : '<button id="btGo" class="btgo">▶ Começar o teste</button>'} <span class="mu">${S ? npEsc(S.prog) + (S.total ? ` · ${S.done}/${S.total} ativos` : '') : 'Demora alguns minutos (descarrega anos de velas de cada favorito). Podes continuar a usar a app.'}</span>
@@ -7663,6 +7779,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const sy = (k) => { const f = settings.favs || []; return k === 'btc' ? ['BTCUSDT'] : k === 'btc3' ? ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] : k === 'all' ? f : f.filter((s) => cls(s) === k); };
     box.querySelectorAll('[data-btsy]').forEach((b) => b.addEventListener('click', () => { settings.btSy = b.dataset.btsy; save('mss_settings4', settings); npRenderBt(); }));
     box.querySelectorAll('[data-btst]').forEach((i) => i.addEventListener('change', () => { settings.btSets = [...box.querySelectorAll('[data-btst]:checked')].map((x) => x.dataset.btst); save('mss_settings4', settings); }));
+    box.querySelectorAll('[data-btmode]').forEach((b) => b.addEventListener('click', () => btSwitch(b.dataset.btmode)));
     box.querySelectorAll('[data-btent]').forEach((b) => b.addEventListener('click', () => { npBtEnt = b.dataset.btent; npRenderBt(); }));
     box.querySelectorAll('[data-btsym]').forEach((b) => b.addEventListener('click', () => { npBtSym = b.dataset.btsym; npRenderBt(); }));
     box.querySelectorAll('[data-btk]').forEach((b) => b.addEventListener('click', () => { npBtKind = b.dataset.btk; npRenderBt(); }));
