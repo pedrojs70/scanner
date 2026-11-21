@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 21nov 21h24</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 21nov 21h46</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -7389,7 +7389,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const d7C = (r) => days7.map((k) => `<td class="e7">${fmtG(r.byDay[k])}</td>`).join('');
     // tendência da distância nos dias visíveis: quantos passos encolheram (a aproximar-se) vs cresceram
     const trC = (r) => { const g = days7.map((k) => r.byDay[k]).filter((x) => x != null); let c = 0, x = false; for (let i = 1; i < g.length; i++) { if (Math.sign(g[i]) !== Math.sign(g[i - 1]) && g[i] !== 0) x = true; if (Math.abs(g[i]) < Math.abs(g[i - 1])) c++; } const m = g.length - 1;
-      return `<td class="small" title="EMA 8 ${fmt(r.e8)} · EMA 21 ${fmt(r.e21)} · distância agora ${pct(r.gap, true)}">${m < 1 ? '<span class="mu">—</span>' : x ? '<span class="wn">✕ cruzaram</span>' : c * 2 > m ? `<span class="wn">→← a aproximar-se</span> <span class="mu">(${c} de ${m})</span>` : `<span class="mu">←→ a afastar-se</span> <span class="mu">(${m - c} de ${m})</span>`}</td>`; };
+      return `<td class="small" title="EMA 8 ${fmt(r.e8)} · EMA 21 ${fmt(r.e21)} · distância agora ${pct(r.gap, true)}">${m < 1 ? '<span class="mu">—</span>' : x ? `<span class="${g[g.length - 1] > 0 ? 'up' : 'dn'}">✕ cruzaram ${g[g.length - 1] > 0 ? 'para cima' : 'para baixo'}</span>` : c * 2 > m ? `<span class="${g[g.length - 1] > 0 ? 'dn' : 'up'}">→← a aproximar-se</span> <span class="mu">(${c} de ${m})</span>` : `<span class="${g[g.length - 1] > 0 ? 'up' : 'dn'}">←→ a afastar-se</span> <span class="mu">(${m - c} de ${m})</span>`}</td>`; };   // verde = bullish · vermelho = bearish
     const h7 = `${days7.map((k, i) => `<th class="e7" title="Distância entre a EMA 8 e a EMA 21 no fecho desse dia (% do preço): verde = 8 acima da 21 · vermelho = 8 abaixo. Em branco = sem fecho (fim de semana ou feriado nas ações)">${wdOf(k)}${i === 6 ? '<br><span class="mu" style="font-weight:400;text-transform:none">último</span>' : ''}</th>`).join('')}<th title="A distância entre as médias nos dias à esquerda: a encolher (a aproximar-se) ou a crescer (a afastar-se), em quantos dos passos">Tendência</th>`;
     const wkC = (r) => `<td class="rn">${emaDotTf((favData[r.s].tfs || {})['1w'], 'Semanal') || '<span class="mu">—</span>'}</td>`;
     const row = (r) => `<tr>${nmC(r)}<td><b>${r.days}</b> fecho${r.days === 1 ? '' : 's'}<div class="mu small">desde ${dt(r.since)}</div></td>${d7C(r)}${trC(r)}${posC(r)}${wkC(r)}</tr>`;
