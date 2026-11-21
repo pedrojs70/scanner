@@ -861,7 +861,7 @@
   .sutbl td:nth-child(9) { white-space:normal; min-width:260px; max-width:360px; text-align:left; } .sutbl td.ctxcol { white-space:normal; min-width:150px; }
   td.fvgc, th.fvgc { width:46px; text-align:center; } td.divc, th.divc { width:40px; text-align:center; } .fvgp { white-space:nowrap; font-weight:700; }
   .mttbl td { white-space:nowrap; padding:4px 3px; } .mtc { font-size:11px; padding:1px 5px; margin:0 1px; border:1px solid var(--evm); background:transparent; color:var(--evm); border-radius:3px; cursor:pointer; } .mtc.on { background:var(--evf); color:var(--prf); border-color:var(--evf); } .mtc:disabled { opacity:.35; cursor:default; }
-  .fseq { font-size:14px; letter-spacing:1px; display:inline-flex; align-items:stretch; white-space:nowrap; } .fseq .fpart { display:inline-block; white-space:nowrap; } .fseq .fpart:first-child { text-align:right; } .fbar { color:transparent; font-size:0; width:0; border-left:1.5px solid var(--evm); margin:2px 5px; align-self:stretch; } td.fvgs { max-width:150px; }
+  .fseq { font-size:14px; letter-spacing:1px; display:inline-flex; align-items:stretch; white-space:nowrap; } .fseq .fpart { display:inline-block; white-space:nowrap; } .fseq .farr { align-self:center; font-size:11px; letter-spacing:0; margin-right:5px; } .fseq .fpart:first-child { text-align:right; } .fbar { color:transparent; font-size:0; width:0; border-left:1.5px solid var(--evm); margin:2px 5px; align-self:stretch; } td.fvgs { max-width:150px; }
   .np-only { margin:6px 0 12px; padding:9px 12px; background:var(--evb); border-radius:3px; font-size:13.5px; }
   body.uni .nunirow, body.uni .nunicell { display:none; }
   /* as classes antigas passam a seguir o dicionário */
@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 21nov 13h59</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 21nov 19h31</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -5575,7 +5575,7 @@
     // até 7 bolas por linha; quando passa, a linha seguinte fica do mesmo lado da barra (perna à esquerda, correção à direita)
     const rows = (a) => { const r = []; for (let i = 0; i < a.length; i += 7) r.push(a.slice(i, i + 7).join('')); return r.join('<br>'); };
     const leg = rows(c.list.filter((x) => x.leg).map((x) => fvgDot(x.f))), cor = rows(c.list.filter((x) => !x.leg).map((x) => fvgDot(x.f)));
-    return `<span class="fseq"><span class="fpart">${leg || '<span class="muted">—</span>'}</span><span class="fbar">|</span><span class="fpart">${cor}</span></span>`;   // cada lado parte linha do seu lado da barra
+    return `<span class="fseq"><span class="farr ${c.dir === 1 ? 'c-up' : 'c-dn'}" title="${c.dir === 1 ? 'Perna de subida: à esquerda a subida, à direita a retração' : 'Perna de descida: à esquerda a descida, à direita o ressalto'}">${c.dir === 1 ? '▲' : '▼'}</span><span class="fpart">${leg || '<span class="muted">—</span>'}</span><span class="fbar">|</span><span class="fpart">${cor}</span></span>`;   // cada lado parte linha do seu lado da barra
   }
   // lista de cada FVG contado (para a dica ao passar o rato)
   function fvgTip(d, c) {
@@ -8019,7 +8019,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     const body = list.map((r) => { const up = r.dir === 1, fid = r.id === '4h' && favData[r.s] && favData[r.s].tfs['4hc'] ? '4hc' : r.id, iv = r.val.inv;
       return `<tr class="rrow" data-s="${r.s}"><td class="nm"><a href="#" class="np-chi" data-chart="${r.s}" data-tf="${r.id}" title="Abrir o gráfico no ${tfLabel(r.id)}">📈</a><a href="#" data-open="${r.s}"><b>${npEsc(nm(r.s))}</b></a>${wIc(r.s)}<div class="mu" style="font-size:11px;margin-left:24px"><b style="color:var(--np-ink)">${tfLabel(r.id)}</b>${nm(r.s) !== r.s ? ' · ' + r.s : ''}${num ? ' · ' + npEsc(aiF(r.price)) : ''}</div></td>
       <td style="white-space:nowrap">${sideC(r.dir)} <span class="cz ${band(r.pull)}">${pct(r.pull)}</span>${num && iv ? `<div class="mu" style="font-size:11px"${iv.t ? ` title="${npEsc(iv.t)}"` : ''}>invalida: ${npEsc(iv.v)}${iv.d ? ' · ' + npEsc(iv.d) : ''}</div>` : ''}</td>
-      <td title="FVG na perna do ${tfLabel(r.id)} que fez estrutura">${fvgPair(r.d, fid)}${r.ok.fvg ? `<div class="small"${r.val.fvg && r.val.fvg.t ? ` title="${npEsc([r.val.fvg.v, r.val.fvg.d].filter(Boolean).join(' · '))}"` : ''}><span class="ev">✔ no FVG de ${up ? 'desconto' : 'prémio'}</span></div>` : ''}</td>
+      <td class="fvgs" title="FVG na perna do ${tfLabel(r.id)} que fez estrutura">${fvgSeqCell(r.d, fid)}${r.ok.fvg ? `<div class="small"${r.val.fvg && r.val.fvg.t ? ` title="${npEsc([r.val.fvg.v, r.val.fvg.d].filter(Boolean).join(' · '))}"` : ''}><span class="ev">✔ no FVG de ${up ? 'desconto' : 'prémio'}</span></div>` : ''}</td>
       ${(num ? cellN : cellT)(r, 'fib')}${['star', 'sma', 'sw', 'div'].map((k) => cellS(r, k)).join('')}<td class="rn">${emaDot((favData[r.s] || {}).tfs)}</td>${(num ? cellN : cellT)(r, 'ln')}
       <td style="white-space:nowrap">${r.gat}</td>${(num ? cellN : cellT)(r, 'ctx').replace('<td class="', '<td class="ctxcol ')}</tr>`; }).join('');
     box.innerHTML = `<div class="bhead"><div><h2>Reversões prováveis</h2><div class="sub">${all.length} zona${all.length === 1 ? '' : 's'} de correção (≥ 50%) nos favoritos · ordenado pelo número de sinais a favor · o gatilho é só informativo — passa o rato pelos títulos das colunas</div></div></div>
