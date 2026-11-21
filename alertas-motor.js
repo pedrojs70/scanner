@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-21T19:31:22.275Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-21T21:24:52.034Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -1883,6 +1883,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     if (!hit) { if (!once && st.ta && st.ta[ak + '|w']) { const v = lnAt(l, now)(0), p = lc.cs[lc.cs.length - 1].c; if (Math.abs(p - v) / v > 0.003) delete st.ta[ak + '|w']; } return; }
     if (!once && st.ta && st.ta[ak + '|w']) return;   // "sempre": volta a avisar depois de o preço se afastar
     st.ta = st.ta || {}; st.ta[once ? ak : ak + '|w'] = now;
+    if (once) st.ta[ak + '|w'] = now;   // a vigilância geral ("todas as linhas") só volta a avisar depois de o preço se afastar e voltar
     if (st.silent) return;
     const chHi = l.type === 'chan' ? Math.max(lnAt(l, now)(0), lnAt(l, now)(l.off || 0)) : null, vNow = lnAt(l, now)(hit.off);
     const what = l.type === 'chan' ? (vNow === chHi ? 'o teto do teu canal' : 'o chão do teu canal') : 'a tua diagonal';
