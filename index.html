@@ -916,7 +916,7 @@
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 20nov 13h16</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 21nov 13h59</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -7719,9 +7719,119 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
     return `<p>Base: ${cell(base)} ganharam${rB != null ? ` · média por caso <b class="${rB >= 0 ? 'up' : 'dn'}">${rB >= 0 ? '+' : ''}${rB.toFixed(2).replace('.', ',')} R</b>` : ''}${mvB.aw != null ? ` · quando ganhou andou em média <b class="up">+${pct(mvB.aw)}</b>, quando perdeu <b class="dn">−${pct(mvB.al || 0)}</b> · média por caso <b class="${(mvB.ex || 0) >= 0 ? 'up' : 'dn'}">${(mvB.ex || 0) >= 0 ? '+' : '−'}${pct(Math.abs(mvB.ex || 0))}</b>` : ''} · mediana de ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.bars)) || '—'} velas do gatilho até ao resultado · recuo máximo mediano contra ${btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae)) != null ? pct(btMed(L.filter((x) => x.r !== 'O').map((x) => x.mae))) : '—'} · ${L.filter((x) => x.r === 'O').length} ainda em aberto (não contam)</p>
       <div class="revwrap"><table class="revtbl bttbl"><tr><th>Input</th><th title="Taxa de acerto quando o input está presente (casos) · média por caso">Com</th><th title="Taxa de acerto sem o input (casos) · média por caso">Sem</th><th title="Diferença em pontos percentuais">Diferença</th><th title="A diferença na 1.ª metade do histórico · na 2.ª metade — só conta se for do mesmo lado nas duas">1.ª · 2.ª metade</th><th>Leitura</th></tr>${dep}${rows}</table></div>`;
   }
+  // ---------- estudo: o 1.º FVG contrário de uma tendência (segura? a tendência reverte?) ----------
+  // tendência = desde a 1.ª quebra num sentido até à 1.ª quebra no sentido contrário (várias quebras seguidas a favor contam como a mesma)
+  function cfRun(sym, id, T, res) {
+    if (!T || T.length < 40 || !res || !res.trace) return [];
+    const n = T.length, k = FB.fvgK(id, settings), F = res.fvgs.filter((f) => f.atr > 0 && f.top - f.bot >= k * f.atr).sort((a, b) => a.mid - b.mid);
+    const BR = [], brAt = new Map(); let lastI = -1;   // quebras na vela em que ficam conhecidas (sem olhar para o futuro)
+    for (let j = 1; j < n; j++) { const lb = res.trace[j] && res.trace[j].lb; if (lb && lb.i > lastI) { const b = { j, dir: lb.dir, i: lb.i, from: lb.from }; BR.push(b); brAt.set(j, b); lastI = lb.i; } }
+    const out = [];
+    for (let s = 0; s < BR.length; s++) {
+      if (s > 0 && BR[s - 1].dir === BR[s].dir) continue;   // só o início de cada tendência
+      const b0 = BR[s], d = b0.dir; let e = s + 1; while (e < BR.length && BR[e].dir === d) e++;
+      const endJ = e < BR.length ? BR[e].j : n - 1;
+      let a = b0.from >= 0 ? b0.from : Math.max(0, b0.i - 50); for (let q = a; q <= b0.i; q++) if (d === 1 ? T[q].l < T[a].l : T[q].h > T[a].h) a = q;   // início da tendência = extremo antes da 1.ª quebra
+      const f = F.find((g) => g.dir === -d && g.mid > b0.i && g.mid + 1 <= endJ && g.mid + 1 < n); if (!f) continue;
+      const nF = F.filter((g) => g.dir === d && g.mid >= a && g.mid < f.mid).length;
+      const k0 = f.mid + 1, near = d === 1 ? f.bot : f.top, far = d === 1 ? f.top : f.bot;
+      const ev = { sym, tf: id, kind: 'cf', dir: d, nF, t: T[k0].ct, sz: (f.top - f.bot) / T[k0].c * 100, touch: false, held: null, out: null, bars: null, tb: null, R1: null, R2: null, mfe: null, mfeR: null, rk: null };
+      // tendência: a 1.ª quebra depois de o FVG nascer decide (contra = reverteu · a favor = continuou)
+      const nb = BR.find((b) => b.j >= k0); if (nb) { ev.out = nb.dir === -d ? 'rev' : 'cont'; ev.bars = nb.j - k0; }
+      // toque e "segurou": depois do toque, uma quebra no sentido contrário à tendência antes de alguma vela fechar do outro lado do FVG
+      let tj = null;
+      for (let j = k0 + 1; j < n; j++) { const c = T[j], b = brAt.get(j);
+        if (d === 1 ? c.h >= near : c.l <= near) { tj = j; break; }
+        if (b && b.dir === d) break; }   // a tendência antiga voltou a quebrar a favor sem o preço tocar no FVG
+      if (tj != null) {
+        ev.touch = true; ev.tb = tj - k0;
+        const c0 = T[tj], en = d === 1 ? Math.max(c0.o, near) : Math.min(c0.o, near), risk = Math.abs(far - en), sd = -d;
+        let held = null, x1 = null, x2 = null, ext = en;
+        for (let j = tj; j < n; j++) { const c = T[j], b = brAt.get(j);
+          ext = sd === -1 ? Math.min(ext, c.l) : Math.max(ext, c.h);
+          if (d === 1 ? c.c > far : c.c < far) { if (held == null) held = false; if (x1 == null) x1 = c.c; x2 = c.c; break; }   // fechou do outro lado: falhou / stop
+          if (b && b.dir === -d) { if (held == null) held = true; if (x1 == null) x1 = c.c; }
+          if (b && b.dir === d && j > tj) { if (held == null) held = false; if (x1 == null) x1 = c.c; x2 = c.c; break; }   // a tendência antiga voltou
+        }
+        ev.held = held;
+        if (risk > 0 && (d === 1 ? en < far : en > far)) {
+          ev.rk = risk / en * 100;
+          if (x1 != null) ev.R1 = (x1 - en) * sd / risk;
+          if (x2 != null) { ev.R2 = (x2 - en) * sd / risk; ev.mfe = Math.abs(ext - en) / en * 100; ev.mfeR = Math.abs(ext - en) / risk; }
+        }
+      }
+      out.push(ev);
+    }
+    return out;
+  }
+  async function cfStart(syms, tfs, deep) {
+    const st = btState = { mode: 'cf', deep: !!deep, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, syms, setups: tfs };
+    const cache = {}, tick = () => new Promise((r) => setTimeout(r, 0));
+    for (const sym of syms) {
+      if (!st.run) break;
+      st.prog = `${sym} — a descarregar o histórico…`; npRenderBt(); await tick();
+      try {
+        const C = await btLoad(sym, tfs, cache, true);
+        for (const id of tfs) { if (!st.run) break; st.prog = `${sym} — ${tfLabel(id)}…`; npRenderBt(); await tick();
+          try { const T = C[BT_API(id)]; if (!T || T.length < 40) { st.errs.push(`${sym} ${tfLabel(id)}: poucas velas`); continue; } st.trades.push(...cfRun(sym, id, T, btRes(T, id, sym))); } catch (e) { st.errs.push(`${sym} ${tfLabel(id)}: ${e.message || e}`); } }
+      } catch (e) { st.errs.push(`${sym}: ${e.message || e}`); }
+      st.done++; await tick();
+    }
+    st.run = false; st.prog = st.done < st.total ? 'Parado.' : 'Concluído.';
+    try { localStorage.setItem('mss_bt4', JSON.stringify({ t: Date.now(), trades: st.trades, syms, setups: tfs, deep: true, errs: st.errs.slice(0, 50) })); } catch (e) {}
+    npRenderBt();
+  }
+  function cfResults(T) {
+    if (!T.length) return '<p class="mu">Nenhum caso com estas escolhas.</p>';
+    const cost = +settings.fsCost || 0, net = (x, R) => R - (cost > 0 && x.rk > 0 ? 2 * cost / x.rk : 0);
+    const avg = (a) => (a.length ? a.reduce((p, q) => p + q, 0) / a.length : null), med = (a) => btMed(a);
+    const P = (a, b) => (b ? `<b>${Math.round(a / b * 100)}%</b> <span class="mu small">(${a}/${b})</span>` : '<span class="mu">—</span>');
+    const fR = (x) => (x == null ? '—' : `<span class="${x >= 0 ? 'up' : 'dn'}">${x >= 0 ? '+' : ''}${x.toFixed(2).replace('.', ',')} R</span>`);
+    const row = (L, lbl, strong) => { if (!L.length) return '';
+      const dec = L.filter((x) => x.out), rev = dec.filter((x) => x.out === 'rev').length, tc = L.filter((x) => x.touch), hd = tc.filter((x) => x.held != null), hy = hd.filter((x) => x.held).length;
+      const t1 = L.filter((x) => x.R1 != null), t2 = L.filter((x) => x.R2 != null).sort((p, q) => p.t - q.t), r1 = avg(t1.map((x) => net(x, x.R1))), r2 = avg(t2.map((x) => net(x, x.R2)));
+      const h = Math.floor(t2.length / 2), a1 = avg(t2.slice(0, h).map((x) => net(x, x.R2))), a2 = avg(t2.slice(h).map((x) => net(x, x.R2)));
+      const ok = t2.length >= 30 && r2 >= 0.2 && a1 > 0 && a2 > 0, v = t2.length < 30 ? '<span class="mu">poucos casos</span>' : ok ? '<b class="up">✔ aprovado</b>' : '<b class="dn">✖ não passa</b>';
+      const mv = med(tc.filter((x) => x.held && x.mfe != null).map((x) => x.mfe)), mvR = med(tc.filter((x) => x.held && x.mfeR != null).map((x) => x.mfeR));
+      return `<tr${strong ? ' style="font-weight:600;border-top:2px solid var(--line)"' : ''}><td>${lbl}</td><td>${L.length}</td><td>${P(rev, dec.length)}</td><td>${P(tc.length, L.length)}</td><td>${med(tc.map((x) => x.tb)) ?? '—'}</td><td>${P(hy, hd.length)}</td><td>${mv == null ? '—' : `${pct(mv)} <span class="mu small">(${mvR.toFixed(1).replace('.', ',')} R)</span>`}</td><td>${fR(r1)} <span class="mu small">(${t1.length})</span></td><td>${fR(r2)} <span class="mu small">(${t2.length})</span></td><td class="small">${fR(a1)} · ${fR(a2)}</td><td>${v}</td></tr>`; };
+    const bk = [['0', (x) => x.nF === 0], ['1', (x) => x.nF === 1], ['2', (x) => x.nF === 2], ['3', (x) => x.nF === 3], ['4', (x) => x.nF === 4], ['5 ou mais', (x) => x.nF >= 5]];
+    return ['1M', '1w', '1d'].filter((id) => T.some((x) => x.tf === id)).map((id) => [1, -1].map((d) => { const L = T.filter((x) => x.tf === id && x.dir === d); if (!L.length) return '';
+      return `<h3 class="np-h2" style="font-size:20px;margin-top:18px">${tfLabel(id)} · ${d === 1 ? '<span class="up">tendência de subida</span> → 1.º FVG <span class="dn">vermelho</span>' : '<span class="dn">tendência de descida</span> → 1.º FVG <span class="up">verde</span>'}</h3>
+        <div class="revwrap"><table class="revtbl bttbl"><tr><th>FVG a favor antes</th><th>Casos</th><th title="Dos casos já decididos: a 1.ª quebra de estrutura depois de nascer o FVG contrário foi contra a tendência">Tendência reverteu</th><th title="O preço voltou a tocar no FVG contrário">Voltou a tocar</th><th title="Mediana de velas até ao toque">Velas até tocar</th><th title="Dos que tocaram: depois do toque houve quebra contra a tendência antes de alguma vela fechar do outro lado do FVG">Segurou</th><th title="Quando segurou: quanto o preço andou a favor da inversão (mediana), em % e em múltiplos do risco">Quando segurou, andou</th><th title="Entrada de inversão no toque · stop no fecho do outro lado do FVG · sai na 1.ª quebra contra a tendência antiga">Entrada no toque: sai na quebra</th><th title="A mesma entrada, mas segue a nova tendência até a estrutura voltar a quebrar a favor da tendência antiga (ou stop)">Entrada no toque: segue a nova tendência</th><th title="Média da coluna anterior na 1.ª · 2.ª metade do histórico">1.ª · 2.ª metade</th><th title="≥ +0,2 R, ≥ 30 casos, positivo nas duas metades">Aprovação</th></tr>
+        ${bk.map(([t, fn]) => row(L.filter(fn), t)).join('')}${row(L, 'Total', true)}</table></div>`; }).join('')).join('');
+  }
+  function npRenderCf(box, modeBar) {
+    const S = btState, cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's'), syms0 = [...new Set((S ? S.trades : []).map((x) => x.sym))];
+    const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
+    const T = (S ? S.trades : []).filter((x) => x.kind === 'cf' && symOk(x) && (npBtKind === 'all' || cls(x.sym) === npBtKind)), tfSel = settings.cfTfs || ['1M', '1w'];
+    box.innerHTML = `<div class="bhead"><div><h2>📊 Teste no passado</h2><div class="sub"><b>1.º FVG contrário</b> — não é uma estratégia, é uma contagem. Em cada <b>tendência</b> (da 1.ª quebra num sentido até à 1.ª quebra no sentido contrário; várias quebras seguidas a favor contam como a mesma tendência), a app conta os FVG a favor até nascer o <b>primeiro FVG contrário</b> e mede: se a tendência <b>reverteu</b> (a quebra seguinte foi contra) ou <b>continuou</b>; se o preço <b>voltou a tocar</b> nesse FVG; e se ele <b>segurou</b> (depois do toque, quebra contra a tendência antes de alguma vela <b>fechar</b> do outro lado do FVG). Também simula uma <b>entrada de inversão</b> no toque, com stop no fecho do outro lado do FVG. Usa sempre o histórico todo.</div></div></div>
+      ${modeBar}
+      <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['btc', '₿ BTC'], ['btc3', 'BTC + ETH + SOL'], ['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+        <div><b>Timeframes</b> ${[['1M', 'Mensal'], ['1w', 'Semanal'], ['1d', 'Diário']].map(([k, t]) => `<label class="btck"><input type="checkbox" data-cftf="${k}"${tfSel.includes(k) ? ' checked' : ''}> ${t}</label>`).join('')}</div>
+        <div><span class="mu small">Custos por lado:</span> <input id="fsCost" type="number" step="0.01" min="0" max="1" value="${+settings.fsCost || 0}" style="width:64px"> %</div>
+        <div>${S && S.run ? '<button id="btStop">■ Parar</button>' : '<button id="cfGo" class="btgo">▶ Começar o estudo</button>'} <span class="mu">${S ? npEsc(S.prog) + (S.total ? ` · ${S.done}/${S.total} ativos` : '') : 'Demora alguns minutos. Podes continuar a usar a app.'}</span>
+        ${T.length && !(S && S.run) ? '<button id="cfCsv">Exportar CSV</button>' : ''}</div></div>
+      ${syms0.length > 1 && syms0.includes('BTCUSDT') ? `<div class="np-ff" style="margin-top:14px">${[['all', 'Todos os ativos juntos'], ['BTCUSDT', 'Só BTC'], ['oth', 'Só os outros']].map(([k, t]) => `<button data-btsym="${k}" class="${npBtSym === k ? 'on' : ''}">${t}</button>`).join('')}</div>` : ''}
+      ${S && S.trades.length ? `<div class="np-ff" style="margin-top:8px">${[['all', 'Todos'], ['c', 'Cripto'], ['s', 'Ações/futuros'], ['r', 'Rácios']].map(([k, t]) => `<button data-btk="${k}" class="${npBtKind === k ? 'on' : ''}">${t}</button>`).join('')}</div>${cfResults(T)}
+      <p class="mu small" style="margin-top:8px">“Tendência reverteu” e “Segurou” só contam os casos já decididos. As colunas em R são a entrada de inversão no toque do FVG (com custos, se os puseste). Com menos de 30 casos, não tires conclusões.</p>` : ''}
+      ${S && S.errs.length ? `<details class="small mu" style="margin-top:10px"><summary>${S.errs.length} sem dados</summary>${S.errs.map(npEsc).join('<br>')}</details>` : ''}`;
+    const sy = (k) => { const f = settings.favs || []; return k === 'btc' ? ['BTCUSDT'] : k === 'btc3' ? ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] : k === 'all' ? f : f.filter((s) => cls(s) === k); };
+    box.querySelectorAll('[data-btmode]').forEach((b) => b.addEventListener('click', () => btSwitch(b.dataset.btmode)));
+    box.querySelectorAll('[data-btsy]').forEach((b) => b.addEventListener('click', () => { settings.btSy = b.dataset.btsy; save('mss_settings4', settings); npRenderBt(); }));
+    { const ci = $('#fsCost'); if (ci) ci.addEventListener('change', () => { settings.fsCost = Math.max(0, Math.min(1, +String(ci.value).replace(',', '.') || 0)); save('mss_settings4', settings); npRenderBt(); }); }
+    box.querySelectorAll('[data-cftf]').forEach((i) => i.addEventListener('change', () => { settings.cfTfs = [...box.querySelectorAll('[data-cftf]:checked')].map((x) => x.dataset.cftf); save('mss_settings4', settings); }));
+    box.querySelectorAll('[data-btsym]').forEach((b) => b.addEventListener('click', () => { npBtSym = b.dataset.btsym; npRenderBt(); }));
+    box.querySelectorAll('[data-btk]').forEach((b) => b.addEventListener('click', () => { npBtKind = b.dataset.btk; npRenderBt(); }));
+    const go = $('#cfGo'); if (go) go.addEventListener('click', () => { const tfs = settings.cfTfs || ['1M', '1w']; if (!tfs.length) { alert('Escolhe pelo menos um timeframe.'); return; } const k = settings.btSy || 'all'; npBtSym = 'all'; cfStart(sy(k), tfs); });
+    const stp = $('#btStop'); if (stp) stp.addEventListener('click', () => { if (btState) btState.run = false; });
+    const csv = $('#cfCsv'); if (csv) csv.addEventListener('click', () => {
+      const cols = ['sym', 'tf', 'dir', 'nF', 't', 'sz', 'out', 'bars', 'touch', 'tb', 'held', 'R1', 'R2', 'mfe', 'mfeR', 'rk'];
+      const txt = [cols.join(';')].concat(T.map((x) => cols.map((c) => (c === 't' ? new Date(x.t).toISOString().slice(0, 10) : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 100) / 100).replace('.', ',') : String(x[c]))).join(';'))).join('\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'estudo-1o-fvg-contrario.csv'; a.click(); });
+  }
   let npBtSet = 'all', npBtKind = 'all', npBtSym = 'all', npBtEnt = 'pronto', npBtMode = 'su', btSaved = {};
   function btLoadSaved(mode) {
-    try { const j = JSON.parse(localStorage.getItem(mode === 'fs' ? 'mss_bt3' : 'mss_bt2') || 'null'); if (j) return { mode, deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {}
+    try { const j = JSON.parse(localStorage.getItem(mode === 'fs' ? 'mss_bt3' : mode === 'cf' ? 'mss_bt4' : 'mss_bt2') || 'null'); if (j) return { mode, deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {}
     return null;
   }
   function btSwitch(m) { if (m === npBtMode) return; btSaved[npBtMode] = btState; npBtMode = m; btState = btSaved[m] || btLoadSaved(m); npRenderBt(); }
@@ -7774,8 +7884,9 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
   function npRenderBt() {
     const box = $('#npBt'); if (!box || npView !== 'bt') return;
     if (btState && btState.mode && btState.mode !== npBtMode) { const o = btSaved[btState.mode]; if (!o || o === btState || !o.run) btSaved[btState.mode] = btState; btState = btSaved[npBtMode] || btLoadSaved(npBtMode); }
-    const modeBar = `<div class="np-ff" style="margin-top:12px">${[['su', 'Setups da app (zona + quebra)'], ['fs', 'Só FVG + estrutura']].map(([k, t]) => `<button data-btmode="${k}" class="${npBtMode === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    const modeBar = `<div class="np-ff" style="margin-top:12px">${[['su', 'Setups da app (zona + quebra)'], ['fs', 'Só FVG + estrutura'], ['cf', '1.º FVG contrário (estudo)']].map(([k, t]) => `<button data-btmode="${k}" class="${npBtMode === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
     if (npBtMode === 'fs') { npRenderFs(box, modeBar); return; }
+    if (npBtMode === 'cf') { npRenderCf(box, modeBar); return; }
     const S = btState, sets = (settings.setups || []).filter((x) => x.on);
     const cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
     const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
