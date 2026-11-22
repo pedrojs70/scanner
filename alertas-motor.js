@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-21T23:25:14.542Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-22T11:11:41.151Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -2015,9 +2015,14 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
             if (dist <= k && (!hit || dist < hit.dist)) hit = { dist, v, l, fem: l.type !== 'chan', what: l.type === 'chan' ? (v === hiC ? 'teto do teu canal' : 'chão do teu canal') : 'tua diagonal' }; }
         }
         if (!hit) continue;
-        const key = `fl|${sym}|${id}|${d.closed[f.created] ? d.closed[f.created].t : f.created}`, inside = price >= lo && price <= hi, was = st.fl[key];
-        st.fl[key] = { in: inside, at: now };
-        if (!inside || (was && was.in)) continue;
+        const key = `fl|${sym}|${id}|${d.closed[f.created] ? d.closed[f.created].t : f.created}`, inside = price >= lo && price <= hi, was = st.fl[key] || {};
+        // depois de avisar, só volta a avisar quando o preço se afastar a sério do FVG (o maior de 0,5% do preço ou 1/4 do FVG) e voltar a entrar, e no máximo 1 vez por dia
+        const m = Math.max(price * 0.005, (hi - lo) * 0.25), away = price < lo - m || price > hi + m;
+        let armed = was.armed != null ? was.armed : !was.in;
+        if (away) armed = true;
+        const fire = inside && armed && !(was.ft && now - was.ft < 864e5);
+        st.fl[key] = { armed: fire ? false : armed, ft: fire ? now : was.ft, in: inside, at: now };
+        if (!fire) continue;
         if (st.silent) continue;
         const tl = lnTfs(hit.l).map((x) => LBL[x]).join('/');
         out.push({ kind: 'fvgl', sym, text: [
