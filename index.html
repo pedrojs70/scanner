@@ -802,7 +802,6 @@
 .tabbar { display:flex; gap:4px; align-items:center; overflow-x:auto; padding:4px 2px 6px; scrollbar-width:thin; white-space:nowrap; }
 .tabbar .tab { display:inline-flex; align-items:center; gap:3px; border:1px solid var(--np-ln, var(--line)); border-radius:6px; padding:3px 4px 3px 2px; cursor:pointer; font-size:13px; background:var(--np-card, var(--panel)); color:var(--np-ink, var(--text)); flex:0 0 auto; user-select:none; }
 .tabbar .tab.on { background:var(--np-ink, var(--text)); color:var(--np-bg, var(--bg)); border-color:var(--np-ink, var(--text)); }
-.tabbar .tab.work { border-style:dashed; }
 .tabbar .tab .ttf { opacity:.7; font-size:12px; }
 .tabbar .tab button { background:none; border:0; padding:0 3px; cursor:pointer; color:inherit; font-size:12px; line-height:1; opacity:.65; }
 .tabbar .tab button:hover { opacity:1; }
@@ -926,7 +925,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 23nov 10h09</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 23nov 10h24</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -1052,7 +1051,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
       <li><b>Velas das ações, ETFs e futuros:</b> o Semanal e o Mensal são construídos pela app a partir das velas diárias (como no TradingView), para nunca virem com o tamanho errado; o 3M, 6M e Anual saem do Mensal. As velas diárias são verificadas sempre que chegam: buracos sem velas, dados parados, velas impossíveis, picos falsos (vela que salta e volta no dia seguinte), histórico cortado e diferença para a cotação atual. No Quadro: <b>✔</b> verificado, <b>⚠ amarelo</b> aviso (a estrutura é desenhada na mesma), <b>⚠ vermelho</b> dados suspeitos — os alertas desse ativo ficam suspensos até os dados voltarem a estar bons. Passa o rato no ⚠ para ver as datas; “velas: … ⚠” no topo do Quadro mostra só os que têm aviso. As cripto vêm da Binance e não precisam disto.</li>
       <li><b>Top do dia</b> (coluna da direita, por cima do “Em foco”): os 5 setups mais fortes para Long e para Short nos favoritos, sem scalp (só setups com zona de 4H para cima) e sem rácios. Um por ativo (o melhor; os outros vão como “também em zona” no resumo). Ordem: estado do setup (pronto → falta FVG → falta quebra), sinais da página Reversões, contexto do timeframe de cima, força relativa e R:R. ⚠ = vai contra o timeframe de cima ou contra a força relativa. Por cima, quantos favoritos de cada grupo estão em alta/baixa no Diário. O botão <b>🤖 Análise IA do dia</b> copia um brief (panorama, rácios, até 8 candidatos de cada lado com entrada, invalidação, alvo e sinais) para colares numa conversa com o Claude. O brief leva os nomes dos ativos em alta e em baixa por grupo, e a IA responde sempre com o lado e o veredicto (ex.: “SHORT Níquel (Day trade) — Entrar já”). Enquanto os favoritos ainda estão a carregar, o botão fica cinzento com “⏳ a carregar X de Y”; se carregares nele assim, o brief avisa a IA de que os dados estão incompletos.</li>
       <li><b>Em foco:</b> um cartão por ativo, só com o sinal mais forte dele: 🔥 Setup pronto + FVG em sintonia → PRONTO → ⚡ Pronto pela reação / ⚠ Pronto pelo topo/fundo. Por defeito só aparecem estes (“Sinais fortes”); “Em zona” e “Perto da inversão” estão nos botões de cima. Cada cartão mostra o setup, a sequência dos FVG da zona e do gatilho, a tua linha se o preço estiver colado a ela e 📅 os resultados se estiverem perto. No Jornal aparecem os 6 primeiros.</li>
-      <li><b>Separadores</b> (por cima do gráfico): cada um tem um ativo e um timeframe. <b>📌 fixos</b> = os do dia a dia, nunca são substituídos; o separador <b>tracejado</b> é o de trabalho: recebe o que abres das listas, dos setups e dos alertas (se o ativo já tem um fixo, a app salta para ele). <b>+</b> cria um fixo com o ativo e timeframe atuais; <b>×</b> fecha; arrasta para mudar a ordem; 📌 fixa/desafixa. A lista sincroniza entre aparelhos; a posição do gráfico de cada separador fica em cada aparelho.</li><li><b>📊 Backtest:</b> reconstrói vela a vela, sem ver o futuro, cada setup PRONTO dos teus favoritos (anos de velas). Ganhou = chegou ao topo/fundo da perna da zona; perdeu = fechou para lá do limite da zona antes disso. Mostra a taxa base de cada setup (e das entradas ⚡ antes da quebra e ⚠ topo/fundo) e, para cada input (profundidade da zona, quebra com FVG, 🔥, perna limpa, correção forte, contexto, bloqueio, 💧, Fibonacci, volume, EMA D e S, SMA 200, mercado), a taxa com e sem. Só diz “ajuda/prejudica” com 30+ casos de cada lado e o mesmo sinal nas duas metades do histórico. As tuas linhas e edições à mão não entram. Segundo modo, <b>“Só FVG + estrutura”</b>: cada timeframe (Semanal, Diário, 4H) sozinho — viés pela última quebra com FVG a favor ainda aberto (fica de fora se os FVG da quebra foram atravessados ou há um FVG contrário aberto a travar), entrada ao tocar um FVG a favor aberto com stop do outro lado dele (por fecho ou ao toque), três saídas (FVG contrário logo · FVG contrário confirmado · liquidez) e quatro gestões (sem limite · fecha a +3, +5 ou +10 R), Long e Short, com mediana, média sem os 5 melhores trades, custos opcionais e comparação com comprar e segurar.</li>
+      <li><b>Separadores</b> (por cima do gráfico): cada um tem um ativo e um timeframe. Abrir um ativo (listas, setups, favoritos, alertas do Telegram) troca o ativo <b>no separador em que estás</b>, como no TradingView. <b>+</b> abre um separador novo com o ativo e timeframe atuais; <b>×</b> fecha; arrasta para mudar a ordem. A lista sincroniza entre aparelhos; o separador ativo e a posição do gráfico de cada um ficam em cada aparelho.</li><li><b>📊 Backtest:</b> reconstrói vela a vela, sem ver o futuro, cada setup PRONTO dos teus favoritos (anos de velas). Ganhou = chegou ao topo/fundo da perna da zona; perdeu = fechou para lá do limite da zona antes disso. Mostra a taxa base de cada setup (e das entradas ⚡ antes da quebra e ⚠ topo/fundo) e, para cada input (profundidade da zona, quebra com FVG, 🔥, perna limpa, correção forte, contexto, bloqueio, 💧, Fibonacci, volume, EMA D e S, SMA 200, mercado), a taxa com e sem. Só diz “ajuda/prejudica” com 30+ casos de cada lado e o mesmo sinal nas duas metades do histórico. As tuas linhas e edições à mão não entram. Segundo modo, <b>“Só FVG + estrutura”</b>: cada timeframe (Semanal, Diário, 4H) sozinho — viés pela última quebra com FVG a favor ainda aberto (fica de fora se os FVG da quebra foram atravessados ou há um FVG contrário aberto a travar), entrada ao tocar um FVG a favor aberto com stop do outro lado dele (por fecho ou ao toque), três saídas (FVG contrário logo · FVG contrário confirmado · liquidez) e quatro gestões (sem limite · fecha a +3, +5 ou +10 R), Long e Short, com mediana, média sem os 5 melhores trades, custos opcionais e comparação com comprar e segurar.</li>
       <li><b>EMA 8/21 D:</b> só o Diário, só fechos, favoritos sem rácios. Três sub-abas: "8 acima da 21", "21 acima da 8" e "Toques ou cruzamentos" (médias a menos de 0,1% do preço, ou cruzamento, nos últimos 3 fechos — ficam aí 3 fechos e depois passam para uma das outras), com os fechos seguidos nesta ordem, a distância entre as médias em cada um dos últimos 7 dias (verde = 8 acima da 21; em branco = sem fecho, como o fim de semana nas ações), a tendência dessa distância (a aproximar-se ou a afastar-se, em quantos dos passos), onde está o preço e a EMA 8/21 do Semanal.</li>
       <li><b>🔔 Alertas (linhas e preços, como no TradingView):</b> numa linha ou canal, carrega nela e liga o 🔔; para um alerta de preço, botão direito no gráfico → “🔔 Criar alerta aqui”. O toque é exato: conta a sombra da vela. Em cada alerta escolhes a entrega (Telegram + app · só Telegram · só na app) e se avisa <b>uma vez</b> (por defeito: ao disparar, o 🔔 da linha desliga-se e a linha fica; o alerta de preço sai do gráfico) ou <b>sempre</b>. A aba 🔔 Alertas tem os ativos (para mudar ou apagar) e os disparados (abre o gráfico no momento do toque; apaga um a um ou “limpar tudo”). Com a app aberta, a app vê de minuto a minuto; fechada, o vigia vê a cada volta.</li>
       <li><b>Reversões prováveis:</b> link por baixo de “Favoritos”. Lista cada favorito × timeframe (1H, 4H, Diário, Semanal, Mensal) em zona de correção (≥ 50%) com ✔ em cada sinal a favor da reversão: Fib 0,618–0,786, ⭐, FVG por preencher na zona, SMA 200 a menos de 2%, Keltner ±3ATR, divergência RSI, 💧 sweep recente, linha tua, força relativa pelos rácios e contexto do timeframe de cima. Por defeito em <b>Numérico</b>: cada célula mostra o nível (em cima) e a distância ao preço atual (em baixo), a verde e negrito quando o sinal bate certo; mais as colunas Preço, Invalida (origem da perna — além dali a reversão falha) e R:R (do preço até ao topo/fundo da perna com stop na origem; verde se ≥ 2). A Força rel. diz que ativos estão a favor e contra no sentido do setup (passa o rato para a lista toda). O botão <b>Tick</b> volta à vista só com ✔. Ordena pelo score; a coluna Gatilho é só informativa — assim um gatilho mal lido não te esconde uma reversão. Alerta opcional “Reversão provável” no Telegram (Alertas → Ajustes).</li>
@@ -8485,22 +8484,22 @@ Usa só os números destes dados.`;
       }).observe(el, { attributes: true, attributeFilter: ['class'] });
     });
   }
-  // ---------- separadores (estilo TradingView): fixos 📌 + um separador de trabalho ----------
-  // settings.tabs = [{ id, s, tf, pin }] (sincroniza com a conta) · a posição do gráfico de cada separador fica só neste aparelho
+  // ---------- separadores (estilo TradingView): abrir um ativo troca-o no separador em que estás ----------
+  // settings.tabs = [{ id, s, tf }] (sincroniza com a conta) · a posição do gráfico de cada separador fica só neste aparelho
   let tabAct = load('mss_tabAct', null), tabFromBar = false;
   const tabPos = load('mss_tabPos', {});
   const tabsL = () => (Array.isArray(settings.tabs) ? settings.tabs : (settings.tabs = []));
   const tabSave = () => { save('mss_settings4', settings); save('mss_tabAct', tabAct); };
-  const tabNew = (s, tf, pin) => ({ id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), s, tf: tf || '1d', pin: !!pin });
+  const tabNew = (s, tf) => ({ id: 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), s, tf: tf || '1d' });
   const tabCur = () => tabsL().find((t) => t.id === tabAct) || null;
   // guarda onde estava o gráfico do separador ativo (por tempo, para servir mesmo com velas novas)
   function tabKeepPos() { const t = tabCur(); if (!t || !chart || !drawState) return; try { const r = chart.timeScale().getVisibleRange(); if (r) { tabPos[t.id] = { from: r.from, to: r.to, tf: t.tf }; save('mss_tabPos', tabPos); } } catch (e) {} }
   // um ativo aberto de fora da barra (listas, setups, alertas): vai para o separador fixo desse ativo, se houver; senão para o separador de trabalho
+  // abrir um ativo (listas, setups, favoritos, alertas): troca o ativo no separador em que estás (como no TradingView); sem separadores, cria um
   function tabRoute(s, tf) {
-    const L = tabsL(); let t = L.find((x) => x.pin && x.s === s && (!tf || x.tf === tf)) || L.find((x) => x.pin && x.s === s);
-    if (!t) { t = L.find((x) => !x.pin); if (!t) { t = tabNew(s, tf || '1d', false); L.push(t); } t.s = s; if (tf) t.tf = tf; }
-    else if (tf) t.tf = tf;
-    if (tabAct !== t.id) tabKeepPos();
+    const L = tabsL(); let t = tabCur();
+    if (!t) { t = tabNew(s, tf || '1d'); L.push(t); }
+    t.s = s; if (tf) t.tf = tf;
     tabAct = t.id; tabSave(); return t;
   }
   function tabSyncTf() { const t = tabCur(); if (!t || t.s !== symbol) return; const tf = selectedTf === '4hc' ? '4h' : selectedTf; if (t.tf !== tf) { t.tf = tf; tabSave(); renderTabs(); } }
@@ -8516,27 +8515,25 @@ Usa só os números destes dados.`;
     // volta a pôr o gráfico onde estava neste separador (quando os dados deste ativo/timeframe estiverem no ecrã)
     if (p && p.tf === t.tf) { const t0 = Date.now(); const w = setInterval(() => { if (tabAct !== id || Date.now() - t0 > 15000) { clearInterval(w); return; } if (dataSym === t.s && data[selectedTf] && drawState) { clearInterval(w); try { chart.timeScale().setVisibleRange({ from: p.from, to: p.to }); } catch (e) {} } }, 120); }
   }
-  function tabAdd() { const t = tabNew(symbol, selectedTf === '4hc' ? '4h' : selectedTf, true); tabKeepPos(); tabsL().push(t); tabAct = t.id; tabSave(); renderTabs(); }
+  function tabAdd() { const t = tabNew(symbol, selectedTf === '4hc' ? '4h' : selectedTf); tabKeepPos(); tabsL().push(t); tabAct = t.id; tabSave(); renderTabs(); }
   function tabClose(id) {
     const L = tabsL(), i = L.findIndex((x) => x.id === id); if (i < 0) return;
     L.splice(i, 1); delete tabPos[id]; save('mss_tabPos', tabPos);
     if (tabAct === id) { const n = L[Math.min(i, L.length - 1)]; tabAct = n ? n.id : null; tabSave(); if (n) tabGo(n.id); else renderTabs(); }
     else { tabSave(); renderTabs(); }
   }
-  function tabPin(id) { const t = tabsL().find((x) => x.id === id); if (!t) return; t.pin = !t.pin; if (!t.pin) { const o = tabsL().find((x) => !x.pin && x.id !== id); if (o) tabsL().splice(tabsL().indexOf(o), 1); } tabSave(); renderTabs(); }
   let tabDrag = null;
   function renderTabs() {
     const bar = $('#tabBar'); if (!bar) return;
     const L = tabsL(), e = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
-    bar.innerHTML = L.map((t) => `<span class="tab${t.id === tabAct ? ' on' : ''}${t.pin ? ' pin' : ' work'}" data-tab="${t.id}" draggable="true" title="${e(nm(t.s))} · ${tfLabel(t.tf)}${t.pin ? ' · fixo' : ' · separador de trabalho: recebe o que abres das listas e dos alertas (📌 para o fixar)'}"><button type="button" class="tpin" data-tpin="${t.id}" title="${t.pin ? 'Desafixar' : 'Fixar este separador'}">${t.pin ? '📌' : '⚲'}</button><span class="tnm">${e(nm(t.s).length > 16 ? nm(t.s).slice(0, 15) + '…' : nm(t.s))}</span> <span class="ttf">${tfLabel(t.tf)}</span><button type="button" class="tx" data-tx="${t.id}" title="Fechar">×</button></span>`).join('') + `<button type="button" class="tadd" id="tabAdd" title="Novo separador fixo com este ativo e timeframe">+</button>`;
+    bar.innerHTML = L.map((t) => `<span class="tab${t.id === tabAct ? ' on' : ''}" data-tab="${t.id}" draggable="true" title="${e(nm(t.s))} · ${tfLabel(t.tf)}"><span class="tnm">${e(nm(t.s).length > 16 ? nm(t.s).slice(0, 15) + '…' : nm(t.s))}</span> <span class="ttf">${tfLabel(t.tf)}</span><button type="button" class="tx" data-tx="${t.id}" title="Fechar">×</button></span>`).join('') + `<button type="button" class="tadd" id="tabAdd" title="Novo separador com este ativo e timeframe">+</button>`;
     bar.querySelectorAll('[data-tab]').forEach((el) => {
-      el.addEventListener('click', (ev) => { if (ev.target.closest('[data-tx],[data-tpin]')) return; tabGo(el.dataset.tab); });
+      el.addEventListener('click', (ev) => { if (ev.target.closest('[data-tx]')) return; tabGo(el.dataset.tab); });
       el.addEventListener('dragstart', (ev) => { tabDrag = el.dataset.tab; try { ev.dataTransfer.effectAllowed = 'move'; ev.dataTransfer.setData('text/plain', tabDrag); } catch (er) {} });
       el.addEventListener('dragover', (ev) => { if (tabDrag) ev.preventDefault(); });
       el.addEventListener('drop', (ev) => { ev.preventDefault(); const L2 = tabsL(), a = L2.findIndex((x) => x.id === tabDrag), b = L2.findIndex((x) => x.id === el.dataset.tab); tabDrag = null; if (a < 0 || b < 0 || a === b) return; const [m] = L2.splice(a, 1); L2.splice(b, 0, m); tabSave(); renderTabs(); });
     });
     bar.querySelectorAll('[data-tx]').forEach((b) => b.addEventListener('click', () => tabClose(b.dataset.tx)));
-    bar.querySelectorAll('[data-tpin]').forEach((b) => b.addEventListener('click', () => tabPin(b.dataset.tpin)));
     const add = $('#tabAdd'); if (add) add.addEventListener('click', tabAdd);
     const on = bar.querySelector('.tab.on'); if (on) { try { on.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (er) {} }
   }
@@ -8559,8 +8556,8 @@ Usa só os números destes dados.`;
   function npOpenAsset(s) {
     if (editMode) { requestExitEdit(); if (editMode) return; }
     const tabT = tabFromBar ? null : tabRoute(s, npKeepTf ? (selectedTf === '4hc' ? '4h' : selectedTf) : null);
-    const sameSym = symbol === s, wantTf = npKeepTf ? selectedTf : tabT && tabT.pin ? tabT.tf : '1d'; npKeepTf = false;
-    if (tabT && !tabT.pin) tabT.tf = wantTf === '4hc' ? '4h' : wantTf;
+    const sameSym = symbol === s, wantTf = npKeepTf ? selectedTf : '1d'; npKeepTf = false;
+    if (tabT) { tabT.tf = wantTf === '4hc' ? '4h' : wantTf; tabSave(); }
     if (selectedTf !== wantTf) { selectedTf = wantTf; save('mss_tf', wantTf); if (sameSym) setTimeout(() => { try { if (!data[wantTf]) loadAll(); else { renderTable(); renderPrev(); renderChart(false); updateEditUi(); } } catch (e) {} }, 0); }
     if (npView !== 'asset') { npFrom = npView; if (npView === 'board' || npView === 'focus' || npView === 'rev' || npView === 'setups' || npView === 'fvg' || npView === 'ai' || npView === 'watch') npBoardY = window.scrollY; }
     if (symbol !== s) swapSym(s);
