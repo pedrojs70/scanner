@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-23T11:41:02.742Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-23T12:45:35.834Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -2126,6 +2126,9 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
     fvgxAlerts(sym, dm, A, st, now, out, S);
     fvgSuAlerts(sym, dm, S, A, st, now, out);
     fvglAlerts(sym, dm, S, A, st, now, out);
+    // todos os avisos dizem o preço atual: os que não o mencionam ganham uma linha logo a seguir ao título
+    { const pid = ['5m', '15m', '1h', '4h', '1d', '1w', '1M'].find((id) => raw[id] && raw[id].length), px = pid ? raw[pid][raw[pid].length - 1].c : null;
+      if (px != null && isFinite(px)) out.forEach((m) => { if (!m.text || /[Pp]reço\s*\(|Preço agora/.test(m.text)) return; const L = m.text.split('\n'); L.splice(1, 0, `Preço agora: <b>${fmt(px)}</b>`); m.text = L.join('\n'); }); }
     if (A._pri) out.forEach((m) => { if (m.text && m.text.indexOf('ALERTA PRIORITÁRIO') < 0) m.text = '🚨 <b>ALERTA PRIORITÁRIO</b>\n' + m.text; m.pri = true; });
     return out;
   }
