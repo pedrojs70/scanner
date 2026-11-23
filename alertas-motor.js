@@ -1,4 +1,4 @@
-// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-23T10:24:03.582Z
+// alertas-motor.js — vigia do Scanner de Estrutura (gerado; não editar à mão). 2026-11-23T11:41:02.742Z
 // Motor de estrutura de mercado (estilo ICT, quebras confirmadas por fecho do corpo)
 // candles: [{t, o, h, l, c, v}] apenas velas FECHADAS, por ordem cronológica
 (function (root) {
@@ -2002,7 +2002,7 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
   function fvglAlerts(sym, dm, S, A, st, now, out) {
     if (!A.fvglOn) return; const ls = ((S.lines || {})[sym] || []).filter((l) => lnLive(l, now)); if (!ls.length) return;
     const tfs = (A.fvglTfs || A_DEF.fvglTfs).filter((id) => !(A.tfOff && A.tfOff[id])), k = (+A.fvglPct || 0.5) / 100;
-    st.fl = st.fl || {};
+    st.fl = st.fl || {}; const cand = [];
     for (const id of tfs) {
       const d = dm[id]; if (!d || !d.ext || !d.ext.res) continue; const price = d.price;
       for (const f of (d.ext.res.fvgs || []).filter((g) => g.filled == null)) {
@@ -2023,14 +2023,32 @@ globalThis.MSS_DEFAULTS = {"confirm":1,"lockBars":2,"extAtr":3,"intAtr":2,"prevL
         const fire = inside && armed && !(was.ft && now - was.ft < 864e5);
         st.fl[key] = { armed: fire ? false : armed, ft: fire ? now : was.ft, in: inside, at: now };
         if (!fire) continue;
-        if (st.silent) continue;
-        const tl = lnTfs(hit.l).map((x) => LBL[x]).join('/');
-        out.push({ kind: 'fvgl', sym, text: [
-          `🎯 <b>FVG colado a uma linha tua · ${LBL[id]} · ${esc(sym)}</b>`,
-          `O preço (${fmt(price)}) entrou no FVG ${f.dir === 1 ? 'verde (de subida)' : 'vermelho (de descida)'} do ${LBL[id]} ${fmt(lo)}–${fmt(hi)}, ${hit.dist === 0 ? (hit.fem ? 'atravessado pela' : 'atravessado pelo') : (hit.fem ? 'colado à' : 'colado ao')} ${hit.what} ${tl} (${fmt(hit.v)}).${hit.l.name ? ' · ' + esc(hit.l.name) : ''}`,
-          `É a confluência mais forte: ${f.dir === 1 ? 'possível apoio' : 'possível resistência'}.`,
-        ].join('\n') });
+        cand.push({ id, f, lo, hi, hit, price });
       }
+    }
+    // um só aviso por linha: junta os FVG (de vários timeframes) colados à mesma linha nesta volta;
+    // e a mesma linha só volta a avisar 12 h depois, ou depois de o preço se afastar dela (> 1%) e voltar
+    { const p0 = (Object.values(dm).find((d) => d && d.price > 0) || {}).price;   // em cada volta: se o preço se afastou (> 1%) de uma linha já avisada, essa linha volta a poder avisar
+      if (p0) for (const kk in st.fl) if (kk.startsWith(`fln|${sym}|`)) { const w = st.fl[kk]; if (w && w.v > 0 && Math.abs(p0 - w.v) / w.v > 0.01) w.armed = true; } }
+    const byLn = new Map();
+    for (const c of cand) { const lk = `${c.hit.l.id || ''}|${c.hit.what}`; if (!byLn.has(lk)) byLn.set(lk, []); byLn.get(lk).push(c); }
+    for (const [lk, cs] of byLn) {
+      const hit = cs.reduce((m, c) => (c.hit.dist < m.dist ? c.hit : m), cs[0].hit), price = cs[0].price, skey = `fln|${sym}|${lk}`, was = st.fl[skey] || {};
+      const armed = was.armed != null ? was.armed : true;
+      const ok = armed || !was.ft || now - was.ft >= 12 * 36e5;
+      if (!ok) { st.fl[skey] = Object.assign({}, was, { at: now }); continue; }
+      st.fl[skey] = { armed: false, ft: now, at: now, v: hit.v };
+      if (st.silent) continue;
+      const tl = lnTfs(hit.l).map((x) => LBL[x]).join('/'), dirs = new Set(cs.map((c) => c.f.dir));
+      const zones = new Map();   // mesma zona em vários timeframes → uma linha só
+      for (const c of cs) { const zk = `${c.f.dir}|${fmt(c.lo)}|${fmt(c.hi)}`; if (!zones.has(zk)) zones.set(zk, { c, tfs: [] }); zones.get(zk).tfs.push(LBL[c.id]); }
+      const zl = [...zones.values()].map(({ c, tfs }) => `FVG ${c.f.dir === 1 ? 'verde (de subida)' : 'vermelho (de descida)'} ${fmt(c.lo)}–${fmt(c.hi)} (${tfs.join(', ')})`);
+      const allTf = [...new Set(cs.map((c) => LBL[c.id]))].join(' + ');
+      out.push({ kind: 'fvgl', sym, text: [
+        `🎯 <b>FVG colado a uma linha tua · ${allTf} · ${esc(sym)}</b>`,
+        `O preço (${fmt(price)}) está ${zl.length > 1 ? 'nos' : 'no'} ${zl.join(' e ')}, ${hit.dist === 0 ? (hit.fem ? 'atravessado pela' : 'atravessado pelo') : (hit.fem ? 'colado à' : 'colado ao')} ${hit.what} ${tl} (${fmt(hit.v)}).${hit.l.name ? ' · ' + esc(hit.l.name) : ''}`,
+        dirs.size > 1 ? 'FVG dos dois lados na mesma linha: zona de decisão.' : `É a confluência mais forte: ${dirs.has(1) ? 'possível apoio' : 'possível resistência'}.`,
+      ].join('\n') });
     }
   }
   // ---------- resultados das empresas: aviso N dias antes (todos os favoritos; a data vem do worker) ----------
