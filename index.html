@@ -925,7 +925,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 23nov 12h45</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 23nov 16h32</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -2775,6 +2775,131 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     return o;
   }
   root.MSS_FIB = { FVG_K, fvgK, fvgsK, fCount, fvgSetup, ZID, orderBlocks, nextOB, resolveSetup, inZone, CTX_UP, fibsMore, confZones, ROLE_NM, starName, ENTRY, DEEP, INVAL, TGT, NEXT, lv, make, fibsOf, confluence, retrOf };
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>// Padrão ICT "sweep → quebra rápida → FVG" (AMD: acumulação, manipulação, distribuição).
+// 1) sweep: a sombra passa um nível de liquidez e, até 2 velas depois, uma vela fecha de volta para dentro;
+// 2) quebra rápida: até 10 velas depois do sweep, fecho para lá do último topo interno (fractal de 3 velas) antes do extremo;
+// 3) FVG no deslocamento (entre o extremo do sweep e a quebra), ainda aberto;
+// entrada no toque do FVG, stop no outro lado do FVG por fecho.
+// Liquidez: topos/fundos da estrutura (fractal 3+3) do próprio TF e do TF de cima (2+2), dia/semana/mês anteriores,
+// iguais (2+ topos/fundos a ≤ 0,1×ATR) e o range da Ásia (20h–24h de Nova Iorque, válido até às 16h do dia seguinte).
+// Tudo calculado só com o passado (sem olhar para o futuro). Usado pelo Backtest da app (e, depois, pelo vigia).
+(function (root) {
+  'use strict';
+  const H = 36e5, D = 864e5, DUR = { '5m': 3e5, '15m': 9e5, '1h': H, '4h': 4 * H, '1d': D, '1w': 7 * D };
+  const UP = { '5m': '1h', '15m': '4h', '1h': '4h', '4h': '1d', '1d': '1w' }, DOWN = { '1d': '1h', '4h': '15m', '1h': '5m' };
+  const dst = {};
+  function nyOff(t) { const y = new Date(t).getUTCFullYear(); let c = dst[y]; if (!c) { const sun = (m, k) => { const d = new Date(Date.UTC(y, m, 1)); return Date.UTC(y, m, 1 + ((7 - d.getUTCDay()) % 7) + 7 * (k - 1)); }; c = dst[y] = [sun(2, 2) + 7 * H, sun(10, 1) + 6 * H]; } return t >= c[0] && t < c[1] ? -4 * H : -5 * H; }
+  const nyH = (t) => { const x = new Date(t + nyOff(t)); return x.getUTCHours() + x.getUTCMinutes() / 60; };
+  const nyDay = (t) => Math.floor((t + nyOff(t)) / D);
+  const sessOf = (t) => { const h = nyH(t); return h >= 20 ? 'Ásia' : h >= 2 && h < 5 ? 'Londres' : h >= 7 && h < 10 ? 'Nova Iorque' : 'fora das sessões'; };
+  function atrOf(T, n) { const a = new Array(T.length).fill(0); let s = 0; for (let i = 1; i < T.length; i++) { const tr = Math.max(T[i].h - T[i].l, Math.abs(T[i].h - T[i - 1].c), Math.abs(T[i].l - T[i - 1].c)); if (i <= n) { s += tr; a[i] = s / i; } else a[i] = (a[i - 1] * (n - 1) + tr) / n; } a[0] = a[1] || 0; return a; }
+  function pivots(T, k) { const hi = [], lo = []; for (let i = k; i < T.length - k; i++) { let h = true, l = true; for (let q = 1; q <= k; q++) { if (!(T[i].h > T[i - q].h && T[i].h >= T[i + q].h)) h = false; if (!(T[i].l < T[i - q].l && T[i].l <= T[i + q].l)) l = false; if (!h && !l) break; } if (h) hi.push({ i, p: T[i].h }); if (l) lo.push({ i, p: T[i].l }); } return { hi, lo }; }
+  const mirror = (T) => T.map((x) => ({ t: x.t, o: -x.o, h: -x.l, l: -x.h, c: -x.c }));
+  // FVG de 3 velas no sentido d (1 = de subida nas velas dadas) com tamanho mínimo k×ATR
+  function fvgs(T, atr, k) { const up = [], dn = []; for (let m = 1; m < T.length - 1; m++) { const a = T[m - 1], b = T[m + 1], mn = k * (atr[m] || 0); if (b.l > a.h && b.l - a.h >= mn) up.push({ mid: m, bot: a.h, top: b.l }); if (a.l > b.h && a.l - b.h >= mn) dn.push({ mid: m, bot: b.h, top: a.l }); } return { up, dn }; }
+  // listas ordenadas de níveis ativos (L = fundos por baixo do preço, H = topos por cima)
+  function lb(arr, p) { let a = 0, b = arr.length; while (a < b) { const m = (a + b) >> 1; if (arr[m].p < p) a = m + 1; else b = m; } return a; }
+  function eqTag(arr, lv, tol) { for (let z = lb(arr, lv.p - tol); z < arr.length && arr[z].p <= lv.p + tol; z++) { const o = arr[z]; if (o.piv && !o.dead) { if (!o.ty.includes('iguais')) o.ty.push('iguais'); if (!lv.ty.includes('iguais')) lv.ty.push('iguais'); } } }
+  function ins(arr, lv) { let a = 0, b = arr.length; while (a < b) { const m = (a + b) >> 1; if (arr[m].p < lv.p) a = m + 1; else b = m; } arr.splice(a, 0, lv); }
+  // padrões de subida (sweep de fundos) nas velas T (já espelhadas para os de descida); HT = velas do TF de cima (mesmo espelho)
+  function scanUp(T, HT, id, k) {
+    const n = T.length, dur = DUR[id] || H, atr = atrOf(T, 14), F = fvgs(T, atr, k), pv3 = pivots(T, 3), pv1 = pivots(T, 1);
+    const ev = new Map(), add = (j, lv) => { if (j < n) { if (!ev.has(j)) ev.set(j, []); ev.get(j).push(lv); } };
+    pv3.lo.forEach((x) => add(x.i + 4, { p: x.p, side: 'L', ty: ['estrutura'], piv: 1 })); pv3.hi.forEach((x) => add(x.i + 4, { p: x.p, side: 'H', ty: ['estrutura'], piv: 1 }));
+    if (HT && HT.length > 10) { const hd = DUR[UP[id]] || dur * 4, hp = pivots(HT, 2); let q = 0; const at = (tt) => { while (q < n && T[q].t < tt) q++; return q; };
+      const evs = hp.lo.map((x) => ({ tt: HT[x.i + 2] ? HT[x.i + 2].t + hd : Infinity, lv: { p: x.p, side: 'L', ty: ['estrutura TF de cima'], piv: 1 } })).concat(hp.hi.map((x) => ({ tt: HT[x.i + 2] ? HT[x.i + 2].t + hd : Infinity, lv: { p: x.p, side: 'H', ty: ['estrutura TF de cima'], piv: 1 } }))).sort((a, b) => a.tt - b.tt);
+      for (const e of evs) { if (!isFinite(e.tt)) continue; add(at(e.tt), e.lv); } }
+    // dia / semana / mês anteriores
+    const per = [[dur < D, (t) => Math.floor(t / D), 'dia anterior'], [dur < 7 * D, (t) => Math.floor((t / D + 3) / 7), 'semana anterior'], [dur <= 7 * D, (t) => { const d = new Date(t); return d.getUTCFullYear() * 12 + d.getUTCMonth(); }, 'mês anterior']];
+    for (const [on, key, nm] of per) { if (!on) continue; let k0 = key(T[0].t), hi = -Infinity, lo = Infinity; for (let j = 0; j < n; j++) { const kk = key(T[j].t); if (kk !== k0) { if (isFinite(lo)) { add(j, { p: lo, side: 'L', ty: [nm] }); add(j, { p: hi, side: 'H', ty: [nm] }); } k0 = kk; hi = -Infinity; lo = Infinity; } hi = Math.max(hi, T[j].h); lo = Math.min(lo, T[j].l); } }
+    // range da Ásia (só no 5m, 15m e 1H)
+    const asia = new Map();
+    if (dur <= H) { let cur = null; for (let j = 0; j < n; j++) { const h = nyH(T[j].t), dd = nyDay(T[j].t);
+      if (h >= 20) { const key = dd + 1; if (!cur || cur.key !== key) cur = { key, hi: -Infinity, lo: Infinity }; cur.hi = Math.max(cur.hi, T[j].h); cur.lo = Math.min(cur.lo, T[j].l); }
+      else if (cur && dd === cur.key && !cur.done) { cur.done = true; const a = { p: cur.lo, side: 'L', ty: ['Ásia'], exp: dd }, b = { p: cur.hi, side: 'H', ty: ['Ásia'], exp: dd }; add(j, a); add(j, b); asia.set(dd, [a, b]); } } }
+    const Ls = [], Hs = [], out = [], cands = [];
+    let pend = null, ph = 0;   // ph: índice no pv1.hi do último topo interno confirmado
+    const byMidDn = new Map(); F.dn.forEach((f) => byMidDn.set(f.mid + 1, (byMidDn.get(f.mid + 1) || []).concat([f])));
+    for (let j = 1; j < n; j++) {
+      const c = T[j], px = Math.min(T[j - 1].c, c.o), pxH = Math.max(T[j - 1].c, c.o);
+      // níveis novos (só se ainda estiverem do lado certo do preço); iguais = 2+ topos/fundos de estrutura a ≤ 0,1×ATR
+      for (const lv of ev.get(j) || []) { const tol = 0.1 * (atr[j] || 0); if (lv.side === 'L') { if (lv.p >= px) continue; if (lv.piv) eqTag(Ls, lv, tol); ins(Ls, lv); } else { if (lv.p <= pxH) continue; if (lv.piv) eqTag(Hs, lv, tol); ins(Hs, lv); } }
+      if (dur <= H && nyH(c.t) >= 16) { const a = asia.get(nyDay(c.t)); if (a) { a[0].dead = a[1].dead = true; asia.delete(nyDay(c.t)); } }
+      while (ph < pv1.hi.length && pv1.hi[ph].i + 1 <= j) ph++;
+      // topos consumidos (o preço passou por cima)
+      while (Hs.length && Hs[0].p < c.h) Hs.shift();
+      // fundos passados pela sombra
+      const hit = []; while (Ls.length && Ls[Ls.length - 1].p > c.l) { const lv = Ls.pop(); if (!lv.dead) hit.push(lv); }
+      if (hit.length) { if (!pend) pend = { j0: j, top: -Infinity, ext: c.l, extI: j, ty: new Set() }; for (const lv of hit) { pend.top = Math.max(pend.top, lv.p); lv.ty.forEach((x) => pend.ty.add(x)); } }
+      if (pend) { if (c.l <= pend.ext) { pend.ext = c.l; pend.extI = j; }
+        if (c.c > pend.top) { // sweep confirmado: o último topo interno antes do extremo é a linha a quebrar
+          let b = null; for (let q = ph - 1; q >= 0; q--) if (pv1.hi[q].i < pend.extI) { b = pv1.hi[q]; break; }
+          if (b && b.p > c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, sess: sessOf(T[pend.extI].t) });
+          else if (b && b.p <= c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, sess: sessOf(T[pend.extI].t), jb: j });
+          pend = null; }
+        else if (j - pend.j0 >= 2) pend = null; }
+      // candidatos: quebra rápida (≤ 10 velas) e depois o FVG do deslocamento
+      for (let q = cands.length - 1; q >= 0; q--) { const k2 = cands[q];
+        if (k2.jb == null) { if (c.c < k2.ext || j - k2.j0 > 10) { cands.splice(q, 1); continue; } if (j > k2.js && c.c > k2.brk) k2.jb = j; continue; }
+        if (j < k2.jb + 1) continue;
+        cands.splice(q, 1);
+        const cand = F.up.filter((f) => f.mid > k2.extI && f.mid <= k2.jb).filter((f) => { for (let z = f.mid + 2; z <= j; z++) if (T[z].c < f.bot) return false; return true; });
+        if (!cand.length) continue;
+        const f = cand.reduce((a, b) => (b.top > a.top ? b : a)), tg = (() => { for (let z = 0; z < Hs.length; z++) if (!Hs[z].dead && Hs[z].p > c.c) return Hs[z]; return null; })();
+        out.push({ jc: j, ext: k2.ext, extI: k2.extI, j0: k2.j0, top: k2.top, ty: k2.ty, sess: k2.sess, fvg: f, tgt: tg ? tg.p : null, tgTy: tg ? tg.ty.join('+') : '' });
+      }
+    }
+    return { pats: out, F, atr };
+  }
+  // simula a entrada no FVG (toque) a partir da vela jc+1 nas velas T; devolve os trades por variante de saída
+  const EXITS = ['2b', 'liq'], MGS = [0, 3, 5, 10];
+  function trade(T, F, from, f, tgt, cap) {
+    const n = T.length; let jt = -1;
+    for (let j = from; j < Math.min(n, from + 50); j++) { const c = T[j]; if (tgt != null && c.h >= tgt) return { miss: 'fugiu' }; if (c.l <= f.top) { jt = j; break; } }
+    if (jt < 0) return { miss: 'não voltou' };
+    const c0 = T[jt], e = Math.min(c0.o, f.top); if (!(e > f.bot)) return { miss: 'abriu do outro lado' };
+    const risk = e - f.bot, dnBy = new Map(); for (const g of F.dn) if (g.mid - 1 >= jt) dnBy.set(g.mid + 1, g);
+    let held = null; for (let j = jt; j < n && held == null; j++) { if (T[j].c < f.bot) held = false; else if (T[j].h >= e + risk) held = true; }
+    const res = [];
+    for (const ex of EXITS) for (const mg of MGS) { if (ex === 'liq' && tgt == null) continue;
+      const tps = [mg ? e + mg * risk : null, ex === 'liq' ? tgt : null].filter((x) => x != null), tp = tps.length ? Math.min(...tps) : null; let r = null;
+      for (let j = jt; j < n; j++) { const c = T[j];
+        if (c.c < f.bot) { r = { px: c.c, j, why: 'stop' }; break; }
+        if (j > jt && tp != null && c.h >= tp) { r = { px: Math.max(c.o, tp), j, why: tp === tgt ? 'liquidez' : 'alvo ' + mg + ' R' }; break; }
+        if (j > jt) { const g = dnBy.get(j - 1); if (g && c.c <= g.top) { r = { px: c.c, j, why: 'FVG contrário' }; break; } }
+        if (j - jt > cap) { r = { px: c.c, j, why: 'tempo' }; break; } }
+      if (r) res.push({ ex, mg, R: (r.px - e) / risk, why: r.why, bars: r.j - jt }); }
+    return { jt, e, risk, held, res };
+  }
+  // corre tudo num ativo: P = { id: velas } (5m…1w); tfs = TFs do padrão; k(id) = tamanho mínimo do FVG em ATR
+  function run(sym, P, tfs, k) {
+    const out = [];
+    for (const id of tfs) { const T0 = P[id]; if (!T0 || T0.length < 200) continue;
+      for (const d of [1, -1]) {
+        const T = d === 1 ? T0 : mirror(T0), HT0 = P[UP[id]], HT = HT0 ? (d === 1 ? HT0 : mirror(HT0)) : null, { pats, F } = scanUp(T, HT, id, k(id));
+        const lid = DOWN[id], L0 = lid ? P[lid] : null, L = L0 && L0.length > 200 ? (d === 1 ? L0 : mirror(L0)) : null, LA = L ? atrOf(L, 14) : null, LF = L ? fvgs(L, LA, k(lid)) : null;
+        for (const p of pats) {
+          const base = { sym, tf: id, dir: d, ty: p.ty, sess: p.sess, t: T[p.jc].t };
+          const tr = trade(T, F, p.jc + 1, p.fvg, p.tgt, 500), rk = (p.fvg.top - p.fvg.bot) / Math.abs(p.fvg.top) * 100;
+          out.push(Object.assign({ kind: 'pat', mode: 'd', touched: !tr.miss, miss: tr.miss || '', held: tr.held }, base));
+          if (!tr.miss) for (const r of tr.res) out.push(Object.assign({ kind: 'tr', mode: 'd', R: r.R, ex: r.ex, mg: r.mg, why: r.why, bars: r.bars, rk: tr.risk / Math.abs(tr.e) * 100, held: tr.held, t1: T[tr.jt].t }, base));
+          // entrada fina: no TF de baixo, o 1.º FVG do mesmo sentido que nasce com o preço dentro do FVG de cima
+          if (L && T[p.jc].t + (DUR[id] || H) >= L[0].t && T[p.jc].t + (DUR[id] || H) < L[L.length - 1].t) { const t0 = T[p.jc].t + (DUR[id] || H), tEnd = t0 + 20 * (DUR[id] || H); let s0 = 0, a = 0, b = L.length; while (a < b) { const m = (a + b) >> 1; if (L[m].t < t0) a = m + 1; else b = m; } s0 = a;
+            let ji = -1, ok = true; for (let j = s0; j < L.length && L[j].t < tEnd; j++) { if (p.tgt != null && L[j].h >= p.tgt) { ok = false; break; } if (L[j].c < p.fvg.bot) { ok = false; break; } if (L[j].l <= p.fvg.top) { ji = j; break; } }
+            if (!ok || ji < 0) { out.push(Object.assign({ kind: 'pat', mode: 'f', lt: lid, touched: false, miss: ok ? 'não voltou' : 'fugiu/falhou' }, base)); continue; }
+            const fs0 = p.fvg.top - p.fvg.bot, lf = LF.up.find((g) => g.mid + 1 >= ji && L[g.mid + 1] && L[g.mid + 1].t < tEnd && g.top <= p.fvg.top && g.bot >= p.fvg.bot - fs0);
+            if (!lf) { out.push(Object.assign({ kind: 'pat', mode: 'f', lt: lid, touched: false, miss: 'sem FVG no TF de baixo' }, base)); continue; }
+            const t2 = trade(L, LF, lf.mid + 2, lf, p.tgt, 2000);
+            out.push(Object.assign({ kind: 'pat', mode: 'f', lt: lid, touched: !t2.miss, miss: t2.miss || '', held: t2.held }, base));
+            if (!t2.miss) for (const r of t2.res) out.push(Object.assign({ kind: 'tr', mode: 'f', lt: lid, R: r.R, ex: r.ex, mg: r.mg, why: r.why, bars: r.bars, rk: t2.risk / Math.abs(t2.e) * 100, held: t2.held, t1: L[t2.jt].t }, base)); }
+        }
+      }
+    }
+    return out;
+  }
+  root.MSS_AMD = { run, scanUp, mirror, sessOf, nyH, UP, DOWN, EXITS, MGS };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function () {
@@ -7849,9 +7974,85 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
       const txt = [cols.join(';')].concat(T.map((x) => cols.map((c) => (c === 't' ? new Date(x.t).toISOString().slice(0, 10) : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 100) / 100).replace('.', ',') : String(x[c]))).join(';'))).join('\n');
       const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'estudo-1o-fvg-contrario.csv'; a.click(); });
   }
+  // ---------- Backtest: padrão ICT sweep → quebra rápida → FVG (motor em alerts/amd.js) ----------
+  const AMD_TFS = [['5m', '5m'], ['15m', '15m'], ['1h', '1H'], ['4h', '4H'], ['1d', 'Diário']];
+  async function amdStart(syms, tfs) {
+    const st = btState = { mode: 'amd', deep: true, run: true, prog: '', trades: [], errs: [], done: 0, total: syms.length, syms, setups: tfs };
+    const cache = {}, tick = () => new Promise((r) => setTimeout(r, 0)), need = [...new Set(tfs.concat(tfs.map((id) => MSS_AMD.UP[id]), tfs.map((id) => MSS_AMD.DOWN[id])).filter(Boolean))];
+    for (const sym of syms) {
+      if (!st.run) break;
+      st.prog = `${sym} — a descarregar o histórico (${need.map(tfLabel).join(', ')})…`; npRenderBt(); await tick();
+      try {
+        const C = await btLoad(sym, need, cache, true), P = {};
+        for (const id of need) { const T = C[BT_API(id)]; if (T && T.length) P[id] = T; else st.errs.push(`${sym} ${tfLabel(id)}: sem dados`); }
+        st.prog = `${sym} — a procurar o padrão…`; npRenderBt(); await tick();
+        const rows = MSS_AMD.run(sym, P, tfs.filter((id) => P[id]), (id) => FB.fvgK(id, settings));
+        for (const x of rows) { x.ty = x.ty.join('+'); st.trades.push(x); }
+      } catch (e) { st.errs.push(`${sym}: ${e.message || e}`); }
+      st.done++; await tick();
+    }
+    st.run = false; st.prog = st.done < st.total ? 'Parado.' : 'Concluído.';
+    const sv = (T) => localStorage.setItem('mss_bt5', JSON.stringify({ t: Date.now(), trades: T, syms, setups: tfs, deep: true, errs: st.errs.slice(0, 50) }));
+    try { sv(st.trades); } catch (e) { try { sv(st.trades.filter((x) => x.kind === 'pat' || (x.mg === (+settings.amdMg || 0) && x.ex === (settings.amdEx || '2b')))); st.errs.unshift('Resultado grande: guardado só a saída e a gestão que tens escolhidas (o resto fica até fechares a app; exporta o CSV antes)'); } catch (e2) {} }
+    npRenderBt();
+  }
+  function amdResults(T0) {
+    const mode = settings.amdMode || 'd', ex = settings.amdEx || '2b', mg = +settings.amdMg || 0, grp = settings.amdGrp || 'tf', cost = +settings.fsCost || 0;
+    const P = T0.filter((x) => x.kind === 'pat' && x.mode === mode), T = T0.filter((x) => x.kind === 'tr' && x.mode === mode && x.ex === ex && (x.mg || 0) === mg);
+    if (!P.length) return '<p class="mu">Nenhum padrão com estas escolhas.</p>';
+    const net = (x) => x.R - (cost > 0 && x.rk > 0 ? 2 * cost / x.rk : 0), avg = (a) => (a.length ? a.reduce((p, q) => p + q, 0) / a.length : null);
+    const fR = (x) => (x == null ? '—' : `<span class="${x >= 0 ? 'up' : 'dn'}">${x >= 0 ? '+' : ''}${x.toFixed(2).replace('.', ',')} R</span>`), pc = (a, b) => (b ? `<b>${Math.round(a / b * 100)}%</b> <span class="mu small">(${a}/${b})</span>` : '—');
+    const keys = (x) => (grp === 'tf' ? [x.tf] : grp === 'sess' ? [x.sess] : String(x.ty).split('+'));
+    const lbl = (k) => (grp === 'tf' ? tfLabel(k) + (mode === 'f' ? ' → ' + tfLabel(MSS_AMD.DOWN[k] || '') : '') : k);
+    const order = grp === 'tf' ? ['5m', '15m', '1h', '4h', '1d'] : grp === 'sess' ? ['Ásia', 'Londres', 'Nova Iorque', 'fora das sessões'] : ['estrutura', 'estrutura TF de cima', 'iguais', 'dia anterior', 'semana anterior', 'mês anterior', 'Ásia'];
+    const row = (Ps, Ts, name, strong) => { if (!Ps.length) return '';
+      const tc = Ps.filter((x) => x.touched), fu = Ps.filter((x) => !x.touched && /fugiu/.test(x.miss)).length, hd = tc.filter((x) => x.held === true).length;
+      const S = Ts.slice().sort((a, b) => a.t - b.t), R = S.map(net), n = R.length, m = avg(R), md = btMed(R), srt = R.slice().sort((a, b) => a - b), no5 = n > 5 ? avg(srt.slice(0, -5)) : null, h = Math.floor(n / 2), a1 = avg(R.slice(0, h)), a2 = avg(R.slice(h)), w = R.filter((x) => x > 0).length;
+      const ok = n >= 30 && m >= 0.2 && a1 > 0 && a2 > 0, v = n < 30 ? '<span class="mu">poucos casos</span>' : ok ? '<b class="up">✔ aprovado</b>' : '<b class="dn">✖ não passa</b>';
+      return `<tr${strong ? ' style="font-weight:600;border-top:2px solid var(--line)"' : ''}><td>${name}</td><td>${Ps.length}</td><td>${pc(tc.length, Ps.length)}</td><td>${pc(fu, Ps.length)}</td><td>${pc(hd, tc.length)}</td><td>${pc(w, n)}</td><td>${fR(m)}</td><td>${fR(md)}</td><td>${fR(no5)}</td><td class="small">${fR(a1)} · ${fR(a2)}</td><td>${v}</td></tr>`; };
+    return [1, -1].map((d) => { const Pd = P.filter((x) => x.dir === d), Td = T.filter((x) => x.dir === d); if (!Pd.length) return '';
+      const ks = [...new Set(Pd.flatMap(keys))].sort((a, b) => (order.indexOf(a) < 0 ? 99 : order.indexOf(a)) - (order.indexOf(b) < 0 ? 99 : order.indexOf(b)));
+      return `<h3 class="np-h2" style="font-size:20px;margin-top:18px">${d === 1 ? '<span class="up">▲ Long</span> — sweep de fundos, quebra para cima, FVG verde' : '<span class="dn">▼ Short</span> — sweep de topos, quebra para baixo, FVG vermelho'}</h3>
+      <div class="revwrap"><table class="revtbl bttbl"><tr><th>${grp === 'tf' ? 'Timeframe' : grp === 'sess' ? 'Sessão do sweep' : 'Liquidez varrida'}</th><th title="Padrões completos (sweep + quebra rápida + FVG)">Padrões</th><th title="O preço voltou ao FVG e houve entrada">Tocou</th><th title="O preço chegou ao alvo de liquidez sem voltar ao FVG (oportunidade perdida)">Fugiu sem tocar</th><th title="Das entradas: o preço andou +1 R a favor antes de alguma vela fechar do outro lado do FVG">Segurou</th><th>Ganhou</th><th title="Média por trade em R (com custos, se os puseste)">Média</th><th>Mediana</th><th>Sem os 5 melhores</th><th>1.ª · 2.ª metade</th><th title="≥ +0,2 R, ≥ 30 trades, positivo nas duas metades">Aprovação</th></tr>
+      ${ks.map((k) => row(Pd.filter((x) => keys(x).includes(k)), Td.filter((x) => keys(x).includes(k)), lbl(k))).join('')}${grp === 'tf' ? row(Pd, Td, 'Total', true) : ''}</table></div>`; }).join('');
+  }
+  function npRenderAmd(box, modeBar) {
+    const S = btState, T = S ? S.trades.filter((x) => x.kind === 'pat' || x.kind === 'tr') : [], tfSel = settings.amdTfs || ['5m', '15m', '1h', '4h', '1d'];
+    const cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's'), syms0 = [...new Set(T.map((x) => x.sym))];
+    const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym), TT = T.filter((x) => symOk(x) && (npBtKind === 'all' || cls(x.sym) === npBtKind));
+    const ff = (key, def, opts) => `<div class="np-ff">${opts.map(([k, t]) => `<button data-amd="${key}" data-v="${k}" class="${String(settings[key] == null ? def : settings[key]) === String(k) ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    box.innerHTML = `<div class="bhead"><div><h2>📊 Backtest</h2><div class="sub"><b>Padrão ICT (AMD)</b>: <b>sweep</b> de liquidez (a sombra passa o nível e uma vela fecha de volta para dentro, até 2 velas depois) → <b>quebra rápida</b> no sentido contrário (fecho para lá do último topo/fundo interno, até 10 velas depois) → <b>FVG</b> no deslocamento. <b>Entrada</b> quando o preço volta a tocar no FVG; <b>stop</b> no outro lado do FVG, por fecho. Liquidez: topos/fundos da estrutura (deste TF e do de cima), dia/semana/mês anteriores, topos/fundos <b>iguais</b> e o range da <b>Ásia</b> (20h–24h de Nova Iorque). <b>Entrada fina</b>: padrão no TF de cima, entrada no 1.º FVG do TF de baixo com o preço dentro do FVG de cima (Diário → 1H, 4H → 15m, 1H → 5m). Usa o histórico todo.</div></div></div>
+      ${modeBar}
+      <div class="btctl"><div><b>Ativos</b> <div class="np-ff">${[['btc', '₿ BTC'], ['btc3', 'BTC + ETH + SOL'], ['all', 'Todos os favoritos'], ['c', 'Cripto'], ['s', 'Ações/futuros']].map(([k, t]) => `<button data-btsy="${k}" class="${(settings.btSy || 'all') === k ? 'on' : ''}">${t}</button>`).join('')}</div></div>
+        <div><b>Timeframe do padrão</b> ${AMD_TFS.map(([k, t]) => `<label class="btck"><input type="checkbox" data-amdtf="${k}"${tfSel.includes(k) ? ' checked' : ''}> ${t}</label>`).join('')}</div>
+        <div><span class="mu small">Custos por lado:</span> <input id="fsCost" type="number" step="0.01" min="0" max="1" value="${+settings.fsCost || 0}" style="width:64px"> %</div>
+        <div>${S && S.run ? '<button id="btStop">■ Parar</button>' : '<button id="amdGo" class="btgo">▶ Começar o teste</button>'} <span class="mu">${S ? npEsc(S.prog) + (S.total ? ` · ${S.done}/${S.total} ativos` : '') : 'O 5m e o 15m têm muito histórico: pode demorar alguns minutos.'}</span>
+        ${TT.length && !(S && S.run) ? '<button id="amdCsv">Exportar CSV</button>' : ''}</div></div>
+      ${TT.length ? `<div class="btctl" style="margin-top:12px"><div><span class="mu small">Entrada:</span> ${ff('amdMode', 'd', [['d', 'No FVG do padrão'], ['f', 'Fina (FVG do TF de baixo)']])}</div>
+        <div><span class="mu small">Saída:</span> ${ff('amdEx', '2b', [['2b', 'FVG contrário'], ['liq', 'Liquidez do outro lado']])} <span class="mu small" style="margin-left:8px">Gestão:</span> ${ff('amdMg', '0', [['0', 'sem limite'], ['3', '+3 R'], ['5', '+5 R'], ['10', '+10 R']])}</div>
+        <div><span class="mu small">Agrupar por:</span> ${ff('amdGrp', 'tf', [['tf', 'timeframe'], ['ty', 'liquidez varrida'], ['sess', 'sessão']])}</div></div>
+      ${syms0.length > 1 && syms0.includes('BTCUSDT') ? `<div class="np-ff" style="margin-top:10px">${[['all', 'Todos os ativos juntos'], ['BTCUSDT', 'Só BTC'], ['oth', 'Só os outros']].map(([k, t]) => `<button data-btsym="${k}" class="${npBtSym === k ? 'on' : ''}">${t}</button>`).join('')}</div>` : ''}
+      ${amdResults(TT)}
+      <p class="mu small" style="margin-top:8px">“Segurou” = depois da entrada o preço andou +1 R a favor antes de alguma vela fechar do outro lado do FVG. Com “Liquidez do outro lado”, a saída é no topo/fundo por varrer mais perto (se não houver, esses casos ficam de fora). Agrupado por liquidez, um padrão que varreu dois tipos ao mesmo tempo conta nas duas linhas. Com menos de 30 trades, não tires conclusões.</p>` : ''}
+      ${S && S.errs.length ? `<details class="small mu" style="margin-top:10px"><summary>${S.errs.length} avisos</summary>${S.errs.map(npEsc).join('<br>')}</details>` : ''}`;
+    const sy = (k) => { const f = settings.favs || []; return k === 'btc' ? ['BTCUSDT'] : k === 'btc3' ? ['BTCUSDT', 'ETHUSDT', 'SOLUSDT'] : k === 'all' ? f.filter((s) => !isRatio(s)) : f.filter((s) => cls(s) === k); };
+    box.querySelectorAll('[data-btmode]').forEach((b) => b.addEventListener('click', () => btSwitch(b.dataset.btmode)));
+    box.querySelectorAll('[data-btsy]').forEach((b) => b.addEventListener('click', () => { settings.btSy = b.dataset.btsy; save('mss_settings4', settings); npRenderBt(); }));
+    box.querySelectorAll('[data-amd]').forEach((b) => b.addEventListener('click', () => { settings[b.dataset.amd] = b.dataset.v; save('mss_settings4', settings); npRenderBt(); }));
+    box.querySelectorAll('[data-amdtf]').forEach((i) => i.addEventListener('change', () => { settings.amdTfs = [...box.querySelectorAll('[data-amdtf]:checked')].map((x) => x.dataset.amdtf); save('mss_settings4', settings); }));
+    box.querySelectorAll('[data-btsym]').forEach((b) => b.addEventListener('click', () => { npBtSym = b.dataset.btsym; npRenderBt(); }));
+    { const ci = $('#fsCost'); if (ci) ci.addEventListener('change', () => { settings.fsCost = Math.max(0, Math.min(1, +String(ci.value).replace(',', '.') || 0)); save('mss_settings4', settings); npRenderBt(); }); }
+    const go = $('#amdGo'); if (go) go.addEventListener('click', () => { const tfs = settings.amdTfs || ['5m', '15m', '1h', '4h', '1d']; if (!tfs.length) { alert('Escolhe pelo menos um timeframe.'); return; } npBtSym = 'all'; amdStart(sy(settings.btSy || 'all'), tfs); });
+    const stp = $('#btStop'); if (stp) stp.addEventListener('click', () => { if (btState) btState.run = false; });
+    const csv = $('#amdCsv'); if (csv) csv.addEventListener('click', () => {
+      const cols = ['sym', 'tf', 'kind', 'mode', 'lt', 'dir', 'ty', 'sess', 't', 't1', 'touched', 'miss', 'held', 'ex', 'mg', 'R', 'rk', 'bars', 'why'];
+      const iso = (v) => (v ? new Date(v).toISOString().slice(0, 16).replace('T', ' ') : '');
+      const txt = [cols.join(';')].concat(TT.map((x) => cols.map((c) => (c === 't' || c === 't1' ? iso(x[c]) : x[c] == null ? '' : typeof x[c] === 'number' ? String(Math.round(x[c] * 1000) / 1000).replace('.', ',') : String(x[c]))).join(';'))).join('\n');
+      const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([txt], { type: 'text/csv' })); a.download = 'teste-padrao-ict.csv'; a.click(); });
+  }
   let npBtSet = 'all', npBtKind = 'all', npBtSym = 'all', npBtEnt = 'pronto', npBtMode = 'su', btSaved = {};
   function btLoadSaved(mode) {
-    try { const j = JSON.parse(localStorage.getItem(mode === 'fs' ? 'mss_bt3' : mode === 'cf' ? 'mss_bt4' : 'mss_bt2') || 'null'); if (j) return { mode, deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {}
+    try { const j = JSON.parse(localStorage.getItem(mode === 'fs' ? 'mss_bt3' : mode === 'cf' ? 'mss_bt4' : mode === 'amd' ? 'mss_bt5' : 'mss_bt2') || 'null'); if (j) return { mode, deep: !!j.deep, run: false, prog: 'Último teste: ' + new Date(j.t).toLocaleString('pt-PT'), trades: j.trades || [], errs: j.errs || [], done: (j.syms || []).length, total: (j.syms || []).length, syms: j.syms || [], setups: j.setups || [] }; } catch (e) {}
     return null;
   }
   function btSwitch(m) { if (m === npBtMode) return; btSaved[npBtMode] = btState; npBtMode = m; btState = btSaved[m] || btLoadSaved(m); npRenderBt(); }
@@ -7904,9 +8105,10 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
   function npRenderBt() {
     const box = $('#npBt'); if (!box || npView !== 'bt') return;
     if (btState && btState.mode && btState.mode !== npBtMode) { const o = btSaved[btState.mode]; if (!o || o === btState || !o.run) btSaved[btState.mode] = btState; btState = btSaved[npBtMode] || btLoadSaved(npBtMode); }
-    const modeBar = `<div class="np-ff" style="margin-top:12px">${[['su', 'Setups da app (zona + quebra)'], ['fs', 'Só FVG + estrutura'], ['cf', '1.º FVG contrário (estudo)']].map(([k, t]) => `<button data-btmode="${k}" class="${npBtMode === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    const modeBar = `<div class="np-ff" style="margin-top:12px">${[['su', 'Setups da app (zona + quebra)'], ['fs', 'Só FVG + estrutura'], ['cf', '1.º FVG contrário (estudo)'], ['amd', 'Padrão ICT (sweep → FVG)']].map(([k, t]) => `<button data-btmode="${k}" class="${npBtMode === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
     if (npBtMode === 'fs') { npRenderFs(box, modeBar); return; }
     if (npBtMode === 'cf') { npRenderCf(box, modeBar); return; }
+    if (npBtMode === 'amd') { npRenderAmd(box, modeBar); return; }
     const S = btState, sets = (settings.setups || []).filter((x) => x.on);
     const cls = (s) => (isRatio(s) ? 'r' : isCrypto(s) || isSynth(s) ? 'c' : 's');
     const symOk = (x) => npBtSym === 'all' || (npBtSym === 'oth' ? x.sym !== 'BTCUSDT' : x.sym === npBtSym);
