@@ -925,7 +925,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   <button id="gear">Definições</button>
 </header>
 <div id="np">
-  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 23nov 17h05</span><span id="npVigia" class="np-vig"></span>
+  <div class="np-top"><span id="npDate"></span><span class="np-ver" title="Versão da app — se aqui não aparecer a versão nova, o telemóvel ainda está com a antiga em memória" style="font-size:11px;color:var(--np-mu);margin-left:8px">v. 24nov 20h39</span><span id="npVigia" class="np-vig"></span>
     <span id="npCloud"></span>
     <nav class="np-links"><a href="#" data-npl="alerts">Alertas</a><a href="#" data-npl="settings">Definições</a><a href="#" data-npl="help">Ajuda</a><a href="#" data-npl="theme" id="npThemeLk">Tema escuro</a><a href="#" data-npl="logout" id="npLogout">Sair</a></nav></div>
   <a href="#" id="npHome" class="np-mast" title="Voltar ao início"><h1>Scanner de Estrutura</h1></a>
@@ -1160,7 +1160,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   </div>
   <div class="chartbox">
     <div id="tabBar" class="tabbar"></div>
-    <div class="chartbar"><span id="symNav"><button type="button" class="lyr" id="prevSym" title="Ativo anterior">‹</button><button type="button" class="lyr" id="nextSym" title="Ativo seguinte">›</button></span><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button type="button" id="posChart" class="lyr" title="Abri posição neste ativo (fica na watch list)">📌</button><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="obBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder os order blocks por mitigar deste timeframe (só os que estão a menos de 15% do preço): a última vela contrária antes do impulso que partiu estrutura. Azul = de compra, roxo = de venda; “origem” = o da base da perna"><span style="color:#4287f5">▭</span> OB</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><label id="sensBox" class="lyr sensbox" title="Quantos pontos tem a tendência principal deste ativo neste grupo de timeframes (só para este ativo): 1 = mais pontos, 5 = menos"><span>Pontos</span><select id="sensSel"></select></label><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
+    <div class="chartbar"><span id="symNav"><button type="button" class="lyr" id="prevSym" title="Ativo anterior">‹</button><button type="button" class="lyr" id="nextSym" title="Ativo seguinte">›</button></span><span id="chartTitle"></span><span id="tfbar"></span><span id="cbRight"><button type="button" id="posChart" class="lyr" title="Abri posição neste ativo (fica na watch list)">📌</button><button id="dispBtn" class="lyr" style="display:none;background:#f5c518;color:#111;font-weight:600" title="Este timeframe tem uma quebra em disputa no movimento recente">⚖ Decidir disputa</button><button id="tgExt" class="lyr">Tendência principal</button><button id="tgInt" class="lyr" style="margin-left:0">Movimento recente</button><button id="editBtn" class="lyr" style="margin-left:0">✎ Editar estrutura</button><button id="undoBtn" class="lyr" style="margin-left:0" title="Desfaz a última alteração neste timeframe (desde a última gravação)">↶ Desfazer</button><button id="redoBtn" class="lyr" style="margin-left:0;display:none" title="Refaz o que desfizeste">↷ Refazer</button><button id="saveBtn" class="lyr" style="margin-left:0;display:none" title="Grava as alterações no aparelho e na conta">💾 Gravado</button><button id="clearBtn" class="lyr" style="margin-left:0" title="Apaga a estrutura do scanner neste timeframe para a construíres de raiz">🧹 Apagar estrutura</button><button id="resetBtn" class="lyr" style="margin-left:0" title="Apaga as tuas marcas deste timeframe e volta ao que a app calcula sozinha">↺ Voltar ao automático</button><button id="maxBtn" class="lyr cbclose">⤢ Gráfico maior</button></span><span class="cbreak"></span><button id="importBtn" class="lyr" style="margin-left:0;display:none" title="Acrescenta ao movimento recente os pontos da tendência principal que lhe faltam">⤓ Importar da principal</button><button id="rngBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as caixas do dia anterior e da semana anterior (as das sessões Ásia e Londres continuam)">▭ Dia/Sem ant.</button><button id="emaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder a EMA 8 (azul-claro) e a EMA 21 (laranja)"><span style="color:#00e5ff">▬</span><span style="color:#ff9100">▬</span> EMA 8/21</button><button id="smaBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as SMA 50 (cinza), 100 (roxo) e 200 (amarelo)"><span style="color:#e6e6e6">▬</span><span style="color:#b388ff">▬</span><span style="color:#ffd600">▬</span> SMA 50/100/200</button><button id="kcBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o canal de Keltner: EMA 20 ± 3 ATR (ATR de 10)"><span style="color:#64b5f6">▬</span> Keltner ±3ATR</button><button id="pocDBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC diário (preço com mais volume de cada dia) — só visual"><span style="color:#ff80ab">▬</span> POC D</button><button id="pocWBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder o POC semanal (preço com mais volume de cada semana) — só visual"><span style="color:#c6ff00">▬</span> POC S</button><button id="obBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder os order blocks por mitigar deste timeframe (só os que estão a menos de 15% do preço): a última vela contrária antes do impulso que partiu estrutura. Azul = de compra, roxo = de venda; “origem” = o da base da perna"><span style="color:#4287f5">▭</span> OB</button><button id="ictBtn" class="lyr" style="margin-left:0" title="Padrões ICT (sweep → quebra rápida → FVG) neste timeframe: roxo = liquidez varrida e sweep; tracejado = quebra; caixa = FVG de entrada (verde segurou, vermelho falhou, cinzento não voltou ou à espera). Janelas por timeframe em Definições.">ICT</button><button id="kzBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as killzones (Ásia, Londres, Nova Iorque) — só em 1H e abaixo">⏱ Killzones</button><label id="sensBox" class="lyr sensbox" title="Quantos pontos tem a tendência principal deste ativo neste grupo de timeframes (só para este ativo): 1 = mais pontos, 5 = menos"><span>Pontos</span><select id="sensSel"></select></label><button id="fibBtn" class="lyr" style="margin-left:0" title="Mostrar / esconder as Fibonacci automáticas deste timeframe (escala log): entrada ótima 61,8–65%, 78,6% e os alvos (−0,236/−0,268 · −0,618/−0,65 · −1/−1,032). Roxo = Fibonacci anterior (só alvos); cinzento ✔ = alvo já atingido">ϕ Fibonacci</button><button id="lineBtn" class="lyr" style="margin-left:0" title="Desenhar linhas diagonais e canais paralelos (com alerta opcional)">📐 Linhas</button><span id="lineTools"><button class="lyr" data-lm="line" style="margin-left:0" title="Linha: carrega no 1.º ponto e depois no 2.º (acaba aí; ⟶ no menu prolonga-a)">／ Linha</button><button class="lyr" data-lm="chan" style="margin-left:0" title="Canal paralelo: 2 pontos para a linha de base e o 3.º no outro lado">▱ Canal</button><button class="lyr" data-mag="1" style="margin-left:0" title="Íman: os pontos colam ao máximo/mínimo da vela mais perto">🧲</button><button class="lyr" data-und="1" style="margin-left:0" title="Desfazer (Ctrl+Z)">↶</button></span></div>
     <div id="editHint" class="edithint"><div id="rangeHint" style="display:none;background:#64b5f6;color:#0b1520;padding:3px 8px;border-radius:4px;margin-bottom:4px;font-weight:600"></div><b>✎ A editar: <span id="editLayerName" style="background:#f5c518;color:#111;padding:0 6px;border-radius:3px"></span></b><button class="helplink" id="editHelp">Ajuda</button><div id="editWarn" style="display:none;margin-top:4px;background:#fff3cd;color:#5c4400;padding:4px 8px;border-radius:4px;font-size:12px"></div></div>
     <div id="fibInfo" class="small"></div>
     <div id="chart"><div id="editMenu" class="editmenu"></div><div id="lineHint" class="linehint"></div><div id="lineMenu" class="linemenu"><button data-mal="1" title="Ligar/desligar o alerta desta linha">🔔</button><button data-mdel="1" title="Apagar a linha de todos os timeframes (Delete). Para a tirar só de um timeframe, desmarca a caixa dele">🗑</button><button data-mext="1" title="Prolongar para a direita">⟶</button><span class="lnmtf"></span></div></div>
@@ -1388,6 +1388,9 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   <h3 class="sethead">FVG — tamanho mínimo</h3>
   <p class="small muted" style="margin:4px 0 6px">Um FVG só conta (na contagem, na sequência, nos sinais da aba FVG, nos alertas e na análise IA) se o vazio tiver pelo menos este tamanho, em ATR (vela média) do próprio timeframe. Os FVG desenhados no gráfico não mudam. 0 = contam todos.</p>
   <div class="field" id="fvgKRow"></div>
+  <h3 class="sethead">Padrão ICT — janelas por timeframe</h3>
+  <p class="small muted" style="margin:4px 0 6px">Para o botão ICT do gráfico, o Backtest e (depois) os alertas. Primeiro número = <b>manipulação</b>: até quantas velas, desde a primeira que passa o nível, para uma fechar de volta para dentro. Segundo = <b>inversão</b>: até quantas velas depois do sweep para a quebra de estrutura.</p>
+  <div class="field" id="amdWinRow"></div>
 
   <h3 class="sethead">Conta e dados</h3>
   <div class="field"><div>Atualizar automaticamente (a cada minuto)</div><input id="setRefresh" type="checkbox"></div>
@@ -2789,6 +2792,9 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   'use strict';
   const H = 36e5, D = 864e5, DUR = { '5m': 3e5, '15m': 9e5, '1h': H, '4h': 4 * H, '1d': D, '1w': 7 * D };
   const UP = { '5m': '1h', '15m': '4h', '1h': '4h', '4h': '1d', '1d': '1w' }, DOWN = { '1d': '1h', '4h': '15m', '1h': '5m' };
+  // janelas por timeframe: m = velas para a manipulação fechar de volta para dentro · v = velas (depois do sweep) para a quebra
+  const WIN = { '5m': [6, 24], '15m': [4, 16], '1h': [3, 12], '4h': [2, 8], '1d': [2, 6] };
+  const winOf = (id, W) => { const w = (W && W[id]) || WIN[id] || [2, 10]; return { m: Math.max(1, +w[0] || 1), v: Math.max(1, +w[1] || 1) }; };
   const dst = {};
   function nyOff(t) { const y = new Date(t).getUTCFullYear(); let c = dst[y]; if (!c) { const sun = (m, k) => { const d = new Date(Date.UTC(y, m, 1)); return Date.UTC(y, m, 1 + ((7 - d.getUTCDay()) % 7) + 7 * (k - 1)); }; c = dst[y] = [sun(2, 2) + 7 * H, sun(10, 1) + 6 * H]; } return t >= c[0] && t < c[1] ? -4 * H : -5 * H; }
   const nyH = (t) => { const x = new Date(t + nyOff(t)); return x.getUTCHours() + x.getUTCMinutes() / 60; };
@@ -2804,7 +2810,8 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
   function eqTag(arr, lv, tol) { for (let z = lb(arr, lv.p - tol); z < arr.length && arr[z].p <= lv.p + tol; z++) { const o = arr[z]; if (o.piv && !o.dead) { if (!o.ty.includes('iguais')) o.ty.push('iguais'); if (!lv.ty.includes('iguais')) lv.ty.push('iguais'); } } }
   function ins(arr, lv) { let a = 0, b = arr.length; while (a < b) { const m = (a + b) >> 1; if (arr[m].p < lv.p) a = m + 1; else b = m; } arr.splice(a, 0, lv); }
   // padrões de subida (sweep de fundos) nas velas T (já espelhadas para os de descida); HT = velas do TF de cima (mesmo espelho)
-  function scanUp(T, HT, id, k) {
+  function scanUp(T, HT, id, k, W) {
+    const win = winOf(id, W);
     const n = T.length, dur = DUR[id] || H, atr = atrOf(T, 14), F = fvgs(T, atr, k), pv3 = pivots(T, 3), pv1 = pivots(T, 1);
     const ev = new Map(), add = (j, lv) => { if (j < n) { if (!ev.has(j)) ev.set(j, []); ev.get(j).push(lv); } };
     pv3.lo.forEach((x) => add(x.i + 4, { p: x.p, side: 'L', ty: ['estrutura'], piv: 1 })); pv3.hi.forEach((x) => add(x.i + 4, { p: x.p, side: 'H', ty: ['estrutura'], piv: 1 }));
@@ -2836,19 +2843,19 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
       if (pend) { if (c.l <= pend.ext) { pend.ext = c.l; pend.extI = j; }
         if (c.c > pend.top) { // sweep confirmado: o último topo interno antes do extremo é a linha a quebrar
           let b = null; for (let q = ph - 1; q >= 0; q--) if (pv1.hi[q].i < pend.extI) { b = pv1.hi[q]; break; }
-          if (b && b.p > c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, sess: sessOf(T[pend.extI].t) });
-          else if (b && b.p <= c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, sess: sessOf(T[pend.extI].t), jb: j });
+          if (b && b.p > c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, brkI: b.i, sess: sessOf(T[pend.extI].t) });
+          else if (b && b.p <= c.c) cands.push({ j0: pend.j0, js: j, ext: pend.ext, extI: pend.extI, top: pend.top, ty: [...pend.ty], brk: b.p, brkI: b.i, sess: sessOf(T[pend.extI].t), jb: j });
           pend = null; }
-        else if (j - pend.j0 >= 2) pend = null; }
+        else if (j - pend.j0 >= win.m - 1) pend = null; }
       // candidatos: quebra rápida (≤ 10 velas) e depois o FVG do deslocamento
       for (let q = cands.length - 1; q >= 0; q--) { const k2 = cands[q];
-        if (k2.jb == null) { if (c.c < k2.ext || j - k2.j0 > 10) { cands.splice(q, 1); continue; } if (j > k2.js && c.c > k2.brk) k2.jb = j; continue; }
+        if (k2.jb == null) { if (c.c < k2.ext || j - k2.js > win.v) { cands.splice(q, 1); continue; } if (j > k2.js && c.c > k2.brk) k2.jb = j; continue; }
         if (j < k2.jb + 1) continue;
         cands.splice(q, 1);
         const cand = F.up.filter((f) => f.mid > k2.extI && f.mid <= k2.jb).filter((f) => { for (let z = f.mid + 2; z <= j; z++) if (T[z].c < f.bot) return false; return true; });
         if (!cand.length) continue;
         const f = cand.reduce((a, b) => (b.top > a.top ? b : a)), tg = (() => { for (let z = 0; z < Hs.length; z++) if (!Hs[z].dead && Hs[z].p > c.c) return Hs[z]; return null; })();
-        out.push({ jc: j, ext: k2.ext, extI: k2.extI, j0: k2.j0, top: k2.top, ty: k2.ty, sess: k2.sess, fvg: f, tgt: tg ? tg.p : null, tgTy: tg ? tg.ty.join('+') : '' });
+        out.push({ jc: j, jb: k2.jb, js: k2.js, brk: k2.brk, brkI: k2.brkI, ext: k2.ext, extI: k2.extI, j0: k2.j0, top: k2.top, ty: k2.ty, sess: k2.sess, fvg: f, tgt: tg ? tg.p : null, tgTy: tg ? tg.ty.join('+') : '' });
       }
     }
     return { pats: out, F, atr };
@@ -2878,7 +2885,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     return { jt, e, held, res };
   }
   // corre tudo num ativo: P = { id: velas } (5m…1w); tfs = TFs do padrão; k(id) = tamanho mínimo do FVG em ATR
-  function run(sym, P, tfs, k) {
+  function run(sym, P, tfs, k, W) {
     const out = [];
     for (const id of tfs) { const T0 = P[id]; if (!T0 || T0.length < 200) continue;
       for (const d of [1, -1]) {
@@ -2905,7 +2912,22 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     }
     return out;
   }
-  root.MSS_AMD = { run, scanUp, mirror, sessOf, nyH, UP, DOWN, EXITS, MGS, STPS };
+  // para o gráfico: padrões dos dois lados nas velas T (já fechadas), com o resultado (stop por fecho no FVG) e preços reais
+  function detect(T, HT, id, k, W) {
+    const out = [];
+    if (!T || T.length < 60) return out;
+    for (const d of [1, -1]) {
+      const TT = d === 1 ? T : mirror(T), H2 = HT && HT.length > 10 ? (d === 1 ? HT : mirror(HT)) : null, { pats, F } = scanUp(TT, H2, id, k, W), P = (x) => (x == null ? null : d === 1 ? x : -x);
+      for (const p of pats) {
+        const tr = trade(TT, F, p.jc + 1, p.fvg, p.tgt, 500, p.ext); let st = 'à espera', endI = null;
+        if (tr.miss) { st = /fugiu/.test(tr.miss) ? 'fugiu sem voltar' : tr.miss === 'não voltou' && p.jc + 51 > TT.length ? 'à espera do toque' : tr.miss; }
+        else { const r = (tr.res || []).find((x) => x.stp === 'c' && x.ex === '2b' && x.mg === 2); st = tr.held.c === true ? 'segurou' : tr.held.c === false ? 'falhou' : 'em curso'; if (r) endI = tr.jt + r.bars; }
+        out.push({ dir: d, j0: p.j0, js: p.js, jb: p.jb, jc: p.jc, extI: p.extI, brkI: p.brkI, ty: p.ty.join(' + '), sess: p.sess, lvl: P(p.top), ext: P(p.ext), brk: P(p.brk), tgt: P(p.tgt), fvgA: P(p.fvg.top), fvgB: P(p.fvg.bot), fvgI: p.fvg.mid, jt: tr.jt, endI, st, rr: p.tgt != null ? (p.tgt - p.fvg.top) / (p.fvg.top - p.fvg.bot) : null });
+      }
+    }
+    return out.sort((a, b) => a.jc - b.jc);
+  }
+  root.MSS_AMD = { detect, WIN, run, scanUp, mirror, sessOf, nyH, UP, DOWN, EXITS, MGS, STPS };
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
 <script>(function () {
@@ -4632,6 +4654,45 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     renderChart._tt = cs.map((c) => c.tt); renderChart._key = symbol + '|' + selectedTf;
   }
 
+  // ---------- padrões ICT no gráfico (motor em alerts/amd.js) ----------
+  const ICT_TF = { '5m': '5m', '15m': '15m', '1h': '1h', '4h': '4h', '4hc': '4h', '1d': '1d' };
+  let ictCache = { key: '', pats: [] };
+  function ictPats(d, cl) {
+    const id = ICT_TF[selectedTf]; if (!id || !cl || cl.length < 60) return [];
+    const up = MSS_AMD.UP[id], hd = data[up] || (up === '4h' ? data['4hc'] : null), HT = hd && hd.closed ? hd.closed : null;
+    const key = [symbol, id, cl.length, cl[cl.length - 1].t, HT ? HT.length : 0, JSON.stringify(settings.amdWin || {}), FB.fvgK(id, settings)].join('|');
+    if (ictCache.key !== key) ictCache = { key, pats: MSS_AMD.detect(cl, HT, id, FB.fvgK(id, settings), settings.amdWin) };
+    return ictCache.pats;
+  }
+  function drawIct(g, d, cl, X, Y, paneW, ts) {
+    const P = ictPats(d, cl); if (!P.length) return;
+    const vr = ts.getVisibleLogicalRange() || { from: 0, to: cl.length };
+    const XX = (i) => { const x = X(Math.min(i, cl.length)); return x == null ? null : x; };
+    g.font = '10px Inter, system-ui, sans-serif';
+    for (const p of P) {
+      const a = Math.max(0, p.j0 - 10), b = p.endI != null ? p.endI : Math.min(cl.length, p.jc + 30);
+      if (b < vr.from - 2 || a > vr.to + 2) continue;
+      const up = p.dir === 1, cG = up ? '38,166,154' : '239,83,80';
+      const stc = p.st === 'segurou' ? '38,166,154' : p.st === 'falhou' ? '239,83,80' : '150,150,150';
+      // nível varrido (roxo tracejado) e o tipo de liquidez
+      const xl0 = XX(a), xl1 = XX(p.js), yl = Y(p.lvl);
+      if (xl0 != null && xl1 != null && yl != null) { g.strokeStyle = 'rgba(126,87,194,0.9)'; g.lineWidth = 1.2; g.setLineDash([5, 3]); g.beginPath(); g.moveTo(xl0, yl); g.lineTo(xl1 + 6, yl); g.stroke(); g.setLineDash([]);
+        g.fillStyle = 'rgba(126,87,194,0.95)'; g.textBaseline = up ? 'top' : 'bottom'; g.fillText('liquidez: ' + p.ty, xl0 + 2, up ? yl + 2 : yl - 2); }
+      // extremo do sweep (manipulação)
+      const xe = XX(p.extI), ye = Y(p.ext);
+      if (xe != null && ye != null) { g.fillStyle = 'rgba(126,87,194,0.95)'; g.beginPath(); const s = up ? 1 : -1; g.moveTo(xe, ye + 4 * s); g.lineTo(xe - 5, ye + 12 * s); g.lineTo(xe + 5, ye + 12 * s); g.closePath(); g.fill(); g.textBaseline = up ? 'top' : 'bottom'; g.fillText('sweep', xe - 14, up ? ye + 14 : ye - 14); }
+      // linha da quebra: do topo/fundo interno até à vela que fechou para lá dele
+      const xb0 = XX(p.brkI), xb1 = XX(p.jb), yb = Y(p.brk);
+      if (xb0 != null && xb1 != null && yb != null) { g.strokeStyle = `rgba(${cG},0.9)`; g.lineWidth = 1.2; g.setLineDash([2, 2]); g.beginPath(); g.moveTo(xb0, yb); g.lineTo(xb1, yb); g.stroke(); g.setLineDash([]); g.fillStyle = `rgba(${cG},1)`; g.textBaseline = up ? 'bottom' : 'top'; g.fillText(up ? 'quebra ▲' : 'quebra ▼', xb1 - 30, up ? yb - 2 : yb + 2); }
+      // FVG de entrada: a cor diz o que aconteceu (verde segurou · vermelho falhou · cinzento não voltou / à espera)
+      const xf0 = XX(p.fvgI - 1), xf1 = XX(b), y1 = Y(p.fvgA), y2 = Y(p.fvgB);
+      if (xf0 != null && y1 != null && y2 != null) { const x2 = xf1 == null ? paneW : xf1; g.fillStyle = `rgba(${stc},0.18)`; g.fillRect(xf0, Math.min(y1, y2), Math.max(2, x2 - xf0), Math.abs(y2 - y1) || 1);
+        g.strokeStyle = `rgba(${stc},0.9)`; g.lineWidth = 1; g.strokeRect(xf0 + 0.5, Math.min(y1, y2) + 0.5, Math.max(2, x2 - xf0) - 1, (Math.abs(y2 - y1) || 1) - 1);
+        g.fillStyle = `rgba(${stc},1)`; g.textBaseline = up ? 'top' : 'bottom'; g.fillText(`ICT ${up ? 'Long' : 'Short'} · ${p.st}${p.rr != null ? ' · ' + p.rr.toFixed(1).replace('.', ',') + ':1' : ''}`, xf0 + 3, up ? Math.max(y1, y2) + 2 : Math.min(y1, y2) - 2); }
+    }
+    g.textBaseline = 'alphabetic';
+  }
+
   function draw() {
     if (!drawState || !chart) return;
     const el = $('#chart'), dpr = window.devicePixelRatio || 1;
@@ -4694,6 +4755,8 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
       g.strokeStyle = `rgba(${col},0.7)`; g.lineWidth = 1; g.setLineDash([]); g.strokeRect(x1 + 0.5, Math.min(y1, y2) + 0.5, paneW - x1 - 1, (Math.abs(y2 - y1) || 1) - 1);
       g.fillStyle = `rgba(${col},0.95)`; g.font = '10px Inter, system-ui, sans-serif'; g.textBaseline = 'top'; g.fillText(`OB ${o.dir === 1 ? 'compra' : 'venda'}${o.origin ? ' · origem' : ''}`, Math.max(x1, 0) + 4, Math.min(y1, y2) + 2); g.textBaseline = 'alphabetic';
     }
+    // padrões ICT (botão ICT): nível varrido, sweep, quebra e FVG de entrada, com o resultado
+    if (settings.ictOn && !editMode) try { drawIct(g, d, cl, X, Y, paneW, ts); } catch (e) {}
     const xs = d.ext.snap;
     if (vE() && xs.trend && !editMode) {
       const x0 = X(d.ext.res.state.ext.i), y50 = Y(xs.levels[50]), y65 = Y(xs.levels[65]), y92 = Y(xs.levels[918]), yp = Y(xs.protected);
@@ -4894,7 +4957,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     $('#resetBtn').disabled = !nEd;
     const dd = data[selectedTf], dsp = dd && dd.int && dd.int.snap && dd.int.snap.dispute;
     $('#dispBtn').style.display = dsp ? '' : 'none';
-    $('#obBtn').classList.toggle('on', !!settings.obOn); $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', linesOn()); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
+    $('#obBtn').classList.toggle('on', !!settings.obOn); { const ib = $('#ictBtn'); if (ib) { ib.classList.toggle('on', !!settings.ictOn); ib.style.display = ICT_TF[selectedTf] ? '' : 'none'; } } $('#pocDBtn').classList.toggle('on', !!settings.pocD); $('#pocDBtn').style.display = (TF_MS0[selectedTf] || 0) <= 864e5 && !isRatio(symbol) ? '' : 'none'; $('#rngBtn').classList.toggle('on', !!settings.rangesDW); $('#emaBtn').classList.toggle('on', !!settings.emaOn); $('#smaBtn').classList.toggle('on', !!settings.smaOn); $('#fibBtn').classList.toggle('on', !!settings.fibOn); $('#lineBtn').classList.toggle('on', linesOn()); renderLinePanel(); renderFibInfo(); $('#kcBtn').classList.toggle('on', !!settings.kcOn); $('#pocWBtn').classList.toggle('on', !!settings.pocW); $('#pocWBtn').style.display = (TF_MS0[selectedTf] || 0) <= 7 * 864e5 && !isRatio(symbol) ? '' : 'none';
     $('#kzBtn').classList.toggle('on', !!settings.kzOn); $('#kzBtn').style.display = (TF_MS0[selectedTf] || 0) <= 36e5 ? '' : 'none';
     const nU = undoCount(selectedTf); $('#undoBtn').disabled = !nU; $('#undoBtn').textContent = nU ? `↶ Desfazer (${nU})` : '↶ Desfazer';
     const nR = redoCount(selectedTf); $('#redoBtn').disabled = !nR; $('#redoBtn').textContent = nR ? `↷ Refazer (${nR})` : '↷ Refazer';
@@ -6048,6 +6111,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     $('#setTfs').innerHTML = TFS.map((t) => `<label class="chk"><input type="checkbox" value="${t.id}" ${settings.tfs.includes(t.id) ? 'checked' : ''}> ${t.label}</label>`).join('');
     monTfDraft = JSON.parse(JSON.stringify(settings.monTfs || {})); monClip = null;
     { const r = $('#fvgKRow'); if (r) r.innerHTML = [['1M', 'Mensal'], ['1w', 'Semanal'], ['1d', 'Diário'], ['4hc', '4H contexto'], ['4h', '4H gatilho'], ['1h', '1H'], ['15m', '15m'], ['5m', '5m']].map(([id, l]) => `<label style="white-space:nowrap;margin-right:10px">${l} <input type="number" min="0" max="2" step="0.05" data-fk="${id}" value="${FB.fvgK(id, settings)}" style="width:62px"></label>`).join(''); }
+    { const r = $('#amdWinRow'), W = settings.amdWin || {}; if (r) r.innerHTML = [['5m', '5m'], ['15m', '15m'], ['1h', '1H'], ['4h', '4H'], ['1d', 'Diário']].map(([id, l]) => { const w = W[id] || MSS_AMD.WIN[id]; return `<label style="white-space:nowrap;margin-right:12px">${l} <input data-aw="${id}|0" type="number" min="1" max="30" step="1" value="${w[0]}" style="width:48px" title="Manipulação: até quantas velas para fechar de volta para dentro"> / <input data-aw="${id}|1" type="number" min="1" max="60" step="1" value="${w[1]}" style="width:48px" title="Inversão: até quantas velas depois do sweep para a quebra"></label>`; }).join(''); }
     monDraft = JSON.parse(JSON.stringify(settings.mon || SY.MON_DEF)); monDraft.grp = Object.assign({}, SY.MON_DEF.grp, monDraft.grp || {}); monDraft.per = monDraft.per || {};
     monRender();
     $('#settings').classList.add('open');
@@ -6119,6 +6183,7 @@ body[data-np="1"]:not([data-npv="asset"]) .tabbar { display:none; }
     if (uniCh) uniApply();
     const monCh = (monDraft && JSON.stringify(monDraft) !== JSON.stringify(settings.mon || null)) || swOld !== (settings.swFloor == null ? 1 : +settings.swFloor) || uniCh || priOld !== JSON.stringify(settings.priSens || null);
     { const ks = {}; let ch = false; document.querySelectorAll('[data-fk]').forEach((i) => { const v = Math.max(0, Math.min(2, +String(i.value).replace(',', '.') || 0)); ks[i.dataset.fk] = v; if (v !== FB.fvgK(i.dataset.fk, settings)) ch = true; }); if (Object.keys(ks).length) { settings.fvgMinK = ks; if (ch) { save('mss_settings4', settings); try { renderTable(); renderConfluence(); } catch (e) {} npRender(); } } }
+    { const W = {}; document.querySelectorAll('[data-aw]').forEach((i) => { const [id, k] = i.dataset.aw.split('|'); (W[id] = W[id] || MSS_AMD.WIN[id].slice())[+k] = Math.max(1, Math.round(+i.value || MSS_AMD.WIN[id][+k])); }); if (Object.keys(W).length) settings.amdWin = W; }
     if (monDraft) settings.mon = monDraft;
     if (monTfDraft) { const ch = JSON.stringify(monTfDraft) !== JSON.stringify(settings.monTfs || {}); settings.monTfs = monTfDraft; if (ch) { save('mss_settings4', settings); scanFavs(true); npRender(); } }
     save('mss_settings4', settings); $('#settings').classList.remove('open'); loadAll();
@@ -7992,7 +8057,7 @@ Ordena as oportunidades da mais forte para a mais fraca e diz porquê. Para cada
         const C = await btLoad(sym, need, cache, true), P = {};
         for (const id of need) { const T = C[BT_API(id)]; if (T && T.length) P[id] = T; else st.errs.push(`${sym} ${tfLabel(id)}: sem dados`); }
         st.prog = `${sym} — a procurar o padrão…`; npRenderBt(); await tick();
-        const rows = MSS_AMD.run(sym, P, tfs.filter((id) => P[id]), (id) => FB.fvgK(id, settings));
+        const rows = MSS_AMD.run(sym, P, tfs.filter((id) => P[id]), (id) => FB.fvgK(id, settings), settings.amdWin);
         for (const x of rows) { x.ty = x.ty.join('+'); st.trades.push(x); }
       } catch (e) { st.errs.push(`${sym}: ${e.message || e}`); }
       st.done++; await tick();
@@ -9109,6 +9174,7 @@ Usa só os números destes dados.`;
     for (const [id, key] of [['#emaBtn', 'emaOn'], ['#smaBtn', 'smaOn'], ['#kcBtn', 'kcOn'], ['#fibBtn', 'fibOn']]) $(id).addEventListener('click', () => { settings[key] = !settings[key]; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#pocWBtn').addEventListener('click', () => { settings.pocW = !settings.pocW; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#obBtn').addEventListener('click', () => { settings.obOn = !settings.obOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
+    $('#ictBtn').addEventListener('click', () => { settings.ictOn = !settings.ictOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#kzBtn').addEventListener('click', () => { settings.kzOn = !settings.kzOn; save('mss_settings4', settings); updateEditUi(); renderChart(true); });
     $('#dispBtn').addEventListener('click', () => decideDispute(selectedTf));
     $('#clearBtn').addEventListener('click', () => {
